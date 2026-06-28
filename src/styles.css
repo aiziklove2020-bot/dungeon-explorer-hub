@@ -145,5 +145,16 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-display);
   }
+}
+
+@utility section-title {
+  color: var(--gold);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+@utility btn-glow {
+  box-shadow: var(--red-glow);
 }
