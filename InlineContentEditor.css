@@ -1,0 +1,174 @@
+.inline-content-editor-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 1rem;
+}
+
+.inline-content-editor-modal {
+  background: rgb(24, 24, 27);
+  border: 1px solid rgb(63, 63, 70);
+  border-radius: 12px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.inline-content-editor-saving {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 24, 27, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 10;
+  border-radius: 12px;
+}
+
+.inline-content-editor-saving p {
+  margin: 0;
+  color: rgb(161, 161, 170);
+  font-size: 0.875rem;
+}
+
+.inline-content-editor-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgb(63, 63, 70);
+  border-top-color: rgb(220, 38, 38);
+  border-radius: 50%;
+  animation: inline-content-spin 0.7s linear infinite;
+}
+
+@keyframes inline-content-spin {
+  to { transform: rotate(360deg); }
+}
+
+.inline-content-editor-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgb(63, 63, 70);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgb(39, 39, 42);
+}
+
+.inline-content-editor-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgb(250, 250, 250);
+}
+
+.inline-content-editor-close {
+  background: none;
+  border: none;
+  color: rgb(161, 161, 170);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.inline-content-editor-close:hover {
+  color: white;
+}
+
+.inline-content-editor-body {
+  padding: 1.25rem;
+  flex: 1;
+  min-height: 120px;
+}
+
+.inline-content-editor-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 0.75rem 1rem;
+  background: rgb(9, 9, 11);
+  border: 1px solid rgb(63, 63, 70);
+  border-radius: 8px;
+  color: rgb(250, 250, 250);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.inline-content-editor-textarea:focus {
+  outline: none;
+  border-color: rgb(220, 38, 38);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+}
+
+.inline-content-editor-textarea:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+.inline-content-editor-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgb(63, 63, 70);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.inline-content-editor-msg {
+  font-size: 0.875rem;
+}
+
+.inline-content-editor-msg.success {
+  color: rgb(34, 197, 94);
+}
+
+.inline-content-editor-msg.error {
+  color: rgb(248, 113, 113);
+}
+
+.inline-content-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.inline-content-editor-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.inline-content-editor-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.inline-content-editor-btn.secondary {
+  background: rgb(63, 63, 70);
+  color: rgb(250, 250, 250);
+}
+
+.inline-content-editor-btn.secondary:hover:not(:disabled) {
+  background: rgb(82, 82, 91);
+}
+
+.inline-content-editor-btn.primary {
+  background: rgb(220, 38, 38);
+  color: white;
+}
+
+.inline-content-editor-btn.primary:hover:not(:disabled) {
+  background: rgb(185, 28, 28);
+}
