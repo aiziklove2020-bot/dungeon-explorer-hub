@@ -1,0 +1,8 @@
+/* Entry point — imports all focused CSS modules. */
+
+@import './styles/base.css';
+@import './styles/cards.css';
+@import './styles/forms.css';
+@import './styles/registration.css';
+@import './styles/homepage.css';
+@import './styles/admin.css';
