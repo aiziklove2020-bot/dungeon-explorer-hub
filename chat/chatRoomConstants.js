@@ -1,0 +1,17 @@
+export const QUICK_REACTIONS = ['👍', '❤️', '😂', '😠', '👎'];
+export const EMOJI_INSERT_GRID = [
+  '😀',
+  '😂',
+  '❤️',
+  '🔥',
+  '👍',
+  '👎',
+  '😠',
+  '🙏',
+  '💯',
+  '🎉',
+  '😍',
+  '🤔',
+  '👀',
+  '💬'
+];
