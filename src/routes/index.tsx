@@ -1,39 +1,34 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import heroImg from "@/assets/hero.jpg";
 import event1 from "@/assets/event1.jpg";
 import event2 from "@/assets/event2.jpg";
 import aboutImg from "@/assets/about.jpg";
+import { PageLayout } from "@/components/PageLayout";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dungeon | הצד הנועז של התשוקה" },
+      { title: "מסיבות ליברליות בישראל | הצד הנועז של התשוקה" },
       {
         name: "description",
         content:
-          "מועדון הפטיש והבדס\"מ הראשון בישראל. חוויה אולטימטיבית של הנאה חושית, אירועים, מסיבות ואומנות במרחב בטוח ומאפשר.",
+          "קהילת המסיבות הליברליות המובילה בישראל. אירועים, מסיבות, פורום וצ'אט במרחב בטוח, מאפשר ומכבד. הכניסה מגיל 18.",
       },
-      { property: "og:title", content: "Dungeon | הצד הנועז של התשוקה" },
+      {
+        property: "og:title",
+        content: "מסיבות ליברליות בישראל | הצד הנועז של התשוקה",
+      },
       {
         property: "og:description",
-        content: "מועדון הפטיש והבדס\"מ הראשון בישראל והמוביל בתחומו.",
+        content: "קהילת המסיבות הליברליות המובילה בישראל.",
       },
       { property: "og:image", content: heroImg },
+      { property: "og:url", content: "/" },
     ],
+    links: [{ rel: "canonical", href: "/" }],
   }),
   component: Index,
 });
-
-const navLinks = [
-  "אירועים",
-  "גלריות",
-  "חנות",
-  "תקשורת",
-  "שאלות ותשובות",
-  "נהלי המועדון",
-  "אודות",
-  "יצירת קשר",
-];
 
 const events = [
   {
@@ -52,26 +47,26 @@ const events = [
 
 const aboutBlocks = [
   {
-    title: "החווייה במועדון",
-    text: "המועדון, כמועדון הפטיש והבדס\"מ הראשון בישראל והמוביל בתחומו בארץ ובעולם, מספק חוויה אולטימטיבית ומעניק כרטיס כניסה לעולם של הנאה חושית וגופנית משכרת. המועדון פועל ויוצר את אירועיו על פי קוד הבדס\"מ העולמי SSC (שפוי בטוח ובהסכמה) ושומר על איזון מגדרי.",
+    title: "החווייה במסיבות",
+    text: "אנחנו קהילת המסיבות הליברליות המובילה בישראל, ומעניקים כרטיס כניסה לעולם של הנאה חושית, פתיחות וחופש. כל אירוע נבנה על פי קוד SSC (שפוי, בטוח ובהסכמה) ותוך שמירה על איזון מגדרי.",
   },
   {
     title: "בילוי איכותי וייחודי",
-    text: "כבר שנים רבות המועדון מספק תחושה של 'בית' המאפשרת לכם ליהנות מפתיחות ולחקור את המיניות שלכם באווירה סקסית, מאפשרת והרפתקנית, עם השקעה רבה במוזיקה, הופעות ותפאורה יוצאת דופן.",
+    text: "כבר שנים אנחנו מספקים תחושה של 'בית' המאפשרת לכם ליהנות מפתיחות ולחקור את עצמכם באווירה סקסית, מאפשרת והרפתקנית, עם השקעה רבה במוזיקה, הופעות ותפאורה.",
   },
   {
     title: "דרס קוד",
-    text: "הכניסה למסיבות מחייבת עמידה בקוד לבוש, שכולל ביגוד קינקי ופטישיסטי, עם דרישת מינימום של לבוש מכובד בצבע שחור.",
+    text: "הכניסה למסיבות מחייבת עמידה בקוד לבוש: ביגוד קינקי ופטישיסטי, עם דרישת מינימום של לבוש מכובד בצבע שחור.",
   },
   {
     title: "יצירת מרחב מוגן",
-    text: "מרחב בטוח לבליינים הוא העיקרון המנחה והחשוב ביותר עבורנו. צוות מאבטחים מיומן דואג למנוע הטרדות ופגיעה בפרטיות, ובכך לשמור על העונג והחוויה במסיבה.",
+    text: "מרחב בטוח לבליינים הוא העיקרון המנחה והחשוב ביותר עבורנו. צוות מיומן דואג למנוע הטרדות ופגיעה בפרטיות, ולשמור על העונג והחוויה.",
   },
 ];
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-center gap-4 mb-3">
+    <div className="mb-3 flex items-center justify-center gap-4">
       <span className="h-px w-12 bg-gold/60" />
       <h2 className="section-title text-3xl md:text-4xl">{children}</h2>
       <span className="h-px w-12 bg-gold/60" />
@@ -81,27 +76,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 function Index() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <a href="/" className="text-2xl font-black tracking-wide text-primary">
-            Dungeon
-          </a>
-          <nav className="hidden items-center gap-6 lg:flex">
-            {navLinks.map((l) => (
-              <a
-                key={l}
-                href="#"
-                className="text-sm text-foreground/80 transition-colors hover:text-primary"
-              >
-                {l}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </header>
-
+    <PageLayout>
       {/* Hero */}
       <section className="relative overflow-hidden">
         <img
@@ -121,12 +96,12 @@ function Index() {
             <br />
             של התשוקה
           </h1>
-          <a
-            href="#events"
+          <Link
+            to="/tickets"
             className="btn-glow mt-8 rounded-full bg-primary px-12 py-4 text-lg font-bold text-primary-foreground transition-transform hover:scale-105"
           >
             הזמנת כרטיס
-          </a>
+          </Link>
           <p className="mt-3 text-muted-foreground">לאירועים קרובים</p>
         </div>
       </section>
@@ -165,23 +140,23 @@ function Index() {
                 </div>
                 <div className="flex items-center justify-between gap-4 p-6">
                   <h3 className="text-xl font-bold">{e.title}</h3>
-                  <a
-                    href="#"
+                  <Link
+                    to="/tickets"
                     className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                   >
                     הזמנה
-                  </a>
+                  </Link>
                 </div>
               </article>
             ))}
           </div>
           <div className="mt-10 text-center">
-            <a
-              href="#"
+            <Link
+              to="/tickets"
               className="inline-block rounded-full bg-secondary px-10 py-3 font-bold text-secondary-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
             >
               אירועים עתידיים
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -190,7 +165,7 @@ function Index() {
       <section className="relative py-20">
         <img
           src={aboutImg}
-          alt="האווירה במועדון"
+          alt="האווירה במסיבות"
           loading="lazy"
           width={1280}
           height={854}
@@ -209,58 +184,44 @@ function Index() {
               </div>
             ))}
           </div>
+          <div className="mt-10 text-center">
+            <Link
+              to="/about"
+              className="inline-block rounded-full border border-border px-10 py-3 font-bold transition-colors hover:border-primary hover:text-primary"
+            >
+              קראו עוד עלינו
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* Personal story */}
       <section className="bg-secondary/40 py-20">
         <div className="mx-auto max-w-3xl px-4 text-center">
-          <SectionTitle>הפעם הראשונה שלי בדאנג'ן</SectionTitle>
+          <SectionTitle>הפעם הראשונה שלי</SectionTitle>
           <h3 className="mb-6 mt-8 text-2xl font-bold text-gold">להתעורר באמת</h3>
           <p className="text-lg leading-relaxed text-foreground/80">
-            הפעם הראשונה שלי בדאנג'ן הייתה אחרי שנה קשה. כזו שבה שכחתי איך מרגיש
-            חופש. חברה גררה אותי לשם כמעט בכוח. אמרה לי: "רק תבואי. לא צריך לעשות
-            כלום". לבשתי שחור כדי להרגיש בלתי נראית. אבל בדאנג'ן קרה בדיוק ההפך.
-            ראיתי נשים שנראו כמו יצירות אמנות, וגברים שלא ניסו להרשים אף אחד…
+            הפעם הראשונה שלי במסיבה ליברלית הייתה אחרי שנה קשה. כזו שבה שכחתי איך
+            מרגיש חופש. חברה גררה אותי לשם כמעט בכוח. אמרה לי: "רק תבואי. לא צריך
+            לעשות כלום". לבשתי שחור כדי להרגיש בלתי נראית, אבל קרה בדיוק ההפך.
+            ראיתי אנשים שפשוט היו עצמם, בלי שיפוט ובלי מסכות…
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <a
-              href="#"
+            <Link
+              to="/blog"
               className="rounded-full bg-primary px-8 py-3 font-bold text-primary-foreground transition-transform hover:scale-105"
             >
-              קרא עוד
-            </a>
-            <a
-              href="#"
+              לכל הסיפורים
+            </Link>
+            <Link
+              to="/forum"
               className="rounded-full border border-border px-8 py-3 font-bold transition-colors hover:border-primary hover:text-primary"
             >
-              לכל הסיפורים
-            </a>
+              לפורום הקהילה
+            </Link>
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border bg-background py-12">
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 text-center">
-          <span className="text-2xl font-black text-primary">Dungeon</span>
-          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-            {navLinks.map((l) => (
-              <a
-                key={l}
-                href="#"
-                className="text-sm text-muted-foreground transition-colors hover:text-primary"
-              >
-                {l}
-              </a>
-            ))}
-          </nav>
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Dungeon · מועדון הפטיש והבדס"מ הראשון
-            בישראל · הכניסה מגיל 18 ומעלה
-          </p>
-        </div>
-      </footer>
-    </div>
+    </PageLayout>
   );
 }
