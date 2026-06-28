@@ -1,0 +1,60 @@
+/* Root layout and global overrides */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #020202;
+  color: #e5e5e5;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 24px;
+  color: #e5e5e5;
+  background-color: #020202;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  width: 100%;
+}
+
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] .header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .tabs {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .user-actions {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .party-info {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .registration-item {
+  flex-direction: row-reverse;
+}
+
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.image-loader {
+  animation: spin 1s linear infinite;
+}
