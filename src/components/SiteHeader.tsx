@@ -22,7 +22,7 @@ export function SiteHeader() {
           <img
             src={logoText}
             alt="מסיבות ליברליות בישראל"
-            width={240}
+            width={288}
             height={48}
             className="h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(212,175,55,0.2)] md:h-12"
           />
