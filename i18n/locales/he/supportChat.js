@@ -25,7 +25,7 @@ export default {
   'supportChat.getChatIdEmptyHint': 'שלח /start לבוט (הודעה פרטית או בקבוצה). לקבוצה: /start בקבוצה. או בטל מצב פרטיות ב-@BotFather.',
   'supportChat.getChatIdGroupHint': 'הקבוצה לא נמצאה. שלח /start בקבוצה (הבוט מקבל רק פקודות). או בטל מצב פרטיות ב-@BotFather: /setprivacy → Disable.',
   'supportChat.webhookEnvHint': '⚠️ לתשובות באתר: הגדר GOOGLE_APPLICATION_CREDENTIALS_JSON ב-Vercel (Firebase service account).',
-  'supportChat.webhookDiagnostic': 'בדיקה: /api/support-chat-diagnostic',
+  'supportChat.webhookDiagnostic': 'בדיקה: /api/support-chat-send (GET)',
   'supportChat.setWebhook': 'הגדר Webhook',
   'supportChat.siteUrl': 'כתובת האתר',
   'supportChat.siteUrlHint': 'כתובת האתר עם https (נדרש ל-Webhook)',

@@ -267,7 +267,7 @@ const SupportChatSection = ({ showSaved }) => {
             {t('supportChat.webhookEnvHint') || '⚠️ לתשובות באתר: הגדר GOOGLE_APPLICATION_CREDENTIALS_JSON ב-Vercel (Firebase service account). Replies need this env var.'}
           </p>
           <p className="text-xs text-zinc-500">
-            {t('supportChat.webhookDiagnostic') || 'בדיקה: /api/support-chat-diagnostic'}
+            {t('supportChat.webhookDiagnostic') || 'בדיקה: /api/support-chat-send (GET)'}
           </p>
           <button
             type="button"
