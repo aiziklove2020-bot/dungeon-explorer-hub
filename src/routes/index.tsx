@@ -78,27 +78,18 @@ function Index() {
   return (
     <PageLayout>
       {/* Hero */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden bg-background">
         <img
           src={heroImg}
           alt="הצד הנועז של התשוקה"
-          width={1280}
-          height={1280}
-          className="absolute inset-0 h-full w-full object-cover object-center opacity-90"
+          width={1600}
+          height={639}
+          className="w-full h-auto object-contain"
         />
-        <div
-          className="absolute inset-0"
-          style={{ background: "var(--hero-gradient)" }}
-        />
-        <div className="relative mx-auto flex min-h-[80vh] max-w-7xl flex-col items-end justify-center px-6 text-right">
-          <h1 className="max-w-md text-5xl font-black leading-tight md:text-7xl">
-            הצד הנועז
-            <br />
-            של התשוקה
-          </h1>
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-center px-6 py-10 text-center">
           <Link
             to="/tickets"
-            className="btn-glow mt-8 rounded-full bg-primary px-12 py-4 text-lg font-bold text-primary-foreground transition-transform hover:scale-105"
+            className="btn-glow rounded-full bg-primary px-12 py-4 text-lg font-bold text-primary-foreground transition-transform hover:scale-105"
           >
             הזמנת כרטיס
           </Link>
