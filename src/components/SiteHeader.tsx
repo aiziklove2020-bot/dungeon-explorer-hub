@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import logoText from "@/assets/logo-text.png";
+import logoText from "@/assets/logo-text.svg";
 
 export const SITE_NAME = "מסיבות ליברליות בישראל";
 
