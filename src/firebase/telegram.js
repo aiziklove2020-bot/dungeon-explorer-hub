@@ -1,4 +1,4 @@
-import { getTranslation } from '../i18n/translations';
+import { getTranslation } from '../../i18n/translations';
 import { relayTelegramApi } from '../utils/telegramRelay';
 import { getTelegramSettings } from './settings';
 

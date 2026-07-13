@@ -1,0 +1,61 @@
+// Static pages: About, Privacy, Contact, DeleteAccount.
+
+export default {
+  // About
+  'about.badge': 'אודותינו',
+  'about.title': 'אודות',
+  'about.subtitle': 'קהילת Talking BDSM',
+  'about.howItWorks': 'איך זה עובד?',
+  'about.entryNoteLabel': 'יש לציין בכניסה:',
+
+  // Privacy
+  'privacy.title': 'מדיניות פרטיות',
+  'privacy.lastUpdated': 'עדכון אחרון',
+  'privacy.section1Title': '1. אילו מידע אנחנו אוספים',
+  'privacy.section1Item1': 'נתוני חשבון ורישום: כשאת/ה נרשם/ת לאירועים או משתמש/ת באפליקציה, אנחנו עשויים לאסוף שם, מספר טלפון ופרטים נוספים שאת/ה מספק/ת.',
+  'privacy.section1Item2': 'נתוני שימוש: אנחנו עשויים לאסוף מידע על אופן השימוש באפליקציה (למשל לשיפור השירות).',
+  'privacy.section1Item3': 'נתוני מכשיר: אנחנו עשויים לאסוף סוג מכשיר ומידע טכני דומה הנדרש לתפעול האפליקציה.',
+  'privacy.section2Title': '2. איך אנחנו משתמשים במידע',
+  'privacy.section2Item1': 'ניהול רישומים לאירועים ולספק את השירות.',
+  'privacy.section2Item2': 'תקשורת איתך לגבי אירועים והקהילה.',
+  'privacy.section2Item3': 'שיפור האפליקציה וחוויית המשתמש.',
+  'privacy.section2Item4': 'כפי שנדרש על פי חוק או להגנה על זכויותינו.',
+  'privacy.section3Title': '3. שיתוף מידע',
+  'privacy.section3Text': 'אנחנו לא מוכרים את המידע האישי שלך. אנחנו עשויים לשתף מידע עם ספקי שירות שעוזרים לנו להפעיל את האפליקציה (כגון אירוח, אנליטיקה), תחת סודיות. אנחנו עשויים לחשוף מידע אם נדרש על פי חוק.',
+  'privacy.section4Title': '4. שמירת מידע',
+  'privacy.section4Text': 'אנחנו שומרים את המידע שלך כל עוד החשבון או הרישום פעילים או ככל שנדרש כדי לספק את השירות ולעמוד בחובות חוקיות.',
+  'privacy.section5Title': '5. זכויותיך',
+  'privacy.section5Text': 'את/ה יכול/ה לבקש גישה, תיקון או מחיקה של המידע שלך באמצעות פנייה אלינו. לבקשת מחיקת חשבון ומספר טלפון',
+  'privacy.section5DeleteLink': 'השתמשו בעמוד בקשת מחיקת חשבון',
+  'privacy.section6Title': '6. אבטחה',
+  'privacy.section6Text': 'אנחנו משתמשים באמצעים טכניים וארגוניים מתאימים להגנה על המידע שלך.',
+  'privacy.section7Title': '7. קטינים',
+  'privacy.section7Text': 'אפליקציה זו אינה מיועדת למשתמשים מתחת לגיל 18. אנחנו לא אוספים במודע מידע מקטינים.',
+  'privacy.section8Title': '8. שינויים',
+  'privacy.section8Text': 'אנחנו עשויים לעדכן מדיניות זו מעת לעת. נודיע על שינויים מהותיים באמצעות האפליקציה או בדוא"ל ככל שמתאים.',
+  'privacy.section9Title': '9. יצירת קשר',
+  'privacy.section9Text': 'לשאלות או בקשות בנושא פרטיות, פנה/י אלינו דרך',
+  'privacy.contactPage': 'עמוד צור קשר',
+
+  // Delete account request
+  'deleteAccount.title': 'בקשת מחיקת חשבון',
+  'deleteAccount.subtitle': 'מבקשים למחוק את מספר הטלפון והנתונים מהמערכת? שלחו בקשה ונתעדכן.',
+  'deleteAccount.intro': 'הזינו את מספר הטלפון הרשום במערכת. הבקשה תישמר ותטופל בהקדם. לא תבוצע מחיקה אוטומטית.',
+  'deleteAccount.phoneLabel': 'מספר טלפון',
+  'deleteAccount.phonePlaceholder': '0500000000',
+  'deleteAccount.hint': 'רק מספר ישראלי שמתחיל ב-05, 10 ספרות.',
+  'deleteAccount.submit': 'שלח בקשת מחיקה',
+  'deleteAccount.submitting': 'שולח...',
+  'deleteAccount.success': 'הבקשה התקבלה. נטפל בה בהקדם וניצור איתך קשר במידת הצורך.',
+  'deleteAccount.errorInvalidPhone': 'נא להזין מספר טלפון תקין (05 ומשך 10 ספרות).',
+  'deleteAccount.errorGeneric': 'אירעה שגיאה. נא לנסות שוב או ליצור איתנו קשר.',
+  'deleteAccount.note': 'לאחר טיפול בבקשה, פרטיכם (כולל מספר הטלפון) יימחקו מהמערכת בהתאם למדיניות הפרטיות.',
+
+  // Contact
+  'contact.title': 'יצירת קשר',
+  'contact.subtitle': 'גישה ישירה לתמיכה',
+  'contact.available': 'זמינים עבורכם',
+  'contact.whatsappButton': 'לחצו להודעת WhatsApp',
+  'contact.supportOnly': 'תמיכה בלבד',
+  'contact.importantTitle': 'חשוב לדעת',
+};
