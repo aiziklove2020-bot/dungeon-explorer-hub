@@ -88,10 +88,10 @@ function Index() {
         />
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-center px-6 py-10 text-center">
           <Link
-            to="/tickets"
+            to="/register"
             className="btn-glow rounded-full bg-primary px-12 py-4 text-lg font-bold text-primary-foreground transition-transform hover:scale-105"
           >
-            הזמנת כרטיס
+            הרשמה למסיבה
           </Link>
           <p className="mt-3 text-muted-foreground">לאירועים קרובים</p>
         </div>

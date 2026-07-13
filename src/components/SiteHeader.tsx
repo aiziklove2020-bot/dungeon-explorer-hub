@@ -10,6 +10,7 @@ export const navLinks = [
   { label: "פורום", to: "/forum" },
   { label: "צ'אט", to: "/chat" },
   { label: "כרטיסים", to: "/tickets" },
+  { label: "הרשמה", to: "/register" },
   { label: "חנות", to: "/shop" },
   { label: "צור קשר", to: "/contact" },
 ] as const;
