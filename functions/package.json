@@ -1,0 +1,19 @@
+{
+  "name": "tbdsm-functions",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "scripts": {
+    "lint": "node --check index.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^5.1.1",
+    "isomorphic-dompurify": "^2.16.0"
+  }
+}

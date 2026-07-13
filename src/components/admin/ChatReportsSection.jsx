@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { Flag, Loader, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { adminAuthHeader, hasAdminApiClientSecret } from '../../utils/adminApi';
@@ -144,14 +143,14 @@ const ChatReportsSection = ({ showSaved }) => {
             </div>
             <div>
               <div className="text-xs text-zinc-500 mb-1">{t('admin.chatReports.room')}</div>
-              <Link
-                to={`/chat/${encodeURIComponent(r.roomId)}?m=${encodeURIComponent(r.messageId)}`}
+              <a
+                href={`/chat/${encodeURIComponent(r.roomId)}?m=${encodeURIComponent(r.messageId)}`}
                 className="text-amber-400 hover:underline break-all text-sm"
                 target="_blank"
                 rel="noreferrer"
               >
                 {r.roomId}
-              </Link>
+              </a>
             </div>
             <div>
               <div className="text-xs text-zinc-500 mb-1">{t('admin.chatReports.reporter')}</div>
@@ -214,14 +213,14 @@ const ChatReportsSection = ({ showSaved }) => {
                   {formatReportTime(r.createdAt)}
                 </td>
                 <td className="p-2 align-top">
-                  <Link
-                    to={`/chat/${encodeURIComponent(r.roomId)}?m=${encodeURIComponent(r.messageId)}`}
+                  <a
+                    href={`/chat/${encodeURIComponent(r.roomId)}?m=${encodeURIComponent(r.messageId)}`}
                     className="text-amber-400 hover:underline break-all"
                     target="_blank"
                     rel="noreferrer"
                   >
                     {r.roomId}
-                  </Link>
+                  </a>
                 </td>
                 <td className="p-2 text-zinc-300 align-top">
                   <span className="font-mono text-xs">{r.reporterId}</span>

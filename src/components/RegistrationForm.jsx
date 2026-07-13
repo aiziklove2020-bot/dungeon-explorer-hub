@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, Send } from 'lucide-react';
 import { useContent } from '../context/ContentContext';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { useSiteAuth } from '../context/AuthContext';
-import Loader from '../../Loader';
+import Loader from './Loader';
 import './RegistrationForm.css';
 
 import {

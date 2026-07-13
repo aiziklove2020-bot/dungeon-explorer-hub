@@ -1,4 +1,4 @@
-import Loader from '../../../Loader';
+import Loader from '../Loader';
 
 function formatPartyDate(date) {
   const d = date instanceof Date ? date : new Date(date);

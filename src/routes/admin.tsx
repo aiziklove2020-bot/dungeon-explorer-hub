@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageLayout } from "@/components/PageLayout";
 import { ContentProvider } from "@/context/ContentContext";
 import { SiteAuthProvider } from "@/context/AuthContext";
-import { LanguageProvider } from "../../i18n/LanguageContext";
+import { LanguageProvider } from "../i18n/LanguageContext";
 import Admin from "@/pages/Admin";
 
 export const Route = createFileRoute("/admin")({
