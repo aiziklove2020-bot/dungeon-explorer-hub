@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 80" width="480" height="80" dir="rtl" lang="he" aria-label="מסיבות ליברליות בישראל">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="55%" stop-color="#d4af37" />
+      <stop offset="100%" stop-color="#991b1b" />
+    </linearGradient>
+    <filter id="logoGlow" x="-20%" y="-40%" width="140%" height="180%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Star accents -->
+  <g fill="#d4af37" opacity="0.9">
+    <path d="M388 22 L389.5 26 L394 26 L390.5 29 L391.5 33.5 L388 31 L384.5 33.5 L385.5 29 L382 26 L386.5 26 Z" />
+    <path d="M102 22 L103.5 26 L108 26 L104.5 29 L105.5 33.5 L102 31 L98.5 33.5 L99.5 29 L96 26 L100.5 26 Z" />
+    <path d="M248 12 L249 15 L252 15 L249.8 17 L250.5 20 L248 18.5 L245.5 20 L246.2 17 L244 15 L247 15 Z" />
+  </g>
+
+  <!-- Decorative lines -->
+  <path d="M60 56 Q 160 70, 240 58 Q 320 46, 420 56" stroke="url(#logoGradient)" stroke-width="1.2" fill="none" opacity="0.6" />
+
+  <!-- Main text -->
+  <text
+    x="460"
+    y="50"
+    text-anchor="end"
+    direction="rtl"
+    font-family="'Cinzel', 'David', 'Times New Roman', serif"
+    font-size="34"
+    font-weight="700"
+    fill="url(#logoGradient)"
+    filter="url(#logoGlow)"
+    letter-spacing="0.5"
+  >
+    מסיבות ליברליות בישראל
+  </text>
+</svg>
