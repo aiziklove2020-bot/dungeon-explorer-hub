@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import logoText from "@/assets/logo-text.svg";
 
 export const SITE_NAME = "מסיבות ליברליות בישראל";
 
@@ -18,14 +17,16 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
-        <Link to="/" className="flex shrink-0 items-center">
-          <img
-            src={logoText}
-            alt="מסיבות ליברליות בישראל"
-            width={288}
-            height={48}
-            className="h-10 w-auto object-contain drop-shadow-[0_0_10px_rgba(212,175,55,0.2)] md:h-12"
-          />
+        <Link to="/" className="flex shrink-0 items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[#d4af37] text-lg font-black text-primary-foreground shadow-[0_0_14px_rgba(212,175,55,0.35)] md:h-10 md:w-10">
+            מ
+          </span>
+          <span className="bg-gradient-to-l from-primary to-[#d4af37] bg-clip-text text-base font-black leading-tight text-transparent md:text-xl">
+            מסיבות ליברליות
+            <span className="block text-[0.7em] font-bold tracking-wide text-foreground/70">
+              בישראל
+            </span>
+          </span>
         </Link>
         <nav className="hidden items-center gap-5 lg:flex">
           {navLinks.map((l) => (
