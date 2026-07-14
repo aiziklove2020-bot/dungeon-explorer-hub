@@ -1,10 +1,11 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import heroImg from "@/assets/hero.jpg";
 import aboutImg from "@/assets/about.jpg";
 import { PageLayout } from "@/components/PageLayout";
-import { ContentProvider, useContent } from "@/context/ContentContext";
-import { LanguageProvider } from "../i18n/LanguageContext";
-import { isPartyExpiredByExpiration } from "../../shared/partyExpiry.js";
+import { getActiveParties } from "@/firebase/parties";
+import { getPartySettings } from "@/firebase/partySettings";
+import { isPartyExpiredByDate } from "../../shared/partyExpiry.js";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -63,21 +64,36 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function IndexRoute() {
   return (
     <PageLayout>
-      <LanguageProvider>
-        <ContentProvider>
-          <Index />
-        </ContentProvider>
-      </LanguageProvider>
+      <Index />
     </PageLayout>
   );
 }
 
+function formatEventDate(date: Date) {
+  return `${date.getDate()}.${date.getMonth() + 1}`;
+}
+
 function Index() {
-  const { content, isInitialized } = useContent();
-  const partyRetentionHours = content.partyRetentionHours;
-  const visibleEvents = (content.events || []).filter(
-    (ev: any) => !isPartyExpiredByExpiration(ev?.expiration, ev?.date, partyRetentionHours)
-  );
+  const [parties, setParties] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([getActiveParties(), getPartySettings()])
+      .then(([allParties, settings]) => {
+        if (cancelled) return;
+        const retentionHours = settings?.retentionHours;
+        const visible = (allParties || []).filter(
+          (p: any) => !isPartyExpiredByDate(p.date, retentionHours)
+        );
+        setParties(visible);
+      })
+      .catch(() => {
+        if (!cancelled) setParties([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <>
@@ -105,22 +121,22 @@ function Index() {
       <section id="events" className="bg-background py-20">
         <div className="mx-auto max-w-7xl px-4">
           <SectionTitle>האירועים הקרובים</SectionTitle>
-          {!isInitialized ? (
+          {parties === null ? (
             <p className="mt-8 text-center text-muted-foreground">טוען אירועים...</p>
-          ) : visibleEvents.length === 0 ? (
+          ) : parties.length === 0 ? (
             <p className="mt-8 text-center text-muted-foreground">
               אין אירועים פעילים כרגע — נא לבדוק שוב בקרוב.
             </p>
           ) : (
             <div className="mt-8 grid gap-8 md:grid-cols-2">
-              {visibleEvents.map((e: any, i: number) => (
+              {parties.map((e: any, i: number) => (
                 <article
                   key={e.id || `${e.title}-${i}`}
                   className="group overflow-hidden rounded-2xl border border-border bg-card"
                 >
                   <div className="relative">
                     <img
-                      src={e.img || heroImg}
+                      src={e.imageURL || heroImg}
                       alt={e.title}
                       loading="lazy"
                       width={768}
@@ -128,24 +144,35 @@ function Index() {
                       className="h-[26rem] w-full bg-secondary object-contain transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute right-4 top-4 rounded-md bg-primary px-4 py-1 text-sm font-bold text-primary-foreground">
-                      {e.date}
+                      {formatEventDate(e.date)}
                     </div>
                     <div className="absolute left-4 top-4 rounded-md bg-black/70 px-4 py-2 text-center">
                       <span className="block text-sm font-bold">{e.day}</span>
                       <span className="block text-xs text-muted-foreground">
-                        {e.date}
+                        {formatEventDate(e.date)}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-4 p-6">
                     <h3 className="text-xl font-bold">{e.title}</h3>
-                    <Link
-                      to="/register"
-                      search={{ partyId: e.id || undefined }}
-                      className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-                    >
-                      הזמנה
-                    </Link>
+                    {e.partyType === "external" && e.registrationLink ? (
+                      <a
+                        href={e.registrationLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                      >
+                        הזמנה
+                      </a>
+                    ) : (
+                      <Link
+                        to="/register"
+                        search={{ partyId: e.id || undefined }}
+                        className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                      >
+                        הזמנה
+                      </Link>
+                    )}
                   </div>
                 </article>
               ))}
