@@ -19,7 +19,6 @@ export const navLinks = [
   { label: "אודות", to: "/about" },
   { label: "בלוג", to: "/blog" },
   { label: "פורום", to: "/forum" },
-  { label: "צ'אט", to: "/chat" },
   { label: "כרטיסים", to: "/tickets" },
   { label: "הרשמה", to: "/register" },
   { label: "חנות", to: "/shop" },
