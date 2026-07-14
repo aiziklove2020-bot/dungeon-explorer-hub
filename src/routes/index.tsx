@@ -146,7 +146,7 @@ function Index() {
           height={639}
           className="w-full h-auto object-contain"
         />
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-center px-6 py-10 text-center">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-center px-6 pt-8 pb-6 text-center">
           <Link
             to="/register"
             className="btn-glow rounded-full bg-primary px-12 py-4 text-lg font-bold text-primary-foreground transition-transform hover:scale-105"
@@ -173,7 +173,7 @@ function Index() {
       </section>
 
       {/* Events */}
-      <section id="events" className="bg-background py-20">
+      <section id="events" className="bg-background pb-20 pt-8">
         <div className="mx-auto max-w-7xl px-4">
           <SectionTitle>האירועים הקרובים</SectionTitle>
           {parties === null ? (
