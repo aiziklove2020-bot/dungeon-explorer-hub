@@ -14,7 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LanguageProvider } from "../i18n/LanguageContext";
 import { SiteAuthProvider } from "../context/AuthContext";
 import { ForumAuthProvider } from "../context/ForumAuthContext";
-import SupportChat from "../components/SupportChat";
+import SupportChat from "../SupportChat";
 
 function NotFoundComponent() {
   return (
