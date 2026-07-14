@@ -125,7 +125,7 @@ function Index() {
                       loading="lazy"
                       width={768}
                       height={1024}
-                      className="h-[26rem] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="h-[26rem] w-full bg-secondary object-contain transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute right-4 top-4 rounded-md bg-primary px-4 py-1 text-sm font-bold text-primary-foreground">
                       {e.date}
