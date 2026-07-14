@@ -153,25 +153,32 @@ function Index() {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between gap-4 p-6">
-                    <h3 className="text-xl font-bold">{e.title}</h3>
-                    {e.partyType === "external" && e.registrationLink ? (
-                      <a
-                        href={e.registrationLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-                      >
-                        הזמנה
-                      </a>
-                    ) : (
-                      <Link
-                        to="/register"
-                        search={{ partyId: e.id || undefined }}
-                        className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-                      >
-                        הזמנה
-                      </Link>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between gap-4">
+                      <h3 className="text-xl font-bold">{e.title}</h3>
+                      {e.partyType === "external" && e.registrationLink ? (
+                        <a
+                          href={e.registrationLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                        >
+                          הזמנה
+                        </a>
+                      ) : (
+                        <Link
+                          to="/register"
+                          search={{ partyId: e.id || undefined }}
+                          className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                        >
+                          הזמנה
+                        </Link>
+                      )}
+                    </div>
+                    {e.description && (
+                      <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                        {e.description}
+                      </p>
                     )}
                   </div>
                 </article>
