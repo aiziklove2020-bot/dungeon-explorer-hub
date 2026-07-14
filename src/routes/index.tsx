@@ -1,14 +1,16 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import heroImg from "@/assets/hero.jpg";
-import event1 from "@/assets/event1.jpg";
-import event2 from "@/assets/event2.jpg";
 import aboutImg from "@/assets/about.jpg";
 import { PageLayout } from "@/components/PageLayout";
+import { getActiveParties } from "@/firebase/parties";
+import { getPartySettings } from "@/firebase/partySettings";
+import { isPartyExpiredByDate } from "../../shared/partyExpiry.js";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "מסיבות ליברליות בישראל | הצד הנועז של התשוקה" },
+      { title: "מסיבות ליברליות בישראל" },
       {
         name: "description",
         content:
@@ -16,7 +18,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "מסיבות ליברליות בישראל | הצד הנועז של התשוקה",
+        content: "מסיבות ליברליות בישראל",
       },
       {
         property: "og:description",
@@ -27,23 +29,8 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
-  component: Index,
+  component: IndexRoute,
 });
-
-const events = [
-  {
-    title: "Summer Fetish Party 2.7",
-    day: "חמישי",
-    date: "2.7.26",
-    img: event2,
-  },
-  {
-    title: "Diva's Sexy Summer Night 3.7",
-    day: "שישי",
-    date: "3.7.26",
-    img: event1,
-  },
-];
 
 const aboutBlocks = [
   {
@@ -74,33 +61,57 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Index() {
+function IndexRoute() {
   return (
     <PageLayout>
+      <Index />
+    </PageLayout>
+  );
+}
+
+function formatEventDate(date: Date) {
+  return `${date.getDate()}.${date.getMonth() + 1}`;
+}
+
+function Index() {
+  const [parties, setParties] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([getActiveParties(), getPartySettings()])
+      .then(([allParties, settings]) => {
+        if (cancelled) return;
+        const retentionHours = settings?.retentionHours;
+        const visible = (allParties || []).filter(
+          (p: any) => !isPartyExpiredByDate(p.date, retentionHours)
+        );
+        setParties(visible);
+      })
+      .catch(() => {
+        if (!cancelled) setParties([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <>
       {/* Hero */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden bg-background">
         <img
           src={heroImg}
-          alt="הצד הנועז של התשוקה"
-          width={1280}
-          height={1280}
-          className="absolute inset-0 h-full w-full object-cover object-center opacity-90"
+          alt="מסיבות ליברליות בישראל"
+          width={1600}
+          height={639}
+          className="w-full h-auto object-contain"
         />
-        <div
-          className="absolute inset-0"
-          style={{ background: "var(--hero-gradient)" }}
-        />
-        <div className="relative mx-auto flex min-h-[80vh] max-w-7xl flex-col items-end justify-center px-6 text-right">
-          <h1 className="max-w-md text-5xl font-black leading-tight md:text-7xl">
-            הצד הנועז
-            <br />
-            של התשוקה
-          </h1>
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-center px-6 py-10 text-center">
           <Link
-            to="/tickets"
-            className="btn-glow mt-8 rounded-full bg-primary px-12 py-4 text-lg font-bold text-primary-foreground transition-transform hover:scale-105"
+            to="/register"
+            className="btn-glow rounded-full bg-primary px-12 py-4 text-lg font-bold text-primary-foreground transition-transform hover:scale-105"
           >
-            הזמנת כרטיס
+            הרשמה למסיבה
           </Link>
           <p className="mt-3 text-muted-foreground">לאירועים קרובים</p>
         </div>
@@ -110,46 +121,63 @@ function Index() {
       <section id="events" className="bg-background py-20">
         <div className="mx-auto max-w-7xl px-4">
           <SectionTitle>האירועים הקרובים</SectionTitle>
-          <p className="mb-12 text-center text-muted-foreground">
-            כל כרטיס הוא כרטיס זוגי
-          </p>
-          <div className="grid gap-8 md:grid-cols-2">
-            {events.map((e) => (
-              <article
-                key={e.title}
-                className="group overflow-hidden rounded-2xl border border-border bg-card"
-              >
-                <div className="relative">
-                  <img
-                    src={e.img}
-                    alt={e.title}
-                    loading="lazy"
-                    width={768}
-                    height={1024}
-                    className="h-[26rem] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute right-4 top-4 rounded-md bg-primary px-4 py-1 text-sm font-bold text-primary-foreground">
-                    {e.date}
+          {parties === null ? (
+            <p className="mt-8 text-center text-muted-foreground">טוען אירועים...</p>
+          ) : parties.length === 0 ? (
+            <p className="mt-8 text-center text-muted-foreground">
+              אין אירועים פעילים כרגע — נא לבדוק שוב בקרוב.
+            </p>
+          ) : (
+            <div className="mt-8 grid gap-8 md:grid-cols-2">
+              {parties.map((e: any, i: number) => (
+                <article
+                  key={e.id || `${e.title}-${i}`}
+                  className="group overflow-hidden rounded-2xl border border-border bg-card"
+                >
+                  <div className="relative">
+                    <img
+                      src={e.imageURL || heroImg}
+                      alt={e.title}
+                      loading="lazy"
+                      width={768}
+                      height={1024}
+                      className="h-[26rem] w-full bg-secondary object-contain transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute right-4 top-4 rounded-md bg-primary px-4 py-1 text-sm font-bold text-primary-foreground">
+                      {formatEventDate(e.date)}
+                    </div>
+                    <div className="absolute left-4 top-4 rounded-md bg-black/70 px-4 py-2 text-center">
+                      <span className="block text-sm font-bold">{e.day}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {formatEventDate(e.date)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="absolute left-4 top-4 rounded-md bg-black/70 px-4 py-2 text-center">
-                    <span className="block text-sm font-bold">{e.day}</span>
-                    <span className="block text-xs text-muted-foreground">
-                      {e.date}
-                    </span>
+                  <div className="flex items-center justify-between gap-4 p-6">
+                    <h3 className="text-xl font-bold">{e.title}</h3>
+                    {e.partyType === "external" && e.registrationLink ? (
+                      <a
+                        href={e.registrationLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                      >
+                        הזמנה
+                      </a>
+                    ) : (
+                      <Link
+                        to="/register"
+                        search={{ partyId: e.id || undefined }}
+                        className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                      >
+                        הזמנה
+                      </Link>
+                    )}
                   </div>
-                </div>
-                <div className="flex items-center justify-between gap-4 p-6">
-                  <h3 className="text-xl font-bold">{e.title}</h3>
-                  <Link
-                    to="/tickets"
-                    className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-                  >
-                    הזמנה
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
+                </article>
+              ))}
+            </div>
+          )}
           <div className="mt-10 text-center">
             <Link
               to="/tickets"
@@ -222,6 +250,6 @@ function Index() {
           </div>
         </div>
       </section>
-    </PageLayout>
+    </>
   );
 }

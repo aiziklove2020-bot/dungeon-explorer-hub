@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useForumAuth } from '../context/ForumAuthContext';
 import SEO from '../components/SEO';
@@ -8,8 +8,8 @@ const ForumEmailVerify = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { refreshForumUser } = useForumAuth();
-  const [params] = useSearchParams();
-  const token = params.get('token') || '';
+  const search = useSearch({ strict: false });
+  const token = search.token || '';
   const [status, setStatus] = useState('verifying'); // verifying | success | expired | invalid | error
   const calledRef = useRef(false);
 
@@ -32,7 +32,7 @@ const ForumEmailVerify = () => {
           // Pull the freshly verified user doc into context so the rest of
           // the app sees emailVerified=true without requiring a hard reload.
           refreshForumUser?.().catch(() => {});
-          setTimeout(() => navigate('/forum', { replace: true }), 2200);
+          setTimeout(() => navigate({ to: '/forum', replace: true }), 2200);
           return;
         }
         if (resp.status === 410) {
@@ -88,7 +88,7 @@ const ForumEmailVerify = () => {
         {(status === 'expired' || status === 'invalid' || status === 'error') && (
           <button
             type="button"
-            onClick={() => navigate('/forum', { replace: true })}
+            onClick={() => navigate({ to: '/forum', replace: true })}
             style={{
               marginTop: '1.5rem',
               padding: '0.6rem 1.25rem',

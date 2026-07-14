@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import logoHeart from "@/assets/logo-heart.png";
 
 export const SITE_NAME = "מסיבות ליברליות בישראל";
 
@@ -9,6 +10,7 @@ export const navLinks = [
   { label: "פורום", to: "/forum" },
   { label: "צ'אט", to: "/chat" },
   { label: "כרטיסים", to: "/tickets" },
+  { label: "הרשמה", to: "/register" },
   { label: "חנות", to: "/shop" },
   { label: "צור קשר", to: "/contact" },
 ] as const;
@@ -18,10 +20,12 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
         <Link to="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[#d4af37] text-lg font-black text-primary-foreground shadow-[0_0_14px_rgba(212,175,55,0.35)] md:h-10 md:w-10">
-            מ
-          </span>
-          <span className="bg-gradient-to-l from-primary to-[#d4af37] bg-clip-text text-base font-black leading-tight text-transparent md:text-xl">
+          <img
+            src={logoHeart}
+            alt="מסיבות ליברליות בישראל"
+            className="h-9 w-auto object-contain md:h-11"
+          />
+          <span className="text-base font-black leading-tight text-foreground md:text-xl">
             מסיבות ליברליות
             <span className="block text-[0.7em] font-bold tracking-wide text-foreground/70">
               בישראל

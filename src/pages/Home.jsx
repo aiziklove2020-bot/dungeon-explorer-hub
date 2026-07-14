@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import {
   User, Users, Ticket, Calendar, Clock, Music, ShoppingCart,
   ClipboardList, ClipboardCheck
@@ -7,7 +7,7 @@ import {
 import { FaFacebook, FaInstagram, FaTelegram, FaWhatsapp } from 'react-icons/fa';
 import { useContent } from '../context/ContentContext';
 import { useLanguage } from '../i18n/LanguageContext';
-import RSSFeedTicker from '../components/RSSFeedTicker';
+import RSSFeedTicker from '../RSSFeedTicker';
 import Loader from '../components/Loader';
 import SEO from '../components/SEO';
 import EditableContent from '../components/EditableContent';
@@ -127,7 +127,7 @@ const partyToIsoDates = (dateStr, timeStr, durationHours = 6) => {
   return { startDate, endDate };
 };
 
-const Home = ({ navigate: handleNavigate }) => {
+const Home = () => {
   const { content, isInitialized, contentLoadError, reloadContent } = useContent();
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -268,7 +268,7 @@ const Home = ({ navigate: handleNavigate }) => {
         <RSSFeedTicker />
         {storeEnabled && (
           <div className="hero-shop-below-rss">
-            <button onClick={() => navigate('/store')} className="hero-store-btn">
+            <button onClick={() => navigate({ to: '/store' })} className="hero-store-btn">
               <ShoppingCart size={20} className="hero-store-btn-icon" /> <span className="hero-store-btn-text"><EditableLabel translationKey="home.storeButton" /></span>
             </button>
           </div>
@@ -278,17 +278,17 @@ const Home = ({ navigate: handleNavigate }) => {
       {((visibleEvents.length > 0) || storeEnabled || workshopsEnabled) && (
         <div className="hero-cta-buttons">
           {visibleEvents.length > 0 && (
-            <button onClick={() => handleNavigate('register')} className="hero-register-btn">
+            <button onClick={() => navigate({ to: '/register' })} className="hero-register-btn">
               <Ticket size={20} className="hero-register-btn-icon" /> <span className="hero-register-btn-text"><EditableLabel translationKey="home.registerButton" /></span>
             </button>
           )}
           {workshopsEnabled && (
-            <button onClick={() => navigate('/workshops')} className="hero-workshops-btn">
+            <button onClick={() => navigate({ to: '/workshops' })} className="hero-workshops-btn">
               <ClipboardList size={20} className="hero-workshops-btn-icon" /> <span className="hero-workshops-btn-text"><EditableLabel translationKey="home.workshopsButton" fallback="רישום לסדנאות" /></span>
             </button>
           )}
           {storeEnabled && (
-            <button onClick={() => navigate('/store')} className="hero-store-btn">
+            <button onClick={() => navigate({ to: '/store' })} className="hero-store-btn">
               <ShoppingCart size={20} className="hero-store-btn-icon" /> <span className="hero-store-btn-text"><EditableLabel translationKey="home.storeButton" /></span>
             </button>
           )}
@@ -340,7 +340,7 @@ const Home = ({ navigate: handleNavigate }) => {
                       <span><EditableLabel translationKey="home.registerTo" />{ev.day}</span>
                     </a>
                   ) : (
-                    <button onClick={() => navigate(`/register?partyId=${ev.id || ''}`)} className="event-register-btn">
+                    <button onClick={() => navigate({ to: '/register', search: { partyId: ev.id || undefined } })} className="event-register-btn">
                       {ev.day === 'חמישי' ? <ClipboardList size={18}/> : <ClipboardCheck size={18}/>}
                       <span><EditableLabel translationKey="home.registerTo" />{ev.day}</span>
                     </button>

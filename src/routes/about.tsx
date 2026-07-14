@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageLayout, PageHeader } from "@/components/PageLayout";
+import { ContentProvider, useContent } from "@/context/ContentContext";
+import { LanguageProvider } from "../i18n/LanguageContext";
 import aboutImg from "@/assets/about.jpg";
 
 export const Route = createFileRoute("/about")({
@@ -18,47 +20,48 @@ export const Route = createFileRoute("/about")({
     ],
     links: [{ rel: "canonical", href: "/about" }],
   }),
-  component: About,
+  component: AboutRoute,
 });
 
-const sections = [
-  {
-    title: "החזון שלנו",
-    text: "אנחנו מאמינים שלכל אדם מגיע מרחב לחקור את התשוקה, הסקרנות והמיניות שלו בחופשיות, בכבוד וללא שיפוט. הקהילה שלנו היא בית לאנשים שמחפשים פתיחות אמיתית.",
-  },
-  {
-    title: "קוד SSC",
-    text: "כל אירוע מתנהל לפי העיקרון העולמי SSC — שפוי (Sane), בטוח (Safe) ובהסכמה (Consensual). הסכמה היא הבסיס לכל אינטראקציה אצלנו, תמיד.",
-  },
-  {
-    title: "איזון מגדרי",
-    text: "בשל אופיים הייחודי של האירועים, אנחנו שומרים על איזון מגדרי ואיננו מאפשרים כניסה ליחידים. כך נשמרת אווירה נעימה, מכבדת ובטוחה לכולם.",
-  },
-  {
-    title: "אומנות וקהילה",
-    text: "אנחנו מקדמים ביטוי אמנותי ומשלבים ציירים, צלמים, פרפורמרים ומעצבים באירועים שלנו. הקהילה היא לב העשייה, ואנחנו גאים בה.",
-  },
-];
-
-function About() {
+function AboutRoute() {
   return (
     <PageLayout>
+      <LanguageProvider>
+        <ContentProvider>
+          <About />
+        </ContentProvider>
+      </LanguageProvider>
+    </PageLayout>
+  );
+}
+
+function About() {
+  const { content } = useContent();
+  const about = content.about || {};
+  const infoCards = about.infoCards || [];
+
+  return (
+    <>
       <PageHeader
         title="אודות"
-        subtitle="קהילת המסיבות הליברליות המובילה בישראל"
+        subtitle={about.roleTitle || "קהילת המסיבות הליברליות המובילה בישראל"}
       />
       <section className="py-16">
         <div className="mx-auto max-w-5xl px-4">
-          <p className="mb-12 text-center text-lg leading-relaxed text-foreground/80">
-            כבר שנים רבות אנחנו מספקים תחושה של 'בית' המאפשרת לכם ליהנות מפתיחות
-            ולחקור את עצמכם באווירה סקסית, מאפשרת והרפתקנית. בכל אירוע יש השקעה
-            רבה במוזיקה מגוונת, בהופעות מעוררות השראה, בצוות אכפתי ובתפאורה יוצאת
-            דופן.
-          </p>
+          {about.roleText && (
+            <p className="mb-4 text-center text-lg leading-relaxed text-foreground/80">
+              {about.roleText.replace(/\*\*/g, "")}
+            </p>
+          )}
+          {about.roleSubtext && (
+            <p className="mb-12 text-center text-muted-foreground">
+              {about.roleSubtext.replace(/\*\*/g, "")}
+            </p>
+          )}
           <div className="grid gap-8 md:grid-cols-2">
-            {sections.map((s) => (
+            {infoCards.map((s: any, i: number) => (
               <div
-                key={s.title}
+                key={s.title || i}
                 className="rounded-2xl border border-border bg-card p-7 text-right"
               >
                 <h3 className="mb-3 text-xl font-bold text-primary">
@@ -70,6 +73,6 @@ function About() {
           </div>
         </div>
       </section>
-    </PageLayout>
+    </>
   );
 }

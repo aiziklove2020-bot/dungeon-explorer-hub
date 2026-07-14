@@ -1,5 +1,5 @@
 import { useState, useEffect, useId } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { 
   ShoppingCart, Package, Star, Plus, Minus, Trash2, 
   Check, ChevronLeft, ChevronRight, X, ArrowRight 
@@ -224,7 +224,7 @@ const Store = () => {
       <div className="store-disabled">
         <Package size={64} className="store-disabled-icon" />
         <h2><EditableLabel translationKey="store.closed" /></h2>
-        <button onClick={() => navigate('/')} className="store-back-btn">
+        <button onClick={() => navigate({ to: '/' })} className="store-back-btn">
           <EditableLabel translationKey="store.backToHome" />
         </button>
       </div>

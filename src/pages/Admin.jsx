@@ -1,5 +1,5 @@
 import { useState, useTransition, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { useContent } from '../context/ContentContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getDeployStatus } from '../firebase/settings';
@@ -204,7 +204,7 @@ const Admin = () => {
               showSaved();
             }
           }}
-          onViewSite={() => navigate('/')}
+          onViewSite={() => navigate({ to: '/' })}
           onLogout={handleLogout}
         />
 

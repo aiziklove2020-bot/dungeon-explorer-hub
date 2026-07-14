@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageLayout, PageHeader } from "@/components/PageLayout";
+import { getProducts, getStoreSettings } from "@/firebase/store";
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
@@ -19,36 +21,69 @@ export const Route = createFileRoute("/shop")({
   component: Shop,
 });
 
-const products = [
-  { name: "אזיקי עור קלאסיים", price: "₪149", emoji: "🔗" },
-  { name: "כיסוי עיניים משי", price: "₪59", emoji: "🖤" },
-  { name: "שוט עור איכותי", price: "₪199", emoji: "🥃" },
-  { name: "ערכת מתחילים", price: "₪289", emoji: "🎁" },
-  { name: "נר עיסוי חם", price: "₪79", emoji: "🕯️" },
-  { name: "חבל באמבוק רך", price: "₪89", emoji: "🪢" },
-];
-
 function Shop() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [storeEnabled, setStoreEnabled] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([getProducts(true), getStoreSettings()])
+      .then(([prods, settings]) => {
+        setProducts(prods);
+        setStoreEnabled(!!settings?.enabled);
+      })
+      .catch(() => {
+        setProducts([]);
+        setStoreEnabled(false);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <PageLayout>
       <PageHeader title="חנות" subtitle="כלים חדשים נוספים כל הזמן" />
       <section className="py-16">
-        <div className="mx-auto grid max-w-5xl gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p) => (
-            <div
-              key={p.name}
-              className="flex flex-col items-center rounded-2xl border border-border bg-card p-7 text-center"
-            >
-              <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-secondary text-4xl">
-                {p.emoji}
-              </div>
-              <h3 className="text-lg font-bold">{p.name}</h3>
-              <span className="mt-1 text-gold">{p.price}</span>
-              <button className="mt-4 w-full rounded-full border border-primary px-6 py-2 font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground">
-                הוסף לסל
-              </button>
+        <div className="mx-auto max-w-5xl px-4">
+          {loading ? (
+            <p className="text-center text-muted-foreground">טוען מוצרים...</p>
+          ) : !storeEnabled ? (
+            <p className="text-center text-muted-foreground">
+              החנות סגורה כרגע — נא לבדוק שוב בקרוב.
+            </p>
+          ) : products.length === 0 ? (
+            <p className="text-center text-muted-foreground">
+              אין מוצרים זמינים כרגע.
+            </p>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex flex-col items-center rounded-2xl border border-border bg-card p-7 text-center"
+                >
+                  <div className="mb-4 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-secondary text-4xl">
+                    {p.images?.[0] ? (
+                      <img
+                        src={p.images[0]}
+                        alt={p.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      "🛍️"
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold">{p.name}</h3>
+                  <span className="mt-1 text-gold">₪{p.price}</span>
+                  <button
+                    disabled={!p.stock}
+                    className="mt-4 w-full rounded-full border border-primary px-6 py-2 font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {p.stock ? "הוסף לסל" : "אזל מהמלאי"}
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       </section>
     </PageLayout>

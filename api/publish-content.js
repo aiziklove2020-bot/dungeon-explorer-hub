@@ -40,8 +40,20 @@ export default async function handler(req, res) {
   let admin;
   try {
     admin = (await import('firebase-admin')).default;
+    if (!admin.firestore) {
+      // firebase-admin v14 dropped admin.firestore()/admin.apps (kept
+      // initializeApp/cert at top level) in favor of the modular API. Patch the
+      // missing pieces back on so the rest of this file (written against the old
+      // namespaced shape) keeps working unchanged.
+      const [{ getApps }, { getFirestore, Timestamp }] = await Promise.all([
+        import('firebase-admin/app'),
+        import('firebase-admin/firestore')
+      ]);
+      Object.defineProperty(admin, 'apps', { get: () => getApps(), configurable: true });
+      admin.firestore = Object.assign(() => getFirestore(), { Timestamp });
+    }
     if (!admin.apps?.length) {
-      const cred = admin.credential.cert(JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON));
+      const cred = admin.cert(JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON));
       admin.initializeApp({
         credential: cred,
         projectId: process.env.GCLOUD_PROJECT || 'tbdsm-5acca'

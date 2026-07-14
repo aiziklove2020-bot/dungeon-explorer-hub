@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { ChevronRight, Clock, Pencil, Trash2, Save, X, Star, Users } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useForumAuth } from '../context/ForumAuthContext';
@@ -39,7 +39,7 @@ import './Blog.css';
 import { formatDateTime as formatDate } from '../utils/dateFormat';
 
 const BlogPost = () => {
-  const { postId } = useParams();
+  const { postId } = useParams({ strict: false });
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { forumUser, isForumAdmin } = useForumAuth();
@@ -219,7 +219,7 @@ const BlogPost = () => {
   const handleDelete = async () => {
     if (!confirm(t('blog.confirmDelete') || 'למחוק את הפוסט? הפעולה בלתי הפיכה.')) return;
     await deleteBlogPost(postId);
-    navigate('/blog');
+    navigate({ to: '/blog' });
   };
 
   const startEditComment = (comment) => {
@@ -305,7 +305,7 @@ const BlogPost = () => {
       />
 
       <div className="forum-breadcrumb flex items-center gap-2 mb-6 text-sm flex-wrap">
-        <button onClick={() => navigate('/blog')} className="hover:text-white text-zinc-400 shrink-0">{t('blog.title') || 'בלוג'}</button>
+        <button onClick={() => navigate({ to: '/blog' })} className="hover:text-white text-zinc-400 shrink-0">{t('blog.title') || 'בלוג'}</button>
         <ChevronRight size={14} className="text-zinc-600 shrink-0" />
         <span className="text-white font-bold truncate max-w-[60vw] sm:max-w-[250px]">{post.title}</span>
       </div>

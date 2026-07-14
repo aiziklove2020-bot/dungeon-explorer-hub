@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useLanguage } from '../i18n/LanguageContext';
 import SEO from '../components/SEO';
 
 const ForumPasswordReset = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const token = params.get('token') || '';
+  const search = useSearch({ strict: false });
+  const token = search.token || '';
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [status, setStatus] = useState('idle'); // idle | submitting | success | invalid | expired | error
@@ -40,7 +40,7 @@ const ForumPasswordReset = () => {
       });
       if (resp.ok) {
         setStatus('success');
-        setTimeout(() => navigate('/forum', { replace: true }), 2200);
+        setTimeout(() => navigate({ to: '/forum', replace: true }), 2200);
         return;
       }
       const data = await resp.json().catch(() => ({}));

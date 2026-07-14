@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageLayout, PageHeader } from "@/components/PageLayout";
+import { ContentProvider, useContent } from "@/context/ContentContext";
+import { LanguageProvider } from "../i18n/LanguageContext";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -16,50 +18,52 @@ export const Route = createFileRoute("/contact")({
     ],
     links: [{ rel: "canonical", href: "/contact" }],
   }),
-  component: Contact,
+  component: ContactRoute,
 });
 
-function Contact() {
+function ContactRoute() {
   return (
     <PageLayout>
+      <LanguageProvider>
+        <ContentProvider>
+          <Contact />
+        </ContentProvider>
+      </LanguageProvider>
+    </PageLayout>
+  );
+}
+
+function Contact() {
+  const { content } = useContent();
+  const contact = content.contact || {};
+
+  return (
+    <>
       <PageHeader title="צור קשר" subtitle="נשמח לשמוע מכם" />
       <section className="py-16">
         <div className="mx-auto grid max-w-5xl gap-10 px-4 md:grid-cols-2">
-          <form
-            className="space-y-4 rounded-2xl border border-border bg-card p-7"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <div>
-              <label className="mb-1 block text-sm font-bold">שם מלא</label>
-              <input
-                type="text"
-                className="w-full rounded-md border border-input bg-background px-3 py-2 outline-none focus:border-primary"
-                placeholder="השם שלך"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-bold">אימייל</label>
-              <input
-                type="email"
-                className="w-full rounded-md border border-input bg-background px-3 py-2 outline-none focus:border-primary"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-bold">הודעה</label>
-              <textarea
-                rows={5}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 outline-none focus:border-primary"
-                placeholder="במה נוכל לעזור?"
-              />
-            </div>
-            <button
-              type="submit"
-              className="btn-glow w-full rounded-full bg-primary px-8 py-3 font-bold text-primary-foreground transition-transform hover:scale-[1.02]"
-            >
-              שליחה
-            </button>
-          </form>
+          <div className="space-y-4 rounded-2xl border border-border bg-card p-7 text-right">
+            {contact.alertText && (
+              <p className="rounded-md bg-secondary px-4 py-2 text-sm font-bold text-gold">
+                {contact.alertText}
+              </p>
+            )}
+            {contact.description && (
+              <p className="leading-relaxed text-foreground/80">
+                {contact.description}
+              </p>
+            )}
+            {contact.whatsappLink && (
+              <a
+                href={contact.whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-glow block w-full rounded-full bg-primary px-8 py-3 text-center font-bold text-primary-foreground transition-transform hover:scale-[1.02]"
+              >
+                שליחת הודעה ב-WhatsApp
+              </a>
+            )}
+          </div>
           <div className="space-y-6 text-right">
             <div>
               <h3 className="mb-2 text-xl font-bold text-primary">
@@ -70,22 +74,14 @@ function Contact() {
                 והטלגרם של הקהילה. נשתדל לחזור אליכם בהקדם.
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              {["אינסטגרם", "טלגרם", "וואטסאפ", "פייסבוק"].map((c) => (
-                <span
-                  key={c}
-                  className="rounded-full border border-border px-5 py-2 text-sm font-bold text-foreground/80"
-                >
-                  {c}
-                </span>
-              ))}
-            </div>
-            <p className="text-sm text-muted-foreground">
-              הכניסה והפנייה אלינו מותרות מגיל 18 ומעלה בלבד.
-            </p>
+            {contact.importantNote && (
+              <p className="text-sm text-muted-foreground">
+                {contact.importantNote}
+              </p>
+            )}
           </div>
         </div>
       </section>
-    </PageLayout>
+    </>
   );
 }
