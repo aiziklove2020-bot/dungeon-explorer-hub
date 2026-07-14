@@ -176,7 +176,7 @@ function Index() {
                       )}
                     </div>
                     {e.description && (
-                      <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                      <p className="mt-3 line-clamp-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                         {e.description}
                       </p>
                     )}
@@ -185,14 +185,6 @@ function Index() {
               ))}
             </div>
           )}
-          <div className="mt-10 text-center">
-            <Link
-              to="/tickets"
-              className="inline-block rounded-full bg-secondary px-10 py-3 font-bold text-secondary-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
-            >
-              אירועים עתידיים
-            </Link>
-          </div>
         </div>
       </section>
 
