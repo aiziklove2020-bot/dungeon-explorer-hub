@@ -61,6 +61,28 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
+function EventDescription({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="mt-3">
+      <p
+        className={`whitespace-pre-line text-sm leading-relaxed text-muted-foreground ${
+          expanded ? "" : "line-clamp-4"
+        }`}
+      >
+        {text}
+      </p>
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="mt-1 text-sm font-bold text-primary hover:underline"
+      >
+        {expanded ? "הצג פחות" : "קרא עוד"}
+      </button>
+    </div>
+  );
+}
+
 function IndexRoute() {
   return (
     <PageLayout>
@@ -175,11 +197,7 @@ function Index() {
                         </Link>
                       )}
                     </div>
-                    {e.description && (
-                      <p className="mt-3 line-clamp-4 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                        {e.description}
-                      </p>
-                    )}
+                    {e.description && <EventDescription text={e.description} />}
                   </div>
                 </article>
               ))}
