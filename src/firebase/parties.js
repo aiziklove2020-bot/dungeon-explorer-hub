@@ -14,7 +14,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './config';
-import { sendBalanceMatchNotification } from './telegram';
+import { sendBalanceMatchNotification, sendNewPartyTelegram, sendNewExternalPartyTelegram } from './telegram';
 import { isUserBlocked } from './users';
 import { getActiveParties as getActivePartiesFromDataAccess, getBalanceMatches as getBalanceMatchesFromDataAccess, getPartyById as getPartyByIdFromDataAccess, getUserByPhone, invalidateCache } from './dataAccess';
 import {
@@ -90,7 +90,24 @@ export const createParty = async (partyData) => {
     // Clear cache
     await invalidateCache('activeParties');
 
-    return { id: newPartyRef.id, ...party };
+    const created = { id: newPartyRef.id, ...party };
+
+    // Announce the new party to Telegram immediately — this used to only
+    // fire as a side effect of the GitHub "Publish" button, which the
+    // homepage/registration flows no longer depend on for parties to go
+    // live, so it silently stopped firing. No-ops quietly if Telegram isn't
+    // configured (see sendNewPartyTelegram/sendNewExternalPartyTelegram).
+    try {
+      if (created.partyType === 'external') {
+        await sendNewExternalPartyTelegram(created, 'he');
+      } else {
+        await sendNewPartyTelegram(created, 'he');
+      }
+    } catch (notifyError) {
+      console.error('createParty: Telegram notify failed:', notifyError);
+    }
+
+    return created;
   } catch (error) {
     throw error;
   }
