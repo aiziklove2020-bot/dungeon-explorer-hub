@@ -73,7 +73,7 @@ export function SiteHeader() {
                 <Menu className="h-6 w-6" />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="flex w-72 flex-col gap-6">
+            <SheetContent side="left" className="flex w-72 flex-col gap-6">
               <SheetHeader>
                 <SheetTitle className="text-right">{SITE_NAME}</SheetTitle>
               </SheetHeader>
