@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { markTopicRead, getTopicActivitySeconds } from '../utils/forumReadState';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { ChevronRight, Pin, Lock, Quote, Clock, Pencil, Trash2, Save, X } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useSiteAuth } from '../context/AuthContext';
@@ -37,7 +37,7 @@ import './Forum.css';
 import { formatDateTime as formatDate } from '../utils/dateFormat';
 
 const ForumTopic = () => {
-  const { sectionId, topicId } = useParams();
+  const { sectionId, topicId } = useParams({ strict: false });
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { siteUser } = useSiteAuth();
@@ -268,7 +268,7 @@ const ForumTopic = () => {
     clearActionError();
     try {
       await deleteTopic(topicId);
-      navigate(`/forum/${sectionId}`);
+      navigate({ to: '/forum/$sectionId', params: { sectionId } });
     } catch (err) {
       showActionError(err);
     }
@@ -318,9 +318,9 @@ const ForumTopic = () => {
       />
 
       <div className="forum-breadcrumb flex items-center gap-2 mb-6 text-sm flex-wrap">
-        <button onClick={() => navigate('/forum')} className="hover:text-white text-zinc-400">{t('forum.title') || 'פורום'}</button>
+        <button onClick={() => navigate({ to: '/forum' })} className="hover:text-white text-zinc-400">{t('forum.title') || 'פורום'}</button>
         <ChevronRight size={14} className="text-zinc-600" />
-        <button onClick={() => navigate(`/forum/${sectionId}`)} className="hover:text-white text-zinc-400">{section?.title || '...'}</button>
+        <button onClick={() => navigate({ to: '/forum/$sectionId', params: { sectionId } })} className="hover:text-white text-zinc-400">{section?.title || '...'}</button>
         <ChevronRight size={14} className="text-zinc-600" />
         <span className="text-white font-bold truncate max-w-[50vw] sm:max-w-[200px]">{topic.title}</span>
       </div>

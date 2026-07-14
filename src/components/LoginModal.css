@@ -1,0 +1,101 @@
+.login-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: max(1rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px)) max(1rem, env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
+}
+
+.login-modal {
+  background: linear-gradient(145deg, #1a1a1a 0%, #0d0d0d 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  max-width: 360px;
+  width: 100%;
+  position: relative;
+}
+
+.login-modal-close {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: none;
+  border: none;
+  color: #a1a1aa;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.login-modal-close:hover {
+  color: #fff;
+}
+
+.login-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: #fff;
+}
+
+.login-modal-subtitle {
+  font-size: 0.875rem;
+  color: #a1a1aa;
+  margin: 0 0 1.25rem 0;
+}
+
+.login-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.login-modal-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-size: 1rem;
+  text-align: right;
+}
+
+.login-modal-input:focus {
+  outline: none;
+  border-color: #dc2626;
+}
+
+.login-modal-input:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+.login-modal-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.login-modal-submit {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.login-modal-submit:hover:not(:disabled) {
+  background: #ef4444;
+}
+
+.login-modal-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

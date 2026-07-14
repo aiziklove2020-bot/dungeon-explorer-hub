@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect } from 'react';
 import { Pause, Play } from 'lucide-react';
-import { useContent } from '../context/ContentContext';
-import { useLanguage } from '../i18n/LanguageContext';
-import { getRssTickerSettings } from '../firebase/settings';
+import { useContent } from './context/ContentContext';
+import { useLanguage } from './i18n/LanguageContext';
+import { getRssTickerSettings } from './firebase/settings';
 import './RSSFeedTicker.css';
 
 const RSS_CACHE_KEY = 'tbdsm_rss_feeds_cache';

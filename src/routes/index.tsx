@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import heroImg from "@/assets/hero.jpg";
-import event1 from "@/assets/event1.jpg";
-import event2 from "@/assets/event2.jpg";
 import aboutImg from "@/assets/about.jpg";
 import { PageLayout } from "@/components/PageLayout";
+import { ContentProvider, useContent } from "@/context/ContentContext";
+import { LanguageProvider } from "../i18n/LanguageContext";
+import { isPartyExpiredByExpiration } from "../../shared/partyExpiry.js";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,23 +28,8 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
-  component: Index,
+  component: IndexRoute,
 });
-
-const events = [
-  {
-    title: "Summer Fetish Party 2.7",
-    day: "חמישי",
-    date: "2.7.26",
-    img: event2,
-  },
-  {
-    title: "Diva's Sexy Summer Night 3.7",
-    day: "שישי",
-    date: "3.7.26",
-    img: event1,
-  },
-];
 
 const aboutBlocks = [
   {
@@ -74,9 +60,27 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Index() {
+function IndexRoute() {
   return (
     <PageLayout>
+      <LanguageProvider>
+        <ContentProvider>
+          <Index />
+        </ContentProvider>
+      </LanguageProvider>
+    </PageLayout>
+  );
+}
+
+function Index() {
+  const { content, isInitialized } = useContent();
+  const partyRetentionHours = content.partyRetentionHours;
+  const visibleEvents = (content.events || []).filter(
+    (ev: any) => !isPartyExpiredByExpiration(ev?.expiration, ev?.date, partyRetentionHours)
+  );
+
+  return (
+    <>
       {/* Hero */}
       <section className="relative overflow-hidden bg-background">
         <img
@@ -104,43 +108,52 @@ function Index() {
           <p className="mb-12 text-center text-muted-foreground">
             כל כרטיס הוא כרטיס זוגי
           </p>
-          <div className="grid gap-8 md:grid-cols-2">
-            {events.map((e) => (
-              <article
-                key={e.title}
-                className="group overflow-hidden rounded-2xl border border-border bg-card"
-              >
-                <div className="relative">
-                  <img
-                    src={e.img}
-                    alt={e.title}
-                    loading="lazy"
-                    width={768}
-                    height={1024}
-                    className="h-[26rem] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute right-4 top-4 rounded-md bg-primary px-4 py-1 text-sm font-bold text-primary-foreground">
-                    {e.date}
-                  </div>
-                  <div className="absolute left-4 top-4 rounded-md bg-black/70 px-4 py-2 text-center">
-                    <span className="block text-sm font-bold">{e.day}</span>
-                    <span className="block text-xs text-muted-foreground">
+          {!isInitialized ? (
+            <p className="text-center text-muted-foreground">טוען אירועים...</p>
+          ) : visibleEvents.length === 0 ? (
+            <p className="text-center text-muted-foreground">
+              אין אירועים פעילים כרגע — נא לבדוק שוב בקרוב.
+            </p>
+          ) : (
+            <div className="grid gap-8 md:grid-cols-2">
+              {visibleEvents.map((e: any, i: number) => (
+                <article
+                  key={e.id || `${e.title}-${i}`}
+                  className="group overflow-hidden rounded-2xl border border-border bg-card"
+                >
+                  <div className="relative">
+                    <img
+                      src={e.img || heroImg}
+                      alt={e.title}
+                      loading="lazy"
+                      width={768}
+                      height={1024}
+                      className="h-[26rem] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute right-4 top-4 rounded-md bg-primary px-4 py-1 text-sm font-bold text-primary-foreground">
                       {e.date}
-                    </span>
+                    </div>
+                    <div className="absolute left-4 top-4 rounded-md bg-black/70 px-4 py-2 text-center">
+                      <span className="block text-sm font-bold">{e.day}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {e.date}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center justify-between gap-4 p-6">
-                  <h3 className="text-xl font-bold">{e.title}</h3>
-                  <Link
-                    to="/tickets"
-                    className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-                  >
-                    הזמנה
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
+                  <div className="flex items-center justify-between gap-4 p-6">
+                    <h3 className="text-xl font-bold">{e.title}</h3>
+                    <Link
+                      to="/register"
+                      search={{ partyId: e.id || undefined }}
+                      className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                    >
+                      הזמנה
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
           <div className="mt-10 text-center">
             <Link
               to="/tickets"
@@ -213,6 +226,6 @@ function Index() {
           </div>
         </div>
       </section>
-    </PageLayout>
+    </>
   );
 }

@@ -1,0 +1,52 @@
+.editable-content {
+  position: relative;
+  display: inline;
+}
+
+.editable-content-btn {
+  position: absolute;
+  top: 0;
+  left: -0.25rem;
+  transform: translate(-100%, 0);
+  width: 22px;
+  height: 22px;
+  background: rgba(220, 38, 38, 0.9);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  padding: 0;
+  margin-right: 2px;
+  vertical-align: middle;
+}
+
+.editable-content:hover .editable-content-btn,
+.editable-content-btn:focus {
+  opacity: 1;
+}
+
+/* SchoolWebsite-style: in admin mode show edit button on hover */
+.admin-mode .editable-content:hover .editable-content-btn {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .admin-mode .editable-content-btn {
+    opacity: 0.85;
+  }
+}
+
+.editable-content-btn:hover {
+  background: rgb(185, 28, 28);
+}
+
+@media (max-width: 768px) {
+  .editable-content-btn {
+    opacity: 0.7;
+  }
+}

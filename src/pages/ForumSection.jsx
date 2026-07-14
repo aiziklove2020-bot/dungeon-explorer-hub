@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import { MessageSquare, Pin, Lock, Heart, Clock, ChevronRight, Plus, Sparkles, Search } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useForumAuth } from '../context/ForumAuthContext';
@@ -24,7 +24,7 @@ import { useDraft } from '../hooks/useDraft';
 import { formatDateTime as formatDate } from '../utils/dateFormat';
 
 const ForumSection = () => {
-  const { sectionId } = useParams();
+  const { sectionId } = useParams({ strict: false });
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { forumUser } = useForumAuth();
@@ -156,7 +156,7 @@ const ForumSection = () => {
       />
 
       <div className="forum-breadcrumb flex items-center gap-2 mb-6 text-sm flex-wrap">
-        <button onClick={() => navigate('/forum')} className="hover:text-white text-zinc-400">{t('forum.title') || 'פורום'}</button>
+        <button onClick={() => navigate({ to: '/forum' })} className="hover:text-white text-zinc-400">{t('forum.title') || 'פורום'}</button>
         <ChevronRight size={14} className="text-zinc-600" />
         <span className="text-white font-bold">{section.title}</span>
       </div>
@@ -300,7 +300,7 @@ const ForumSection = () => {
             return (
             <button
               key={topic.id}
-              onClick={() => navigate(`/forum/${sectionId}/${topic.id}`)}
+              onClick={() => navigate({ to: '/forum/$sectionId/$topicId', params: { sectionId, topicId: topic.id } })}
               className={`forum-post-card w-full text-right rounded-xl p-4 transition-all border ${unread ? 'bg-zinc-900/70 border-amber-600/50 ring-1 ring-amber-600/20' : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-600'}`}
             >
               <div className="flex justify-between items-start gap-3">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { MessageSquare, Clock, LogIn, LogOut, Sparkles, User, Search } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useForumAuth } from '../context/ForumAuthContext';
@@ -63,7 +63,7 @@ const Forum = () => {
             <>
               <span
                 className="text-zinc-400 text-sm cursor-pointer hover:text-pink-300 transition-colors"
-                onClick={() => navigate(`/profile/${forumUser.id}`)}
+                onClick={() => navigate({ to: '/profile/$userId', params: { userId: forumUser.id } })}
                 title={t('profile.editProfile') || 'ערוך פרופיל'}
               >
                 <User size={14} className="inline mr-1" />
@@ -117,7 +117,7 @@ const Forum = () => {
             return (
             <button
               key={section.id}
-              onClick={() => navigate(`/forum/${section.id}`)}
+              onClick={() => navigate({ to: '/forum/$sectionId', params: { sectionId: section.id } })}
               className={`forum-section-card w-full text-right backdrop-blur rounded-xl p-5 transition-all group border ${unreadN > 0 ? 'bg-zinc-900/80 border-amber-600/40 ring-1 ring-amber-600/15' : 'bg-zinc-900/60 border-zinc-800 hover:border-red-600/50'}`}
             >
               <div className="flex justify-between items-start gap-4">

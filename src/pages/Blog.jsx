@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import { BookOpen, Heart, MessageSquare, Clock, Plus, LogIn, Star, Filter, Users, Sparkles, Search } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useForumAuth } from '../context/ForumAuthContext';
@@ -34,7 +34,6 @@ const PREVIEW_LENGTH = 250;
 const Blog = () => {
   const { t } = useLanguage();
   const { forumUser } = useForumAuth();
-  const navigate = useNavigate();
 
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);

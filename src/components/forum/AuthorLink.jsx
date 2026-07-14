@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 
 const AuthorLink = ({ authorId, authorName, shortBio }) => {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ const AuthorLink = ({ authorId, authorName, shortBio }) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;
     e.stopPropagation();
     e.preventDefault();
-    navigate(href);
+    navigate({ to: '/profile/$userId', params: { userId: authorId } });
   };
 
   return (
