@@ -1,11 +1,21 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Instagram, Facebook, Send, MessageCircle } from "lucide-react";
 import heroImg from "@/assets/hero.jpg";
 import aboutImg from "@/assets/about.jpg";
 import { PageLayout } from "@/components/PageLayout";
 import { getActiveParties } from "@/firebase/parties";
 import { getPartySettings } from "@/firebase/partySettings";
+import { getSocialLinks } from "@/firebase/settings";
 import { isPartyExpiredByDate } from "../../shared/partyExpiry.js";
+
+const SOCIAL_ICONS = [
+  { key: "instagram", Icon: Instagram, label: "אינסטגרם" },
+  { key: "facebook", Icon: Facebook, label: "פייסבוק" },
+  { key: "telegramChannel", Icon: Send, label: "ערוץ טלגרם" },
+  { key: "telegramGroup", Icon: Send, label: "קבוצת טלגרם" },
+  { key: "whatsapp", Icon: MessageCircle, label: "וואטסאפ" },
+] as const;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -97,6 +107,7 @@ function formatEventDate(date: Date) {
 
 function Index() {
   const [parties, setParties] = useState<any[] | null>(null);
+  const [socialLinks, setSocialLinks] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -111,6 +122,13 @@ function Index() {
       })
       .catch(() => {
         if (!cancelled) setParties([]);
+      });
+    getSocialLinks()
+      .then((links: any) => {
+        if (!cancelled) setSocialLinks(links || {});
+      })
+      .catch(() => {
+        if (!cancelled) setSocialLinks({});
       });
     return () => {
       cancelled = true;
@@ -135,7 +153,22 @@ function Index() {
           >
             הרשמה למסיבה
           </Link>
-          <p className="mt-3 text-muted-foreground">לאירועים קרובים</p>
+          {socialLinks && (
+            <div className="mt-5 flex items-center justify-center gap-4">
+              {SOCIAL_ICONS.filter(({ key }) => socialLinks[key]).map(({ key, Icon, label }) => (
+                <a
+                  key={key}
+                  href={socialLinks[key]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground/80 transition-colors hover:border-primary hover:text-primary"
+                >
+                  <Icon size={20} />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -177,7 +210,12 @@ function Index() {
                   </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between gap-4">
-                      <h3 className="text-xl font-bold">{e.title}</h3>
+                      <div>
+                        <h3 className="text-xl font-bold">{e.title}</h3>
+                        {e.dj && (
+                          <p className="mt-1 text-sm text-muted-foreground">{e.dj}</p>
+                        )}
+                      </div>
                       {e.partyType === "external" && e.registrationLink ? (
                         <a
                           href={e.registrationLink}
