@@ -438,6 +438,11 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                             ? (party.partyType === 'exchange' ? t('admin.exchangeParty') : t('admin.internalParty'))
                             : t('admin.externalParty')}
                         </span>
+                        {party.createdByType === 'advertiser' && (
+                          <span className="px-2 py-1 rounded text-xs font-bold bg-indigo-600">
+                            פורסם ע"י מפרסם
+                          </span>
+                        )}
                         {party.needsPublish === true ? (
                           <span className="flex items-center gap-1 px-2 py-1 rounded text-xs font-bold bg-orange-500/20 text-orange-400 border border-orange-500/40">
                             <CloudOff size={11} /> לא פורסם

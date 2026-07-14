@@ -16,6 +16,7 @@ import AboutSection from '../components/admin/AboutSection';
 import ContactSection from '../components/admin/ContactSection';
 import LinksSection from '../components/admin/LinksSection';
 import AdminsSection from '../components/admin/AdminsSection';
+import AdvertisersSection from '../components/admin/AdvertisersSection';
 import TelegramSection from '../components/admin/TelegramSection';
 import StoreSection from '../components/admin/StoreSection';
 import WorkshopsSection from '../components/admin/WorkshopsSection';
@@ -242,6 +243,7 @@ const Admin = () => {
           {activeSection === 'users'     && <UsersSection showSaved={showSaved} />}
           {activeSection === 'subscriptions' && <SubscriptionsSection showSaved={showSaved} />}
           {activeSection === 'admins'    && <AdminsSection showSaved={showSaved} />}
+          {activeSection === 'advertisers' && <AdvertisersSection showSaved={showSaved} />}
           {activeSection === 'rss'       && <RssSection showSaved={showSaved} />}
           {activeSection === 'telegram'  && <TelegramSection showSaved={showSaved} />}
           {activeSection === 'gitHistory' && <GitHistorySection />}

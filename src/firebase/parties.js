@@ -1177,6 +1177,19 @@ export const deleteParty = async (partyId, imageDeleteUrl = null) => {
   }
 };
 
+/** Advertiser panel: parties created by a specific advertiser, newest first. */
+export const getPartiesByAdvertiser = async (advertiserId) => {
+  const partiesRef = collection(db, PARTIES_COLLECTION);
+  const q = query(partiesRef, where('createdBy', '==', advertiserId));
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((d) => {
+      const data = d.data();
+      return { id: d.id, ...data, date: data.date?.toDate ? data.date.toDate() : data.date };
+    })
+    .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+};
+
 export const updateUserRegistrationsInParties = async (userId, userUpdates) => {
   try {
     // Use dataAccess to get all active parties (with caching) instead of reading all parties

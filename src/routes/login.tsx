@@ -57,6 +57,16 @@ function Login() {
               </Link>
             </p>
           </form>
+
+          <div className="mt-6 rounded-2xl border border-border bg-card p-6 text-center">
+            <p className="mb-3 font-bold">בעל עסק ורוצה לפרסם מסיבה באתר?</p>
+            <Link
+              to="/advertiser/register"
+              className="inline-block rounded-full border border-primary px-8 py-3 font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+            >
+              הרשמה כמפרסם
+            </Link>
+          </div>
         </div>
       </section>
     </PageLayout>

@@ -19,6 +19,7 @@ export const adminTabs = [
   { id: 'users',    label: 'ניהול משתמשים' },
   { id: 'subscriptions', label: 'ניהול מנויים' },
   { id: 'admins',   label: 'ניהול אדמינים' },
+  { id: 'advertisers', label: 'מפרסמים' },
   { id: 'rss',      label: 'RSS Feeds' },
   { id: 'telegram', label: 'טלגרם' },
   { id: 'db',       label: 'DB' },
