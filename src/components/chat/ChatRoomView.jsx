@@ -474,7 +474,7 @@ const ChatRoomView = ({ roomId, navigate }) => {
 
   useEffect(() => {
     if (!displayMessages.length) return;
-    if (searchParams.get('m')) return;
+    if (searchParamsObj?.m) return;
     let cancelled = false;
     // estimateSize is intentionally generous (200) so the virtualizer
     // doesn't under-allocate before measuring; the side effect is that
