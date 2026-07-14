@@ -61,7 +61,7 @@ function applyAutoFill(prev, siteUser) {
 }
 
 const RegistrationForm = ({ onCancel, partyId }) => {
-  const { content, isInitialized, saveRegistration } = useContent();
+  const { content, saveRegistration } = useContent();
   const { t } = useLanguage();
   const { siteUser } = useSiteAuth();
 
@@ -70,11 +70,7 @@ const RegistrationForm = ({ onCancel, partyId }) => {
   const [hasTriedSubmit, setHasTriedSubmit] = useState(false);
   const [shakeTrigger, setShakeTrigger] = useState(0);
 
-  const { activeParties, loadingParties } = useActiveParties(
-    content?.events,
-    isInitialized,
-    content?.partyRetentionHours
-  );
+  const { activeParties, loadingParties } = useActiveParties();
 
   // Pre-select a party when the URL pre-binds one and it's still in the future.
   useEffect(() => {
@@ -150,13 +146,10 @@ const RegistrationForm = ({ onCancel, partyId }) => {
     <div className="registration-form-container">
       <div className="registration-form-header">
         <h1 className="registration-form-title">
-          <span className="registration-form-title-red">
-            {content.registration.formTitle || 'TALKING'}
-          </span>{' '}
-          BDSM
+          מסיבות בישראל
         </h1>
         <p className="registration-form-subtitle">
-          {content.registration.formSubtitle || 'Registration & Balance'}
+          הרשמה למסיבה
         </p>
       </div>
 
