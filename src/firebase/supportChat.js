@@ -14,6 +14,7 @@ import { db } from './config';
 const SUPPORT_CHAT_COLLECTION = 'supportChat';
 
 const getOrCreateSessionId = () => {
+  if (typeof window === 'undefined') return null;
   let sessionId = localStorage.getItem('support_chat_session');
   if (!sessionId) {
     sessionId = `sc_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
