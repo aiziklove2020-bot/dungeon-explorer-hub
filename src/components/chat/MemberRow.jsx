@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { MoreHorizontal, EyeOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import { getForumUserById } from '../../firebase/forumUsers';
 import {
   setChatMute,
@@ -161,7 +161,7 @@ export function MemberRow({
                 className="block w-full text-right text-xs text-zinc-200 hover:text-white"
                 onClick={() => {
                   setOpen(false);
-                  navigate(`/messages/${m.id}`);
+                  navigate({ to: `/messages/${m.id}` });
                 }}
               >
                 {t('chat.sendPrivateMessage') || 'שלח הודעה פרטית'}
@@ -171,7 +171,7 @@ export function MemberRow({
                 className="block w-full text-right text-xs text-zinc-300 hover:text-white"
                 onClick={() => {
                   setOpen(false);
-                  navigate(`/profile/${m.id}`);
+                  navigate({ to: `/profile/${m.id}` });
                 }}
               >
                 {t('chat.viewProfile') || 'צפייה בפרופיל'}

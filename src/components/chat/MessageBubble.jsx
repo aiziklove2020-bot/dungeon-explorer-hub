@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Pin, Trash2, MessagesSquare, Copy, Flag, Loader2, Check } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 import {
   subscribeReactions,
   toggleReaction,
@@ -146,7 +146,7 @@ export function MessageBubble({
   const authorClickable =
     !!msg.authorId && msg.authorId !== 'system' && msg.authorId !== forumUser?.id;
   const onAuthorClick = authorClickable
-    ? () => navigate(`/profile/${msg.authorId}`)
+    ? () => navigate({ to: `/profile/${msg.authorId}` })
     : undefined;
 
   const copyMessageText = () => {

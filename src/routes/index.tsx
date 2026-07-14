@@ -198,12 +198,9 @@ function Index() {
                       height={1024}
                       className="h-[26rem] w-full bg-secondary object-contain transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute right-4 top-4 rounded-md bg-primary px-4 py-1 text-sm font-bold text-primary-foreground">
-                      {formatEventDate(e.date)}
-                    </div>
-                    <div className="absolute left-4 top-4 rounded-md bg-black/70 px-4 py-2 text-center">
-                      <span className="block text-sm font-bold">{e.day}</span>
-                      <span className="block text-xs text-muted-foreground">
+                    <div className="absolute right-4 top-4 rounded-md bg-primary px-4 py-1 text-center">
+                      <span className="block text-sm font-bold text-primary-foreground">{e.day}</span>
+                      <span className="block text-xs text-primary-foreground/80">
                         {formatEventDate(e.date)}
                       </span>
                     </div>

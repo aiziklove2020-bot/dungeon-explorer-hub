@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { Link, useNavigate as useTanstackNavigate, useSearch } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   ArrowRight,
@@ -70,7 +70,8 @@ import {
 
 const ChatRoomView = ({ roomId, navigate }) => {
   const { t } = useLanguage();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParamsObj = useSearch({ strict: false });
+  const tanstackNavigate = useTanstackNavigate();
   const { forumUser, isForumAdmin } = useForumAuth();
   const { siteUser } = useSiteAuth();
   const {
@@ -505,9 +506,9 @@ const ChatRoomView = ({ roomId, navigate }) => {
     // Note: `displayMessages.length` deliberately omitted from deps —
     // re-firing on "load older" would yank the scroll back to bottom
     // and undo the very action the user just initiated.
-  }, [liveMessages.length, roomId, searchParams, rowVirtualizer]);
+  }, [liveMessages.length, roomId, searchParamsObj, rowVirtualizer]);
 
-  const targetMid = searchParams.get('m');
+  const targetMid = searchParamsObj?.m;
   useEffect(() => {
     if (!targetMid) return;
     if (!displayMessages.length) return;
@@ -521,16 +522,15 @@ const ChatRoomView = ({ roomId, navigate }) => {
       rowVirtualizer.scrollToIndex(idx, { align: 'center' });
     });
     const clearHl = setTimeout(() => setHighlightId(null), 2800);
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.delete('m');
-        return next;
+    tanstackNavigate({
+      search: (prev) => {
+        const { m, ...rest } = prev || {};
+        return rest;
       },
-      { replace: true }
-    );
+      replace: true,
+    });
     return () => clearTimeout(clearHl);
-  }, [targetMid, displayMessages, roomId, rowVirtualizer, setSearchParams]);
+  }, [targetMid, displayMessages, roomId, rowVirtualizer, tanstackNavigate]);
 
   const handleChatScroll = useCallback(() => {
     const el = parentRef.current;
