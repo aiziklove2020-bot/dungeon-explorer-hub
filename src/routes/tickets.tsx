@@ -10,7 +10,7 @@ export const Route = createFileRoute("/tickets")({
       {
         name: "description",
         content:
-          "הזמנת כרטיסים לאירועים והמסיבות הקרובות. כל כרטיס הוא כרטיס זוגי.",
+          "הזמנת כרטיסים לאירועים והמסיבות הקרובות.",
       },
       { property: "og:title", content: "כרטיסים | מסיבות ליברליות בישראל" },
       { property: "og:description", content: "הזמנת כרטיסים לאירועים." },
@@ -42,7 +42,7 @@ const events = [
 function Tickets() {
   return (
     <PageLayout>
-      <PageHeader title="כרטיסים" subtitle="כל כרטיס הוא כרטיס זוגי" />
+      <PageHeader title="כרטיסים" />
       <section className="py-16">
         <div className="mx-auto grid max-w-5xl gap-8 px-4 md:grid-cols-2">
           {events.map((e) => (

@@ -9,7 +9,7 @@ import { isPartyExpiredByExpiration } from "../../shared/partyExpiry.js";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "מסיבות ליברליות בישראל | הצד הנועז של התשוקה" },
+      { title: "מסיבות ליברליות בישראל" },
       {
         name: "description",
         content:
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "מסיבות ליברליות בישראל | הצד הנועז של התשוקה",
+        content: "מסיבות ליברליות בישראל",
       },
       {
         property: "og:description",
@@ -85,7 +85,7 @@ function Index() {
       <section className="relative overflow-hidden bg-background">
         <img
           src={heroImg}
-          alt="הצד הנועז של התשוקה"
+          alt="מסיבות ליברליות בישראל"
           width={1600}
           height={639}
           className="w-full h-auto object-contain"
@@ -105,17 +105,14 @@ function Index() {
       <section id="events" className="bg-background py-20">
         <div className="mx-auto max-w-7xl px-4">
           <SectionTitle>האירועים הקרובים</SectionTitle>
-          <p className="mb-12 text-center text-muted-foreground">
-            כל כרטיס הוא כרטיס זוגי
-          </p>
           {!isInitialized ? (
-            <p className="text-center text-muted-foreground">טוען אירועים...</p>
+            <p className="mt-8 text-center text-muted-foreground">טוען אירועים...</p>
           ) : visibleEvents.length === 0 ? (
-            <p className="text-center text-muted-foreground">
+            <p className="mt-8 text-center text-muted-foreground">
               אין אירועים פעילים כרגע — נא לבדוק שוב בקרוב.
             </p>
           ) : (
-            <div className="grid gap-8 md:grid-cols-2">
+            <div className="mt-8 grid gap-8 md:grid-cols-2">
               {visibleEvents.map((e: any, i: number) => (
                 <article
                   key={e.id || `${e.title}-${i}`}
