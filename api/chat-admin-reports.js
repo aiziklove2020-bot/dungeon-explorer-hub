@@ -66,7 +66,7 @@ async function getFirebaseAdmin() {
       import('firebase-admin/app'),
       import('firebase-admin/firestore')
     ]);
-    admin.apps = getApps();
+    Object.defineProperty(admin, 'apps', { get: () => getApps(), configurable: true });
     admin.firestore = Object.assign(() => getFirestore(), { Timestamp });
   }
   if (firebaseAdminMemo) return admin;
@@ -141,7 +141,7 @@ async function listFirebase(limitN) {
       import('firebase-admin/app'),
       import('firebase-admin/firestore')
     ]);
-    admin.apps = getApps();
+    Object.defineProperty(admin, 'apps', { get: () => getApps(), configurable: true });
     admin.firestore = Object.assign(() => getFirestore(), { Timestamp });
   }
   const snap = await admin
@@ -177,7 +177,7 @@ async function updateFirebase(reportId, status, notes) {
       import('firebase-admin/app'),
       import('firebase-admin/firestore')
     ]);
-    admin.apps = getApps();
+    Object.defineProperty(admin, 'apps', { get: () => getApps(), configurable: true });
     admin.firestore = Object.assign(() => getFirestore(), { Timestamp });
   }
   await admin

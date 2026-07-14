@@ -55,7 +55,7 @@ async function getAdmin() {
       import('firebase-admin/app'),
       import('firebase-admin/firestore')
     ]);
-    admin.apps = getApps();
+    Object.defineProperty(admin, 'apps', { get: () => getApps(), configurable: true });
     admin.firestore = Object.assign(() => getFirestore(), { Timestamp });
   }
   if (adminApp) return admin;
