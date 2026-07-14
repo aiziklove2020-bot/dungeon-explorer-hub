@@ -11,15 +11,15 @@ import {
 } from 'firebase/firestore';
 import bcrypt from 'bcryptjs';
 import { db } from './config';
+import { cleanPhone } from '../utils/phone';
 
 const ADVERTISERS_COLLECTION = 'advertisers';
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const getAdvertiserByEmail = async (email) => {
-  const clean = String(email || '').trim().toLowerCase();
-  if (!clean) return null;
+const getAdvertiserByPhone = async (phoneNumber) => {
+  const phone = cleanPhone(phoneNumber);
+  if (!phone) return null;
   const advertisersRef = collection(db, ADVERTISERS_COLLECTION);
-  const q = query(advertisersRef, where('email', '==', clean));
+  const q = query(advertisersRef, where('phoneNumber', '==', phone));
   const snap = await getDocs(q);
   if (snap.empty) return null;
   const d = snap.docs[0];
@@ -27,17 +27,17 @@ const getAdvertiserByEmail = async (email) => {
 };
 
 /** Public signup: creates a pending advertiser account awaiting admin approval. */
-export const registerAdvertiser = async ({ businessName, contactName, email, password }) => {
-  const clean = String(email || '').trim().toLowerCase();
-  if (!EMAIL_RE.test(clean)) {
-    throw new Error('כתובת אימייל לא תקינה');
+export const registerAdvertiser = async ({ businessName, contactName, phoneNumber, password }) => {
+  const phone = cleanPhone(phoneNumber);
+  if (!phone) {
+    throw new Error('מספר טלפון לא תקין');
   }
   if (!password || password.length < 4) {
     throw new Error('הסיסמה חייבת להכיל לפחות 4 תווים');
   }
-  const existing = await getAdvertiserByEmail(clean);
+  const existing = await getAdvertiserByPhone(phone);
   if (existing) {
-    throw new Error('כבר קיימת בקשת הרשמה עם כתובת האימייל הזו');
+    throw new Error('כבר קיימת בקשת הרשמה עם מספר הטלפון הזה');
   }
 
   const hashed = await bcrypt.hash(password, 10);
@@ -46,9 +46,12 @@ export const registerAdvertiser = async ({ businessName, contactName, email, pas
   const data = {
     businessName: (businessName || '').trim(),
     contactName: (contactName || '').trim(),
-    email: clean,
+    phoneNumber: phone,
     password: hashed,
     status: 'pending',
+    // Explicit marker so admins/other tooling can tell this account apart
+    // from a regular subscribed customer at a glance (see AdvertisersSection
+    // and the "מפרסם" badge, both of which key off this field).
     role: 'advertiser',
     createdAt: Timestamp.now()
   };
@@ -57,8 +60,8 @@ export const registerAdvertiser = async ({ businessName, contactName, email, pas
 };
 
 /** Login: only succeeds for accounts an admin has approved. */
-export const authenticateAdvertiser = async (email, password) => {
-  const advertiser = await getAdvertiserByEmail(email);
+export const authenticateAdvertiser = async (phoneNumber, password) => {
+  const advertiser = await getAdvertiserByPhone(phoneNumber);
   if (!advertiser) {
     return { authenticated: false, error: 'פרטי התחברות שגויים' };
   }

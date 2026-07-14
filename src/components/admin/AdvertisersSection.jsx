@@ -1,5 +1,6 @@
 import { RotateCcw, Check, X, RotateCw } from 'lucide-react';
 import AdminLoader from './AdminLoader';
+import PhoneLink from '../PhoneLink';
 import useAdminSection from '../../hooks/useAdminSection';
 import { getAllAdvertisers, setAdvertiserStatus } from '../../firebase/advertisers';
 
@@ -61,7 +62,11 @@ const AdvertisersSection = ({ showSaved }) => {
                     </span>
                   </div>
                   {adv.contactName && <p className="text-zinc-400 text-sm">איש קשר: {adv.contactName}</p>}
-                  {adv.email && <p className="text-zinc-400 text-sm">אימייל: {adv.email}</p>}
+                  {adv.phoneNumber && (
+                    <p className="text-zinc-400 text-sm">
+                      טלפון: <PhoneLink phone={adv.phoneNumber}>{adv.phoneNumber}</PhoneLink>
+                    </p>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {adv.status !== 'approved' && (

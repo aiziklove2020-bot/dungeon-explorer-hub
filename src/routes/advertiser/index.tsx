@@ -49,7 +49,7 @@ function AdvertiserPage() {
 }
 
 function AdvertiserLogin({ onAuthenticated }: { onAuthenticated: (id: string) => void }) {
-  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -59,7 +59,7 @@ function AdvertiserLogin({ onAuthenticated }: { onAuthenticated: (id: string) =>
     setError("");
     setLoading(true);
     try {
-      const result = await authenticateAdvertiser(email, password);
+      const result = await authenticateAdvertiser(phoneNumber, password);
       if (result.authenticated) {
         sessionStorage.setItem("advertiser_id", result.advertiser.id);
         onAuthenticated(result.advertiser.id);
@@ -78,11 +78,11 @@ function AdvertiserLogin({ onAuthenticated }: { onAuthenticated: (id: string) =>
       <h1 className="mb-8 text-center text-2xl font-bold">כניסת מפרסמים</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-bold">אימייל</label>
+          <label className="mb-1 block text-sm font-bold">טלפון</label>
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
             required
             className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground outline-none focus:border-primary"
           />

@@ -16,7 +16,7 @@ export const Route = createFileRoute("/advertiser/register")({
 function AdvertiserRegisterPage() {
   const [businessName, setBusinessName] = useState("");
   const [contactName, setContactName] = useState("");
-  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,7 +32,7 @@ function AdvertiserRegisterPage() {
     }
     setLoading(true);
     try {
-      await registerAdvertiser({ businessName, contactName, email, password });
+      await registerAdvertiser({ businessName, contactName, phoneNumber, password });
       setSubmitted(true);
     } catch (err: any) {
       setError(err?.message || "שגיאה בשליחת ההרשמה");
@@ -51,7 +51,7 @@ function AdvertiserRegisterPage() {
             <Link to="/advertiser" className="font-bold text-primary hover:underline">
               כניסת מפרסמים
             </Link>{" "}
-            עם כתובת האימייל והסיסמה שהזנת.
+            עם מספר הטלפון והסיסמה שהזנת.
           </p>
         </div>
       </PageLayout>
@@ -87,11 +87,12 @@ function AdvertiserRegisterPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-bold">אימייל</label>
+            <label className="mb-1 block text-sm font-bold">טלפון</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="05XXXXXXXX"
               required
               className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground outline-none focus:border-primary"
             />
