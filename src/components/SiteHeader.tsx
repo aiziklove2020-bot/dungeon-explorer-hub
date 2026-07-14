@@ -59,7 +59,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-2">
           <Link
             to="/login"
-            className="hidden shrink-0 rounded-full border border-primary px-5 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground lg:inline-block"
+            className="shrink-0 rounded-full border border-primary px-3 py-2 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground sm:px-5 sm:text-sm"
           >
             היכנס
           </Link>
