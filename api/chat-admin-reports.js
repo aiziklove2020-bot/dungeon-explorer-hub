@@ -57,12 +57,24 @@ async function getSupabaseAdmin() {
 let firebaseAdminMemo = null;
 async function getFirebaseAdmin() {
   const admin = (await import('firebase-admin')).default;
+  if (!admin.firestore) {
+    // firebase-admin v14 dropped admin.firestore()/admin.apps (kept
+    // initializeApp/cert at top level) in favor of the modular API. Patch the
+    // missing pieces back on so the rest of this file (written against the old
+    // namespaced shape) keeps working unchanged.
+    const [{ getApps }, { getFirestore, Timestamp }] = await Promise.all([
+      import('firebase-admin/app'),
+      import('firebase-admin/firestore')
+    ]);
+    admin.apps = getApps();
+    admin.firestore = Object.assign(() => getFirestore(), { Timestamp });
+  }
   if (firebaseAdminMemo) return admin;
   if (!admin.apps?.length) {
     const raw = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
     if (!raw) throw new Error('GOOGLE_APPLICATION_CREDENTIALS_JSON not set');
     admin.initializeApp({
-      credential: admin.credential.cert(JSON.parse(raw)),
+      credential: admin.cert(JSON.parse(raw)),
       projectId: process.env.GCLOUD_PROJECT || 'tbdsm-5acca'
     });
   }
@@ -119,7 +131,19 @@ async function listSupabase(limitN) {
 }
 
 async function listFirebase(limitN) {
-  const admin = await getFirebaseAdmin();
+  const admin = (await import('firebase-admin')).default;
+  if (!admin.firestore) {
+    // firebase-admin v14 dropped admin.firestore()/admin.apps (kept
+    // initializeApp/cert at top level) in favor of the modular API. Patch the
+    // missing pieces back on so the rest of this file (written against the old
+    // namespaced shape) keeps working unchanged.
+    const [{ getApps }, { getFirestore, Timestamp }] = await Promise.all([
+      import('firebase-admin/app'),
+      import('firebase-admin/firestore')
+    ]);
+    admin.apps = getApps();
+    admin.firestore = Object.assign(() => getFirestore(), { Timestamp });
+  }
   const snap = await admin
     .firestore()
     .collection('chatMessageReports')
@@ -143,7 +167,19 @@ async function updateSupabase(reportId, status, notes) {
 }
 
 async function updateFirebase(reportId, status, notes) {
-  const admin = await getFirebaseAdmin();
+  const admin = (await import('firebase-admin')).default;
+  if (!admin.firestore) {
+    // firebase-admin v14 dropped admin.firestore()/admin.apps (kept
+    // initializeApp/cert at top level) in favor of the modular API. Patch the
+    // missing pieces back on so the rest of this file (written against the old
+    // namespaced shape) keeps working unchanged.
+    const [{ getApps }, { getFirestore, Timestamp }] = await Promise.all([
+      import('firebase-admin/app'),
+      import('firebase-admin/firestore')
+    ]);
+    admin.apps = getApps();
+    admin.firestore = Object.assign(() => getFirestore(), { Timestamp });
+  }
   await admin
     .firestore()
     .collection('chatMessageReports')
