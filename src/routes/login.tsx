@@ -2,9 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { LogIn, UserPlus } from "lucide-react";
 import { PageLayout, PageHeader } from "@/components/PageLayout";
-import { LanguageProvider } from "../i18n/LanguageContext";
-import { SiteAuthProvider } from "@/context/AuthContext";
-import { ForumAuthProvider, useForumAuth } from "@/context/ForumAuthContext";
+import { useForumAuth } from "@/context/ForumAuthContext";
 import ForumLoginModal from "@/components/forum/ForumLoginModal";
 
 export const Route = createFileRoute("/login")({
@@ -27,13 +25,7 @@ export const Route = createFileRoute("/login")({
 function LoginRoute() {
   return (
     <PageLayout>
-      <LanguageProvider>
-        <SiteAuthProvider>
-          <ForumAuthProvider>
-            <Login />
-          </ForumAuthProvider>
-        </SiteAuthProvider>
-      </LanguageProvider>
+      <Login />
     </PageLayout>
   );
 }
