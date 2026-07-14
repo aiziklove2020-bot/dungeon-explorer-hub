@@ -21,9 +21,11 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ForumIndexRouteImport } from './routes/forum/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as AdvertiserIndexRouteImport } from './routes/advertiser/index'
 import { Route as ForumVerifyEmailRouteImport } from './routes/forum/verify-email'
 import { Route as ForumResetPasswordRouteImport } from './routes/forum/reset-password'
 import { Route as BlogPostIdRouteImport } from './routes/blog/$postId'
+import { Route as AdvertiserRegisterRouteImport } from './routes/advertiser/register'
 import { Route as ForumSectionIdIndexRouteImport } from './routes/forum/$sectionId/index'
 import { Route as ForumSectionIdTopicIdRouteImport } from './routes/forum/$sectionId/$topicId'
 
@@ -87,6 +89,11 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
   path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdvertiserIndexRoute = AdvertiserIndexRouteImport.update({
+  id: '/advertiser/',
+  path: '/advertiser/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForumVerifyEmailRoute = ForumVerifyEmailRouteImport.update({
   id: '/forum/verify-email',
   path: '/forum/verify-email',
@@ -100,6 +107,11 @@ const ForumResetPasswordRoute = ForumResetPasswordRouteImport.update({
 const BlogPostIdRoute = BlogPostIdRouteImport.update({
   id: '/blog/$postId',
   path: '/blog/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdvertiserRegisterRoute = AdvertiserRegisterRouteImport.update({
+  id: '/advertiser/register',
+  path: '/advertiser/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForumSectionIdIndexRoute = ForumSectionIdIndexRouteImport.update({
@@ -124,9 +136,11 @@ export interface FileRoutesByFullPath {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
+  '/advertiser/register': typeof AdvertiserRegisterRoute
   '/blog/$postId': typeof BlogPostIdRoute
   '/forum/reset-password': typeof ForumResetPasswordRoute
   '/forum/verify-email': typeof ForumVerifyEmailRoute
+  '/advertiser/': typeof AdvertiserIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/forum/$sectionId/$topicId': typeof ForumSectionIdTopicIdRoute
@@ -143,9 +157,11 @@ export interface FileRoutesByTo {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
+  '/advertiser/register': typeof AdvertiserRegisterRoute
   '/blog/$postId': typeof BlogPostIdRoute
   '/forum/reset-password': typeof ForumResetPasswordRoute
   '/forum/verify-email': typeof ForumVerifyEmailRoute
+  '/advertiser': typeof AdvertiserIndexRoute
   '/blog': typeof BlogIndexRoute
   '/forum': typeof ForumIndexRoute
   '/forum/$sectionId/$topicId': typeof ForumSectionIdTopicIdRoute
@@ -163,9 +179,11 @@ export interface FileRoutesById {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
+  '/advertiser/register': typeof AdvertiserRegisterRoute
   '/blog/$postId': typeof BlogPostIdRoute
   '/forum/reset-password': typeof ForumResetPasswordRoute
   '/forum/verify-email': typeof ForumVerifyEmailRoute
+  '/advertiser/': typeof AdvertiserIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/forum/$sectionId/$topicId': typeof ForumSectionIdTopicIdRoute
@@ -184,9 +202,11 @@ export interface FileRouteTypes {
     | '/shop'
     | '/sitemap.xml'
     | '/tickets'
+    | '/advertiser/register'
     | '/blog/$postId'
     | '/forum/reset-password'
     | '/forum/verify-email'
+    | '/advertiser/'
     | '/blog/'
     | '/forum/'
     | '/forum/$sectionId/$topicId'
@@ -203,9 +223,11 @@ export interface FileRouteTypes {
     | '/shop'
     | '/sitemap.xml'
     | '/tickets'
+    | '/advertiser/register'
     | '/blog/$postId'
     | '/forum/reset-password'
     | '/forum/verify-email'
+    | '/advertiser'
     | '/blog'
     | '/forum'
     | '/forum/$sectionId/$topicId'
@@ -222,9 +244,11 @@ export interface FileRouteTypes {
     | '/shop'
     | '/sitemap.xml'
     | '/tickets'
+    | '/advertiser/register'
     | '/blog/$postId'
     | '/forum/reset-password'
     | '/forum/verify-email'
+    | '/advertiser/'
     | '/blog/'
     | '/forum/'
     | '/forum/$sectionId/$topicId'
@@ -242,9 +266,11 @@ export interface RootRouteChildren {
   ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TicketsRoute: typeof TicketsRoute
+  AdvertiserRegisterRoute: typeof AdvertiserRegisterRoute
   BlogPostIdRoute: typeof BlogPostIdRoute
   ForumResetPasswordRoute: typeof ForumResetPasswordRoute
   ForumVerifyEmailRoute: typeof ForumVerifyEmailRoute
+  AdvertiserIndexRoute: typeof AdvertiserIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ForumIndexRoute: typeof ForumIndexRoute
   ForumSectionIdTopicIdRoute: typeof ForumSectionIdTopicIdRoute
@@ -337,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/advertiser/': {
+      id: '/advertiser/'
+      path: '/advertiser'
+      fullPath: '/advertiser/'
+      preLoaderRoute: typeof AdvertiserIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forum/verify-email': {
       id: '/forum/verify-email'
       path: '/forum/verify-email'
@@ -356,6 +389,13 @@ declare module '@tanstack/react-router' {
       path: '/blog/$postId'
       fullPath: '/blog/$postId'
       preLoaderRoute: typeof BlogPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/advertiser/register': {
+      id: '/advertiser/register'
+      path: '/advertiser/register'
+      fullPath: '/advertiser/register'
+      preLoaderRoute: typeof AdvertiserRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forum/$sectionId/': {
@@ -386,9 +426,11 @@ const rootRouteChildren: RootRouteChildren = {
   ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TicketsRoute: TicketsRoute,
+  AdvertiserRegisterRoute: AdvertiserRegisterRoute,
   BlogPostIdRoute: BlogPostIdRoute,
   ForumResetPasswordRoute: ForumResetPasswordRoute,
   ForumVerifyEmailRoute: ForumVerifyEmailRoute,
+  AdvertiserIndexRoute: AdvertiserIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
   ForumIndexRoute: ForumIndexRoute,
   ForumSectionIdTopicIdRoute: ForumSectionIdTopicIdRoute,

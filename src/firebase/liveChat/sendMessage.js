@@ -26,10 +26,13 @@ import { getRoom } from './roomQueries.js';
 import { ROOMS_COL, MAX_TEXT, BURST_WINDOW_MS, BURST_MAX_MSG } from './constants.js';
 
 function useLegacyDirectSend() {
-  return (
-    typeof import.meta !== 'undefined' &&
-    String(import.meta.env?.VITE_CHAT_CALLABLE_SEND ?? 'true').toLowerCase() === 'false'
-  );
+  // This deployment has no Cloud Functions (issueForumChatToken /
+  // sendLiveChatMessage were never deployed — that requires the paid Blaze
+  // plan), so always use the direct-Firestore-write path. Previously this
+  // read VITE_CHAT_CALLABLE_SEND, but relying on that env var being set
+  // correctly in Vercel proved unreliable — hardcoding it removes an entire
+  // class of "why isn't this taking effect" failures.
+  return true;
 }
 
 function allowDevCallableFallback() {

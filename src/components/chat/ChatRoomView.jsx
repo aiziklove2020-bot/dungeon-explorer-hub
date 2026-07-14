@@ -100,6 +100,7 @@ const ChatRoomView = ({ roomId, navigate }) => {
   } = useChatRoom(roomId, forumUser, siteUser);
   const [input, setInput] = useState('');
   const [replyTo, setReplyTo] = useState(null);
+  const [sendError, setSendError] = useState('');
   const [soundOn, setSoundOn] = useState(() => typeof localStorage !== 'undefined' && localStorage.getItem('chat_sound') !== '0');
   const [highlightId, setHighlightId] = useState(null);
   const [threadFor, setThreadFor] = useState(null);
@@ -762,6 +763,7 @@ const ChatRoomView = ({ roomId, navigate }) => {
     setInput('');
     setMentionPicker(null);
     setReplyTo(null);
+    setSendError('');
     try {
       const sendOpts = {
         replyToMessageId: replyId,
@@ -823,7 +825,7 @@ const ChatRoomView = ({ roomId, navigate }) => {
       }
       setInput(text);
       if (replySnapshot) setReplyTo(replySnapshot);
-      alert(err.message || 'שגיאה');
+      setSendError(err.message || 'שגיאה בשליחת ההודעה');
     } finally {
       sendingMessageRef.current = false;
     }
@@ -1307,6 +1309,11 @@ const ChatRoomView = ({ roomId, navigate }) => {
             onSubmit={handleSend}
             className="shrink-0 border-t border-zinc-800 bg-zinc-950 px-2 py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] sm:p-4 sm:pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           >
+            {sendError && (
+              <div className="mb-1 rounded-md bg-red-950/60 px-2 py-1 text-xs text-red-300 sm:mb-2" role="alert">
+                {sendError}
+              </div>
+            )}
             {replyTo && (
               <div className="mb-1 flex items-center justify-between gap-2 rounded-md bg-white/95 px-2 py-1 text-xs sm:mb-2">
                 <span className="min-w-0 truncate font-bold text-black">
