@@ -4,7 +4,8 @@ import {
   query,
   orderBy,
   limit,
-  onSnapshot
+  onSnapshot,
+  getDocs
 } from 'firebase/firestore';
 import { db as mainDb, dbChat } from '../config';
 import { MAIN_ROOM_ID, ROOMS_COL, TYPING_TTL_MS } from './constants.js';
@@ -99,4 +100,19 @@ export function subscribeReactions(roomId, messageId, callback) {
   return onSnapshot(col, (snap) => {
     callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   });
+}
+
+/**
+ * One-shot reactions read (no live listener). Used by `useVisibleChatReactions`
+ * instead of one `onSnapshot` per visible message — with many messages on
+ * screen that used to mean dozens of concurrent Firestore realtime channels
+ * open at once, which is what was overloading the browser/tab. Polling this
+ * on an interval instead trades instant reaction updates for a bounded,
+ * predictable number of one-off reads.
+ */
+export async function fetchReactions(roomId, messageId) {
+  if (!roomId || !messageId) return [];
+  const col = collection(dbChat, ROOMS_COL, roomId, 'messages', messageId, 'reactions');
+  const snap = await getDocs(col);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }

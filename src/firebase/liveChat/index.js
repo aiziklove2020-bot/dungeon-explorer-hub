@@ -17,7 +17,8 @@ export {
   subscribeMessages,
   subscribeMembers,
   subscribeTyping,
-  subscribeReactions
+  subscribeReactions,
+  fetchReactions
 } from './subscriptions.js';
 
 export { ensureMainRoom, getRoom, subscribeRoom, listActiveRooms, listMyPrivateRooms, listChannels } from './roomQueries.js';

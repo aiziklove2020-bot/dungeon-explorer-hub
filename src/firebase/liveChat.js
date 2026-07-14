@@ -35,6 +35,11 @@ export const subscribeMessages = (...a) => pickFn('subscribeMessages')(...a);
 export const subscribeMembers = (...a) => pickFn('subscribeMembers')(...a);
 export const subscribeTyping = (...a) => pickFn('subscribeTyping')(...a);
 export const subscribeReactions = (...a) => pickFn('subscribeReactions')(...a);
+export const fetchReactions = (...a) => {
+  const mod = pickModule();
+  const fn = typeof mod.fetchReactions === 'function' ? mod.fetchReactions : firebaseChat.fetchReactions;
+  return fn(...a);
+};
 
 export const ensureMainRoom = (...a) => pickFn('ensureMainRoom')(...a);
 export const getRoom = (...a) => pickFn('getRoom')(...a);
