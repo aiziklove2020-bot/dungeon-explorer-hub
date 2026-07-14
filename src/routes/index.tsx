@@ -4,7 +4,7 @@ import { Instagram, Facebook, Send, MessageCircle } from "lucide-react";
 import heroImg from "@/assets/hero.jpg";
 import aboutImg from "@/assets/about.jpg";
 import { PageLayout } from "@/components/PageLayout";
-import { getActiveParties } from "@/firebase/parties";
+import { getActiveParties, deleteExpiredParties } from "@/firebase/parties";
 import { getPartySettings } from "@/firebase/partySettings";
 import { getSocialLinks } from "@/firebase/settings";
 import { isPartyExpiredByDate } from "../../shared/partyExpiry.js";
@@ -123,6 +123,11 @@ function Index() {
       .catch(() => {
         if (!cancelled) setParties([]);
       });
+    // Best-effort: actually delete party docs whose retention window has
+    // passed, instead of only ever hiding them client-side. Previously this
+    // only ran when an admin opened the Parties tab, so ended parties stayed
+    // in Firestore indefinitely until someone happened to open admin.
+    deleteExpiredParties().catch(() => {});
     getSocialLinks()
       .then((links: any) => {
         if (!cancelled) setSocialLinks(links || {});
