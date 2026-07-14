@@ -84,12 +84,20 @@ function Login() {
             <p className="mb-3 flex items-center justify-center gap-2 font-bold">
               <UserPlus size={18} /> בעל עסק ורוצה לפרסם מסיבה באתר?
             </p>
-            <Link
-              to="/advertiser/register"
-              className="inline-block rounded-full border border-primary px-8 py-3 font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-            >
-              הרשמה כמפרסם
-            </Link>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link
+                to="/advertiser"
+                className="inline-block rounded-full bg-primary px-8 py-3 font-bold text-primary-foreground transition-transform hover:scale-105"
+              >
+                כניסת מפרסמים
+              </Link>
+              <Link
+                to="/advertiser/register"
+                className="inline-block rounded-full border border-primary px-8 py-3 font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+              >
+                הרשמה כמפרסם
+              </Link>
+            </div>
           </div>
         </div>
       </section>
