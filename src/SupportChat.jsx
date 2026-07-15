@@ -200,20 +200,21 @@ const SupportChat = ({ initialSettings = null }) => {
               dropped from the production CSS build (never reproduced why —
               same class of issue hit the RSS ticker keyframes and the
               overscroll-behavior rule), so it's inlined here to guarantee it
-              ships: full-screen panel below 480px instead of the floating
-              desktop-sized card. */}
+              ships. Stays a small compact card on mobile too (not
+              fullscreen) — just resized/repositioned so it isn't cut off by
+              the header or the edges of the screen. */}
           <style>{`
             @media (max-width: 480px) {
               .support-chat-window {
-                width: 100vw !important;
-                height: 100vh !important;
-                max-width: 100vw !important;
-                max-height: 100vh !important;
-                top: 0 !important;
-                bottom: 0 !important;
-                right: 0 !important;
-                left: 0 !important;
-                border-radius: 0 !important;
+                width: calc(100vw - 24px) !important;
+                max-width: 360px !important;
+                height: min(520px, calc(100vh - 96px)) !important;
+                max-height: calc(100vh - 96px) !important;
+                bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+                right: calc(12px + env(safe-area-inset-right, 0px)) !important;
+                left: auto !important;
+                top: auto !important;
+                border-radius: 16px !important;
               }
             }
           `}</style>
