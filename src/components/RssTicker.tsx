@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
-import { getRssFeeds, getRssTickerSettings } from "@/firebase/settings";
+import { getRssFeeds } from "@/firebase/settings";
 
 const RSS_CACHE_KEY = "libral_rss_feeds_cache";
 
@@ -18,7 +18,6 @@ export function RssTicker() {
       return [];
     }
   });
-  const [speed, setSpeed] = useState(60);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -37,11 +36,6 @@ export function RssTicker() {
         }
       })
       .catch(() => {});
-    getRssTickerSettings()
-      .then((s: any) => {
-        if (!cancelled) setSpeed(Math.max(10, Math.min(300, Number(s?.speed) || 60)));
-      })
-      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -50,6 +44,15 @@ export function RssTicker() {
   if (feeds.length === 0) return null;
 
   const track = [...feeds, ...feeds];
+  // The admin "speed" setting (in seconds) was tuned for the old horizontal
+  // marquee, where the scroll distance is the full width of every item laid
+  // out side by side — often thousands of pixels. This vertical box only
+  // travels one item's height (36px) per item, a much shorter distance, so
+  // reusing that setting made the movement all but imperceptible (it looked
+  // "stuck" rather than just slow). A fixed, item-count-scaled pace reads as
+  // a normal ticker regardless of what that old setting is configured to.
+  const SECONDS_PER_ITEM = 4;
+  const speed = feeds.length * SECONDS_PER_ITEM;
 
   return (
     <div className="flex items-center gap-3 border-b border-border/60 bg-secondary/60 px-3 py-2 text-sm">
