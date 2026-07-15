@@ -8,6 +8,11 @@ import { SitePopup } from "./SitePopup";
 export function PageLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
+      {/* Stops iOS/mobile rubber-band overscroll past the page's real bottom.
+          This rule kept disappearing when placed in the global index.css
+          (Tailwind's build was dropping it for reasons never fully pinned
+          down), so it's inlined here where it's guaranteed to ship. */}
+      <style>{`html, body { overscroll-behavior-y: none; }`}</style>
       <SiteHeader />
       <RssTicker />
       <main className="flex-1">{children}</main>
