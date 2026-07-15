@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageLayout } from "@/components/PageLayout";
+import LoginGate from "@/components/LoginGate";
+import SimpleChatRoom from "@/components/chat/SimpleChatRoom";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({
@@ -7,7 +9,8 @@ export const Route = createFileRoute("/chat")({
       { title: "צ'אט | מסיבות ליברליות בישראל" },
       {
         name: "description",
-        content: "הצ'אט בשיפוצים ויחזור בקרוב.",
+        content:
+          "צ'אט הקהילה — הצטרפו לשיחה בזמן אמת עם חברי הקהילה במרחב מכבד ובטוח.",
       },
       { property: "og:title", content: "צ'אט | מסיבות ליברליות בישראל" },
       { property: "og:url", content: "/chat" },
@@ -20,11 +23,10 @@ export const Route = createFileRoute("/chat")({
 function ChatRoute() {
   return (
     <PageLayout>
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-2 p-8 text-center">
-        <h1 className="text-2xl font-bold">הצ'אט בשיפוצים</h1>
-        <p className="text-muted-foreground">
-          אנחנו עובדים על שיפור הצ'אט. הוא יחזור בקרוב.
-        </p>
+      <div className="flex min-h-[70vh] flex-col">
+        <LoginGate>
+          <SimpleChatRoom />
+        </LoginGate>
       </div>
     </PageLayout>
   );
