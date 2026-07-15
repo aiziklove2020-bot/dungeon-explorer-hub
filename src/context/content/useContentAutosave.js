@@ -87,6 +87,14 @@ export function useContentAutosave(content, isInitialized) {
 
         await batch.commit();
 
+        // The public pages (About, homepage, etc.) read this same data via
+        // firebase/settings.js's cached getters. Without invalidating here,
+        // a stale in-memory value could keep being served in this same
+        // browser session until it naturally expires, making admin edits
+        // look like they "didn't save" even though Firestore is correct.
+        const { invalidateCache } = await import('../../firebase/dataAccess');
+        await invalidateCache('contentSettings');
+
         previousAutosaveSectionsRef.current = {
           hero: content.hero,
           about: content.about,
