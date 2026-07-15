@@ -279,36 +279,6 @@ function Index() {
           </div>
         </div>
       </section>
-
-      {/* Personal story */}
-      <section className="bg-secondary/40 py-20">
-        <div className="mx-auto max-w-3xl px-4 text-center">
-          <SectionTitle>הפעם הראשונה שלי</SectionTitle>
-          <h3 className="mb-6 mt-8 text-2xl font-bold text-gold">המקום שבו הכל התחיל</h3>
-          <p className="text-lg leading-relaxed text-foreground/80">
-            עמדתי בחוץ כמה דקות טובות, מהוססת, לפני שהעזתי להיכנס. חבר קרוב לחש
-            לי: "פשוט תני לעצמך רגע, בלי לתכנן כלום". ברגע שנכנסתי הבנתי שזו לא
-            מסיבה כמו כל מסיבה שהכרתי — אנשים רוקדים בלי שיפוט, מישהי בלבוש עור
-            מבריק לצד מישהו בחליפה קלאסית, טראנס בחדר אחד ומזרחית סוערת בשני,
-            והכל פשוט זורם. באותו לילה הבנתי שהחופש האמיתי הוא לא לעשות הכול,
-            אלא לדעת שיש מקום בטוח לבחור בו בדיוק מה שמתאים לך.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link
-              to="/blog"
-              className="rounded-full bg-primary px-8 py-3 font-bold text-primary-foreground transition-transform hover:scale-105"
-            >
-              לכל הסיפורים
-            </Link>
-            <Link
-              to="/forum"
-              className="rounded-full border border-border px-8 py-3 font-bold transition-colors hover:border-primary hover:text-primary"
-            >
-              לפורום הקהילה
-            </Link>
-          </div>
-        </div>
-      </section>
     </>
   );
 }
