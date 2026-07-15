@@ -1,13 +1,19 @@
 import type { ReactNode } from "react";
 import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
+import { RssTicker } from "./RssTicker";
+import { BannerStrip } from "./BannerStrip";
+import { SitePopup } from "./SitePopup";
 
 export function PageLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SiteHeader />
+      <RssTicker />
       <main className="flex-1">{children}</main>
+      <BannerStrip />
       <SiteFooter />
+      <SitePopup />
     </div>
   );
 }

@@ -28,6 +28,7 @@ import LiveChatSection from '../components/admin/LiveChatSection';
 import ChatReportsSection from '../components/admin/ChatReportsSection';
 import BlogAdminSection from '../components/admin/BlogAdminSection';
 import SubscriptionsSection from '../components/admin/SubscriptionsSection';
+import SiteDesignSection from '../components/admin/SiteDesignSection';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -226,6 +227,7 @@ const Admin = () => {
         </div>
 
         <div className="space-y-6">
+          {activeSection === 'siteDesign' && <SiteDesignSection showSaved={showSaved} />}
           {activeSection === 'hero'      && <HeroSection showSaved={showSaved} />}
           {activeSection === 'parties'   && <PartiesSection showSaved={showSaved} refreshKey={partiesRefreshKey} />}
           {activeSection === 'about'     && <AboutSection showSaved={showSaved} />}

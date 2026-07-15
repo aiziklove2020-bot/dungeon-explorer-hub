@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Menu, LogOut } from "lucide-react";
 import logoHeart from "@/assets/logo-heart.png";
 import { useForumAuth } from "@/context/ForumAuthContext";
+import { getSiteConfig } from "@/firebase/siteConfig";
 import {
   Sheet,
   SheetContent,
@@ -26,8 +27,21 @@ export const navLinks = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [customLogoUrl, setCustomLogoUrl] = useState("");
   const { forumUser, forumLogout } = useForumAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let cancelled = false;
+    getSiteConfig()
+      .then((cfg) => {
+        if (!cancelled && cfg?.logoUrl) setCustomLogoUrl(cfg.logoUrl);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function handleLogout() {
     forumLogout();
@@ -40,7 +54,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
         <Link to="/" className="flex shrink-0 items-center gap-2">
           <img
-            src={logoHeart}
+            src={customLogoUrl || logoHeart}
             alt="מסיבות ליברליות בישראל"
             className="h-9 w-auto object-contain md:h-11"
           />

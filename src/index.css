@@ -5,6 +5,20 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes rss-marquee {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.rss-marquee-track {
+  animation-name: rss-marquee;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
 @layer base {
   html,
   body {
