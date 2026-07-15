@@ -79,6 +79,11 @@ function About() {
               </div>
             ))}
           </div>
+          <div className="mt-10 rounded-2xl border-2 border-primary bg-primary/10 p-6 text-center">
+            <p className="text-lg font-bold text-primary">
+              חשוב: מי שנרשם דרך האתר חייב לציין בכניסה שהגיע/ה דרך חן ואיציק
+            </p>
+          </div>
         </div>
       </section>
     </>
