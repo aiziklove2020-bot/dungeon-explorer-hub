@@ -64,7 +64,8 @@ const SiteDesignSection = ({ showSaved }) => {
     try {
       const result = await uploadPartyImage(file, bannerId);
       const url = typeof result === 'string' ? result : result.url;
-      setBanners((prev) => prev.map((b) => (b.id === bannerId ? { ...b, imageUrl: url } : b)));
+      const next = banners.map((b) => (b.id === bannerId ? { ...b, imageUrl: url } : b));
+      await saveBanners(next);
     } catch (err) {
       alert('שגיאה בהעלאת תמונת הבאנר: ' + (err?.message || ''));
     } finally {
