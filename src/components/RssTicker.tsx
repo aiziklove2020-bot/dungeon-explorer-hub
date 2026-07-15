@@ -62,10 +62,19 @@ export function RssTicker() {
         {paused ? <Play size={12} /> : <Pause size={12} />}
       </button>
       <div ref={containerRef} className="flex-1 overflow-hidden">
+        <style>{`
+          @keyframes rss-marquee-scroll {
+            from { transform: translateX(0%); }
+            to { transform: translateX(-50%); }
+          }
+        `}</style>
         <div
-          className="rss-marquee-track flex w-max gap-10 whitespace-nowrap"
+          className="flex w-max gap-10 whitespace-nowrap"
           style={{
+            animationName: "rss-marquee-scroll",
             animationDuration: `${speed}s`,
+            animationTimingFunction: "linear",
+            animationIterationCount: "infinite",
             animationPlayState: paused ? "paused" : "running",
           }}
         >
