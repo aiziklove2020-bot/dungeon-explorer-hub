@@ -1,7 +1,7 @@
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageLayout, PageHeader } from "@/components/PageLayout";
-import { ContentProvider, useContent } from "@/context/ContentContext";
-import { LanguageProvider } from "../i18n/LanguageContext";
+import { getContent } from "@/firebase/settings";
 import aboutImg from "@/assets/about.jpg";
 
 export const Route = createFileRoute("/about")({
@@ -26,18 +26,26 @@ export const Route = createFileRoute("/about")({
 function AboutRoute() {
   return (
     <PageLayout>
-      <LanguageProvider>
-        <ContentProvider>
-          <About />
-        </ContentProvider>
-      </LanguageProvider>
+      <About />
     </PageLayout>
   );
 }
 
 function About() {
-  const { content } = useContent();
-  const about = content.about || {};
+  const [about, setAbout] = useState<any>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    getContent()
+      .then((data: any) => {
+        if (!cancelled) setAbout(data?.about || {});
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const infoCards = about.infoCards || [];
 
   return (
