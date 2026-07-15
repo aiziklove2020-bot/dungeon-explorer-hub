@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Trash2, Plus, X } from 'lucide-react';
-import { getSiteConfig, updateLogoUrl, updateBanners, updatePopup } from '../../firebase/siteConfig';
+import { getSiteConfig, updateLogoUrl, updateHeroImageUrl, updateBanners, updatePopup } from '../../firebase/siteConfig';
 import { uploadPartyImage } from '../../firebase/storage';
 
 const emptyBanner = () => ({ id: `banner_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, imageUrl: '', linkUrl: '', enabled: true });
@@ -8,14 +8,17 @@ const emptyBanner = () => ({ id: `banner_${Date.now()}_${Math.random().toString(
 const SiteDesignSection = ({ showSaved }) => {
   const [loading, setLoading] = useState(true);
   const [logoUrl, setLogoUrl] = useState('');
+  const [heroImageUrl, setHeroImageUrl] = useState('');
   const [banners, setBanners] = useState([]);
   const [popup, setPopup] = useState({ enabled: false, title: '', text: '', imageUrl: '', linkUrl: '', linkText: '' });
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingHero, setUploadingHero] = useState(false);
   const [uploadingBannerId, setUploadingBannerId] = useState(null);
 
   useEffect(() => {
     getSiteConfig().then((cfg) => {
       setLogoUrl(cfg.logoUrl || '');
+      setHeroImageUrl(cfg.heroImageUrl || '');
       setBanners(cfg.banners || []);
       setPopup(cfg.popup || popup);
       setLoading(false);
@@ -36,6 +39,22 @@ const SiteDesignSection = ({ showSaved }) => {
       alert('שגיאה בהעלאת הלוגו: ' + (err?.message || ''));
     } finally {
       setUploadingLogo(false);
+    }
+  };
+
+  const handleHeroFile = async (file) => {
+    if (!file) return;
+    setUploadingHero(true);
+    try {
+      const result = await uploadPartyImage(file, 'site-hero');
+      const url = typeof result === 'string' ? result : result.url;
+      setHeroImageUrl(url);
+      await updateHeroImageUrl(url);
+      showSaved?.();
+    } catch (err) {
+      alert('שגיאה בהעלאת תמונת הבאנר הראשי: ' + (err?.message || ''));
+    } finally {
+      setUploadingHero(false);
     }
   };
 
@@ -69,15 +88,35 @@ const SiteDesignSection = ({ showSaved }) => {
 
   return (
     <div className="space-y-8">
-      {/* Logo */}
+      {/* Hero banner */}
       <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-4">
-        <h3 className="text-xl font-bold">לוגו האתר</h3>
+        <h3 className="text-xl font-bold">תמונת הבאנר הראשי (דף הבית)</h3>
+        <p className="text-xs text-zinc-500">זו התמונה הגדולה בראש דף הבית (עם הכותרת "מסיבות ליברליות בישראל").</p>
+        {heroImageUrl && (
+          <img src={heroImageUrl} alt="באנר ראשי" className="w-full max-w-md rounded-xl object-cover bg-black/40" />
+        )}
+        <label className="inline-block cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl text-sm">
+          {uploadingHero ? 'מעלה...' : 'העלה תמונת באנר חדשה'}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            disabled={uploadingHero}
+            onChange={(e) => handleHeroFile(e.target.files?.[0])}
+          />
+        </label>
+      </div>
+
+      {/* Small header logo */}
+      <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-4">
+        <h3 className="text-xl font-bold">לוגו קטן (ליד שם האתר, בכותרת העליונה)</h3>
+        <p className="text-xs text-zinc-500">זה הלב הקטן שמופיע למעלה ליד שם האתר בכל עמוד — לא תמונת הבאנר הראשי.</p>
         <div className="flex items-center gap-4">
           {logoUrl && (
             <img src={logoUrl} alt="לוגו" className="h-16 w-auto object-contain rounded bg-black/40 p-2" />
           )}
           <label className="cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl text-sm">
-            {uploadingLogo ? 'מעלה...' : 'העלה לוגו חדש'}
+            {uploadingLogo ? 'מעלה...' : 'העלה לוגו קטן חדש'}
             <input
               type="file"
               accept="image/*"
@@ -87,7 +126,6 @@ const SiteDesignSection = ({ showSaved }) => {
             />
           </label>
         </div>
-        <p className="text-xs text-zinc-500">הלוגו יוחלף בכל האתר (כותרת עליונה) מיד לאחר ההעלאה.</p>
       </div>
 
       {/* Banners */}

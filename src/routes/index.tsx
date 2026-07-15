@@ -7,6 +7,7 @@ import { PageLayout } from "@/components/PageLayout";
 import { getActiveParties, deleteExpiredParties } from "@/firebase/parties";
 import { getPartySettings } from "@/firebase/partySettings";
 import { getSocialLinks } from "@/firebase/settings";
+import { getSiteConfig } from "@/firebase/siteConfig";
 import { isPartyExpiredByDate } from "../../shared/partyExpiry.js";
 
 const SOCIAL_ICONS = [
@@ -108,6 +109,7 @@ function formatEventDate(date: Date) {
 function Index() {
   const [parties, setParties] = useState<any[] | null>(null);
   const [socialLinks, setSocialLinks] = useState<Record<string, string> | null>(null);
+  const [customHeroImg, setCustomHeroImg] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -135,6 +137,11 @@ function Index() {
       .catch(() => {
         if (!cancelled) setSocialLinks({});
       });
+    getSiteConfig()
+      .then((cfg) => {
+        if (!cancelled && cfg?.heroImageUrl) setCustomHeroImg(cfg.heroImageUrl);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -145,7 +152,7 @@ function Index() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-background">
         <img
-          src={heroImg}
+          src={customHeroImg || heroImg}
           alt="מסיבות ליברליות בישראל"
           width={1600}
           height={639}
