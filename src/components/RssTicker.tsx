@@ -52,7 +52,10 @@ export function RssTicker() {
   const track = [...feeds, ...feeds];
 
   return (
-    <div className="flex items-center gap-2 border-b border-border/60 bg-secondary/60 px-3 py-2 text-sm">
+    <div className="flex items-center gap-3 border-b border-border/60 bg-secondary/60 px-3 py-2 text-sm">
+      <span className="shrink-0 rounded-md bg-primary px-2 py-1 text-xs font-black tracking-wide text-primary-foreground">
+        חדשות
+      </span>
       <button
         type="button"
         onClick={() => setPaused((p) => !p)}
