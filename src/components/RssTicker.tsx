@@ -53,7 +53,7 @@ export function RssTicker() {
 
   return (
     <div className="flex items-center gap-3 border-b border-border/60 bg-secondary/60 px-3 py-2 text-sm">
-      <span className="shrink-0 rounded-md bg-primary px-2 py-1 text-xs font-black tracking-wide text-primary-foreground">
+      <span className="flex shrink-0 items-center justify-center rounded-md bg-primary px-3 py-2 text-xs font-black tracking-wide text-primary-foreground">
         חדשות
       </span>
       <button
@@ -64,17 +64,16 @@ export function RssTicker() {
       >
         {paused ? <Play size={12} /> : <Pause size={12} />}
       </button>
-      <div ref={containerRef} className="flex-1 overflow-hidden">
+      <div ref={containerRef} className="h-9 flex-1 overflow-hidden">
         <style>{`
-          @keyframes rss-marquee-scroll {
-            from { transform: translateX(0%); }
-            to { transform: translateX(-50%); }
+          @keyframes rss-vertical-scroll {
+            from { transform: translateY(0%); }
+            to { transform: translateY(-50%); }
           }
         `}</style>
         <div
-          className="flex w-max gap-10 whitespace-nowrap"
           style={{
-            animationName: "rss-marquee-scroll",
+            animationName: "rss-vertical-scroll",
             animationDuration: `${speed}s`,
             animationTimingFunction: "linear",
             animationIterationCount: "infinite",
@@ -82,10 +81,9 @@ export function RssTicker() {
           }}
         >
           {track.map((feed, i) => (
-            <span key={`${feed.id}-${i}`} className="flex items-center gap-3 text-foreground/80">
+            <div key={`${feed.id}-${i}`} className="flex h-9 items-center text-foreground/80">
               {feed.text}
-              <span aria-hidden="true" className="text-primary">•</span>
-            </span>
+            </div>
           ))}
         </div>
       </div>
