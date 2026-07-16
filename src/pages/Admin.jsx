@@ -21,7 +21,6 @@ import StoreSection from '../components/admin/StoreSection';
 import WorkshopsSection from '../components/admin/WorkshopsSection';
 import DBLoggerSection from '../components/admin/DBLoggerSection';
 import DBSection from '../components/admin/DBSection';
-import GitHistorySection from '../components/admin/GitHistorySection';
 import ForumAdminSection from '../components/admin/ForumAdminSection';
 import LiveChatSection from '../components/admin/LiveChatSection';
 import ChatReportsSection from '../components/admin/ChatReportsSection';
@@ -246,7 +245,6 @@ const Admin = () => {
           {activeSection === 'advertisers' && <AdvertisersSection showSaved={showSaved} />}
           {activeSection === 'rss'       && <RssSection showSaved={showSaved} />}
           {activeSection === 'telegram'  && <TelegramSection showSaved={showSaved} />}
-          {activeSection === 'gitHistory' && <GitHistorySection />}
         </div>
       </div>
     </div>
