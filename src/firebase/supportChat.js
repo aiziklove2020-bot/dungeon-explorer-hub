@@ -25,6 +25,12 @@ const getOrCreateSessionId = () => {
 
 export const getSessionId = getOrCreateSessionId;
 
+/** Forget the local session so the next chat open starts a fresh conversation. */
+export const clearSessionId = () => {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('support_chat_session');
+};
+
 export const sendSupportMessage = async (text, sessionId = getOrCreateSessionId()) => {
   if (!text || !text.trim()) return null;
   const messagesRef = collection(db, SUPPORT_CHAT_COLLECTION, sessionId, 'messages');

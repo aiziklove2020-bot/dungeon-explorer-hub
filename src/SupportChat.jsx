@@ -1,8 +1,8 @@
 import { useState, useEffect, useId, useRef } from 'react';
-import { X, MessageCircle, Send, Trash2 } from 'lucide-react';
+import { X, MessageCircle, Send, Trash2, LogOut } from 'lucide-react';
 import { useLanguage } from './i18n/LanguageContext';
 import { getSupportChatSettings } from './firebase/settings';
-import { sendSupportMessage, sendSupportToTelegram, subscribeToSupportMessages, fetchSupportMessages, getSessionId, deleteSupportChatSession } from './firebase/supportChat';
+import { sendSupportMessage, sendSupportToTelegram, subscribeToSupportMessages, fetchSupportMessages, getSessionId, deleteSupportChatSession, clearSessionId } from './firebase/supportChat';
 import './SupportChat.css';
 
 const DISPLAY_NAME_KEY = 'support_chat_name';
@@ -161,6 +161,20 @@ const SupportChat = ({ initialSettings = null }) => {
     }
   };
 
+  /** Leave the chat without deleting the conversation — just forget the local
+   *  name + session so the next open starts fresh (e.g. for a different person
+   *  on a shared device). Messages stay in Firestore for the admin/Telegram side. */
+  const handleDisconnect = () => {
+    if (!window.confirm(t('supportChat.disconnectConfirm') || 'להתנתק מהצ\'אט?')) return;
+    clearSessionId();
+    clearStoredName();
+    setMessages([]);
+    setInput('');
+    setError(null);
+    setIsOpen(false);
+    setIsMinimized(false);
+  };
+
   // Once settings are loaded and chat is explicitly disabled, hide completely
   if (enabled === false) return null;
 
@@ -229,6 +243,17 @@ const SupportChat = ({ initialSettings = null }) => {
               </div>
             </div>
             <div className="support-chat-header-actions">
+              {hasName && (
+                <button
+                  type="button"
+                  className="support-chat-disconnect"
+                  onClick={handleDisconnect}
+                  aria-label={t('supportChat.disconnect') || 'התנתק'}
+                  title={t('supportChat.disconnect') || 'התנתק'}
+                >
+                  <LogOut size={18} aria-hidden="true" />
+                </button>
+              )}
               <button
                 type="button"
                 className="support-chat-delete"

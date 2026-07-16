@@ -35,6 +35,8 @@ export default {
   'supportChat.deleteChat': 'מחק צ\'אט',
   'supportChat.deleteConfirm': 'למחוק את כל ההודעות בצ\'אט זה?',
   'supportChat.deleteError': 'מחיקת הצ\'אט נכשלה',
+  'supportChat.disconnect': 'התנתק',
+  'supportChat.disconnectConfirm': 'להתנתק מהצ\'אט? ההודעות יישארו שמורות, אבל בפתיחה הבאה תתבקש/י להזין שם מחדש.',
   'supportChat.displayNamePlaceholder': 'שם',
   'supportChat.saveName': 'שמור',
   'supportChat.nameRequiredTitle': 'הזן את שמך כדי להתחיל את הצ\'אט',
