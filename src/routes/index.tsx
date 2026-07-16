@@ -20,6 +20,10 @@ const SOCIAL_ICONS = [
 ] as const;
 
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    const cfg = await getSiteConfig().catch(() => null);
+    return { heroImageUrl: cfg?.heroImageUrl || "" };
+  },
   head: () => ({
     meta: [
       { title: "מסיבות ליברליות בישראל" },
@@ -96,9 +100,10 @@ function EventDescription({ text }: { text: string }) {
 }
 
 function IndexRoute() {
+  const { heroImageUrl } = Route.useLoaderData();
   return (
     <PageLayout>
-      <Index />
+      <Index heroImageUrl={heroImageUrl} />
     </PageLayout>
   );
 }
@@ -107,10 +112,10 @@ function formatEventDate(date: Date) {
   return `${date.getDate()}.${date.getMonth() + 1}`;
 }
 
-function Index() {
+function Index({ heroImageUrl }: { heroImageUrl?: string }) {
   const [parties, setParties] = useState<any[] | null>(null);
   const [socialLinks, setSocialLinks] = useState<Record<string, string> | null>(null);
-  const [customHeroImg, setCustomHeroImg] = useState("");
+  const customHeroImg = heroImageUrl || "";
 
   useEffect(() => {
     let cancelled = false;
@@ -138,11 +143,6 @@ function Index() {
       .catch(() => {
         if (!cancelled) setSocialLinks({});
       });
-    getSiteConfig()
-      .then((cfg) => {
-        if (!cancelled && cfg?.heroImageUrl) setCustomHeroImg(cfg.heroImageUrl);
-      })
-      .catch(() => {});
     return () => {
       cancelled = true;
     };
