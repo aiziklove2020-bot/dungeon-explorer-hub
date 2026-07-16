@@ -37,11 +37,22 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   });
 }
 
+// grop.libralparty.net serves the intro-post funnel at its root — rewritten
+// here (rather than relying on vercel.json's host-based rewrite, which
+// didn't take effect) so it's guaranteed to work regardless of platform
+// rewrite support.
+function rewriteIntroSubdomain(request: Request): Request {
+  const url = new URL(request.url);
+  if (url.hostname !== "grop.libralparty.net" || url.pathname !== "/") return request;
+  url.pathname = "/intro";
+  return new Request(url, request);
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      const response = await handler.fetch(rewriteIntroSubdomain(request), env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);
