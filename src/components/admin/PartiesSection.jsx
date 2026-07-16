@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RotateCcw, Plus, Trash2, CloudOff, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { RotateCcw, Plus, Trash2, Clock, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminLoader from './AdminLoader';
 import { getActiveParties, createParty, updateParty, deleteParty, adminRemoveUserFromParty, recomputeAllPartiesExpiration, deleteExpiredParties } from '../../firebase/parties';
@@ -441,15 +441,6 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                         {party.createdByType === 'advertiser' && (
                           <span className="px-2 py-1 rounded text-xs font-bold bg-indigo-600">
                             פורסם ע"י מפרסם
-                          </span>
-                        )}
-                        {party.needsPublish === true ? (
-                          <span className="flex items-center gap-1 px-2 py-1 rounded text-xs font-bold bg-orange-500/20 text-orange-400 border border-orange-500/40">
-                            <CloudOff size={11} /> לא פורסם
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 px-2 py-1 rounded text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/40">
-                            <CheckCircle2 size={11} /> פורסם
                           </span>
                         )}
                       </div>
