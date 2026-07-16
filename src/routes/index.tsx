@@ -167,17 +167,17 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
             הרשמה למסיבה
           </Link>
           {socialLinks && (
-            <div className="mt-5 flex items-center justify-center gap-4">
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
               {SOCIAL_ICONS.filter(({ key }) => socialLinks[key]).map(({ key, Icon, label }) => (
                 <a
                   key={key}
                   href={socialLinks[key]}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={label}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground/80 transition-colors hover:border-primary hover:text-primary"
+                  className="flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-bold text-foreground/80 transition-colors hover:border-primary hover:text-primary"
                 >
-                  <Icon size={20} />
+                  <Icon size={18} />
+                  <span>{label}</span>
                 </a>
               ))}
             </div>
