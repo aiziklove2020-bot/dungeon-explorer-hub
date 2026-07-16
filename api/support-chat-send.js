@@ -192,7 +192,7 @@ export default async function handler(req, res) {
       displayName && typeof displayName === 'string' && displayName.trim()
         ? ` - ${displayName.trim()}`
         : '';
-    const msg = `💬 Support${namePart} [${sessionId.trim()}]\n\n${trimmed}`;
+    const msg = `💬 תמיכה${namePart}\n\n${trimmed}`;
 
     const tgResp = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
