@@ -4,8 +4,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import { getTelegramSettings, updateTelegramSettings } from '../../firebase/settings';
 import { getRegistrationSettings } from '../../firebase/settings';
 import { getBotInfo, MESSAGE_KEYS, REGISTRATION_TYPE_KEYS, BALANCE_PUBLISH_TYPE_KEYS, VARIABLES_REFERENCE, buildMessagePreview, sendTelegramNotification } from '../../firebase/telegram';
-import { Plus, Trash2, Edit2, ChevronDown, ChevronRight, Send, Eye, MessageCircle, Mail } from 'lucide-react';
-import SupportChatSection from './SupportChatSection';
+import { Plus, Trash2, Edit2, ChevronDown, ChevronRight, Send, Eye, Mail } from 'lucide-react';
 
 const BUILT_IN_MESSAGE_KEYS = [MESSAGE_KEYS.REGISTRATION, MESSAGE_KEYS.BALANCE_PUBLISH, MESSAGE_KEYS.NEW_PARTY, MESSAGE_KEYS.NEW_EXTERNAL_PARTY, MESSAGE_KEYS.NEW_STORE_ITEM, MESSAGE_KEYS.NEW_STORE_ORDER, MESSAGE_KEYS.NEW_WORKSHOP, MESSAGE_KEYS.NEW_WORKSHOP_REGISTRATION];
 
@@ -375,7 +374,7 @@ const TelegramSection = ({ showSaved }) => {
       </p>
 
       <div className="flex flex-wrap gap-2 items-center border-b border-zinc-800 pb-3">
-        {['bots', 'channels', 'messages', 'sendMessage', 'supportChat'].map((panel) => (
+        {['bots', 'channels', 'messages', 'sendMessage'].map((panel) => (
           <button
             key={panel}
             type="button"
@@ -393,15 +392,9 @@ const TelegramSection = ({ showSaved }) => {
                 {t('admin.telegram.sendMessage')}
               </>
             )}
-            {panel === 'supportChat' && (
-              <>
-                <MessageCircle size={16} />
-                {t('supportChat.adminTitle')}
-              </>
-            )}
           </button>
         ))}
-        {activePanel !== 'supportChat' && activePanel !== 'sendMessage' && (
+        {activePanel !== 'sendMessage' && (
           <button
             type="button"
             onClick={() => handleSave({ preventDefault: () => {} })}
@@ -1007,11 +1000,7 @@ const TelegramSection = ({ showSaved }) => {
         </div>
       )}
 
-      {activePanel === 'supportChat' && (
-        <SupportChatSection showSaved={showSaved} />
-      )}
-
-      {activePanel !== 'supportChat' && activePanel !== 'sendMessage' && (
+      {activePanel !== 'sendMessage' && (
         <form onSubmit={handleSave} className="pt-4 border-t border-zinc-800">
           <button type="submit" disabled={saving} className="bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
             <Send size={16} /> {saving ? t('saving') : t('save')}
