@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Libral Party - פוסט היכרות</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --primary-red: #990000;
+            --bright-red: #ff1a1a;
+            --dark-bg: #030303;
+            --card-bg: #080808;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #f0f0f0;
+            font-family: 'Assistant', sans-serif;
+            background-image:
+                radial-gradient(circle at 10% 10%, #200505 0%, transparent 30%),
+                radial-gradient(circle at 90% 90%, #200505 0%, transparent 30%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .app {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 16px calc(100px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .header {
+            text-align: center;
+            padding: 36px 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 24px;
+        }
+        .logo {
+            font-size: 44px; font-weight: 900; letter-spacing: -1px;
+            text-transform: uppercase; color: #fff; font-style: italic;
+            text-shadow: 0 0 10px rgba(255,26,26,0.5); line-height: 1; margin-bottom: 8px;
+        }
+        .logo span { color: #e00; }
+        .logo-sub { color: #555; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
+
+        .progress-bar { height: 3px; background: #222; border-radius: 2px; overflow: hidden; margin-bottom: 28px; }
+        .progress-fill {
+            height: 100%; background: var(--bright-red);
+            box-shadow: 0 0 10px var(--bright-red); transition: width 0.5s ease; width: 33%;
+        }
+
+        .step { display: none; }
+        .step.active { display: block; animation: fadeUp .35s ease; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-title { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+        .step-sub {
+            font-size: 10px; font-weight: 700; color: var(--bright-red);
+            text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 20px;
+        }
+
+        .rule-card {
+            background: rgba(255,255,255,0.02); border-right: 3px solid var(--primary-red);
+            padding: 14px 14px 14px 10px; border-radius: 10px; margin-bottom: 10px;
+        }
+        .rule-card.warning { border-right-color: #ff9900; background: rgba(255,153,0,0.05); }
+        .rule-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .rule-title { font-size: 11px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.08em; }
+        .rule-body { font-size: 13px; color: #777; line-height: 1.6; }
+        .rule-body .red { color: #cc3333; font-weight: 700; }
+        .rule-body .orange { color: #e67e00; font-weight: 700; text-decoration: underline; }
+
+        .agree-list { margin: 22px 0 28px; display: flex; flex-direction: column; gap: 10px; }
+        .agree-row {
+            display: flex; align-items: flex-start; gap: 14px;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px; padding: 14px 16px; cursor: pointer;
+            -webkit-user-select: none; user-select: none;
+        }
+        .check-box {
+            width: 24px; height: 24px; border: 2px solid #333; border-radius: 6px;
+            background: #000; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .2s; margin-top: 1px;
+        }
+        .check-mark { color: #fff; font-size: 15px; font-weight: 900; display: none; line-height: 1; }
+        .agree-text { font-size: 13.5px; color: #ccc; line-height: 1.5; }
+
+        .field-label {
+            display: block; font-size: 10px; font-weight: 800; color: var(--bright-red);
+            text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px;
+        }
+        textarea {
+            width: 100%; background: #000; border: 1px solid #222; border-radius: 14px;
+            color: #fff; font-family: 'Assistant', sans-serif;
+            font-size: 15px; line-height: 1.6; padding: 16px; resize: none; outline: none;
+            -webkit-appearance: none; transition: border-color .2s, box-shadow .2s;
+        }
+        textarea:focus { border-color: var(--bright-red); box-shadow: 0 0 0 3px rgba(255,26,26,0.12); }
+        textarea::placeholder { color: #444; }
+
+        .tg-input-wrap { position: relative; }
+        .tg-at {
+            position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+            color: #555; font-size: 16px; font-weight: 700; pointer-events: none;
+        }
+        .text-input {
+            width: 100%; background: #000; border: 1px solid #222; border-radius: 14px;
+            color: #fff; font-family: 'Assistant', sans-serif;
+            font-size: 15px; line-height: 1.6; padding: 16px 36px 16px 16px;
+            outline: none; -webkit-appearance: none;
+            transition: border-color .2s, box-shadow .2s;
+            direction: ltr; text-align: right;
+        }
+        .text-input:focus { border-color: var(--bright-red); box-shadow: 0 0 0 3px rgba(255,26,26,0.12); }
+        .text-input::placeholder { color: #444; }
+        .text-input.error { border-color: #ff4444; box-shadow: 0 0 0 3px rgba(255,68,68,0.12); }
+        .field-error { font-size: 11px; color: #ff4444; margin-top: 6px; display: none; }
+        .field-error.visible { display: block; }
+        .field-hint { font-size: 11px; color: #444; margin-top: 6px; }
+
+        .select-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .sel-btn {
+            background: #000; border: 1px solid #333; border-radius: 10px;
+            color: #777; font-family: 'Assistant', sans-serif;
+            font-size: 13px; font-weight: 700; padding: 10px 16px;
+            cursor: pointer; transition: all .2s; user-select: none;
+        }
+        .sel-btn.active { background: rgba(153,0,0,0.2); border-color: var(--bright-red); color: #fff; }
+
+        .file-pick {
+            background: #000; border: 1px solid #222; border-radius: 14px;
+            padding: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+        }
+        .file-name { font-size: 13px; color: #555; }
+        .file-name.selected { color: #fff; }
+        .file-icon {
+            width: 36px; height: 36px; background: rgba(153,0,0,0.15);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+        }
+        .file-icon svg { width: 18px; height: 18px; stroke: var(--bright-red); }
+        .field-group { margin-bottom: 20px; }
+
+        .step2-title { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+        .step-num {
+            width: 30px; height: 30px; border-radius: 50%;
+            background: rgba(153,0,0,0.2); border: 1px solid rgba(153,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: #fff; font-weight: 700; flex-shrink: 0;
+        }
+
+        .bottom-bar {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px;
+            background: linear-gradient(to top, #030303 55%, transparent);
+            padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+            z-index: 99;
+        }
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #990000 0%, #440000 100%);
+            border: 1px solid rgba(255,26,26,0.3); border-radius: 14px; color: #fff;
+            font-family: 'Assistant', sans-serif; font-size: 17px; font-weight: 800;
+            letter-spacing: 0.12em; text-transform: uppercase; padding: 18px; cursor: pointer;
+            transition: all .2s; -webkit-appearance: none; outline: none; display: block;
+        }
+        .btn-primary:active:not(:disabled) { transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.2; filter: grayscale(1); }
+        .btn-back {
+            background: none; border: none; color: #555;
+            font-family: 'Assistant', sans-serif; font-size: 12px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            cursor: pointer; padding: 10px 0 0; display: none; width: 100%; text-align: center;
+        }
+
+        .success-wrap { text-align: center; padding: 20px 0 40px; }
+        .success-icon {
+            width: 80px; height: 80px; border-radius: 50%; border: 1px solid var(--bright-red);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px; box-shadow: 0 0 24px rgba(153,0,0,0.4);
+            font-size: 38px; color: var(--bright-red); font-weight: 900;
+        }
+        .success-title { font-size: 30px; font-weight: 800; color: #fff; margin-bottom: 16px; }
+        .success-box {
+            background: rgba(153,0,0,0.06); border: 1px solid rgba(153,0,0,0.2);
+            border-radius: 18px; padding: 20px; font-size: 14px; color: #aaa; line-height: 1.8;
+            margin-bottom: 32px; text-align: right;
+        }
+        .success-box strong { color: #e04444; }
+        .tg-btn {
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            background: linear-gradient(135deg, #ff1a1a 0%, #990000 100%);
+            color: #fff; border-radius: 18px; width: 100%; padding: 22px 28px;
+            font-family: 'Assistant', sans-serif; font-size: 18px; font-weight: 800;
+            text-decoration: none; text-transform: uppercase; letter-spacing: 0.1em;
+            transition: all .2s; border: 1px solid rgba(255,100,100,0.4);
+            box-shadow: 0 0 30px rgba(255,26,26,0.4), 0 0 60px rgba(153,0,0,0.2);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(255,26,26,0.4), 0 0 60px rgba(153,0,0,0.2); }
+            50%       { box-shadow: 0 0 45px rgba(255,26,26,0.7), 0 0 80px rgba(153,0,0,0.4); }
+        }
+        .tg-btn:active { transform: scale(0.97); }
+        .tg-btn svg { width: 24px; height: 24px; fill: currentColor; flex-shrink: 0; }
+        .submit-error { font-size: 13px; color: #ff4444; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <div class="header">
+        <div class="logo">Libral<span>Party</span></div>
+        <div class="logo-sub">פוסט היכרות לקהילה שלנו</div>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+    <!-- STEP 1 -->
+    <div class="step active" id="step1">
+        <div class="step-title">תקנון הקהילה</div>
+        <div class="step-sub">חובה לקרוא ולאשר לפני המשך</div>
+        <div class="rule-card">
+            <div class="rule-head"><span>🆔</span><span class="rule-title">זהות ופרטיות</span></div>
+            <p class="rule-body">חל איסור מוחלט על חשיפת אדם בשמו המלא. התייחסות לחברים תהיה אך ורק בכינוי שלהם בקבוצה. <span class="red">אין להוציא אף חבר מהארון בשום צורה.</span></p>
+        </div>
+        <div class="rule-card">
+            <div class="rule-head"><span>📩</span><span class="rule-title">פניות בפרטי</span></div>
+            <p class="rule-body">אין לפנות לחבר/ה בפרטי (DM) ללא קבלת אישור מפורש ומוסכם בשיח הראשי בתוך הצ'אט של הקהילה.</p>
+        </div>
+        <div class="rule-card warning">
+            <div class="rule-head"><span>🔞</span><span class="rule-title">מדיניות עירום</span></div>
+            <p class="rule-body">עירום מלא מותר, אך <span class="orange">חובה להשתמש באפשרות הטשטוש של טלגרם (Hidden Media)</span>. פוסטים חשופים ללא הגנה יימחקו מיידית.</p>
+        </div>
+        <div class="rule-card">
+            <div class="rule-head"><span>🤐</span><span class="rule-title">דיסקרטיות מוחלטת</span></div>
+            <p class="rule-body">מה שקורה בקהילה נשאר בקהילה. צילום מסך או הקלטה יגררו הרחקה לצמיתות ללא אזהרה.</p>
+        </div>
+        <div class="agree-list">
+            <div class="agree-row" id="row1">
+                <div class="check-box" id="box1"><span class="check-mark" id="mark1">✓</span></div>
+                <span class="agree-text">אני מתחייב/ת לשמור על אנונימיות החברים ולא לפנות בפרטי ללא אישור</span>
+            </div>
+            <div class="agree-row" id="row2">
+                <div class="check-box" id="box2"><span class="check-mark" id="mark2">✓</span></div>
+                <span class="agree-text">אני מצהיר/ה שמלאו לי 18 שנים</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step2">
+        <div class="step2-title"><span class="step-num">2</span>הפוסט שלך</div>
+        <div class="step-sub" style="margin-right:40px">ספר/י על העדפות, גבולות ומי את/ה.</div>
+
+        <div class="field-group">
+            <label class="field-label">👤 שם משתמש בטלגרם *</label>
+            <div class="tg-input-wrap">
+                <span class="tg-at">@</span>
+                <input type="text" class="text-input" id="tgUsername" placeholder="username"
+                    autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            </div>
+            <div class="field-error" id="tgError">שם משתמש בטלגרם הוא שדה חובה</div>
+            <div class="field-hint">שם המשתמש שלך בטלגרם, ללא @ — חובה למילוי</div>
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">💬 ספר/י על עצמך *</label>
+            <textarea id="fieldAbout" rows="4" placeholder="קצת עליך, מה מחפש/ת..."></textarea>
+            <div class="field-error" id="aboutError">שדה חובה</div>
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">📷 העלאת תמונה</label>
+            <input type="file" id="photoInput" accept="image/*" style="display:none">
+            <div class="file-pick" id="filePick">
+                <span class="file-name" id="fileName">לחץ/י לבחירת קובץ</span>
+                <div class="file-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">😊 שם / כינוי *</label>
+            <input type="text" class="text-input" id="fieldName" placeholder="איך לקרוא לך?">
+            <div class="field-error" id="nameError">שדה חובה</div>
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">🔞 גיל *</label>
+            <input type="number" class="text-input" id="fieldAge" placeholder="גיל" min="18" max="99">
+            <div class="field-error" id="ageError">שדה חובה (18+)</div>
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">🎭 הצד שלי *</label>
+            <div class="select-group" id="sideSelect">
+                <div class="sel-btn" data-val="שולט">שולט</div>
+                <div class="sel-btn" data-val="נשלט">נשלט</div>
+                <div class="sel-btn" data-val="נשלטת">נשלטת</div>
+                <div class="sel-btn" data-val="סוויץ׳">סוויץ׳</div>
+                <div class="sel-btn" data-val="עדיין מגלה">עדיין מגלה</div>
+            </div>
+            <div class="field-error" id="sideError">שדה חובה</div>
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">🔗 סטטוס</label>
+            <div class="select-group" id="statusSelect">
+                <div class="sel-btn" data-val="פנוי/ה">פנוי/ה</div>
+                <div class="sel-btn" data-val="בקשר">בקשר</div>
+                <div class="sel-btn" data-val="מורכב">מורכב</div>
+            </div>
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">⛓️ ניסיון</label>
+            <div class="select-group" id="expSelect">
+                <div class="sel-btn" data-val="מתחיל/ה">מתחיל/ה</div>
+                <div class="sel-btn" data-val="בינוני">בינוני</div>
+                <div class="sel-btn" data-val="מנוסה">מנוסה</div>
+            </div>
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">❌ גבולות אדומים</label>
+            <input type="text" class="text-input" id="fieldLimits" placeholder="מה הם הגבולות שלך?">
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">🎯 מטרת הכניסה לקבוצה</label>
+            <input type="text" class="text-input" id="fieldGoal" placeholder="חברויות, קשר, סקרנות...">
+        </div>
+
+        <div class="submit-error" id="submitError"></div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step3">
+        <div class="success-wrap">
+            <div class="success-icon">✓</div>
+            <div class="success-title">נשלח לאישור</div>
+            <div class="success-box">
+                הפוסט התקבל במערכת.<br>
+                <strong>לאחר שתלחץ על הכפתור למטה ותיכנס לקבוצה, עליך להמתין לאישור מנהל.</strong><br>
+                המנהלים יבחנו את הפוסט ויפרסמו אותו במידה והוא עומד בתקנון.
+            </div>
+            <a href="https://t.me/+C2o1zdKnal82YTQ0" target="_blank" class="tg-btn">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.39.52-.46-.01-1.33-.26-1.98-.48-.8-.27-1.43-.42-1.37-.89.03-.25.38-.51 1.03-.78 4.04-1.75 6.73-2.91 8.07-3.48 3.84-1.6 4.63-1.88 5.15-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.13-.03.2z"/></svg>
+                לחץ כאן לכניסה לקבוצה ←
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<div class="bottom-bar" id="bottomBar">
+    <button class="btn-primary" id="mainBtn" disabled>המשך לכתיבת הפוסט</button>
+    <button class="btn-back" id="backBtn">חזרה</button>
+</div>
+
+<script>
+    /* אין טוקן טלגרם כאן — התמונה עולה ישירות ל-Cloudinary (unsigned preset,
+       זהה למה שכבר בשימוש פומבי באתר הראשי), והשליחה לטלגרם עוברת דרך /api/send
+       שמחזיק את טוקן הבוט בצד השרת בלבד. */
+    const CLOUDINARY_CLOUD_NAME = 'dya5cymnl';
+    const CLOUDINARY_UPLOAD_PRESET = 'TBDSM-ING';
+
+    let currentStep = 1;
+    const checked = { r1: false, r2: false };
+    const selections = { side: '', status: '', exp: '' };
+
+    function setupCheck(rowId, boxId, markId, key) {
+        document.getElementById(rowId).addEventListener('click', function() {
+            checked[key] = !checked[key];
+            const box = document.getElementById(boxId);
+            const mark = document.getElementById(markId);
+            box.style.background = checked[key] ? '#990000' : '#000';
+            box.style.borderColor = checked[key] ? '#ff1a1a' : '#333';
+            mark.style.display = checked[key] ? 'block' : 'none';
+            document.getElementById('mainBtn').disabled = !(checked.r1 && checked.r2);
+        });
+    }
+    setupCheck('row1','box1','mark1','r1');
+    setupCheck('row2','box2','mark2','r2');
+
+    function setupSelect(groupId, key) {
+        document.getElementById(groupId).querySelectorAll('.sel-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById(groupId).querySelectorAll('.sel-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                selections[key] = this.dataset.val;
+            });
+        });
+    }
+    setupSelect('sideSelect', 'side');
+    setupSelect('statusSelect', 'status');
+    setupSelect('expSelect', 'exp');
+
+    document.getElementById('filePick').addEventListener('click', () => document.getElementById('photoInput').click());
+    document.getElementById('photoInput').addEventListener('change', function(e) {
+        if (e.target.files[0]) {
+            document.getElementById('fileName').textContent = e.target.files[0].name;
+            document.getElementById('fileName').classList.add('selected');
+        }
+    });
+    document.getElementById('tgUsername').addEventListener('input', function() {
+        this.value = this.value.replace(/^@+/, '').replace(/\s/g, '');
+        document.getElementById('tgError').classList.remove('visible');
+        this.classList.remove('error');
+    });
+
+    document.getElementById('mainBtn').addEventListener('click', function() {
+        if (currentStep === 1) goStep(2);
+        else if (currentStep === 2) submitForm();
+    });
+    document.getElementById('backBtn').addEventListener('click', function() {
+        if (currentStep === 2) goStep(1);
+    });
+
+    function goStep(n) {
+        document.getElementById('step' + currentStep).classList.remove('active');
+        document.getElementById('step' + n).classList.add('active');
+        currentStep = n;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const fills = ['','33%','66%','100%'];
+        document.getElementById('progressFill').style.width = fills[n];
+        if (n === 1) {
+            document.getElementById('mainBtn').textContent = 'המשך לכתיבת הפוסט';
+            document.getElementById('mainBtn').disabled = !(checked.r1 && checked.r2);
+            document.getElementById('backBtn').style.display = 'none';
+        } else if (n === 2) {
+            document.getElementById('mainBtn').textContent = 'שלח לאישור';
+            document.getElementById('mainBtn').disabled = false;
+            document.getElementById('backBtn').style.display = 'block';
+        } else if (n === 3) {
+            document.getElementById('bottomBar').style.display = 'none';
+        }
+    }
+
+    function showErr(id, msg) {
+        const el = document.getElementById(id);
+        if (msg) el.textContent = msg;
+        el.classList.add('visible');
+    }
+
+    async function uploadToCloudinary(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (!data.secure_url) throw new Error('שגיאה בהעלאת התמונה');
+        return data.secure_url;
+    }
+
+    async function submitForm() {
+        const username  = document.getElementById('tgUsername').value.trim().replace(/^@+/, '');
+        const name      = document.getElementById('fieldName').value.trim();
+        const age       = document.getElementById('fieldAge').value.trim();
+        const about     = document.getElementById('fieldAbout').value.trim();
+        const limits    = document.getElementById('fieldLimits').value.trim();
+        const goal      = document.getElementById('fieldGoal').value.trim();
+        const photoFile = document.getElementById('photoInput').files[0];
+
+        let hasError = false;
+        if (!username) { showErr('tgError', 'שם משתמש בטלגרם הוא שדה חובה'); document.getElementById('tgUsername').classList.add('error'); hasError = true; }
+        if (!name)     { showErr('nameError', 'שדה חובה'); hasError = true; }
+        if (!age || parseInt(age) < 18) { showErr('ageError', 'שדה חובה (18+)'); hasError = true; }
+        if (!selections.side) { showErr('sideError', 'נא לבחור צד'); hasError = true; }
+        if (!about)    { showErr('aboutError', 'שדה חובה'); hasError = true; }
+        if (hasError) return;
+        if (!photoFile) { alert('נא לבחור תמונה'); return; }
+
+        const caption = `🔥 פוסט היכרות חדש – Libral Party
+
+👤 טלגרם: @${username}
+💬 ספר/י על עצמך: ${about}
+😊 שם / כינוי: ${name}
+🔞 גיל: ${age}
+🎭 הצד שלי: ${selections.side}
+🔗 סטטוס: ${selections.status || 'לא צוין'}
+⛓️ ניסיון: ${selections.exp || 'לא צוין'}
+❌ גבולות אדומים: ${limits || 'לא צוין'}
+🎯 מטרת הכניסה לקבוצה: ${goal || 'לא צוין'}`;
+
+        const btn = document.getElementById('mainBtn');
+        btn.disabled = true; btn.textContent = 'שולח...';
+        document.getElementById('submitError').textContent = '';
+
+        try {
+            const photoUrl = await uploadToCloudinary(photoFile);
+
+            const res = await fetch('/api/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ photoUrl, caption })
+            });
+
+            if (res.ok) {
+                goStep(3);
+            } else {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || 'server error');
+            }
+        } catch (e) {
+            document.getElementById('submitError').textContent = 'שגיאה בשליחה. נסה שנית.';
+            btn.disabled = false; btn.textContent = 'שלח לאישור';
+        }
+    }
+</script>
+</body>
+</html>
