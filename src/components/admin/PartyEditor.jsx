@@ -33,7 +33,8 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
       maleLimit: party.maleLimit || 100,
       femaleLimit: party.femaleLimit || 100,
       registrationLink: party.registrationLink || '',
-      partyType: party.partyType || 'internal' 
+      whatsappNumber: party.whatsappNumber || '',
+      partyType: party.partyType || 'internal'
     };
   });
 
@@ -235,6 +236,20 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           </p>
         </div>
       )}
+      <div className="space-y-1 text-right">
+        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.whatsappNumber') || 'מספר וואטסאפ ליצירת קשר'}</label>
+        <input
+          type="tel"
+          value={formData.whatsappNumber}
+          onChange={e => setFormData(prev => ({...prev, whatsappNumber: e.target.value}))}
+          className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+          placeholder="050-1234567"
+          dir="ltr"
+        />
+        <p className="text-zinc-500 text-xs mt-1">
+          {t('admin.whatsappNumberHint') || 'הזינו רק מספר טלפון - הקישור לוואטסאפ ייווצר אוטומטית'}
+        </p>
+      </div>
       <div className="flex flex-col sm:flex-row gap-2">
         <button
           onClick={handleSave}

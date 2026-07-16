@@ -11,3 +11,18 @@ export const getTelHref = (phone) => {
   if (digits.length >= 9 && !digits.startsWith('972')) return `tel:+972${digits}`;
   return `tel:+${digits}`;
 };
+
+/**
+ * Returns a wa.me href for the given phone number (Israeli format supported).
+ * Use to let visitors open a WhatsApp chat without exposing a raw phone number.
+ * Returns null if phone is empty, just a dash, or too short to be valid.
+ */
+export const getWhatsAppHref = (phone) => {
+  if (!phone || String(phone).trim() === '' || String(phone).trim() === '-') return null;
+  const digits = String(phone).replace(/\D/g, '');
+  if (digits.length < 9) return null;
+  // Israeli: 05xxxxxxxx -> 9725xxxxxxxx
+  if (digits.startsWith('0')) return `https://wa.me/972${digits.slice(1)}`;
+  if (digits.length >= 9 && !digits.startsWith('972')) return `https://wa.me/972${digits}`;
+  return `https://wa.me/${digits}`;
+};

@@ -1130,6 +1130,7 @@ export const updateParty = async (partyId, partyData) => {
     if (partyData.dj !== undefined) updateData.dj = partyData.dj;
     if (partyData.title !== undefined) updateData.title = partyData.title;
     if (partyData.registrationLink !== undefined) updateData.registrationLink = partyData.registrationLink;
+    if (partyData.whatsappNumber !== undefined) updateData.whatsappNumber = partyData.whatsappNumber;
 
     if (partyData.partyType !== undefined) {
       updateData.partyType = partyData.partyType;

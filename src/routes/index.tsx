@@ -9,6 +9,7 @@ import { getPartySettings } from "@/firebase/partySettings";
 import { getSocialLinks } from "@/firebase/settings";
 import { getSiteConfig } from "@/firebase/siteConfig";
 import { isPartyExpiredByDate } from "../../shared/partyExpiry.js";
+import { getWhatsAppHref } from "@/utils/phoneLink";
 
 const SOCIAL_ICONS = [
   { key: "instagram", Icon: Instagram, label: "אינסטגרם" },
@@ -245,6 +246,17 @@ function Index() {
                       )}
                     </div>
                     {e.description && <EventDescription text={e.description} />}
+                    {getWhatsAppHref(e.whatsappNumber) && (
+                      <a
+                        href={getWhatsAppHref(e.whatsappNumber)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2 text-sm font-bold text-black transition-opacity hover:opacity-90"
+                      >
+                        <MessageCircle size={16} />
+                        יצירת קשר בוואטסאפ
+                      </a>
+                    )}
                   </div>
                 </article>
               ))}

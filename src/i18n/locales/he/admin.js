@@ -28,6 +28,8 @@ export default {
   'admin.imageUrl': 'כתובת תמונה',
   'admin.partyPageUrl': 'כתובת עמוד המסיבה',
   'admin.registrationLinkOptional': 'קישור רישום (אופציונלי)',
+  'admin.whatsappNumber': 'מספר וואטסאפ ליצירת קשר',
+  'admin.whatsappNumberHint': 'הזינו רק מספר טלפון - הקישור לוואטסאפ ייווצר אוטומטית',
   'admin.save': 'שמור',
   'admin.cancel': 'ביטול',
   'admin.activeParties': 'מסיבות פעילות',
