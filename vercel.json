@@ -1,4 +1,11 @@
 {
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "grop.libralparty.net" }],
+      "destination": "/intro"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
