@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Instagram, Facebook, Send, MessageCircle } from "lucide-react";
-import heroImg from "@/assets/hero.jpg";
+import heroImg from "@/assets/logo-heart.png";
 import aboutImg from "@/assets/about.jpg";
 import { PageLayout } from "@/components/PageLayout";
 import { getActiveParties, deleteExpiredParties } from "@/firebase/parties";
