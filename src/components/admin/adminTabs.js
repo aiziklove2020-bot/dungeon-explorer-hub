@@ -24,4 +24,5 @@ export const adminTabs = [
   { id: 'telegram', label: 'טלגרם' },
   { id: 'db',       label: 'DB' },
   { id: 'dbLogger', label: 'לוג קריאות DB' },
+  { id: 'gitHistory', label: 'היסטוריית Git' },
 ];
