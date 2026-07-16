@@ -59,14 +59,34 @@ function useBlockOverscroll() {
  */
 function useBlockPinchZoom() {
   useEffect(() => {
-    const prevent = (e: Event) => e.preventDefault();
-    document.addEventListener("gesturestart", prevent);
-    document.addEventListener("gesturechange", prevent);
-    document.addEventListener("gestureend", prevent);
+    const preventGesture = (e: Event) => e.preventDefault();
+    // Belt-and-suspenders #2: gesturestart/change/end are WebKit-only and
+    // Apple has been inconsistent about honoring preventDefault on them
+    // across iOS versions. Any touchmove with 2+ fingers on screen is
+    // unambiguously a pinch (or two-finger scroll, which this site doesn't
+    // use), so cancelling those directly is the more reliable backstop —
+    // this is the same technique Chrome/Android respects too.
+    const preventMultiTouch = (e: TouchEvent) => {
+      if (e.touches.length > 1) e.preventDefault();
+    };
+    let lastTouchEnd = 0;
+    const preventDoubleTapZoom = (e: TouchEvent) => {
+      const now = Date.now();
+      if (now - lastTouchEnd < 350) e.preventDefault();
+      lastTouchEnd = now;
+    };
+
+    document.addEventListener("gesturestart", preventGesture, { passive: false });
+    document.addEventListener("gesturechange", preventGesture, { passive: false });
+    document.addEventListener("gestureend", preventGesture, { passive: false });
+    document.addEventListener("touchmove", preventMultiTouch, { passive: false });
+    document.addEventListener("touchend", preventDoubleTapZoom, { passive: false });
     return () => {
-      document.removeEventListener("gesturestart", prevent);
-      document.removeEventListener("gesturechange", prevent);
-      document.removeEventListener("gestureend", prevent);
+      document.removeEventListener("gesturestart", preventGesture);
+      document.removeEventListener("gesturechange", preventGesture);
+      document.removeEventListener("gestureend", preventGesture);
+      document.removeEventListener("touchmove", preventMultiTouch);
+      document.removeEventListener("touchend", preventDoubleTapZoom);
     };
   }, []);
 }
