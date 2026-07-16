@@ -5,7 +5,6 @@
  */
 export const adminTabs = [
   { id: 'siteDesign', label: 'עיצוב האתר (לוגו/באנרים/פופאפ)' },
-  { id: 'hero',      label: 'דף הבית - כותרת' },
   { id: 'parties',  label: 'מסיבות' },
   { id: 'about',    label: 'אודות' },
   { id: 'contact',  label: 'צור קשר' },

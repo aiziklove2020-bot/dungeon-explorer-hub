@@ -11,7 +11,6 @@ import PartiesSection from '../components/admin/PartiesSection';
 import MatchesSection from '../components/admin/MatchesSection';
 import UsersSection from '../components/admin/UsersSection';
 import RssSection from '../components/admin/RssSection';
-import HeroSection from '../components/admin/HeroSection';
 import AboutSection from '../components/admin/AboutSection';
 import ContactSection from '../components/admin/ContactSection';
 import LinksSection from '../components/admin/LinksSection';
@@ -41,7 +40,7 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(() =>
     sessionStorage.getItem('admin_authenticated') === 'true'
   );
-  const [activeSection, setActiveSection] = useState('hero');
+  const [activeSection, setActiveSection] = useState('parties');
   const [saved, setSaved] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishMessage, setPublishMessage] = useState('');
@@ -228,7 +227,6 @@ const Admin = () => {
 
         <div className="space-y-6">
           {activeSection === 'siteDesign' && <SiteDesignSection showSaved={showSaved} />}
-          {activeSection === 'hero'      && <HeroSection showSaved={showSaved} />}
           {activeSection === 'parties'   && <PartiesSection showSaved={showSaved} refreshKey={partiesRefreshKey} />}
           {activeSection === 'about'     && <AboutSection showSaved={showSaved} />}
           {activeSection === 'contact'   && <ContactSection showSaved={showSaved} />}
