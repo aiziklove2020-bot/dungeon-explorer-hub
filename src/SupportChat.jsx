@@ -1,8 +1,8 @@
 import { useState, useEffect, useId, useRef } from 'react';
-import { X, MessageCircle, Send, Trash2, LogOut } from 'lucide-react';
+import { X, MessageCircle, Send, LogOut } from 'lucide-react';
 import { useLanguage } from './i18n/LanguageContext';
 import { getSupportChatSettings } from './firebase/settings';
-import { sendSupportMessage, sendSupportToTelegram, subscribeToSupportMessages, fetchSupportMessages, getSessionId, deleteSupportChatSession, clearSessionId } from './firebase/supportChat';
+import { sendSupportMessage, sendSupportToTelegram, subscribeToSupportMessages, fetchSupportMessages, getSessionId, clearSessionId } from './firebase/supportChat';
 import './SupportChat.css';
 
 const DISPLAY_NAME_KEY = 'support_chat_name';
@@ -21,7 +21,6 @@ const SupportChat = ({ initialSettings = null }) => {
   const [error, setError] = useState(null);
   const [confirmedName, setConfirmedName] = useState(getStoredDisplayName);
   const [displayNameInput, setDisplayNameInput] = useState('');
-  const [deleting, setDeleting] = useState(false);
   const messagesEndRef = useRef(null);
   /** Synchronous guard — `sending` state updates too late to block double Enter / double click */
   const sendInFlightRef = useRef(false);
@@ -146,21 +145,6 @@ const SupportChat = ({ initialSettings = null }) => {
     setDisplayNameInput('');
   };
 
-  const handleDeleteChat = async () => {
-    if (!window.confirm(t('supportChat.deleteConfirm') || 'למחוק את כל הודעות הצ\'אט?')) return;
-    setDeleting(true);
-    setError(null);
-    try {
-      await deleteSupportChatSession(sessionId);
-      setMessages([]);
-      clearStoredName();
-    } catch (err) {
-      setError(err.message || t('supportChat.deleteError'));
-    } finally {
-      setDeleting(false);
-    }
-  };
-
   /** Leave the chat without deleting the conversation — just forget the local
    *  name + session so the next open starts fresh (e.g. for a different person
    *  on a shared device). Messages stay in Firestore for the admin/Telegram side. */
@@ -254,17 +238,6 @@ const SupportChat = ({ initialSettings = null }) => {
                   <LogOut size={18} aria-hidden="true" />
                 </button>
               )}
-              <button
-                type="button"
-                className="support-chat-delete"
-                onClick={handleDeleteChat}
-                disabled={deleting || messages.length === 0}
-                aria-disabled={deleting || messages.length === 0}
-                aria-label={t('supportChat.deleteChat')}
-                title={t('supportChat.deleteChat')}
-              >
-                <Trash2 size={18} aria-hidden="true" />
-              </button>
               <button
                 type="button"
                 className="support-chat-minimize"
