@@ -49,15 +49,38 @@ function useBlockOverscroll() {
   }, []);
 }
 
+/**
+ * The `maximum-scale=1, user-scalable=no` viewport meta tag stops *some*
+ * zoom gestures, but iOS Safari has ignored it for two-finger pinch-zoom
+ * specifically since iOS 10 (an accessibility carve-out that can't be
+ * turned off from the page side via meta tags). `gesturestart` is a
+ * WebKit-only touch event that fires right as a pinch begins — cancelling
+ * it is the only way left to actually block pinch-zoom on iOS.
+ */
+function useBlockPinchZoom() {
+  useEffect(() => {
+    const prevent = (e: Event) => e.preventDefault();
+    document.addEventListener("gesturestart", prevent);
+    document.addEventListener("gesturechange", prevent);
+    document.addEventListener("gestureend", prevent);
+    return () => {
+      document.removeEventListener("gesturestart", prevent);
+      document.removeEventListener("gesturechange", prevent);
+      document.removeEventListener("gestureend", prevent);
+    };
+  }, []);
+}
+
 export function PageLayout({ children }: { children: ReactNode }) {
   useBlockOverscroll();
+  useBlockPinchZoom();
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       {/* Stops iOS/mobile rubber-band overscroll past the page's real bottom.
           This rule kept disappearing when placed in the global index.css
           (Tailwind's build was dropping it for reasons never fully pinned
           down), so it's inlined here where it's guaranteed to ship. */}
-      <style>{`html, body { overscroll-behavior-y: none; }`}</style>
+      <style>{`html, body { overscroll-behavior-y: none; touch-action: pan-x pan-y; }`}</style>
       <SiteHeader />
       <RssTicker />
       <main className="flex-1">{children}</main>
