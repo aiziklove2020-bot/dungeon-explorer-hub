@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Libral Party - פוסט היכרות</title>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>מסיבות ליברליות בישראל - פוסט היכרות | Libral Party</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
         :root {
-            --primary-red: #990000;
-            --bright-red: #ff1a1a;
-            --dark-bg: #030303;
-            --card-bg: #080808;
+            --primary-red: #b91c1c;
+            --bright-red: #dc2626;
+            --dark-bg: #0a0705;
+            --card-bg: #120c0a;
         }
 
         body {
             background-color: var(--dark-bg);
             color: #f0f0f0;
-            font-family: 'Assistant', sans-serif;
+            font-family: 'Heebo', system-ui, sans-serif;
             background-image:
                 radial-gradient(circle at 10% 10%, #200505 0%, transparent 30%),
                 radial-gradient(circle at 90% 90%, #200505 0%, transparent 30%);
@@ -34,17 +34,17 @@
 
         .header {
             text-align: center;
-            padding: 36px 20px 24px;
+            padding: 32px 20px 24px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             margin-bottom: 24px;
         }
+        .logo-img { height: 48px; width: auto; margin-bottom: 10px; }
         .logo {
-            font-size: 44px; font-weight: 900; letter-spacing: -1px;
-            text-transform: uppercase; color: #fff; font-style: italic;
-            text-shadow: 0 0 10px rgba(255,26,26,0.5); line-height: 1; margin-bottom: 8px;
+            font-size: 22px; font-weight: 900; letter-spacing: -0.5px;
+            color: #fff; line-height: 1.2; margin-bottom: 6px;
         }
-        .logo span { color: #e00; }
-        .logo-sub { color: #555; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
+        .logo span { color: var(--bright-red); }
+        .logo-sub { color: #777; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; }
 
         .progress-bar { height: 3px; background: #222; border-radius: 2px; overflow: hidden; margin-bottom: 28px; }
         .progress-fill {
@@ -98,11 +98,11 @@
         }
         textarea {
             width: 100%; background: #000; border: 1px solid #222; border-radius: 14px;
-            color: #fff; font-family: 'Assistant', sans-serif;
+            color: #fff; font-family: 'Heebo', system-ui, sans-serif;
             font-size: 15px; line-height: 1.6; padding: 16px; resize: none; outline: none;
             -webkit-appearance: none; transition: border-color .2s, box-shadow .2s;
         }
-        textarea:focus { border-color: var(--bright-red); box-shadow: 0 0 0 3px rgba(255,26,26,0.12); }
+        textarea:focus { border-color: var(--bright-red); box-shadow: 0 0 0 3px rgba(220,38,38,0.12); }
         textarea::placeholder { color: #444; }
 
         .tg-input-wrap { position: relative; }
@@ -112,13 +112,13 @@
         }
         .text-input {
             width: 100%; background: #000; border: 1px solid #222; border-radius: 14px;
-            color: #fff; font-family: 'Assistant', sans-serif;
+            color: #fff; font-family: 'Heebo', system-ui, sans-serif;
             font-size: 15px; line-height: 1.6; padding: 16px 36px 16px 16px;
             outline: none; -webkit-appearance: none;
             transition: border-color .2s, box-shadow .2s;
             direction: ltr; text-align: right;
         }
-        .text-input:focus { border-color: var(--bright-red); box-shadow: 0 0 0 3px rgba(255,26,26,0.12); }
+        .text-input:focus { border-color: var(--bright-red); box-shadow: 0 0 0 3px rgba(220,38,38,0.12); }
         .text-input::placeholder { color: #444; }
         .text-input.error { border-color: #ff4444; box-shadow: 0 0 0 3px rgba(255,68,68,0.12); }
         .field-error { font-size: 11px; color: #ff4444; margin-top: 6px; display: none; }
@@ -128,11 +128,11 @@
         .select-group { display: flex; flex-wrap: wrap; gap: 8px; }
         .sel-btn {
             background: #000; border: 1px solid #333; border-radius: 10px;
-            color: #777; font-family: 'Assistant', sans-serif;
+            color: #777; font-family: 'Heebo', system-ui, sans-serif;
             font-size: 13px; font-weight: 700; padding: 10px 16px;
             cursor: pointer; transition: all .2s; user-select: none;
         }
-        .sel-btn.active { background: rgba(153,0,0,0.2); border-color: var(--bright-red); color: #fff; }
+        .sel-btn.active { background: rgba(185,28,28,0.2); border-color: var(--bright-red); color: #fff; }
 
         .file-pick {
             background: #000; border: 1px solid #222; border-radius: 14px;
@@ -141,7 +141,7 @@
         .file-name { font-size: 13px; color: #555; }
         .file-name.selected { color: #fff; }
         .file-icon {
-            width: 36px; height: 36px; background: rgba(153,0,0,0.15);
+            width: 36px; height: 36px; background: rgba(185,28,28,0.15);
             border-radius: 10px; display: flex; align-items: center; justify-content: center;
         }
         .file-icon svg { width: 18px; height: 18px; stroke: var(--bright-red); }
@@ -150,7 +150,7 @@
         .step2-title { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 4px; }
         .step-num {
             width: 30px; height: 30px; border-radius: 50%;
-            background: rgba(153,0,0,0.2); border: 1px solid rgba(153,0,0,0.5);
+            background: rgba(185,28,28,0.2); border: 1px solid rgba(185,28,28,0.5);
             display: flex; align-items: center; justify-content: center;
             font-size: 13px; color: #fff; font-weight: 700; flex-shrink: 0;
         }
@@ -164,9 +164,9 @@
         }
         .btn-primary {
             width: 100%;
-            background: linear-gradient(135deg, #990000 0%, #440000 100%);
-            border: 1px solid rgba(255,26,26,0.3); border-radius: 14px; color: #fff;
-            font-family: 'Assistant', sans-serif; font-size: 17px; font-weight: 800;
+            background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+            border: 1px solid rgba(220,38,38,0.3); border-radius: 14px; color: #fff;
+            font-family: 'Heebo', system-ui, sans-serif; font-size: 17px; font-weight: 800;
             letter-spacing: 0.12em; text-transform: uppercase; padding: 18px; cursor: pointer;
             transition: all .2s; -webkit-appearance: none; outline: none; display: block;
         }
@@ -174,7 +174,7 @@
         .btn-primary:disabled { opacity: 0.2; filter: grayscale(1); }
         .btn-back {
             background: none; border: none; color: #555;
-            font-family: 'Assistant', sans-serif; font-size: 12px; font-weight: 700;
+            font-family: 'Heebo', system-ui, sans-serif; font-size: 12px; font-weight: 700;
             text-transform: uppercase; letter-spacing: 0.1em;
             cursor: pointer; padding: 10px 0 0; display: none; width: 100%; text-align: center;
         }
@@ -183,29 +183,29 @@
         .success-icon {
             width: 80px; height: 80px; border-radius: 50%; border: 1px solid var(--bright-red);
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 24px; box-shadow: 0 0 24px rgba(153,0,0,0.4);
+            margin: 0 auto 24px; box-shadow: 0 0 24px rgba(185,28,28,0.4);
             font-size: 38px; color: var(--bright-red); font-weight: 900;
         }
         .success-title { font-size: 30px; font-weight: 800; color: #fff; margin-bottom: 16px; }
         .success-box {
-            background: rgba(153,0,0,0.06); border: 1px solid rgba(153,0,0,0.2);
+            background: rgba(185,28,28,0.06); border: 1px solid rgba(185,28,28,0.2);
             border-radius: 18px; padding: 20px; font-size: 14px; color: #aaa; line-height: 1.8;
             margin-bottom: 32px; text-align: right;
         }
         .success-box strong { color: #e04444; }
         .tg-btn {
             display: flex; align-items: center; justify-content: center; gap: 12px;
-            background: linear-gradient(135deg, #ff1a1a 0%, #990000 100%);
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
             color: #fff; border-radius: 18px; width: 100%; padding: 22px 28px;
-            font-family: 'Assistant', sans-serif; font-size: 18px; font-weight: 800;
+            font-family: 'Heebo', system-ui, sans-serif; font-size: 18px; font-weight: 800;
             text-decoration: none; text-transform: uppercase; letter-spacing: 0.1em;
             transition: all .2s; border: 1px solid rgba(255,100,100,0.4);
-            box-shadow: 0 0 30px rgba(255,26,26,0.4), 0 0 60px rgba(153,0,0,0.2);
+            box-shadow: 0 0 30px rgba(220,38,38,0.4), 0 0 60px rgba(185,28,28,0.2);
             animation: pulse 2s ease-in-out infinite;
         }
         @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 30px rgba(255,26,26,0.4), 0 0 60px rgba(153,0,0,0.2); }
-            50%       { box-shadow: 0 0 45px rgba(255,26,26,0.7), 0 0 80px rgba(153,0,0,0.4); }
+            0%, 100% { box-shadow: 0 0 30px rgba(220,38,38,0.4), 0 0 60px rgba(185,28,28,0.2); }
+            50%       { box-shadow: 0 0 45px rgba(220,38,38,0.7), 0 0 80px rgba(185,28,28,0.4); }
         }
         .tg-btn:active { transform: scale(0.97); }
         .tg-btn svg { width: 24px; height: 24px; fill: currentColor; flex-shrink: 0; }
@@ -216,7 +216,8 @@
 <div class="app">
 
     <div class="header">
-        <div class="logo">Libral<span>Party</span></div>
+        <img src="/logo-heart.png" alt="מסיבות ליברליות בישראל" class="logo-img">
+        <div class="logo">מסיבות ליברליות <span>בישראל</span></div>
         <div class="logo-sub">פוסט היכרות לקהילה שלנו</div>
     </div>
 
@@ -384,8 +385,8 @@
             checked[key] = !checked[key];
             const box = document.getElementById(boxId);
             const mark = document.getElementById(markId);
-            box.style.background = checked[key] ? '#990000' : '#000';
-            box.style.borderColor = checked[key] ? '#ff1a1a' : '#333';
+            box.style.background = checked[key] ? '#b91c1c' : '#000';
+            box.style.borderColor = checked[key] ? '#dc2626' : '#333';
             mark.style.display = checked[key] ? 'block' : 'none';
             document.getElementById('mainBtn').disabled = !(checked.r1 && checked.r2);
         });
