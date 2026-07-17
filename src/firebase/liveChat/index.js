@@ -38,7 +38,7 @@ export {
 
 export { joinRoom, updateObserveMode, heartbeatMember, leaveRoom } from './roomLifecycle.js';
 
-export { tryDeleteRoomIfEmpty } from './roomCleanup.js';
+export { tryDeleteRoomIfEmpty, clearRoomMessages } from './roomCleanup.js';
 
 export { purgeForumUserFromChat } from './userCleanup.js';
 

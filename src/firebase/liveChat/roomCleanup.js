@@ -11,17 +11,21 @@ import { dbChat } from '../config';
 import { ROOMS_COL } from './constants.js';
 import { getRoom } from './roomQueries.js';
 
-async function deleteRoomAndMessages(roomId) {
-  const batchDeleteCol = async (colRef, maxRounds = 50) => {
-    for (let i = 0; i < maxRounds; i += 1) {
-      const snap = await getDocs(query(colRef, limit(400)));
-      if (snap.empty) return;
-      const batch = writeBatch(dbChat);
-      snap.docs.forEach((d) => batch.delete(d.ref));
-      await batch.commit();
-    }
-  };
+async function batchDeleteCol(colRef, maxRounds = 50) {
+  for (let i = 0; i < maxRounds; i += 1) {
+    const snap = await getDocs(query(colRef, limit(400)));
+    if (snap.empty) return;
+    const batch = writeBatch(dbChat);
+    snap.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+  }
+}
 
+/** Delete every message (and stale typing indicators) in a room, keeping the
+ *  room doc itself so members can keep chatting in a now-empty room. Used by
+ *  the admin "clear messages" action to shed old message data without
+ *  disrupting anyone currently in the room. */
+export async function clearRoomMessages(roomId) {
   const messagesCol = collection(dbChat, ROOMS_COL, roomId, 'messages');
   await batchDeleteCol(messagesCol);
 
@@ -32,7 +36,10 @@ async function deleteRoomAndMessages(roomId) {
     typingSnap.docs.forEach((d) => b.delete(d.ref));
     await b.commit();
   }
+}
 
+async function deleteRoomAndMessages(roomId) {
+  await clearRoomMessages(roomId);
   await deleteDoc(doc(dbChat, ROOMS_COL, roomId));
 }
 

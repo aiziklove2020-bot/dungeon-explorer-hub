@@ -67,6 +67,7 @@ export const heartbeatMember = (...a) => pickFn('heartbeatMember')(...a);
 export const leaveRoom = (...a) => pickFn('leaveRoom')(...a);
 
 export const tryDeleteRoomIfEmpty = (...a) => pickFn('tryDeleteRoomIfEmpty')(...a);
+export const clearRoomMessages = (...a) => pickFn('clearRoomMessages')(...a);
 export const purgeForumUserFromChat = (...a) => pickFn('purgeForumUserFromChat')(...a);
 
 export const closeRoom = (...a) => pickFn('closeRoom')(...a);

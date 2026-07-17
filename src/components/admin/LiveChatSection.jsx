@@ -1,13 +1,22 @@
 import { useState, useEffect } from 'react';
-import { MessageCircle, ExternalLink } from 'lucide-react';
+import { MessageCircle, ExternalLink, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getLiveChatSettings, updateLiveChatSettings } from '../../firebase/settings';
+import { MAIN_ROOM_ID, clearRoomMessages } from '../../firebase/liveChat';
+
+const CHAT_ROOMS = [
+  { id: MAIN_ROOM_ID, label: 'כללי' },
+  { id: 'bdsm', label: 'בדס״מ' },
+  { id: 'swap', label: 'חילופי זוגות' }
+];
 
 const LiveChatSection = ({ showSaved }) => {
   const { t } = useLanguage();
   const [retentionDays, setRetentionDays] = useState(3);
   const [globalChatMuted, setGlobalChatMuted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [clearingRoomId, setClearingRoomId] = useState('');
+  const [clearError, setClearError] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -31,6 +40,20 @@ const LiveChatSection = ({ showSaved }) => {
       globalChatMuted
     });
     showSaved?.();
+  };
+
+  const handleClearRoom = async (roomId, label) => {
+    if (!confirm(`למחוק את כל ההודעות בחדר "${label}"? הפעולה בלתי הפיכה. החדר עצמו יישאר פעיל וריק.`)) return;
+    setClearingRoomId(roomId);
+    setClearError('');
+    try {
+      await clearRoomMessages(roomId);
+      showSaved?.();
+    } catch (err) {
+      setClearError(err?.message || 'שגיאה במחיקת ההודעות');
+    } finally {
+      setClearingRoomId('');
+    }
   };
 
   if (loading) {
@@ -96,6 +119,38 @@ const LiveChatSection = ({ showSaved }) => {
         <ExternalLink size={16} />
         {t('admin.liveChat.openChat') || 'פתח צ׳אט במסך חדש'}
       </a>
+
+      <div className="border-t border-zinc-800 pt-6 space-y-3">
+        <div className="text-white font-bold">
+          {t('admin.liveChat.clearRoomsTitle') || 'ניקוי הודעות'}
+        </div>
+        <p className="text-zinc-400 text-sm leading-relaxed">
+          {t('admin.liveChat.clearRoomsIntro') ||
+            'מוחק את כל ההודעות בחדר כדי לפנות מקום במסד הנתונים. החדר עצמו נשאר פעיל וריק — לא נמחק.'}
+        </p>
+        {clearError && <p className="text-red-400 text-sm">{clearError}</p>}
+        <div className="space-y-2">
+          {CHAT_ROOMS.map((room) => (
+            <div
+              key={room.id}
+              className="flex items-center justify-between bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3"
+            >
+              <span className="text-zinc-200 text-sm font-bold">{room.label}</span>
+              <button
+                type="button"
+                onClick={() => handleClearRoom(room.id, room.label)}
+                disabled={clearingRoomId === room.id}
+                className="flex items-center gap-2 text-red-400 hover:text-red-300 disabled:opacity-50 text-sm font-bold"
+              >
+                <Trash2 size={16} />
+                {clearingRoomId === room.id
+                  ? (t('admin.liveChat.clearing') || 'מוחק…')
+                  : (t('admin.liveChat.clearRoom') || 'מחק הודעות')}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
