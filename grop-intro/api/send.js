@@ -8,7 +8,7 @@
  * the vetting group, using the bot token from the TELEGRAM_BOT_TOKEN env var
  * (set in this project's Vercel settings, not the main project's).
  */
-const TARGET_CHAT_ID = '-1002472743528';
+const TARGET_CHAT_ID = '-1001610769071';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
