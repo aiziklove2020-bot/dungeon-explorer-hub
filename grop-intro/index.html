@@ -303,15 +303,25 @@
         </div>
 
         <div class="field-group">
-            <label class="field-label">🎭 הצד שלי *</label>
-            <div class="select-group" id="sideSelect">
-                <div class="sel-btn" data-val="שולט">שולט</div>
-                <div class="sel-btn" data-val="נשלט">נשלט</div>
-                <div class="sel-btn" data-val="נשלטת">נשלטת</div>
-                <div class="sel-btn" data-val="סוויץ׳">סוויץ׳</div>
-                <div class="sel-btn" data-val="עדיין מגלה">עדיין מגלה</div>
+            <label class="field-label">👥 מי אתם *</label>
+            <div class="select-group" id="profileSelect">
+                <div class="sel-btn" data-val="יחיד">יחיד</div>
+                <div class="sel-btn" data-val="יחידה">יחידה</div>
+                <div class="sel-btn" data-val="זוג">זוג</div>
+                <div class="sel-btn" data-val="קבוצה">קבוצה</div>
             </div>
-            <div class="field-error" id="sideError">שדה חובה</div>
+            <div class="field-error" id="profileError">שדה חובה</div>
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">✨ מה הכי מעניין אתכם בקהילה *</label>
+            <div class="select-group" id="interestSelect">
+                <div class="sel-btn" data-val="בדס״מ">בדס״מ</div>
+                <div class="sel-btn" data-val="חילופי זוגות">חילופי זוגות</div>
+                <div class="sel-btn" data-val="היכרויות ליברליות">היכרויות ליברליות</div>
+                <div class="sel-btn" data-val="הכל / עדיין מגלה">הכל / עדיין מגלה</div>
+            </div>
+            <div class="field-error" id="interestError">שדה חובה</div>
         </div>
 
         <div class="field-group">
@@ -324,17 +334,17 @@
         </div>
 
         <div class="field-group">
-            <label class="field-label">⛓️ ניסיון</label>
+            <label class="field-label">🌱 היכרות עם הקהילה</label>
             <div class="select-group" id="expSelect">
-                <div class="sel-btn" data-val="מתחיל/ה">מתחיל/ה</div>
-                <div class="sel-btn" data-val="בינוני">בינוני</div>
-                <div class="sel-btn" data-val="מנוסה">מנוסה</div>
+                <div class="sel-btn" data-val="חדש/ה">חדש/ה</div>
+                <div class="sel-btn" data-val="מכיר/ה קצת">מכיר/ה קצת</div>
+                <div class="sel-btn" data-val="מנוסה/ת">מנוסה/ת</div>
             </div>
         </div>
 
         <div class="field-group">
-            <label class="field-label">❌ גבולות אדומים</label>
-            <input type="text" class="text-input" id="fieldLimits" placeholder="מה הם הגבולות שלך?">
+            <label class="field-label">💭 העדפות / דברים חשובים לציין</label>
+            <input type="text" class="text-input" id="fieldLimits" placeholder="גבולות, העדפות, כל דבר שחשוב לך שנדע">
         </div>
 
         <div class="field-group">
@@ -378,7 +388,7 @@
 
     let currentStep = 1;
     const checked = { r1: false, r2: false };
-    const selections = { side: '', status: '', exp: '' };
+    const selections = { profile: '', interest: '', status: '', exp: '' };
 
     function setupCheck(rowId, boxId, markId, key) {
         document.getElementById(rowId).addEventListener('click', function() {
@@ -403,7 +413,8 @@
             });
         });
     }
-    setupSelect('sideSelect', 'side');
+    setupSelect('profileSelect', 'profile');
+    setupSelect('interestSelect', 'interest');
     setupSelect('statusSelect', 'status');
     setupSelect('expSelect', 'exp');
 
@@ -480,7 +491,8 @@
         if (!username) { showErr('tgError', 'שם משתמש בטלגרם הוא שדה חובה'); document.getElementById('tgUsername').classList.add('error'); hasError = true; }
         if (!name)     { showErr('nameError', 'שדה חובה'); hasError = true; }
         if (!age || parseInt(age) < 18) { showErr('ageError', 'שדה חובה (18+)'); hasError = true; }
-        if (!selections.side) { showErr('sideError', 'נא לבחור צד'); hasError = true; }
+        if (!selections.profile) { showErr('profileError', 'שדה חובה'); hasError = true; }
+        if (!selections.interest) { showErr('interestError', 'שדה חובה'); hasError = true; }
         if (!about)    { showErr('aboutError', 'שדה חובה'); hasError = true; }
         if (hasError) return;
         if (!photoFile) { alert('נא לבחור תמונה'); return; }
@@ -491,10 +503,11 @@
 💬 ספר/י על עצמך: ${about}
 😊 שם / כינוי: ${name}
 🔞 גיל: ${age}
-🎭 הצד שלי: ${selections.side}
+👥 מי אתם: ${selections.profile}
+✨ מעניין אתכם: ${selections.interest}
 🔗 סטטוס: ${selections.status || 'לא צוין'}
-⛓️ ניסיון: ${selections.exp || 'לא צוין'}
-❌ גבולות אדומים: ${limits || 'לא צוין'}
+🌱 היכרות עם הקהילה: ${selections.exp || 'לא צוין'}
+💭 העדפות: ${limits || 'לא צוין'}
 🎯 מטרת הכניסה לקבוצה: ${goal || 'לא צוין'}`;
 
         const btn = document.getElementById('mainBtn');
