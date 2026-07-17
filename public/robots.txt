@@ -21,4 +21,4 @@ Disallow: /deleterequest
 # Server APIs
 Disallow: /api/
 
-Sitemap: https://talkingbdsm.net/sitemap.xml
+Sitemap: https://www.libralparty.net/sitemap.xml

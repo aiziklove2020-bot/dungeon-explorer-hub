@@ -26,19 +26,23 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "מסיבות ליברליות בישראל" },
+      { title: "מסיבות ליברליות בישראל | חילופי זוגות ובדס״מ - Libral Party" },
       {
         name: "description",
         content:
-          "קהילת המסיבות הליברליות המובילה בישראל. אירועים, מסיבות, פורום וצ'אט במרחב בטוח, מאפשר ומכבד. הכניסה מגיל 18.",
+          "האתר המוביל למסיבות ליברליות בישראל: חילופי זוגות, בדס״מ ואירועי קהילה ליברלית ברחבי הארץ. הרשמה למסיבות, פורום וצ'אט במרחב בטוח, מאפשר ומכבד. הכניסה מגיל 18.",
+      },
+      {
+        name: "keywords",
+        content: "מסיבות ליברליות, מסיבות ליברליות בישראל, חילופי זוגות, בדסם, בדס״מ, קהילה ליברלית, מסיבות סווינגרס",
       },
       {
         property: "og:title",
-        content: "מסיבות ליברליות בישראל",
+        content: "מסיבות ליברליות בישראל | חילופי זוגות ובדס״מ - Libral Party",
       },
       {
         property: "og:description",
-        content: "קהילת המסיבות הליברליות המובילה בישראל.",
+        content: "האתר המוביל למסיבות ליברליות בישראל: חילופי זוגות, בדס״מ ואירועי קהילה ליברלית ברחבי הארץ.",
       },
       { property: "og:image", content: heroImg },
       { property: "og:url", content: "/" },
@@ -99,10 +103,28 @@ function EventDescription({ text }: { text: string }) {
   );
 }
 
+const ORGANIZATION_JSON_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Libral Party",
+  alternateName: "מסיבות ליברליות בישראל",
+  url: "https://www.libralparty.net",
+  description: "קהילת המסיבות הליברליות המובילה בישראל — מסיבות ליברליות, חילופי זוגות ובדס״מ.",
+});
+
+const WEBSITE_JSON_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Libral Party - מסיבות ליברליות בישראל",
+  url: "https://www.libralparty.net",
+});
+
 function IndexRoute() {
   const { heroImageUrl } = Route.useLoaderData();
   return (
     <PageLayout>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ORGANIZATION_JSON_LD }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: WEBSITE_JSON_LD }} />
       <Index heroImageUrl={heroImageUrl} />
     </PageLayout>
   );
