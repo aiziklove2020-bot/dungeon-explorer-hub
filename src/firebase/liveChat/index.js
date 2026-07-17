@@ -21,7 +21,7 @@ export {
   fetchReactions
 } from './subscriptions.js';
 
-export { ensureMainRoom, getRoom, subscribeRoom, listActiveRooms, listMyPrivateRooms, listChannels } from './roomQueries.js';
+export { ensureMainRoom, ensureChannelRoom, getRoom, subscribeRoom, listActiveRooms, listMyPrivateRooms, listChannels } from './roomQueries.js';
 
 export {
   listPrivateRoomsWhereCanInvite,

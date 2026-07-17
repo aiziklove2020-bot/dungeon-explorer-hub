@@ -34,6 +34,30 @@ export async function ensureMainRoom() {
   return { id: MAIN_ROOM_ID, ...data };
 }
 
+/** Ensure a fixed-id public channel room exists (same shape as `ensureMainRoom`,
+ *  generalized for named topic rooms with a caller-chosen id, e.g. 'bdsm'/'swap'). */
+export async function ensureChannelRoom(roomId, name) {
+  const ref = doc(dbChat, ROOMS_COL, roomId);
+  const snap = await getDoc(ref);
+  if (snap.exists()) return { id: roomId, ...snap.data() };
+  const now = Timestamp.now();
+  const data = {
+    type: 'channel',
+    name,
+    description: '',
+    category: '',
+    createdByForumUserId: 'system',
+    createdAt: now,
+    updatedAt: now,
+    lastActivityAt: now,
+    participantIds: [],
+    closedAt: null,
+    slowModeSeconds: 0
+  };
+  await setDoc(ref, data);
+  return { id: roomId, ...data };
+}
+
 export async function getRoom(roomId) {
   if (!roomId) return null;
   const snap = await getDoc(doc(dbChat, ROOMS_COL, roomId));

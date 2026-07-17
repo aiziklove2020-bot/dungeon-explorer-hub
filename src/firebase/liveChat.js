@@ -42,6 +42,7 @@ export const fetchReactions = (...a) => {
 };
 
 export const ensureMainRoom = (...a) => pickFn('ensureMainRoom')(...a);
+export const ensureChannelRoom = (...a) => pickFn('ensureChannelRoom')(...a);
 export const getRoom = (...a) => pickFn('getRoom')(...a);
 export const subscribeRoom = (...a) => pickFn('subscribeRoom')(...a);
 export const listActiveRooms = (...a) => pickFn('listActiveRooms')(...a);
