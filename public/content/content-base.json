@@ -2,7 +2,7 @@
   "hero": {
     "titleHebrew": "מדברים",
     "titleEnglish": "בדסמ",
-    "subtitle": "Talking BDSM",
+    "subtitle": "Libral Party",
     "tagline": "Safe · Sane · Consensual"
   },
   "about": {
@@ -98,12 +98,12 @@
     {
       "type": "channel",
       "label": "ערוץ טלגרם",
-      "url": "https://t.me/talkingbdsm"
+      "url": "https://t.me/libralparty"
     },
     {
       "type": "discussion",
       "label": "קבוצת טלגרם",
-      "url": "https://grop.talkingbdsm.net/"
+      "url": "https://grop.libralparty.net/"
     },
     {
       "type": "whatsapp",

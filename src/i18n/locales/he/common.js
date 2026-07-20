@@ -131,7 +131,7 @@ export default {
   instagram: 'אינסטגרם',
   telegramChannel: 'ערוץ טלגרם',
   telegramGroup: 'קבוצת טלגרם',
-  talkingBdsm: 'Talking BDSM',
+  talkingBdsm: 'וואטסאפ',
   facebook: 'פייסבוק',
 
   matching: 'טבלת התאמות',

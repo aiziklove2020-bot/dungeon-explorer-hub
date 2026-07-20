@@ -125,7 +125,7 @@ const Navigation = ({ currentPage, navigate, mobileMenuOpen, setMobileMenuOpen, 
           <div className="nav-logo logo-font">
             <span className="nav-logo-red">מדברים</span> <span className="nav-logo-white">בדסמ</span>
           </div>
-          <div className="nav-subtitle">Talking BDSM</div>
+          <div className="nav-subtitle">Libral Party</div>
         </div>
 
         <div className="nav-desktop-menu">

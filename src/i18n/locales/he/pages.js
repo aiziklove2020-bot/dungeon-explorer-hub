@@ -4,7 +4,7 @@ export default {
   // About
   'about.badge': 'אודותינו',
   'about.title': 'אודות',
-  'about.subtitle': 'קהילת Talking BDSM',
+  'about.subtitle': 'קהילת Libral Party',
   'about.howItWorks': 'איך זה עובד?',
   'about.entryNoteLabel': 'יש לציין בכניסה:',
 

@@ -14,7 +14,7 @@ export const defaultContent = {
   hero: {
     titleHebrew: 'מדברים',
     titleEnglish: 'בדסמ',
-    subtitle: 'Talking BDSM',
+    subtitle: 'Libral Party',
     tagline: 'Safe · Sane · Consensual'
   },
   events: [],

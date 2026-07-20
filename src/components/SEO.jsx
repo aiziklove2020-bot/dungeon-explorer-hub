@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 // Falls back to the 512x512 PWA icon since no dedicated OG art exists yet.
 // When a richer 1200x630 share image is added under /public, swap it in.
 const defaultImage = '/icon-512.png';
-const siteName = 'מדברים BDSM | Talking BDSM';
+const siteName = 'מסיבות ליברליות בישראל | Libral Party';
 
 /**
  * Get base URL for canonical and OG: from env or current origin.
