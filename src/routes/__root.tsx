@@ -125,6 +125,14 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
+        {/* Register the service worker as early as possible (independent of React
+            hydration) so PWA analyzers/installers reliably detect it. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})});}",
+          }}
+        />
         <Scripts />
       </body>
     </html>
@@ -133,14 +141,6 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
-  // Register the service worker so the site is an installable PWA (the basis
-  // for the Android APK / TWA wrapper). It does no caching, so content stays
-  // live and in sync with the website.
-  useEffect(() => {
-    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
-  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
