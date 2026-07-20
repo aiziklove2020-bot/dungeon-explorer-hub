@@ -11,6 +11,10 @@ import { getPartySettings } from '../../firebase/partySettings';
 function buildActiveParties(parties, retentionHours = DEFAULT_PARTY_RETENTION_HOURS) {
   return (parties || [])
     .filter((p) => !isPartyExpiredByDate(p.date, retentionHours))
+    // Only on-site-registration parties belong on /register. External parties
+    // (register via their own link) and WhatsApp-contact parties (contact via
+    // WhatsApp) don't take registrations through the site, so they're excluded.
+    .filter((p) => (p.partyType || 'internal') !== 'external' && !p.whatsappNumber)
     .map((p) => ({
       id: p.id,
       day: p.day,
