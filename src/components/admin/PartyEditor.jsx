@@ -48,9 +48,20 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
   }, [formData.date]);
 
   const handleSave = async () => {
-    
+
     if (formData.partyType === 'external' && !formData.registrationLink?.trim()) {
       alert(t('admin.externalPartyUrlRequired'));
+      return;
+    }
+
+    // Block phone numbers inside the description so contact goes through the
+    // dedicated WhatsApp field (which the site uses to build the wa.me link and
+    // to keep the party out of the on-site registration list). Normalize away
+    // spaces/dashes/parens/dots so "055-936 4370" is caught the same as a plain
+    // number; the pattern targets Israeli mobile/landline (0…) and +972 forms.
+    const normalizedDesc = String(formData.description || '').replace(/[\s\-().]/g, '');
+    if (/(?:\+?972|0)\d{8,9}/.test(normalizedDesc)) {
+      alert(t('admin.phoneInDescriptionBlocked') || 'אין להזין מספר טלפון בתיאור המסיבה. הזינו מספר וואטסאפ בשדה הייעודי למטה.');
       return;
     }
 
@@ -216,6 +227,9 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           rows={3}
           className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
         />
+        <p className="text-zinc-500 text-xs mt-1">
+          {t('admin.noPhoneInDescription') || 'לא להזין מספר טלפון בתיאור — יש שדה וואטסאפ ייעודי למטה.'}
+        </p>
       </div>
       <div className="space-y-1 text-right">
         <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.imageUrl')}</label>
