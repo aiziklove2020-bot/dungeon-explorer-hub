@@ -145,9 +145,14 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
       .then(([allParties, settings]) => {
         if (cancelled) return;
         const retentionHours = settings?.retentionHours;
-        const visible = (allParties || []).filter(
-          (p: any) => !isPartyExpiredByDate(p.date, retentionHours)
-        );
+        const toMs = (d: any) => {
+          const dt = d instanceof Date ? d : d?.toDate ? d.toDate() : new Date(d);
+          const t = dt?.getTime?.();
+          return Number.isFinite(t) ? t : Number.MAX_SAFE_INTEGER;
+        };
+        const visible = (allParties || [])
+          .filter((p: any) => !isPartyExpiredByDate(p.date, retentionHours))
+          .sort((a: any, b: any) => toMs(a.date) - toMs(b.date));
         setParties(visible);
       })
       .catch(() => {

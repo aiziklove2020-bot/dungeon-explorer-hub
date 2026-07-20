@@ -23,7 +23,16 @@ function buildActiveParties(parties, retentionHours = DEFAULT_PARTY_RETENTION_HO
       name: p.title || '',
       description: p.description || '',
       partyType: p.partyType || 'internal',
-    }));
+    }))
+    // Chronological order — earliest upcoming party first.
+    .sort((a, b) => {
+      const toMs = (d) => {
+        const dt = d instanceof Date ? d : d?.toDate ? d.toDate() : new Date(d);
+        const t = dt?.getTime?.();
+        return Number.isFinite(t) ? t : Number.MAX_SAFE_INTEGER;
+      };
+      return toMs(a.date) - toMs(b.date);
+    });
 }
 
 /** @returns {{ activeParties: Array, loadingParties: boolean }} */
