@@ -54,6 +54,12 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
         clearCache('activeParties');
       }
       const parties = await getActiveParties();
+      const toMs = (d) => {
+        const dt = d instanceof Date ? d : d?.toDate ? d.toDate() : new Date(d);
+        const t = dt?.getTime?.();
+        return Number.isFinite(t) ? t : Number.MAX_SAFE_INTEGER;
+      };
+      parties.sort((a, b) => toMs(a.date) - toMs(b.date));
       setActiveParties(parties);
       
       // Load all users once to avoid multiple calls in RegistrationItem
