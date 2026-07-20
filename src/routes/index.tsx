@@ -259,6 +259,16 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
                         >
                           הזמנה
                         </a>
+                      ) : getWhatsAppHref(e.whatsappNumber) ? (
+                        <a
+                          href={getWhatsAppHref(e.whatsappNumber)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#25D366] px-5 py-2 text-sm font-bold text-black transition-opacity hover:opacity-90"
+                        >
+                          <MessageCircle size={16} />
+                          הזמנה בוואטסאפ
+                        </a>
                       ) : (
                         <Link
                           to="/register"
@@ -270,17 +280,6 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
                       )}
                     </div>
                     {e.description && <EventDescription text={e.description} />}
-                    {getWhatsAppHref(e.whatsappNumber) && (
-                      <a
-                        href={getWhatsAppHref(e.whatsappNumber)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2 text-sm font-bold text-black transition-opacity hover:opacity-90"
-                      >
-                        <MessageCircle size={16} />
-                        יצירת קשר בוואטסאפ
-                      </a>
-                    )}
                   </div>
                 </article>
               ))}

@@ -430,11 +430,11 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         <h3 className="text-lg md:text-xl font-bold">{party.name || party.title}</h3>
                         <span className={`px-2 py-1 rounded text-xs font-bold ${
-                          ['internal', 'exchange'].includes(party.partyType || 'internal')
+                          !party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal')
                             ? (party.partyType === 'exchange' ? 'bg-purple-600' : 'bg-red-600')
                             : 'bg-blue-600'
                         }`}>
-                          {['internal', 'exchange'].includes(party.partyType || 'internal')
+                          {!party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal')
                             ? (party.partyType === 'exchange' ? t('admin.exchangeParty') : t('admin.internalParty'))
                             : t('admin.externalParty')}
                         </span>
@@ -477,7 +477,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                     {party.dj && <p><strong>DJ:</strong> {party.dj}</p>}
                   </div>
                   {party.description && <p className="mb-3"><strong>{t('description') || 'תיאור'}:</strong> {party.description}</p>}
-                  {['internal', 'exchange'].includes(party.partyType || 'internal') && (
+                  {!party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal') && (
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 mb-3 text-sm md:text-base">
                       <p><strong>{t('maleRegistered') || 'גברים רשומים'}:</strong> {getGenderCount(party, 'male')}/{party.maleLimit}</p>
                       <p><strong>{t('femaleRegistered') || 'נשים רשומות'}:</strong> {getGenderCount(party, 'female')}/{party.femaleLimit}</p>
@@ -492,7 +492,13 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                       </a>
                     </p>
                   )}
-                  {party.registrations && party.registrations.length > 0 && ['internal', 'exchange'].includes(party.partyType || 'internal') && (
+                  {party.whatsappNumber && (
+                    <p className="mb-3">
+                      <strong>{t('admin.whatsappNumber') || 'מספר וואטסאפ'}:</strong>{' '}
+                      <span dir="ltr">{party.whatsappNumber}</span>
+                    </p>
+                  )}
+                  {!party.whatsappNumber && party.registrations && party.registrations.length > 0 && ['internal', 'exchange'].includes(party.partyType || 'internal') && (
                     <div className="mt-4 space-y-4">
                       <button
                         onClick={() => exportRegistrationsByType(party)}
