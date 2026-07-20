@@ -167,26 +167,30 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
           />
         </div>
-        <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.maleLimit')}</label>
-          <input
-            type="number"
-            value={formData.maleLimit}
-            onChange={e => setFormData(prev => ({...prev, maleLimit: parseInt(e.target.value) || 0}))}
-            className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
-            min="0"
-          />
-        </div>
-        <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.femaleLimit')}</label>
-          <input
-            type="number"
-            value={formData.femaleLimit}
-            onChange={e => setFormData(prev => ({...prev, femaleLimit: parseInt(e.target.value) || 0}))}
-            className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
-            min="0"
-          />
-        </div>
+        {!formData.whatsappNumber?.trim() && (
+          <>
+            <div className="space-y-1 text-right">
+              <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.maleLimit')}</label>
+              <input
+                type="number"
+                value={formData.maleLimit}
+                onChange={e => setFormData(prev => ({...prev, maleLimit: parseInt(e.target.value) || 0}))}
+                className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+                min="0"
+              />
+            </div>
+            <div className="space-y-1 text-right">
+              <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.femaleLimit')}</label>
+              <input
+                type="number"
+                value={formData.femaleLimit}
+                onChange={e => setFormData(prev => ({...prev, femaleLimit: parseInt(e.target.value) || 0}))}
+                className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+                min="0"
+              />
+            </div>
+          </>
+        )}
         <div className="space-y-1 text-right">
           <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.partyType')} *</label>
           <select
