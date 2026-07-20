@@ -2,12 +2,10 @@ import './Loader.css';
 
 const Loader = ({ size = 'large' }) => {
   
-  const text = 'BDSM';
+  const text = 'LP';
   const letterColors = [
-    { letter: 'B', color: '#dc2626' }, 
-    { letter: 'D', color: '#ffffff' }, 
-    { letter: 'S', color: '#dc2626' }, 
-    { letter: 'M', color: '#ffffff' }  
+    { letter: 'L', color: '#dc2626' },
+    { letter: 'P', color: '#ffffff' }
   ];
 
   const sizeClasses = {
