@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "net.libralparty.www.twa",
+    "sha256_cert_fingerprints": ["67:E9:9A:CE:BD:C4:73:CA:A2:2C:8D:1C:61:6D:BE:2C:2B:B8:8F:04:16:81:B7:CE:62:EB:FD:6C:33:BB:17:80"]
+  }
+}]
