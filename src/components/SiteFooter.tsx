@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Download } from "lucide-react";
 import { navLinks, SITE_NAME } from "./SiteHeader";
+import { AppDownload } from "./AppDownload";
 
 export function SiteFooter() {
   return (
@@ -8,19 +8,7 @@ export function SiteFooter() {
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 text-center">
         <span className="text-xl font-black text-primary">{SITE_NAME}</span>
 
-        <div className="flex flex-col items-center gap-2">
-          <a
-            href="/libral-party.apk"
-            download="LibralParty.apk"
-            className="btn-glow flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-transform hover:scale-105"
-          >
-            <Download size={18} />
-            הורדת האפליקציה לאנדרואיד
-          </a>
-          <span className="text-xs text-muted-foreground">
-            להתקנה ישירה במכשירי Android
-          </span>
-        </div>
+        <AppDownload />
 
         <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
           {navLinks.map((l) => (
