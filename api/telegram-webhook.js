@@ -7,17 +7,24 @@
  *       POST https://api.telegram.org/bot<TOKEN>/setWebhook
  *            ?url=<URL>&secret_token=<SAME_VALUE_AS_ENV>
  *
- * GET: Cron job (see vercel.json "crons") — posts every currently-active party
- * as its own Telegram message (photo + caption) to the community channel and
- * group, a few times a week. Merged in here (rather than its own file) to
- * stay under the Vercel Hobby plan's 12-serverless-function limit — same
- * reasoning as git-history.js absorbing the old record-deploy-status route.
+ * GET (default / ?job=reminders): Cron job (see vercel.json "crons") — posts
+ * every currently-active party as its own Telegram message (photo + caption)
+ * to the community channel and group, a few times a week. Merged in here
+ * (rather than its own file) to stay under the Vercel Hobby plan's
+ * 12-serverless-function limit — same reasoning as git-history.js absorbing
+ * the old record-deploy-status route.
  *
  * Auth: Vercel signs cron-triggered requests with `Authorization: Bearer
  * ${CRON_SECRET}` when that env var is set — verified below so this can't be
  * triggered by an arbitrary GET from outside Vercel.
  * Env (cron): CRON_SECRET, TELEGRAM_BOT_TOKEN (the "Legacy (Matching)" bot —
  * already has access to both destinations).
+ *
+ * GET ?job=promo: Sends a short recurring "publish your party through the
+ * site" message to the "מסיבות בישראל" group. Vercel Hobby cron jobs can only
+ * run once/day, so a every-few-hours schedule needs an external pinger (e.g.
+ * cron-job.org) hitting this URL with ?job=promo&key=TELEGRAM_PROMO_SECRET.
+ * Env: TELEGRAM_PROMO_SECRET, TELEGRAM_BOT_TOKEN.
  */
 import { requireTelegramWebhookSecret } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
@@ -103,6 +110,44 @@ async function sendReminderToChat(botToken, chatId, party) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const PROMO_MESSAGE = [
+  '📣 מעוניינים לפרסם את המסיבה שלכם?',
+  '',
+  'בואו באהבה 🩶 כל פרסום מסיבות בקבוצה נעשה רק דרך לינק אחד — אתר הקהילה. ככה כולם רואים את כל המסיבות במקום אחד, מסודר וברור.',
+  '',
+  'להרשמה כמפרסם ופרסום המסיבה שלכם:',
+  'https://www.libralparty.net/advertiser/register'
+].join('\n');
+
+function isPromoAuthorized(req) {
+  const secret = process.env.TELEGRAM_PROMO_SECRET;
+  if (!secret) return false; // must be explicitly configured — no lenient default for a public-facing job
+  const key = req.query?.key || new URL(req.url, 'http://x').searchParams.get('key');
+  return key === secret;
+}
+
+async function handleGroupPromo(req, res) {
+  if (!isPromoAuthorized(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    return res.status(503).json({ error: 'Server not configured (missing TELEGRAM_BOT_TOKEN)' });
+  }
+  try {
+    const res2 = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: REMINDER_GROUP_CHAT_ID, text: PROMO_MESSAGE })
+    });
+    const data = await res2.json();
+    return res.status(200).json({ ok: data.ok, description: data.description });
+  } catch (err) {
+    console.error('group-promo:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 async function handlePartyReminders(req, res) {
   if (!isCronAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -148,6 +193,10 @@ async function handlePartyReminders(req, res) {
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
+    const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
+    if (job === 'promo') {
+      return handleGroupPromo(req, res);
+    }
     return handlePartyReminders(req, res);
   }
   if (req.method !== 'POST') {
