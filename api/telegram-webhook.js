@@ -194,6 +194,16 @@ async function handlePartyReminders(req, res) {
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
+    if (job === 'promo-check') {
+      // Diagnostic only — never sends a message. Reports whether the secret
+      // is configured and whether the provided key matches, without leaking
+      // the actual secret value.
+      return res.status(200).json({
+        secretConfigured: Boolean(process.env.TELEGRAM_PROMO_SECRET),
+        keyReceived: Boolean(req.query?.key || new URL(req.url, 'http://x').searchParams.get('key')),
+        authorized: isPromoAuthorized(req)
+      });
+    }
     if (job === 'promo') {
       return handleGroupPromo(req, res);
     }
