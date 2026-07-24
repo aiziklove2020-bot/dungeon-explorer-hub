@@ -95,7 +95,7 @@ const UserProfile = () => {
 
   if (!profileUser) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-dvh bg-black text-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-zinc-400 text-lg mb-4">{t('profile.userNotFound') || 'המשתמש לא נמצא'}</p>
           <button onClick={() => navigate(-1)} className="text-pink-400 hover:underline">
@@ -111,7 +111,7 @@ const UserProfile = () => {
   return (
     <>
       <SEO title={`${profileUser.nickname} – ${t('profile.title') || 'פרופיל'}`} noindex />
-      <div className="min-h-screen bg-black text-white pb-20" dir="rtl">
+      <div className="min-h-dvh bg-black text-white pb-20" dir="rtl">
         <div className="max-w-2xl mx-auto px-4 pt-6">
 
           <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-zinc-400 hover:text-white mb-4 text-sm">

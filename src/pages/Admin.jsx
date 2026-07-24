@@ -188,7 +188,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white py-6 sm:py-8" dir="rtl">
+    <div className="min-h-dvh bg-black text-white py-6 sm:py-8" dir="rtl">
       <SEO title="Admin" noindex />
       <div className="container mx-auto px-3 sm:px-4 max-w-6xl">
 

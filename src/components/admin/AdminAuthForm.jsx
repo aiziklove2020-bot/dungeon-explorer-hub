@@ -91,7 +91,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
 
   if (isFirstLogin) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center" dir="rtl">
+      <div className="min-h-dvh bg-black text-white flex items-center justify-center" dir="rtl">
         <SEO title="Admin" noindex />
         <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-8 rounded-2xl max-w-md w-full mx-4">
           <div className="text-center mb-8">
@@ -158,7 +158,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center" dir="rtl">
+    <div className="min-h-dvh bg-black text-white flex items-center justify-center" dir="rtl">
       <SEO title="Admin" noindex />
       <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-8 rounded-2xl max-w-md w-full mx-4">
         <div className="text-center mb-8">

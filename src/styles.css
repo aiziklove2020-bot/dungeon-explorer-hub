@@ -142,10 +142,17 @@
     border-color: var(--color-border);
   }
 
+  html {
+    background-color: var(--color-background);
+    color-scheme: dark;
+  }
+
   body {
+    min-height: 100dvh;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-display);
+    overscroll-behavior-y: none;
   }
 }
 
