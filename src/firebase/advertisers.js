@@ -4,6 +4,7 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  deleteDoc,
   query,
   where,
   getDocs,
@@ -94,6 +95,11 @@ export const setAdvertiserStatus = async (advertiserId, status) => {
     throw new Error('Invalid status');
   }
   await updateDoc(doc(db, ADVERTISERS_COLLECTION, advertiserId), { status });
+};
+
+/** Admin-side: permanently delete an advertiser account. */
+export const deleteAdvertiser = async (advertiserId) => {
+  await deleteDoc(doc(db, ADVERTISERS_COLLECTION, advertiserId));
 };
 
 export const getAdvertiserById = async (advertiserId) => {

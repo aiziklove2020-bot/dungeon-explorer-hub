@@ -1,8 +1,8 @@
-import { RotateCcw, Check, X, RotateCw } from 'lucide-react';
+import { RotateCcw, Check, X, RotateCw, Trash2 } from 'lucide-react';
 import AdminLoader from './AdminLoader';
 import PhoneLink from '../PhoneLink';
 import useAdminSection from '../../hooks/useAdminSection';
-import { getAllAdvertisers, setAdvertiserStatus } from '../../firebase/advertisers';
+import { getAllAdvertisers, setAdvertiserStatus, deleteAdvertiser } from '../../firebase/advertisers';
 
 const STATUS_LABEL = {
   pending: 'ממתין לאישור',
@@ -27,6 +27,17 @@ const AdvertisersSection = ({ showSaved }) => {
       showSaved();
     } catch (error) {
       alert(error.message || 'שגיאה בעדכון סטטוס');
+    }
+  };
+
+  const handleDelete = async (id, businessName) => {
+    if (!confirm(`למחוק לצמיתות את המפרסם "${businessName || 'ללא שם עסק'}"?`)) return;
+    try {
+      await deleteAdvertiser(id);
+      await reload();
+      showSaved();
+    } catch (error) {
+      alert(error.message || 'שגיאה במחיקת מפרסם');
     }
   };
 
@@ -93,6 +104,12 @@ const AdvertisersSection = ({ showSaved }) => {
                       <RotateCw size={14} /> איפוס לממתין
                     </button>
                   )}
+                  <button
+                    onClick={() => handleDelete(adv.id, adv.businessName)}
+                    className="bg-zinc-800 hover:bg-red-900 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+                  >
+                    <Trash2 size={14} /> מחיקה
+                  </button>
                 </div>
               </div>
             </div>
