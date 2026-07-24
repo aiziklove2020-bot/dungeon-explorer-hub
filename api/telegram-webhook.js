@@ -54,24 +54,40 @@ function isCronAuthorized(req) {
   return auth === `Bearer ${secret}`;
 }
 
+const CAPTION_LIMIT = 1024; // Telegram caption limit
+
 function buildReminderCaption(party) {
-  const lines = [`🎉 ${party.title || party.name || 'מסיבה'}`];
+  const header = [`🎉 ${party.title || party.name || 'מסיבה'}`];
   if (party.day || party.date) {
     const dateStr = party.date?.toDate ? party.date.toDate().toLocaleDateString('he-IL') : '';
-    lines.push([party.day, dateStr].filter(Boolean).join(' · '));
+    header.push([party.day, dateStr].filter(Boolean).join(' · '));
   }
-  if (party.dj) lines.push(`🎧 ${party.dj}`);
-  if (party.description) lines.push('', party.description.slice(0, 900));
+  if (party.dj) header.push(`🎧 ${party.dj}`);
+
+  let linkLine;
   if (party.partyType === 'external' && party.registrationLink) {
-    lines.push('', `הרשמה: ${party.registrationLink}`);
+    linkLine = `הרשמה: ${party.registrationLink}`;
   } else if (party.whatsappNumber) {
     const digits = String(party.whatsappNumber).replace(/\D/g, '');
     const waNumber = digits.startsWith('0') ? `972${digits.slice(1)}` : digits;
-    lines.push('', `יצירת קשר בוואטסאפ: https://wa.me/${waNumber}`);
+    linkLine = `יצירת קשר בוואטסאפ: https://wa.me/${waNumber}`;
   } else {
-    lines.push('', 'הרשמה: https://www.libralparty.net/register');
+    linkLine = `הרשמה: https://www.libralparty.net/register`;
   }
-  return lines.join('\n').slice(0, 1024); // Telegram caption limit
+
+  // Reserve space for the header and link line first, so the link (added last)
+  // can never be pushed past CAPTION_LIMIT by a long description — only the
+  // description itself gets truncated to whatever budget remains.
+  const headerText = header.join('\n');
+  const fixedLength = headerText.length + 2 /* blank line before description */ + 2 /* blank line before link */ + linkLine.length;
+  const descBudget = Math.max(0, CAPTION_LIMIT - fixedLength);
+
+  const lines = [headerText];
+  if (party.description && descBudget > 0) {
+    lines.push('', party.description.slice(0, descBudget));
+  }
+  lines.push('', linkLine);
+  return lines.join('\n').slice(0, CAPTION_LIMIT);
 }
 
 async function sendReminderToChat(botToken, chatId, party) {
