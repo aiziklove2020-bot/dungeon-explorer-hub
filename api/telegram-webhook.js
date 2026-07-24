@@ -64,16 +64,11 @@ function buildReminderCaption(party) {
   }
   if (party.dj) header.push(`🎧 ${party.dj}`);
 
-  let linkLine;
-  if (party.partyType === 'external' && party.registrationLink) {
-    linkLine = `הרשמה: ${party.registrationLink}`;
-  } else if (party.whatsappNumber) {
-    const digits = String(party.whatsappNumber).replace(/\D/g, '');
-    const waNumber = digits.startsWith('0') ? `972${digits.slice(1)}` : digits;
-    linkLine = `יצירת קשר בוואטסאפ: https://wa.me/${waNumber}`;
-  } else {
-    linkLine = `הרשמה: https://www.libralparty.net/register`;
-  }
+  // Always point to the site's own registration page, regardless of whether
+  // this party's actual registration is external/WhatsApp — the Telegram
+  // post intentionally doesn't expose those direct links, so people go
+  // through the site.
+  const linkLine = `הרשמה: https://www.libralparty.net/register`;
 
   // Reserve space for the header and link line first, so the link (added last)
   // can never be pushed past CAPTION_LIMIT by a long description — only the
