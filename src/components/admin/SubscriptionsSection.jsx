@@ -94,6 +94,69 @@ const SubscriptionsSection = ({ showSaved }) => {
     });
   }, [users, activeTab, filterStatus, searchQuery]);
 
+  // Group + sort so it's obvious at a glance who holds which tier — the
+  // admin's actual complaint was "I can't tell who has a year vs a month, and
+  // I can't tell subscribers apart from plain registered site users" (this
+  // list already only shows users with an actual parties/exchangeParties
+  // subscription record, never plain registered accounts).
+  const TIER_GROUPS = [
+    { id: 'gold', label: '⭐ זהב' },
+    { id: 'year', label: '📅 שנה' },
+    { id: 'halfYear', label: '📅 חצי שנה' },
+    { id: 'month', label: '📅 חודש' },
+    { id: 'day', label: '🌓 יום אחד' },
+    { id: 'expired', label: '⛔ פג תוקף' },
+    { id: 'other', label: 'אחר' },
+  ];
+
+  const groupOf = (info) => {
+    if (!info.exists) return null;
+    if (info.isGold) return 'gold';
+    if (info.isExpired) return 'expired';
+    if (info.tier && TIER_GROUPS.some(g => g.id === info.tier)) return info.tier;
+    return 'other';
+  };
+
+  const groupedUsers = useMemo(() => {
+    const singleKind = activeTab === 'parties' || activeTab === 'exchangeParties';
+    const groups = new Map(TIER_GROUPS.map(g => [g.id, []]));
+
+    processedUsers.forEach(u => {
+      let key;
+      if (singleKind) {
+        key = groupOf(u.subs[activeTab]);
+      } else {
+        // "all" tab: a user can hold two different tiers (one per kind) —
+        // show them under whichever is "best", active status wins over expired.
+        const p = groupOf(u.subs.parties);
+        const e = groupOf(u.subs.exchangeParties);
+        const priority = TIER_GROUPS.map(g => g.id);
+        const candidates = [p, e].filter(Boolean);
+        key = candidates.sort((a, b) => priority.indexOf(a) - priority.indexOf(b))[0];
+      }
+      if (key && groups.has(key)) groups.get(key).push(u);
+    });
+
+    const expirySort = (kind) => (a, b) => {
+      const ea = a.subs[kind]?.expiryDate?.getTime?.() ?? Infinity;
+      const eb = b.subs[kind]?.expiryDate?.getTime?.() ?? Infinity;
+      return ea - eb;
+    };
+    const byName = (a, b) => (a.name || '').localeCompare(b.name || '', 'he');
+
+    groups.forEach((list, key) => {
+      if (singleKind && key !== 'gold') {
+        list.sort(expirySort(activeTab));
+      } else {
+        list.sort(byName);
+      }
+    });
+
+    return TIER_GROUPS
+      .map(g => ({ ...g, users: groups.get(g.id) }))
+      .filter(g => g.users.length > 0);
+  }, [processedUsers, activeTab]);
+
   const stats = useMemo(() => {
     if (!users) return { total: 0, active: 0, gold: 0, expiringSoon: 0, expired: 0 };
     
@@ -184,6 +247,9 @@ const SubscriptionsSection = ({ showSaved }) => {
               <span>פגים: <span className="text-red-400 font-medium">{stats.expired}</span></span>
             </p>
           )}
+          <p className="text-xs text-zinc-500 mt-1">
+            כאן מוצגים רק משתמשים עם מנוי בתשלום (מסיבות / מסיבות חילופים), מקובצים לפי סוג המנוי. משתמש שרק רשום לאתר בלי מנוי — זה עניין נפרד, ומופיע ב"ניהול משתמשים" ולא כאן.
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button onClick={reload} className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
@@ -256,32 +322,42 @@ const SubscriptionsSection = ({ showSaved }) => {
           <p>לא נמצאו מנויים התואמים לסינון.</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {processedUsers.map(u => (
-            <div key={u.id} className="bg-black/40 border border-zinc-800 p-3 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <strong className="text-lg text-white">{u.name}</strong>
-                  {u.level === 'admin' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-600">Admin</span>}
-                  {u.level === 'blocked' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-900">Blocked</span>}
-                </div>
-                <div className="text-sm text-zinc-400 flex gap-3">
-                  <span><PhoneLink phone={u.phoneNumber}>{u.phoneNumber}</PhoneLink></span>
-                  {u.telegramUsername && <span>@{u.telegramUsername}</span>}
-                </div>
-                
-                <div className="mt-3 flex flex-col gap-1.5">
-                  {(activeTab === 'all' || activeTab === 'parties') && u.subs.parties.exists && (
-                    <SubscriptionBadge user={u} kind="parties" />
-                  )}
-                  {(activeTab === 'all' || activeTab === 'exchangeParties') && u.subs.exchangeParties.exists && (
-                    <SubscriptionBadge user={u} kind="exchangeParties" />
-                  )}
-                </div>
-              </div>
-              
-              <div className="w-full md:w-auto self-end md:self-center">
-                <SubscriptionEditor onAction={(kind, action, payload) => handleAction(u.id, kind, action, payload)} />
+        <div className="space-y-6">
+          {groupedUsers.map(group => (
+            <div key={group.id}>
+              <h3 className="text-sm font-bold text-zinc-400 mb-2 flex items-center gap-2">
+                {group.label}
+                <span className="text-xs font-normal text-zinc-600">({group.users.length})</span>
+              </h3>
+              <div className="space-y-3">
+                {group.users.map(u => (
+                  <div key={u.id} className="bg-black/40 border border-zinc-800 p-3 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <strong className="text-lg text-white">{u.name}</strong>
+                        {u.level === 'admin' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-600">Admin</span>}
+                        {u.level === 'blocked' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-900">Blocked</span>}
+                      </div>
+                      <div className="text-sm text-zinc-400 flex gap-3">
+                        <span><PhoneLink phone={u.phoneNumber}>{u.phoneNumber}</PhoneLink></span>
+                        {u.telegramUsername && <span>@{u.telegramUsername}</span>}
+                      </div>
+
+                      <div className="mt-3 flex flex-col gap-1.5">
+                        {(activeTab === 'all' || activeTab === 'parties') && u.subs.parties.exists && (
+                          <SubscriptionBadge user={u} kind="parties" />
+                        )}
+                        {(activeTab === 'all' || activeTab === 'exchangeParties') && u.subs.exchangeParties.exists && (
+                          <SubscriptionBadge user={u} kind="exchangeParties" />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="w-full md:w-auto self-end md:self-center">
+                      <SubscriptionEditor onAction={(kind, action, payload) => handleAction(u.id, kind, action, payload)} />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
