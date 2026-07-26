@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { RotateCcw, Search, Download, Upload, Shield, ShieldOff, Ban, CheckCircle, Trash2, MessageSquare, MessageSquareOff, KeyRound, Mail, MailCheck, Database, UserCog } from 'lucide-react';
+import { RotateCcw, Search, Download, Upload, UserCog } from 'lucide-react';
 import UserCrmModal from './UserCrmModal';
 import { useLanguage } from '../../i18n/LanguageContext';
 import Loader from '../Loader';
@@ -19,20 +19,6 @@ import {
   getBalanceMatches, 
   saveBalanceMatches 
 } from '../../firebase/parties';
-import {
-  getAllForumUsers,
-  blockForumUser,
-  unblockForumUser,
-  setForumUserRole,
-  deleteForumUser,
-  linkForumUserToSiteUser,
-  registerForumUser,
-  setForumUserPasswordWithReset,
-  setForumUserEmail,
-  adminMarkForumEmailVerified,
-  backfillForumNicknameLower
-} from '../../firebase/forumUsers';
-import { purgeForumUserFromChat } from '../../firebase/liveChat';
 import SubscriptionBadge from './SubscriptionBadge';
 import SubscriptionEditor from './SubscriptionEditor';
 import { addOrExtendSubscription, setSubscriptionExpiry, removeSubscription, getSubscription } from '../../firebase/subscriptions';
@@ -45,10 +31,8 @@ const UsersSection = ({ showSaved }) => {
   const [crmUserId, setCrmUserId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
-  const [forumFilter, setForumFilter] = useState('');
   const [subFilter, setSubFilter] = useState('');
   const [importing, setImporting] = useState(false);
-  const [backfilling, setBackfilling] = useState(false);
   const fileInputRef = useRef(null);
   const [editUserForm, setEditUserForm] = useState({
     name: '',
@@ -57,9 +41,6 @@ const UsersSection = ({ showSaved }) => {
     telegramUsername: '',
     subscriptionEndDate: ''
   });
-
-  // Forum users mapped by linkedUserId for quick lookup
-  const [forumUsersMap, setForumUsersMap] = useState({});
 
   const toDateInputValue = (value) => {
     if (!value) return '';
@@ -82,25 +63,6 @@ const UsersSection = ({ showSaved }) => {
   }, [usersData]);
 
   const loadUsers = reloadUsers;
-
-  const loadForumUsers = async () => {
-    try {
-      const all = await getAllForumUsers();
-      const map = {};
-      all.forEach(fu => {
-        if (fu.linkedUserId) {
-          map[fu.linkedUserId] = fu;
-        }
-      });
-      setForumUsersMap(map);
-    } catch (err) {
-      console.error('Error loading forum users:', err);
-    }
-  };
-
-  useEffect(() => {
-    loadForumUsers();
-  }, []);
 
   const handleEditUser = (user) => {
     setEditingUser(user);
@@ -263,187 +225,6 @@ const UsersSection = ({ showSaved }) => {
     }
   };
 
-  // ========== Forum user actions (inline on site user card) ==========
-
-  /** Promote a site user to also be a forum user. The admin chooses the nickname so the
-   * new identity feels continuous with the existing site user (default = name). A short
-   * temporary password is generated and the user is forced to set their own on next login.
-   */
-  const handleAddForumAccount = async (siteUser) => {
-    try {
-      if (forumUsersMap[siteUser.id]) {
-        alert(t('admin.forumAccountAlreadyExists') || 'למשתמש האתר כבר קיים חשבון פורום מקושר.');
-        return;
-      }
-      const defaultNick = (siteUser.name || siteUser.phoneNumber?.slice(-4) || 'user').slice(0, 30);
-      const nickname = window.prompt(
-        t('admin.transferForumNicknamePrompt') || 'בחר כינוי לחשבון הפורום של המשתמש:',
-        defaultNick
-      );
-      if (nickname == null) return;
-      const cleanNick = nickname.trim();
-      if (cleanNick.length < 2) {
-        alert(t('admin.forumNicknameTooShort') || 'כינוי חייב להכיל לפחות 2 תווים');
-        return;
-      }
-      if (!/^[\p{L}\p{N}_-]+$/u.test(cleanNick)) {
-        alert(t('admin.forumNicknameInvalidChars') || 'כינוי יכול להכיל אותיות, ספרות, מקף וקו תחתון בלבד');
-        return;
-      }
-      const makeAdmin = window.confirm(t('admin.transferForumAsAdminConfirm') || 'להפוך את המשתמש למנהל פורום?');
-      const tempPassword = Math.random().toString(36).slice(-8);
-      const newUser = await registerForumUser(cleanNick, tempPassword);
-      await linkForumUserToSiteUser(newUser.id, siteUser.id);
-      await setForumUserPasswordWithReset(newUser.id, tempPassword);
-      if (makeAdmin) await setForumUserRole(newUser.id, 'forumAdmin');
-      alert(
-        `${t('admin.forumAccountCreated') || 'חשבון פורום נוצר ויחובר לחשבון האתר'}\n` +
-          `${t('admin.forumNickname') || 'כינוי'}: ${cleanNick}\n` +
-          `${t('admin.forumTempPassword') || 'סיסמה זמנית'}: ${tempPassword}\n` +
-          `${t('admin.forumMustResetNotice') || 'המשתמש יחויב לבחור סיסמה חדשה בהתחברות הבאה.'}`
-      );
-      await loadForumUsers();
-      showSaved();
-    } catch (err) {
-      alert(err.message || 'שגיאה');
-    }
-  };
-
-  const handleToggleForumBlock = async (fu) => {
-    try {
-      if (fu.isBlocked) { await unblockForumUser(fu.id); } else { await blockForumUser(fu.id); }
-      await loadForumUsers();
-      showSaved();
-    } catch (err) { alert(err.message || 'שגיאה'); }
-  };
-
-  const handleToggleForumRole = async (fu) => {
-    try {
-      const newRole = fu.role === 'forumAdmin' ? 'user' : 'forumAdmin';
-      await setForumUserRole(fu.id, newRole);
-      await loadForumUsers();
-      showSaved();
-    } catch (err) { alert(err.message || 'שגיאה'); }
-  };
-
-  const handleDeleteForumUser = async (fu) => {
-    if (!window.confirm(`${t('admin.confirmDeleteForumUser') || 'למחוק משתמש פורום'} "${fu.nickname}"?`)) return;
-    try {
-      // Scrub the chat first so the deleted user's messages, room
-      // participations, and private rooms are gone before the forum-user
-      // doc disappears. If the chat purge fails we still proceed with
-      // the forum-user deletion (admin already confirmed) and surface a
-      // warning — leaving an orphaned UID in main chat is worse than the
-      // partial-cleanup edge case here.
-      try {
-        await purgeForumUserFromChat(fu.id, { hardDeleteMessages: true });
-      } catch (chatErr) {
-        console.warn('purgeForumUserFromChat failed; continuing with deleteForumUser:', chatErr?.message);
-      }
-      await deleteForumUser(fu.id);
-      await loadForumUsers();
-      showSaved();
-    } catch (err) { alert(err.message || 'שגיאה'); }
-  };
-
-  // Kick from chat — softer than deleteForumUser. Wipes participant rows
-  // and private-room memberships but leaves the forum account intact and
-  // keeps the user's authored messages. Re-entering the site auto-rejoins
-  // the main chat (lazy joinRoom on mount); private rooms still need a
-  // fresh invite.
-  const handleKickFromChat = async (fu) => {
-    const confirmMsg = `${t('admin.confirmKickFromChat') || 'להוציא את המשתמש מהצ׳אט?'} "${fu.nickname}"\n\n${t('admin.kickFromChatHint') || 'המשתמש יוסר מכל החדרים. אם הוא ייכנס שוב — הוא יתווסף אוטומטית לצ׳אט הראשי.'}`;
-    if (!window.confirm(confirmMsg)) return;
-    try {
-      await purgeForumUserFromChat(fu.id, { hardDeleteMessages: false });
-      showSaved();
-    } catch (err) { alert(err.message || 'שגיאה'); }
-  };
-
-  const handleResetForumPassword = async (fu) => {
-    const newPassword = prompt(
-      t('admin.enterNewForumPasswordResetHint') ||
-        'הזן סיסמה זמנית למשתמש הפורום (הוא יחויב לבחור סיסמה חדשה בהתחברות הבאה):'
-    );
-    if (!newPassword) return;
-    if (newPassword.length < 4) {
-      alert(t('admin.forumPasswordTooShort') || 'סיסמה חייבת להכיל לפחות 4 תווים');
-      return;
-    }
-    try {
-      await setForumUserPasswordWithReset(fu.id, newPassword);
-      alert(
-        `${t('admin.forumPasswordResetDone') || 'הסיסמה אופסה.'} ` +
-          (t('admin.forumMustResetNotice') ||
-            'המשתמש יחויב לבחור סיסמה חדשה בהתחברות הבאה.')
-      );
-      await loadForumUsers();
-      showSaved();
-    } catch (err) {
-      alert(err.message || 'שגיאה');
-    }
-  };
-
-  const handleSetForumEmail = async (fu) => {
-    const current = fu.email || '';
-    const next = window.prompt(
-      t('admin.setForumEmailPrompt') || 'הזן כתובת אימייל למשתמש הפורום (השאר ריק כדי להסיר):',
-      current
-    );
-    if (next == null) return;
-    try {
-      await setForumUserEmail(fu.id, next.trim());
-      alert(
-        next.trim()
-          ? (t('admin.forumEmailSet') || 'האימייל עודכן. המשתמש יצטרך לאמת אותו לפני שיוכל לבקש איפוס סיסמה.')
-          : (t('admin.forumEmailCleared') || 'האימייל הוסר.')
-      );
-      await loadForumUsers();
-      showSaved();
-    } catch (err) {
-      alert(err.message || 'שגיאה');
-    }
-  };
-
-  const handleForceVerifyEmail = async (fu) => {
-    if (!fu.email) {
-      alert(t('admin.forumEmailMissing') || 'למשתמש אין כתובת אימייל. הגדר אותה קודם.');
-      return;
-    }
-    if (!window.confirm(t('admin.forceVerifyConfirm') || 'לסמן ידנית את האימייל כמאומת?')) return;
-    try {
-      await adminMarkForumEmailVerified(fu.id);
-      await loadForumUsers();
-      showSaved();
-    } catch (err) {
-      alert(err.message || 'שגיאה');
-    }
-  };
-
-  const handleBackfillNicknameLower = async () => {
-    if (backfilling) return;
-    // Yield to the next paint before opening the synchronous confirm() so the
-    // click handler returns immediately. Without this, INP is measured against
-    // the time the user spends reading the dialog (~2s) and the metric is bad
-    // even though our own work is fast.
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    if (!window.confirm(t('admin.backfillNicknameLowerConfirm') || 'להריץ Backfill על כל משתמשי הפורום (nicknameLower)?')) return;
-    setBackfilling(true);
-    try {
-      const result = await backfillForumNicknameLower();
-      await loadForumUsers();
-      showSaved();
-      alert(
-        `${t('admin.backfillDone') || 'הסתיים.'}\n` +
-        `Updated: ${result.updated}\nSkipped: ${result.skipped}\nTotal: ${result.total}`
-      );
-    } catch (err) {
-      alert(err.message || 'שגיאה');
-    } finally {
-      setBackfilling(false);
-    }
-  };
-
   // ========== Filtering ==========
 
   const filteredUsers = users.filter(u => {
@@ -474,10 +255,6 @@ const UsersSection = ({ showSaved }) => {
         if (!isPartiesExpiring && !isExchangeExpiring) return false;
       }
     }
-    const fu = forumUsersMap[u.id];
-    if (forumFilter === 'hasForum' && !fu) return false;
-    if (forumFilter === 'forumAdmin' && (!fu || fu.role !== 'forumAdmin')) return false;
-    if (forumFilter === 'noForum' && fu) return false;
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -524,17 +301,6 @@ const UsersSection = ({ showSaved }) => {
             {t('admin.importJson') || 'ייבא JSON'}
           </button>
           <input ref={fileInputRef} type="file" accept=".json" onChange={handleImportUsers} className="hidden" />
-          <button
-            onClick={handleBackfillNicknameLower}
-            disabled={backfilling}
-            className="bg-zinc-700 hover:bg-zinc-600 disabled:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold flex items-center gap-2 text-xs md:text-sm"
-            title={t('admin.backfillNicknameLowerHint') || 'מעדכן nicknameLower על כל משתמשי הפורום'}
-          >
-            {backfilling ? <Loader size="small" /> : <Database size={14} className="md:w-4 md:h-4" />}
-            {backfilling
-              ? (t('admin.backfillRunning') || 'מריץ Backfill...')
-              : (t('admin.backfillNicknameLower') || 'תיקון Nickname Lower')}
-          </button>
         </div>
       </div>
 
@@ -573,21 +339,6 @@ const UsersSection = ({ showSaved }) => {
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-zinc-500 text-sm font-bold">{t('admin.filterByForum') || 'סינון לפי פורום'}:</span>
-        <button type="button" onClick={() => setForumFilter('')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${forumFilter === '' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
-          {t('admin.filterAll') || 'הכל'}
-        </button>
-        <button type="button" onClick={() => setForumFilter('hasForum')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${forumFilter === 'hasForum' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
-          {t('admin.filterForumHas') || 'עם חשבון פורום'}
-        </button>
-        <button type="button" onClick={() => setForumFilter('forumAdmin')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${forumFilter === 'forumAdmin' ? 'bg-purple-700 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
-          {t('admin.filterForumAdmin') || 'מנהל פורום'}
-        </button>
-        <button type="button" onClick={() => setForumFilter('noForum')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${forumFilter === 'noForum' ? 'bg-zinc-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
-          {t('admin.filterForumNone') || 'ללא חשבון פורום'}
-        </button>
-      </div>
 
       <div className="flex flex-wrap gap-2 items-center">
         <span className="text-zinc-500 text-sm font-bold">{t('admin.filterBySub') || 'סינון לפי מנוי'}:</span>
@@ -614,7 +365,7 @@ const UsersSection = ({ showSaved }) => {
         </button>
       </div>
 
-      {(searchQuery || typeFilter || forumFilter || subFilter) && (
+      {(searchQuery || typeFilter || subFilter) && (
         <p className="text-sm text-zinc-400">
           {t('admin.showingResults') || 'מציג'} {filteredUsers.length} {t('admin.outOf') || 'מתוך'} {users.length} {t('admin.users') || 'משתמשים'}
         </p>
@@ -633,7 +384,6 @@ const UsersSection = ({ showSaved }) => {
       ) : (
         <div className="space-y-4">
           {filteredUsers.map(u => {
-            const fu = forumUsersMap[u.id] || null;
             return (
               <div key={u.id} className="bg-black/40 border border-zinc-800 p-3 md:p-4 rounded-xl">
                 {editingUser?.id === u.id ? (
@@ -717,115 +467,6 @@ const UsersSection = ({ showSaved }) => {
                         </button>
                       </div>
                     </div>
-
-                    {/* Forum/Blog account info - inline */}
-                    {fu ? (
-                      <div className="mt-3 pt-3 border-t border-zinc-700/50">
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <MessageSquare size={14} className="text-purple-400" />
-                          <span className="text-purple-300 text-xs font-bold">{t('admin.forumAccount') || 'חשבון פורום'}</span>
-                          <span className="text-white text-sm font-bold">{fu.nickname}</span>
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${fu.role === 'forumAdmin' ? 'bg-purple-600' : 'bg-zinc-700'}`}>
-                            {fu.role === 'forumAdmin' ? (t('admin.forumAdmin') || 'מנהל פורום') : (t('admin.forumUser') || 'משתמש')}
-                          </span>
-                          {fu.isBlocked && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-900">{t('admin.blocked') || 'חסום'}</span>
-                          )}
-                        </div>
-                        {/* Inline email + verification status; gives admins
-                         * an at-a-glance view without hovering the edit button. */}
-                        <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
-                          <Mail size={12} className="text-zinc-500" />
-                          {fu.email ? (
-                            <>
-                              <span className="text-zinc-300 font-mono ltr:text-left rtl:text-right" dir="ltr">
-                                {fu.email}
-                              </span>
-                              {fu.emailVerified ? (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-700 text-white">
-                                  {t('admin.emailVerified') || 'מאומת'}
-                                </span>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-700 text-white">
-                                  {t('admin.emailUnverified') || 'לא מאומת'}
-                                </span>
-                              )}
-                            </>
-                          ) : (
-                            <span className="text-zinc-500 italic">
-                              {t('admin.emailMissing') || 'אין אימייל'}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={() => handleToggleForumRole(fu)}
-                            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors ${fu.role === 'forumAdmin' ? 'bg-zinc-700 hover:bg-zinc-600 text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'}`}
-                          >
-                            {fu.role === 'forumAdmin' ? <ShieldOff size={11} /> : <Shield size={11} />}
-                            {fu.role === 'forumAdmin' ? (t('admin.removeForumAdmin') || 'הסר מנהל') : (t('admin.makeForumAdmin') || 'הפוך למנהל')}
-                          </button>
-                          <button
-                            onClick={() => handleToggleForumBlock(fu)}
-                            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors ${fu.isBlocked ? 'bg-green-700 hover:bg-green-600 text-white' : 'bg-red-900 hover:bg-red-800 text-white'}`}
-                          >
-                            {fu.isBlocked ? <CheckCircle size={11} /> : <Ban size={11} />}
-                            {fu.isBlocked ? (t('admin.forumUnblock') || 'בטל חסימה בפורום') : (t('admin.forumBlock') || 'חסום בפורום')}
-                          </button>
-                          <button
-                            onClick={() => handleResetForumPassword(fu)}
-                            className="flex items-center gap-1 bg-zinc-700 hover:bg-zinc-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
-                          >
-                            <KeyRound size={11} />
-                            {t('admin.resetForumPassword') || 'אפס סיסמה'}
-                          </button>
-                          <button
-                            onClick={() => handleSetForumEmail(fu)}
-                            className="flex items-center gap-1 bg-zinc-700 hover:bg-zinc-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
-                            title={fu.email || ''}
-                          >
-                            <Mail size={11} />
-                            {fu.email
-                              ? `${t('admin.editForumEmail') || 'ערוך אימייל'}${fu.emailVerified ? ' ✓' : ''}`
-                              : (t('admin.addForumEmail') || 'הוסף אימייל')}
-                          </button>
-                          {fu.email && !fu.emailVerified && (
-                            <button
-                              onClick={() => handleForceVerifyEmail(fu)}
-                              className="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
-                            >
-                              <MailCheck size={11} />
-                              {t('admin.forceVerifyEmail') || 'סמן כמאומת'}
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleKickFromChat(fu)}
-                            className="flex items-center gap-1 bg-amber-700 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
-                            title={t('admin.kickFromChatHint') || 'יוסר מכל חדרי הצ׳אט; אם ייכנס שוב — יתווסף אוטומטית לצ׳אט הראשי.'}
-                          >
-                            <MessageSquareOff size={11} />
-                            {t('admin.kickFromChat') || 'הוצא מהצ׳אט'}
-                          </button>
-                          <button
-                            onClick={() => handleDeleteForumUser(fu)}
-                            className="flex items-center gap-1 bg-red-900/60 hover:bg-red-800 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
-                          >
-                            <Trash2 size={11} />
-                            {t('admin.deleteForumAccount') || 'מחק חשבון פורום'}
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="mt-3 pt-3 border-t border-zinc-700/50">
-                        <button
-                          onClick={() => handleAddForumAccount(u)}
-                          className="flex items-center gap-1.5 text-zinc-500 hover:text-purple-300 text-xs transition-colors"
-                        >
-                          <Shield size={12} />
-                          {t('admin.transferToForum') || 'הוסף חשבון פורום למשתמש זה'}
-                        </button>
-                      </div>
-                    )}
                   </>
                 )}
               </div>

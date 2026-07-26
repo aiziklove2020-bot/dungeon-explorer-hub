@@ -13,6 +13,7 @@ export const adminTabs = [
   { id: 'store',    label: 'חנות' },
   { id: 'workshops',label: 'סדנאות' },
   { id: 'forum',    label: 'פורום' },
+  { id: 'forumUsers', label: 'משתמשי פורום' },
   { id: 'liveChat', label: 'צ׳אט' },
   { id: 'chatReports', label: 'דיווחי צ׳אט' },
   { id: 'blog',     label: 'בלוג' },

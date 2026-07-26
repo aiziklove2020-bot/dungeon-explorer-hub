@@ -1,0 +1,364 @@
+import { useState, useEffect } from 'react';
+import { RotateCcw, Search, Shield, ShieldOff, Ban, CheckCircle, Trash2, KeyRound, Mail, MailCheck, MessageSquareOff, Link2 } from 'lucide-react';
+import { useLanguage } from '../../i18n/LanguageContext';
+import AdminLoader from './AdminLoader';
+import PhoneLink from '../PhoneLink';
+import { getAllUsers } from '../../firebase/users';
+import {
+  getAllForumUsers,
+  blockForumUser,
+  unblockForumUser,
+  setForumUserRole,
+  deleteForumUser,
+  linkForumUserToSiteUser,
+  registerForumUser,
+  setForumUserPasswordWithReset,
+  setForumUserEmail,
+  adminMarkForumEmailVerified,
+  backfillForumNicknameLower,
+} from '../../firebase/forumUsers';
+import { purgeForumUserFromChat } from '../../firebase/liveChat';
+
+/**
+ * Fully independent from the site/subscriptions user list (UsersSection):
+ * forum accounts are a separate identity system, and mixing their
+ * management inline into the site-user cards made it impossible to tell
+ * which controls affected which system. This section owns forum accounts
+ * end-to-end; the only cross-reference is a read-only "linked site user"
+ * line, purely for context.
+ */
+const ForumUsersSection = ({ showSaved }) => {
+  const { t } = useLanguage();
+  const [forumUsers, setForumUsers] = useState([]);
+  const [siteUsersMap, setSiteUsersMap] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState(''); // '', 'forumAdmin', 'unlinked'
+  const [backfilling, setBackfilling] = useState(false);
+
+  // Link-new-account tool
+  const [linkSearch, setLinkSearch] = useState('');
+  const [linkResults, setLinkResults] = useState([]);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const [fu, siteUsers] = await Promise.all([getAllForumUsers(), getAllUsers()]);
+      setForumUsers(fu);
+      const map = {};
+      siteUsers.forEach((u) => { map[u.id] = u; });
+      setSiteUsersMap(map);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleToggleBlock = async (fu) => {
+    try {
+      if (fu.isBlocked) { await unblockForumUser(fu.id); } else { await blockForumUser(fu.id); }
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleToggleRole = async (fu) => {
+    try {
+      const newRole = fu.role === 'forumAdmin' ? 'user' : 'forumAdmin';
+      await setForumUserRole(fu.id, newRole);
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleDelete = async (fu) => {
+    if (!window.confirm(`למחוק משתמש פורום "${fu.nickname}"?`)) return;
+    try {
+      try {
+        await purgeForumUserFromChat(fu.id, { hardDeleteMessages: true });
+      } catch (chatErr) {
+        console.warn('purgeForumUserFromChat failed; continuing with deleteForumUser:', chatErr?.message);
+      }
+      await deleteForumUser(fu.id);
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleKickFromChat = async (fu) => {
+    if (!window.confirm(`להוציא את "${fu.nickname}" מהצ'אט? המשתמש יוסר מכל החדרים. אם ייכנס שוב — יתווסף אוטומטית לצ'אט הראשי.`)) return;
+    try {
+      await purgeForumUserFromChat(fu.id, { hardDeleteMessages: false });
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleResetPassword = async (fu) => {
+    const newPassword = prompt('הזן סיסמה זמנית למשתמש הפורום (הוא יחויב לבחור סיסמה חדשה בהתחברות הבאה):');
+    if (!newPassword) return;
+    if (newPassword.length < 4) { alert('סיסמה חייבת להכיל לפחות 4 תווים'); return; }
+    try {
+      await setForumUserPasswordWithReset(fu.id, newPassword);
+      alert('הסיסמה אופסה. המשתמש יחויב לבחור סיסמה חדשה בהתחברות הבאה.');
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleSetEmail = async (fu) => {
+    const next = window.prompt('הזן כתובת אימייל למשתמש הפורום (השאר ריק כדי להסיר):', fu.email || '');
+    if (next == null) return;
+    try {
+      await setForumUserEmail(fu.id, next.trim());
+      alert(next.trim() ? 'האימייל עודכן. המשתמש יצטרך לאמת אותו לפני שיוכל לבקש איפוס סיסמה.' : 'האימייל הוסר.');
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleForceVerify = async (fu) => {
+    if (!fu.email) { alert('למשתמש אין כתובת אימייל. הגדר אותה קודם.'); return; }
+    if (!window.confirm('לסמן ידנית את האימייל כמאומת?')) return;
+    try {
+      await adminMarkForumEmailVerified(fu.id);
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleBackfill = async () => {
+    if (backfilling) return;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    if (!window.confirm('להריץ Backfill על כל משתמשי הפורום (nicknameLower)?')) return;
+    setBackfilling(true);
+    try {
+      const result = await backfillForumNicknameLower();
+      await load();
+      showSaved();
+      alert(`הסתיים.\nUpdated: ${result.updated}\nSkipped: ${result.skipped}\nTotal: ${result.total}`);
+    } catch (err) {
+      alert(err.message || 'שגיאה');
+    } finally {
+      setBackfilling(false);
+    }
+  };
+
+  // ---- Link a new forum account to an existing site user ----
+
+  const runLinkSearch = () => {
+    const q = linkSearch.trim().toLowerCase();
+    if (!q) { setLinkResults([]); return; }
+    const linkedIds = new Set(forumUsers.map((fu) => fu.linkedUserId).filter(Boolean));
+    const matches = Object.values(siteUsersMap).filter((u) =>
+      !linkedIds.has(u.id) &&
+      ((u.name || '').toLowerCase().includes(q) || (u.phoneNumber || '').includes(q))
+    ).slice(0, 10);
+    setLinkResults(matches);
+  };
+
+  const handleCreateAndLink = async (siteUser) => {
+    try {
+      const defaultNick = (siteUser.name || siteUser.phoneNumber?.slice(-4) || 'user').slice(0, 30);
+      const nickname = window.prompt('בחר כינוי לחשבון הפורום של המשתמש:', defaultNick);
+      if (nickname == null) return;
+      const cleanNick = nickname.trim();
+      if (cleanNick.length < 2) { alert('כינוי חייב להכיל לפחות 2 תווים'); return; }
+      if (!/^[\p{L}\p{N}_-]+$/u.test(cleanNick)) { alert('כינוי יכול להכיל אותיות, ספרות, מקף וקו תחתון בלבד'); return; }
+      const makeAdmin = window.confirm('להפוך את המשתמש למנהל פורום?');
+      const tempPassword = Math.random().toString(36).slice(-8);
+      const newUser = await registerForumUser(cleanNick, tempPassword);
+      await linkForumUserToSiteUser(newUser.id, siteUser.id);
+      await setForumUserPasswordWithReset(newUser.id, tempPassword);
+      if (makeAdmin) await setForumUserRole(newUser.id, 'forumAdmin');
+      alert(
+        `חשבון פורום נוצר ויחובר לחשבון האתר\n` +
+        `כינוי: ${cleanNick}\n` +
+        `סיסמה זמנית: ${tempPassword}\n` +
+        `המשתמש יחויב לבחור סיסמה חדשה בהתחברות הבאה.`
+      );
+      setLinkSearch('');
+      setLinkResults([]);
+      await load();
+      showSaved();
+    } catch (err) {
+      alert(err.message || 'שגיאה');
+    }
+  };
+
+  const filteredForumUsers = forumUsers.filter((fu) => {
+    if (roleFilter === 'forumAdmin' && fu.role !== 'forumAdmin') return false;
+    if (roleFilter === 'unlinked' && fu.linkedUserId) return false;
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (fu.nickname || '').toLowerCase().includes(q) || (fu.email || '').toLowerCase().includes(q);
+  });
+
+  return (
+    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold">משתמשי פורום</h2>
+          <p className="text-xs text-zinc-500 mt-1">
+            חשבונות פורום (כינוי + סיסמה) — מערכת נפרדת לגמרי ממשתמשי האתר/מנויים ב"ניהול משתמשים". קישור לחשבון אתר מוצג כאן רק לצורך התמצאות.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={load} className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
+            <RotateCcw size={14} /> רענן
+          </button>
+          <button onClick={handleBackfill} disabled={backfilling} className="bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 text-white px-3 py-1.5 rounded-xl font-bold text-sm">
+            {backfilling ? 'מריץ...' : 'Backfill nicknameLower'}
+          </button>
+        </div>
+      </div>
+
+      {/* Link new account tool */}
+      <div className="bg-black/20 border border-zinc-800 rounded-xl p-3 space-y-2">
+        <label className="text-xs uppercase font-bold text-zinc-500 flex items-center gap-1.5">
+          <Link2 size={14} /> צור חשבון פורום חדש ושייך למשתמש אתר קיים
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={linkSearch}
+            onChange={(e) => setLinkSearch(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && runLinkSearch()}
+            placeholder="חפש לפי שם או טלפון..."
+            className="flex-1 bg-black/40 border border-zinc-800 p-2.5 rounded-xl focus:border-red-600 outline-none text-white text-right text-sm"
+          />
+          <button onClick={runLinkSearch} className="bg-zinc-700 hover:bg-zinc-600 text-white px-4 rounded-xl font-bold text-sm">
+            <Search size={16} />
+          </button>
+        </div>
+        {linkResults.length > 0 && (
+          <div className="space-y-1.5 mt-2">
+            {linkResults.map((u) => (
+              <div key={u.id} className="flex items-center justify-between bg-black/40 border border-zinc-800 rounded-lg p-2 text-sm">
+                <span>{u.name} — <PhoneLink phone={u.phoneNumber}>{u.phoneNumber}</PhoneLink></span>
+                <button onClick={() => handleCreateAndLink(u)} className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 rounded-lg font-bold text-xs">
+                  צור וקשר
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="relative">
+          <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="חיפוש לפי כינוי או אימייל..."
+            className="w-full bg-black/40 border border-zinc-800 p-3 pr-10 rounded-xl focus:border-red-600 outline-none text-white text-right"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-zinc-500 text-sm font-bold">סינון:</span>
+          {[{ id: '', label: 'הכל' }, { id: 'forumAdmin', label: 'מנהלי פורום' }, { id: 'unlinked', label: 'לא מקושר לאתר' }].map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setRoleFilter(f.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${roleFilter === f.id ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <AdminLoader />
+      ) : filteredForumUsers.length === 0 ? (
+        <div className="text-center py-12 text-zinc-500">
+          <p>לא נמצאו משתמשי פורום.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredForumUsers.map((fu) => {
+            const linkedUser = fu.linkedUserId ? siteUsersMap[fu.linkedUserId] : null;
+            return (
+              <div key={fu.id} className="bg-black/40 border border-zinc-800 p-3 md:p-4 rounded-xl">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <strong className="text-lg text-white">{fu.nickname}</strong>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${fu.role === 'forumAdmin' ? 'bg-purple-600' : 'bg-zinc-700'}`}>
+                    {fu.role === 'forumAdmin' ? 'מנהל פורום' : 'משתמש'}
+                  </span>
+                  {fu.isBlocked && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-900">חסום</span>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
+                  <Mail size={12} className="text-zinc-500" />
+                  {fu.email ? (
+                    <>
+                      <span className="text-zinc-300 font-mono ltr:text-left rtl:text-right" dir="ltr">{fu.email}</span>
+                      {fu.emailVerified ? (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-700 text-white">מאומת</span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-700 text-white">לא מאומת</span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-zinc-500 italic">אין אימייל</span>
+                  )}
+                </div>
+
+                <p className="text-xs text-zinc-500 mb-3">
+                  {linkedUser
+                    ? <>מקושר למשתמש אתר: <span className="text-zinc-300">{linkedUser.name}</span> — <PhoneLink phone={linkedUser.phoneNumber}>{linkedUser.phoneNumber}</PhoneLink></>
+                    : 'לא מקושר לחשבון אתר'}
+                </p>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleToggleRole(fu)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors ${fu.role === 'forumAdmin' ? 'bg-zinc-700 hover:bg-zinc-600 text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'}`}
+                  >
+                    {fu.role === 'forumAdmin' ? <ShieldOff size={11} /> : <Shield size={11} />}
+                    {fu.role === 'forumAdmin' ? 'הסר מנהל' : 'הפוך למנהל'}
+                  </button>
+                  <button
+                    onClick={() => handleToggleBlock(fu)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors ${fu.isBlocked ? 'bg-green-700 hover:bg-green-600 text-white' : 'bg-red-900 hover:bg-red-800 text-white'}`}
+                  >
+                    {fu.isBlocked ? <CheckCircle size={11} /> : <Ban size={11} />}
+                    {fu.isBlocked ? 'בטל חסימה בפורום' : 'חסום בפורום'}
+                  </button>
+                  <button onClick={() => handleResetPassword(fu)} className="flex items-center gap-1 bg-zinc-700 hover:bg-zinc-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
+                    <KeyRound size={11} /> אפס סיסמה
+                  </button>
+                  <button onClick={() => handleSetEmail(fu)} className="flex items-center gap-1 bg-zinc-700 hover:bg-zinc-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]" title={fu.email || ''}>
+                    <Mail size={11} /> {fu.email ? `ערוך אימייל${fu.emailVerified ? ' ✓' : ''}` : 'הוסף אימייל'}
+                  </button>
+                  {fu.email && !fu.emailVerified && (
+                    <button onClick={() => handleForceVerify(fu)} className="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
+                      <MailCheck size={11} /> סמן כמאומת
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleKickFromChat(fu)}
+                    className="flex items-center gap-1 bg-amber-700 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
+                    title="יוסר מכל חדרי הצ'אט; אם ייכנס שוב — יתווסף אוטומטית לצ'אט הראשי."
+                  >
+                    <MessageSquareOff size={11} /> הוצא מהצ'אט
+                  </button>
+                  <button onClick={() => handleDelete(fu)} className="flex items-center gap-1 bg-red-900/60 hover:bg-red-800 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
+                    <Trash2 size={11} /> מחק חשבון פורום
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ForumUsersSection;

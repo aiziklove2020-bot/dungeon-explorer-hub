@@ -23,6 +23,7 @@ import DBLoggerSection from '../components/admin/DBLoggerSection';
 import DBSection from '../components/admin/DBSection';
 import GitHistorySection from '../components/admin/GitHistorySection';
 import ForumAdminSection from '../components/admin/ForumAdminSection';
+import ForumUsersSection from '../components/admin/ForumUsersSection';
 import LiveChatSection from '../components/admin/LiveChatSection';
 import ChatReportsSection from '../components/admin/ChatReportsSection';
 import BlogAdminSection from '../components/admin/BlogAdminSection';
@@ -237,6 +238,7 @@ const Admin = () => {
           {activeSection === 'db'        && <DBSection />}
           {activeSection === 'dbLogger'  && <DBLoggerSection />}
           {activeSection === 'forum'     && <ForumAdminSection showSaved={showSaved} />}
+          {activeSection === 'forumUsers' && <ForumUsersSection showSaved={showSaved} />}
           {activeSection === 'liveChat'  && <LiveChatSection showSaved={showSaved} />}
           {activeSection === 'chatReports' && <ChatReportsSection showSaved={showSaved} />}
           {activeSection === 'blog'      && <BlogAdminSection showSaved={showSaved} />}
