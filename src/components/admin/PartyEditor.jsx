@@ -61,7 +61,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
     // number; the pattern targets Israeli mobile/landline (0…) and +972 forms.
     const normalizedDesc = String(formData.description || '').replace(/[\s\-().]/g, '');
     if (/(?:\+?972|0)\d{8,9}/.test(normalizedDesc)) {
-      alert(t('admin.phoneInDescriptionBlocked') || 'אין להזין מספר טלפון בתיאור המסיבה. הזינו מספר וואטסאפ בשדה הייעודי למטה.');
+      alert('אין להזין מספר טלפון בתיאור המסיבה. הזינו מספר וואטסאפ בשדה הייעודי למטה.');
       return;
     }
 
