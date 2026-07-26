@@ -9,8 +9,9 @@
  *
  * GET (default / ?job=reminders): Cron job (see vercel.json "crons") — posts
  * every currently-active party as its own Telegram message (photo + caption)
- * to the community channel and group, a few times a week. Merged in here
- * (rather than its own file) to stay under the Vercel Hobby plan's
+ * to every channel/group configured in the admin "טלגרם" tab's ערוצים list
+ * (settings/telegram.channels in Firestore), a few times a week. Merged in
+ * here (rather than its own file) to stay under the Vercel Hobby plan's
  * 12-serverless-function limit — same reasoning as git-history.js absorbing
  * the old record-deploy-status route.
  *
@@ -18,7 +19,7 @@
  * ${CRON_SECRET}` when that env var is set — verified below so this can't be
  * triggered by an arbitrary GET from outside Vercel.
  * Env (cron): CRON_SECRET, TELEGRAM_BOT_TOKEN (the "Legacy (Matching)" bot —
- * already has access to both destinations).
+ * needs to already be a member of every configured channel/group).
  *
  * GET ?job=promo: Sends a short recurring "publish your party through the
  * site" message to the "מסיבות בישראל" group. Vercel Hobby cron jobs can only
@@ -34,10 +35,35 @@
 import { requireTelegramWebhookSecret, requireAdminApiSecret } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 
+// Fallback destinations, used only if the admin-configured channel list
+// (settings/telegram.channels — the "ערוצים" panel in the Telegram admin
+// tab) can't be read for some reason.
 const REMINDER_CHANNEL_CHAT_ID = '-1002446012533'; // @libralparty channel
 const REMINDER_GROUP_CHAT_ID = '-1001610769071'; // "מסיבות בישראל" group
-const REMINDER_GROUP2_CHAT_ID = '-3413559919'; // additional group requested for party postings
 const DEFAULT_RETENTION_HOURS = 48;
+
+// Some admin-entered chat IDs are missing the leading "-" (or "-100" for
+// supergroups) or carry a stray "_<topic>" suffix copied from a topic link.
+// Best-effort normalize rather than silently skipping them.
+function sanitizeChatId(raw) {
+  let s = String(raw || '').trim().split('_')[0];
+  if (/^\d+$/.test(s)) s = `-100${s}`;
+  return s;
+}
+
+async function getReminderDestinations(admin) {
+  try {
+    const snap = await admin.firestore().collection('settings').doc('telegram').get();
+    const channels = snap.exists ? snap.data()?.channels : null;
+    const ids = (channels || [])
+      .map((c) => sanitizeChatId(c.chatId))
+      .filter((id) => /^-\d+$/.test(id));
+    if (ids.length > 0) return ids;
+  } catch (err) {
+    console.error('getReminderDestinations:', err);
+  }
+  return [REMINDER_CHANNEL_CHAT_ID, REMINDER_GROUP_CHAT_ID];
+}
 
 async function initAdmin() {
   const admin = (await import('firebase-admin')).default;
@@ -132,9 +158,10 @@ function isPromoAuthorized(req) {
   return key === secret;
 }
 
-// One-off connectivity check for a new destination (?job=test-group), so we
-// can confirm the bot can post there before relying on the full cron blast
-// hitting it alongside the channel + existing group.
+// One-off connectivity check for a single destination (?job=test-group&chatId=...),
+// so a specific entry from the admin channel list can be verified without
+// running the full broadcast. chatId goes through the same sanitizer as the
+// real send path.
 async function handleTestGroup(req, res) {
   if (!isPromoAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -143,14 +170,19 @@ async function handleTestGroup(req, res) {
   if (!botToken) {
     return res.status(503).json({ error: 'Server not configured (missing TELEGRAM_BOT_TOKEN)' });
   }
+  const rawChatId = req.query?.chatId || new URL(req.url, 'http://x').searchParams.get('chatId');
+  if (!rawChatId) {
+    return res.status(400).json({ error: 'Missing chatId query param' });
+  }
+  const chatId = sanitizeChatId(rawChatId);
   try {
     const r = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: REMINDER_GROUP2_CHAT_ID, text: '✅ בדיקת חיבור — הבוט מצליח לשלוח הודעות לקבוצה הזו.' })
+      body: JSON.stringify({ chat_id: chatId, text: '✅ בדיקת חיבור — הבוט מצליח לשלוח הודעות לקבוצה הזו.' })
     });
     const data = await r.json();
-    return res.status(200).json({ ok: data.ok, description: data.description });
+    return res.status(200).json({ ok: data.ok, description: data.description, chatIdTried: chatId });
   } catch (err) {
     console.error('test-group:', err);
     return res.status(500).json({ error: err.message || 'Internal error' });
@@ -194,6 +226,7 @@ async function sendAllPartyReminders() {
   const admin = await initAdmin();
   const settingsSnap = await admin.firestore().collection('settings').doc('partySettings').get();
   const retentionHours = settingsSnap.exists ? settingsSnap.data()?.retentionHours : DEFAULT_RETENTION_HOURS;
+  const destinations = await getReminderDestinations(admin);
 
   const partiesSnap = await admin.firestore().collection('parties').get();
   const now = Date.now();
@@ -207,14 +240,14 @@ async function sendAllPartyReminders() {
 
   const results = [];
   for (const party of activeParties) {
-    for (const chatId of [REMINDER_CHANNEL_CHAT_ID, REMINDER_GROUP_CHAT_ID, REMINDER_GROUP2_CHAT_ID]) {
+    for (const chatId of destinations) {
       const data = await sendReminderToChat(botToken, chatId, party);
       results.push({ party: party.title || party.name, chatId, ok: data.ok, description: data.description });
       await sleep(1200); // stay well under Telegram's per-chat rate limit
     }
   }
 
-  return { partiesSent: activeParties.length, results };
+  return { partiesSent: activeParties.length, destinationCount: destinations.length, results };
 }
 
 async function handlePartyReminders(req, res) {
