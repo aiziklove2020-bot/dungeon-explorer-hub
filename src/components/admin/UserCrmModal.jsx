@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { X, Trash2, Plus } from 'lucide-react';
 import { getUserCrm, setUserSource, addPaymentRecord, deletePaymentRecord, CRM_SOURCES, PAYMENT_METHODS } from '../../firebase/crm';
 import AdminLoader from './AdminLoader';
+import PhoneLink from '../PhoneLink';
+import SubscriptionBadge from './SubscriptionBadge';
+import SubscriptionEditor from './SubscriptionEditor';
 
 const todayStr = () => new Date().toISOString().split('T')[0];
 
-const UserCrmModal = ({ user, onClose }) => {
+const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
   const [loading, setLoading] = useState(true);
   const [crm, setCrm] = useState({ source: '', sourceNote: '', payments: [] });
   const [savingSource, setSavingSource] = useState(false);
@@ -84,6 +87,33 @@ const UserCrmModal = ({ user, onClose }) => {
           <AdminLoader />
         ) : (
           <div className="space-y-6">
+            {/* Basic profile */}
+            <div className="bg-black/20 border border-zinc-800 rounded-xl p-3 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`px-2 py-1 rounded text-xs font-bold ${user.level === 'admin' ? 'bg-red-600' : user.level === 'gold' ? 'bg-yellow-600' : user.level === 'registered' ? 'bg-green-600' : user.level === 'blocked' ? 'bg-red-900' : 'bg-zinc-600'}`}>
+                  {user.level}
+                </span>
+                <span className={`px-2 py-1 rounded text-xs font-bold ${user.gender === 'male' ? 'bg-blue-600' : user.gender === 'female' ? 'bg-pink-600' : 'bg-zinc-600'}`}>
+                  {user.gender === 'male' ? 'זכר' : user.gender === 'female' ? 'נקבה' : 'לא מוגדר'}
+                </span>
+              </div>
+              <p className="text-sm text-zinc-300">
+                טלפון: <PhoneLink phone={user.phoneNumber}>{user.phoneNumber}</PhoneLink>
+              </p>
+              {user.telegramUsername && (
+                <p className="text-sm text-zinc-300">Telegram: @{user.telegramUsername}</p>
+              )}
+              <div className="flex flex-col gap-1.5 pt-1">
+                <SubscriptionBadge user={user} kind="parties" />
+                <SubscriptionBadge user={user} kind="exchangeParties" />
+              </div>
+              {onSubscriptionAction && (
+                <div className="pt-1">
+                  <SubscriptionEditor onAction={onSubscriptionAction} />
+                </div>
+              )}
+            </div>
+
             {/* Acquisition source */}
             <div>
               <label className="text-xs uppercase font-bold text-zinc-500">מאיפה הגיע</label>
