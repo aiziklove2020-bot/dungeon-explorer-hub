@@ -29,6 +29,7 @@ export const SUBSCRIPTION_KINDS = {
 export const SUBSCRIPTION_KIND_IDS = Object.keys(SUBSCRIPTION_KINDS);
 
 export const SUBSCRIPTION_TIERS = {
+  day: { id: 'day', label: 'יום אחד', days: 1 },
   month: { id: 'month', label: 'חודש', months: 1 },
   halfYear: { id: 'halfYear', label: 'חצי שנה', months: 6 },
   year: { id: 'year', label: 'שנה', months: 12 },
@@ -67,6 +68,12 @@ const toIso = (value) => {
 const addMonths = (date, months) => {
   const d = new Date(date.getTime());
   d.setMonth(d.getMonth() + months);
+  return d;
+};
+
+const addDays = (date, days) => {
+  const d = new Date(date.getTime());
+  d.setDate(d.getDate() + days);
   return d;
 };
 
@@ -307,10 +314,10 @@ const computeNextSubscription = (prevSub, tier) => {
     };
   }
 
-  const months = SUBSCRIPTION_TIERS[tier].months;
+  const { months, days } = SUBSCRIPTION_TIERS[tier];
   const prevExpiry = parseDate(prevSub?.expiry);
   const base = prevExpiry && prevExpiry.getTime() > Date.now() ? prevExpiry : new Date();
-  const nextExpiry = addMonths(base, months);
+  const nextExpiry = months ? addMonths(base, months) : addDays(base, days);
 
   return {
     tier,

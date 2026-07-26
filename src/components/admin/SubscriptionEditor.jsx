@@ -59,6 +59,13 @@ const SubscriptionEditor = ({
               </div>
               
               <button
+                onClick={() => handleAction(kind.id, 'extend', 'day')}
+                className="block w-full text-right px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+              >
+                ➕ הוסף יום אחד
+              </button>
+
+              <button
                 onClick={() => handleAction(kind.id, 'extend', 'month')}
                 className="block w-full text-right px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
               >
