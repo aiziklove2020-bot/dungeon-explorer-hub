@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { RotateCcw, Search, Download, Upload, Shield, ShieldOff, Ban, CheckCircle, Trash2, MessageSquare, MessageSquareOff, KeyRound, Mail, MailCheck, Database } from 'lucide-react';
+import { RotateCcw, Search, Download, Upload, Shield, ShieldOff, Ban, CheckCircle, Trash2, MessageSquare, MessageSquareOff, KeyRound, Mail, MailCheck, Database, UserCog } from 'lucide-react';
+import UserCrmModal from './UserCrmModal';
 import { useLanguage } from '../../i18n/LanguageContext';
 import Loader from '../Loader';
 import useAdminSection from '../../hooks/useAdminSection';
@@ -41,6 +42,7 @@ const UsersSection = ({ showSaved }) => {
   const { data: usersData, loading: loadingUsers, reload: reloadUsers } = useAdminSection(getAllUsers);
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
+  const [crmUser, setCrmUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [forumFilter, setForumFilter] = useState('');
@@ -486,6 +488,7 @@ const UsersSection = ({ showSaved }) => {
   });
 
   return (
+    <>
     <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div>
@@ -691,7 +694,11 @@ const UsersSection = ({ showSaved }) => {
                       </div>
                       <div className="flex flex-wrap gap-2 items-start justify-end">
                         <SubscriptionEditor onAction={(kind, action, payload) => handleSubscriptionAction(u.id, kind, action, payload)} />
-                        
+
+                        <button onClick={() => setCrmUser(u)} className="flex items-center gap-1.5 bg-purple-700 hover:bg-purple-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm">
+                          <UserCog size={14} /> כרטיס לקוח
+                        </button>
+
                         <button onClick={() => handleEditUser(u)} className="bg-red-600 hover:bg-red-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm">
                           {t('edit') || 'ערוך'}
                         </button>
@@ -827,6 +834,8 @@ const UsersSection = ({ showSaved }) => {
         </div>
       )}
     </div>
+    {crmUser && <UserCrmModal user={crmUser} onClose={() => setCrmUser(null)} />}
+    </>
   );
 };
 
