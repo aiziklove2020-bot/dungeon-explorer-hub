@@ -263,6 +263,15 @@ async function handlePartyReminders(req, res) {
   }
 }
 
+// GET ?job=manual-post-check — diagnostic only, never sends anything. Runs
+// the exact same requireAdminApiSecret() check as the real manual-post job,
+// so a mismatched ADMIN_API_SECRET / VITE_ADMIN_API_SECRET pair can be
+// confirmed without risking a real broadcast.
+async function handleManualPostCheck(req, res) {
+  if (!requireAdminApiSecret(req, res)) return; // writes its own 401/503 response
+  return res.status(200).json({ authorized: true });
+}
+
 // GET ?job=manual-post — the admin panel's "פרסם מסיבות לטלגרם" button.
 // Same sending logic as the cron, but triggered on demand from the browser,
 // authenticated via the shared ADMIN_API_SECRET (Bearer header) used by
@@ -296,6 +305,9 @@ export default async function handler(req, res) {
     }
     if (job === 'test-group') {
       return handleTestGroup(req, res);
+    }
+    if (job === 'manual-post-check') {
+      return handleManualPostCheck(req, res);
     }
     if (job === 'manual-post') {
       return handleManualPost(req, res);
