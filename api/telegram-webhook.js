@@ -31,6 +31,7 @@ import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 
 const REMINDER_CHANNEL_CHAT_ID = '-1002446012533'; // @libralparty channel
 const REMINDER_GROUP_CHAT_ID = '-1001610769071'; // "מסיבות בישראל" group
+const REMINDER_GROUP2_CHAT_ID = '-3413559919'; // additional group requested for party postings
 const DEFAULT_RETENTION_HOURS = 48;
 
 async function initAdmin() {
@@ -126,6 +127,31 @@ function isPromoAuthorized(req) {
   return key === secret;
 }
 
+// One-off connectivity check for a new destination (?job=test-group), so we
+// can confirm the bot can post there before relying on the full cron blast
+// hitting it alongside the channel + existing group.
+async function handleTestGroup(req, res) {
+  if (!isPromoAuthorized(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    return res.status(503).json({ error: 'Server not configured (missing TELEGRAM_BOT_TOKEN)' });
+  }
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: REMINDER_GROUP2_CHAT_ID, text: '✅ בדיקת חיבור — הבוט מצליח לשלוח הודעות לקבוצה הזו.' })
+    });
+    const data = await r.json();
+    return res.status(200).json({ ok: data.ok, description: data.description });
+  } catch (err) {
+    console.error('test-group:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 async function handleGroupPromo(req, res) {
   if (!isPromoAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -177,7 +203,7 @@ async function handlePartyReminders(req, res) {
 
     const results = [];
     for (const party of activeParties) {
-      for (const chatId of [REMINDER_CHANNEL_CHAT_ID, REMINDER_GROUP_CHAT_ID]) {
+      for (const chatId of [REMINDER_CHANNEL_CHAT_ID, REMINDER_GROUP_CHAT_ID, REMINDER_GROUP2_CHAT_ID]) {
         const data = await sendReminderToChat(botToken, chatId, party);
         results.push({ party: party.title || party.name, chatId, ok: data.ok, description: data.description });
         await sleep(1200); // stay well under Telegram's per-chat rate limit
@@ -206,6 +232,9 @@ export default async function handler(req, res) {
     }
     if (job === 'promo') {
       return handleGroupPromo(req, res);
+    }
+    if (job === 'test-group') {
+      return handleTestGroup(req, res);
     }
     return handlePartyReminders(req, res);
   }
