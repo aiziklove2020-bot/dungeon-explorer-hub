@@ -29,6 +29,7 @@ import ChatReportsSection from '../components/admin/ChatReportsSection';
 import BlogAdminSection from '../components/admin/BlogAdminSection';
 import SubscriptionsSection from '../components/admin/SubscriptionsSection';
 import SiteDesignSection from '../components/admin/SiteDesignSection';
+import { adminAuthHeader } from '../utils/adminApi';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ const Admin = () => {
   const [publishMessage, setPublishMessage] = useState('');
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
+  const [postingParties, setPostingParties] = useState(false);
   const [partiesRefreshKey, setPartiesRefreshKey] = useState(0);
   const [publishedCommitSha, setPublishedCommitSha] = useState(null);
   const [deployStatusLoading, setDeployStatusLoading] = useState(false);
@@ -153,6 +155,28 @@ const Admin = () => {
     }
   };
 
+  const handlePostParties = async () => {
+    if (postingParties) return;
+    if (!confirm('לפרסם עכשיו את כל המסיבות הפעילות באתר לטלגרם?')) return;
+    setPostingParties(true);
+    try {
+      const res = await fetch('/api/telegram-webhook?job=manual-post', {
+        headers: { ...adminAuthHeader() }
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        alert(`הפרסום נכשל: ${data.error || res.statusText}`);
+        return;
+      }
+      alert(`הפרסום הושלם.\nמסיבות שפורסמו: ${data.partiesSent}`);
+      showSaved();
+    } catch (err) {
+      alert(`הפרסום נכשל: ${err.message}`);
+    } finally {
+      setPostingParties(false);
+    }
+  };
+
   const handleImportFromGit = async () => {
     if (importing) return;
     const doParties = confirm(
@@ -200,6 +224,7 @@ const Admin = () => {
           deployStatusLoading={deployStatusLoading}
           deployStatus={deployStatus}
           importing={importing} importMessage={importMessage} onImport={handleImportFromGit}
+          postingParties={postingParties} onPostParties={handlePostParties}
           onReset={() => {
             if (confirm(t('admin.resetConfirm') || 'האם אתה בטוח שברצונך לאפס את כל התוכן לברירות מחדל?')) {
               resetToDefaults();

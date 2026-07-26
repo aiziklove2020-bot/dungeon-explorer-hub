@@ -1,4 +1,4 @@
-import { X, RotateCcw, CheckCircle2, Eye, Upload, Download, Loader2 } from 'lucide-react';
+import { X, RotateCcw, CheckCircle2, Eye, Upload, Download, Loader2, Megaphone } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 /**
@@ -16,6 +16,8 @@ const AdminHeader = ({
   importMessage,
   onLogout,
   onPublish,
+  postingParties,
+  onPostParties,
   onImport,
   onReset,
   onViewSite,
@@ -72,6 +74,19 @@ const AdminHeader = ({
             <Upload size={16} />
           )}
           {publishing ? t('admin.publishing') : t('admin.publish')}
+        </button>
+        <button
+          onClick={onPostParties}
+          disabled={postingParties}
+          title="שולח עכשיו את כל המסיבות הפעילות באתר לטלגרם, בלי לחכות ללו&quot;ז האוטומטי"
+          className="bg-purple-700 hover:bg-purple-600 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+        >
+          {postingParties ? (
+            <Loader2 size={16} className="animate-spin shrink-0" />
+          ) : (
+            <Megaphone size={16} />
+          )}
+          {postingParties ? 'מפרסם...' : 'פרסם מסיבות לטלגרם'}
         </button>
         <button
           onClick={onImport}
