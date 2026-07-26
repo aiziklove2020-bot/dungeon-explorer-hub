@@ -4,7 +4,8 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import { getTelegramSettings, updateTelegramSettings } from '../../firebase/settings';
 import { getRegistrationSettings } from '../../firebase/settings';
 import { getBotInfo, MESSAGE_KEYS, REGISTRATION_TYPE_KEYS, BALANCE_PUBLISH_TYPE_KEYS, VARIABLES_REFERENCE, buildMessagePreview, sendTelegramNotification } from '../../firebase/telegram';
-import { Plus, Trash2, Edit2, ChevronDown, ChevronRight, Send, Eye, Mail } from 'lucide-react';
+import { adminAuthHeader } from '../../utils/adminApi';
+import { Plus, Trash2, Edit2, ChevronDown, ChevronRight, Send, Eye, Mail, Megaphone } from 'lucide-react';
 
 const BUILT_IN_MESSAGE_KEYS = [MESSAGE_KEYS.REGISTRATION, MESSAGE_KEYS.BALANCE_PUBLISH, MESSAGE_KEYS.NEW_PARTY, MESSAGE_KEYS.NEW_EXTERNAL_PARTY, MESSAGE_KEYS.NEW_STORE_ITEM, MESSAGE_KEYS.NEW_STORE_ORDER, MESSAGE_KEYS.NEW_WORKSHOP, MESSAGE_KEYS.NEW_WORKSHOP_REGISTRATION];
 
@@ -127,6 +128,7 @@ const TelegramSection = ({ showSaved }) => {
   const [sendMsgChannelIds, setSendMsgChannelIds] = useState([]);
   const [sendingMsg, setSendingMsg] = useState(false);
   const [sendMsgResult, setSendMsgResult] = useState(null);
+  const [postingParties, setPostingParties] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -328,6 +330,34 @@ const TelegramSection = ({ showSaved }) => {
     setSendingMsg(false);
   };
 
+  /** Manually posts every currently-active party to Telegram right now
+   * (same destinations + logic as the scheduled cron), instead of waiting
+   * for the next scheduled run. */
+  const handlePostParties = async () => {
+    if (postingParties) return;
+    if (!confirm(t('admin.telegram.postPartiesConfirm') || 'לפרסם עכשיו את כל המסיבות הפעילות באתר לטלגרם?')) return;
+    setPostingParties(true);
+    try {
+      const res = await fetch('/api/telegram-webhook?job=manual-post', {
+        headers: { ...adminAuthHeader() }
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        alert(`${t('admin.telegram.postPartiesFail') || 'הפרסום נכשל'}: ${data.error || res.statusText}`);
+        return;
+      }
+      alert(
+        `${t('admin.telegram.postPartiesDone') || 'הפרסום הושלם'}\n` +
+        `${t('admin.telegram.postPartiesSent') || 'מסיבות שפורסמו'}: ${data.partiesSent}`
+      );
+      showSaved();
+    } catch (err) {
+      alert(`${t('admin.telegram.postPartiesFail') || 'הפרסום נכשל'}: ${err.message}`);
+    } finally {
+      setPostingParties(false);
+    }
+  };
+
   /** Insert a variable (e.g. '{{party.name}}') into the current template for message m. */
   const insertVariable = (msg, variable) => {
     const text = `${variable}`.trim();
@@ -361,13 +391,25 @@ const TelegramSection = ({ showSaved }) => {
 
   return (
     <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-2xl font-bold">{t('admin.telegram.title')}</h2>
-        {legacy && (
-          <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-1 rounded">
-            {t('admin.telegram.legacyMode')}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {legacy && (
+            <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-1 rounded">
+              {t('admin.telegram.legacyMode')}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={handlePostParties}
+            disabled={postingParties}
+            title={t('admin.telegram.postPartiesHint') || 'שולח עכשיו את כל המסיבות הפעילות באתר לטלגרם, בלי לחכות ללו"ז האוטומטי'}
+            className="bg-purple-700 hover:bg-purple-600 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+          >
+            <Megaphone size={16} />
+            {postingParties ? (t('admin.telegram.posting') || 'מפרסם...') : (t('admin.telegram.postParties') || 'פרסם מסיבות לטלגרם')}
+          </button>
+        </div>
       </div>
       <p className="text-zinc-400 text-sm">
         {t('admin.telegram.description')}

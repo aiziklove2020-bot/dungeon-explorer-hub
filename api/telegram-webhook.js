@@ -25,8 +25,13 @@
  * run once/day, so a every-few-hours schedule needs an external pinger (e.g.
  * cron-job.org) hitting this URL with ?job=promo&key=TELEGRAM_PROMO_SECRET.
  * Env: TELEGRAM_PROMO_SECRET, TELEGRAM_BOT_TOKEN.
+ *
+ * GET ?job=manual-post: Admin panel's "פרסם מסיבות לטלגרם" button — same
+ * send-every-active-party logic as the cron, triggered on demand. Auth via
+ * `Authorization: Bearer ADMIN_API_SECRET` (see lib/apiAuth.js), same as
+ * every other admin-only endpoint.
  */
-import { requireTelegramWebhookSecret } from '../lib/apiAuth.js';
+import { requireTelegramWebhookSecret, requireAdminApiSecret } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 
 const REMINDER_CHANNEL_CHAT_ID = '-1002446012533'; // @libralparty channel
@@ -174,46 +179,69 @@ async function handleGroupPromo(req, res) {
   }
 }
 
+// Core sending logic, shared by the scheduled cron path and the admin
+// "פרסם מסיבות לטלגרם" manual-trigger button — only the auth check differs
+// between the two callers.
+async function sendAllPartyReminders() {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    throw new Error('Server not configured (missing TELEGRAM_BOT_TOKEN)');
+  }
+  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+    throw new Error('Server not configured (missing GOOGLE_APPLICATION_CREDENTIALS_JSON)');
+  }
+
+  const admin = await initAdmin();
+  const settingsSnap = await admin.firestore().collection('settings').doc('partySettings').get();
+  const retentionHours = settingsSnap.exists ? settingsSnap.data()?.retentionHours : DEFAULT_RETENTION_HOURS;
+
+  const partiesSnap = await admin.firestore().collection('parties').get();
+  const now = Date.now();
+  const activeParties = partiesSnap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .filter((p) => !isPartyExpiredByDate(p.date?.toDate ? p.date.toDate() : p.date, retentionHours, now))
+    .sort((a, b) => {
+      const toMs = (d) => (d?.toDate ? d.toDate().getTime() : new Date(d).getTime());
+      return toMs(a.date) - toMs(b.date);
+    });
+
+  const results = [];
+  for (const party of activeParties) {
+    for (const chatId of [REMINDER_CHANNEL_CHAT_ID, REMINDER_GROUP_CHAT_ID, REMINDER_GROUP2_CHAT_ID]) {
+      const data = await sendReminderToChat(botToken, chatId, party);
+      results.push({ party: party.title || party.name, chatId, ok: data.ok, description: data.description });
+      await sleep(1200); // stay well under Telegram's per-chat rate limit
+    }
+  }
+
+  return { partiesSent: activeParties.length, results };
+}
+
 async function handlePartyReminders(req, res) {
   if (!isCronAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  if (!botToken) {
-    return res.status(503).json({ error: 'Server not configured (missing TELEGRAM_BOT_TOKEN)' });
-  }
-  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-    return res.status(503).json({ error: 'Server not configured (missing GOOGLE_APPLICATION_CREDENTIALS_JSON)' });
-  }
-
   try {
-    const admin = await initAdmin();
-    const settingsSnap = await admin.firestore().collection('settings').doc('partySettings').get();
-    const retentionHours = settingsSnap.exists ? settingsSnap.data()?.retentionHours : DEFAULT_RETENTION_HOURS;
-
-    const partiesSnap = await admin.firestore().collection('parties').get();
-    const now = Date.now();
-    const activeParties = partiesSnap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((p) => !isPartyExpiredByDate(p.date?.toDate ? p.date.toDate() : p.date, retentionHours, now))
-      .sort((a, b) => {
-        const toMs = (d) => (d?.toDate ? d.toDate().getTime() : new Date(d).getTime());
-        return toMs(a.date) - toMs(b.date);
-      });
-
-    const results = [];
-    for (const party of activeParties) {
-      for (const chatId of [REMINDER_CHANNEL_CHAT_ID, REMINDER_GROUP_CHAT_ID, REMINDER_GROUP2_CHAT_ID]) {
-        const data = await sendReminderToChat(botToken, chatId, party);
-        results.push({ party: party.title || party.name, chatId, ok: data.ok, description: data.description });
-        await sleep(1200); // stay well under Telegram's per-chat rate limit
-      }
-    }
-
-    return res.status(200).json({ ok: true, partiesSent: activeParties.length, results });
+    const { partiesSent, results } = await sendAllPartyReminders();
+    return res.status(200).json({ ok: true, partiesSent, results });
   } catch (err) {
     console.error('party-reminders:', err);
-    return res.status(500).json({ error: err.message || 'Internal error' });
+    return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
+  }
+}
+
+// GET ?job=manual-post — the admin panel's "פרסם מסיבות לטלגרם" button.
+// Same sending logic as the cron, but triggered on demand from the browser,
+// authenticated via the shared ADMIN_API_SECRET (Bearer header) used by
+// every other admin-only endpoint (see lib/apiAuth.js).
+async function handleManualPost(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  try {
+    const { partiesSent, results } = await sendAllPartyReminders();
+    return res.status(200).json({ ok: true, partiesSent, results });
+  } catch (err) {
+    console.error('manual-post:', err);
+    return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
   }
 }
 
@@ -235,6 +263,9 @@ export default async function handler(req, res) {
     }
     if (job === 'test-group') {
       return handleTestGroup(req, res);
+    }
+    if (job === 'manual-post') {
+      return handleManualPost(req, res);
     }
     return handlePartyReminders(req, res);
   }
