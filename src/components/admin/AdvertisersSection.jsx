@@ -1,8 +1,8 @@
-import { RotateCcw, Check, X, RotateCw, Trash2 } from 'lucide-react';
+import { RotateCcw, Check, X, RotateCw, Trash2, KeyRound } from 'lucide-react';
 import AdminLoader from './AdminLoader';
 import PhoneLink from '../PhoneLink';
 import useAdminSection from '../../hooks/useAdminSection';
-import { getAllAdvertisers, setAdvertiserStatus, deleteAdvertiser } from '../../firebase/advertisers';
+import { getAllAdvertisers, setAdvertiserStatus, deleteAdvertiser, resetAdvertiserPassword } from '../../firebase/advertisers';
 
 const STATUS_LABEL = {
   pending: 'ממתין לאישור',
@@ -27,6 +27,22 @@ const AdvertisersSection = ({ showSaved }) => {
       showSaved();
     } catch (error) {
       alert(error.message || 'שגיאה בעדכון סטטוס');
+    }
+  };
+
+  const handleResetPassword = async (id, businessName) => {
+    const suggested = Math.random().toString(36).slice(-8);
+    const newPassword = prompt(
+      `סיסמה חדשה למפרסם "${businessName || 'ללא שם עסק'}" (אפשר לשנות, מינימום 4 תווים):`,
+      suggested
+    );
+    if (!newPassword) return;
+    try {
+      await resetAdvertiserPassword(id, newPassword);
+      alert(`הסיסמה עודכנה. הסיסמה החדשה: ${newPassword}`);
+      showSaved();
+    } catch (error) {
+      alert(error.message || 'שגיאה באיפוס סיסמה');
     }
   };
 
@@ -104,6 +120,12 @@ const AdvertisersSection = ({ showSaved }) => {
                       <RotateCw size={14} /> איפוס לממתין
                     </button>
                   )}
+                  <button
+                    onClick={() => handleResetPassword(adv.id, adv.businessName)}
+                    className="bg-zinc-700 hover:bg-zinc-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+                  >
+                    <KeyRound size={14} /> אפס סיסמה
+                  </button>
                   <button
                     onClick={() => handleDelete(adv.id, adv.businessName)}
                     className="bg-zinc-800 hover:bg-red-900 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"

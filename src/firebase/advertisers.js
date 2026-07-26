@@ -97,6 +97,15 @@ export const setAdvertiserStatus = async (advertiserId, status) => {
   await updateDoc(doc(db, ADVERTISERS_COLLECTION, advertiserId), { status });
 };
 
+/** Admin-side: set a new password for an advertiser (e.g. they forgot it). */
+export const resetAdvertiserPassword = async (advertiserId, newPlainPassword) => {
+  if (!newPlainPassword || newPlainPassword.length < 4) {
+    throw new Error('הסיסמה חייבת להכיל לפחות 4 תווים');
+  }
+  const hashed = await bcrypt.hash(newPlainPassword, 10);
+  await updateDoc(doc(db, ADVERTISERS_COLLECTION, advertiserId), { password: hashed });
+};
+
 /** Admin-side: permanently delete an advertiser account. */
 export const deleteAdvertiser = async (advertiserId) => {
   await deleteDoc(doc(db, ADVERTISERS_COLLECTION, advertiserId));
