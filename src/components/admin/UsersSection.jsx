@@ -687,6 +687,25 @@ const UsersSection = ({ showSaved }) => {
                         {u.telegramUsername && (
                           <p className="text-zinc-400 text-sm">Telegram: @{u.telegramUsername}</p>
                         )}
+                        <p className="text-zinc-400 text-sm">
+                          מקור: <span className="text-zinc-200">{u.crm?.source || 'לא צוין'}</span>
+                          {u.crm?.sourceNote && <span className="text-zinc-500"> ({u.crm.sourceNote})</span>}
+                        </p>
+                        {(() => {
+                          const payments = u.crm?.payments || [];
+                          if (payments.length === 0) {
+                            return <p className="text-zinc-500 text-sm">אין תשלומים רשומים</p>;
+                          }
+                          const last = [...payments].sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0];
+                          return (
+                            <p className="text-zinc-400 text-sm">
+                              תשלום אחרון: <span className="text-green-400 font-bold">{last.date}</span>
+                              {last.amount != null && <span className="text-green-400 font-bold"> · ₪{last.amount}</span>}
+                              {last.method && <span className="text-zinc-500"> ({last.method})</span>}
+                              {payments.length > 1 && <span className="text-zinc-600"> · {payments.length} תשלומים בסה"כ</span>}
+                            </p>
+                          );
+                        })()}
                         <div className="flex flex-col gap-1.5 mt-2">
                           <SubscriptionBadge user={u} kind="parties" />
                           <SubscriptionBadge user={u} kind="exchangeParties" />
@@ -696,7 +715,7 @@ const UsersSection = ({ showSaved }) => {
                         <SubscriptionEditor onAction={(kind, action, payload) => handleSubscriptionAction(u.id, kind, action, payload)} />
 
                         <button onClick={() => setCrmUser(u)} className="flex items-center gap-1.5 bg-purple-700 hover:bg-purple-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm">
-                          <UserCog size={14} /> כרטיס לקוח
+                          <UserCog size={14} /> ערוך מקור/תשלומים
                         </button>
 
                         <button onClick={() => handleEditUser(u)} className="bg-red-600 hover:bg-red-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm">
