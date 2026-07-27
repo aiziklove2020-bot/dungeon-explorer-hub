@@ -197,9 +197,6 @@ export default async function handler(req, res) {
     const jsonParties = JSON.stringify(partiesOnly, null, 2);
     const authHeader = GITHUB_TOKEN.startsWith('ghp_') ? `token ${GITHUB_TOKEN}` : `Bearer ${GITHUB_TOKEN}`;
 
-    // Parties with needsPublish=true will get Telegram notification (sent by browser after response)
-    const partiesToNotify = validParties.filter(p => p.needsPublish === true);
-    console.log(`[Publish] partiesToNotify: ${partiesToNotify.length}`, partiesToNotify.map(p => p.title || p.name));
 
     const getFileSha = async (filePath) => {
       const response = await fetch(
@@ -354,29 +351,12 @@ export default async function handler(req, res) {
     // Mark valid parties as published (needsPublish: false) after Git push
     await Promise.all(validParties.map(p => p._ref.update({ needsPublish: false })));
 
-    // Return notifiedParties to the client so it can send Telegram notifications via the browser (same path as main branch)
-    const notifiedParties = partiesToNotify.map(p => ({
-      id: p.id,
-      name: p.name || p.title || '',
-      title: p.title || p.name || '',
-      day: p.day || '',
-      date: p.date ? p.date.toISOString() : null,
-      time: p.time || '',
-      dj: p.dj || '',
-      description: p.description || '',
-      imageURL: p.imageURL || '',
-      maleLimit: p.maleLimit ?? null,
-      femaleLimit: p.femaleLimit ?? null,
-      partyType: p.partyType || 'internal'
-    }));
-
     return res.status(200).json({
       success: true,
       message: `Content published to branch ${GITHUB_BRANCH}`,
       commit: { sha: commit.sha, message: commitMessage, url: commit.url },
       files: filePaths,
-      branch: GITHUB_BRANCH,
-      notifiedParties
+      branch: GITHUB_BRANCH
     });
   } catch (error) {
     console.error('Publish content error:', error);

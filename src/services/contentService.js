@@ -475,26 +475,13 @@ export const publishContent = async (commitMessage) => {
     const result = await response.json();
     contentCache.clearMode('public');
 
-    // Send Telegram notifications for new/edited parties (same as main branch - client-side)
-    if (result.notifiedParties?.length > 0) {
-      try {
-        const { sendNewPartyTelegram, sendNewExternalPartyTelegram } = await import('../firebase/telegram');
-        for (const party of result.notifiedParties) {
-          try {
-            const partyWithDate = { ...party, date: party.date ? new Date(party.date) : null };
-            if (party.partyType === 'external') {
-              await sendNewExternalPartyTelegram(partyWithDate, 'he');
-            } else {
-              await sendNewPartyTelegram(partyWithDate, 'he');
-            }
-          } catch (err) {
-            console.error('contentService.publish telegram per-party notify:', err);
-          }
-        }
-      } catch (err) {
-        console.error('contentService.publish telegram batch notify:', err);
-      }
-    }
+    // No Telegram notification here on purpose — this used to fire a "new
+    // party" message for every party flagged needsPublish, which included
+    // parties that were only *edited* (updateParty sets needsPublish=true
+    // on every save), re-announcing them as new on every unrelated "פרסם
+    // ל-Git" click. The scheduled/manual broadcast is the single source of
+    // truth for posting parties to Telegram now (see api/telegram-webhook.js
+    // sendAllPartyReminders).
 
     return result;
   } finally {
