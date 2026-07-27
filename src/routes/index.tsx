@@ -248,13 +248,13 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
                     </div>
                   </div>
                   <div className="p-6">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <h3 className="text-xl font-bold">{e.title}</h3>
-                        {e.dj && (
-                          <p className="mt-1 text-sm text-muted-foreground">{e.dj}</p>
-                        )}
-                      </div>
+                    <div className="text-center">
+                      <h3 className="text-xl font-bold">{e.title}</h3>
+                      {e.dj && (
+                        <p className="mt-1 text-sm text-muted-foreground">{e.dj}</p>
+                      )}
+                    </div>
+                    <div className="mt-4 flex justify-center">
                       {e.partyType === "external" && e.registrationLink ? (
                         <a
                           href={e.registrationLink}
