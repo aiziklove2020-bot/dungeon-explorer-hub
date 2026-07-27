@@ -56,8 +56,12 @@ async function getReminderDestinations(admin) {
     const snap = await admin.firestore().collection('settings').doc('telegram').get();
     const channels = snap.exists ? snap.data()?.channels : null;
     const ids = (channels || [])
+      // Group/channel owners can opt out of the automatic party broadcast
+      // (checkbox in the ערוצים panel) without deleting the destination —
+      // some only want their own party posted there, not everyone else's.
+      .filter((c) => c.broadcastEnabled !== false)
       .map((c) => sanitizeChatId(c.chatId))
-      .filter((id) => /^-\d+$/.test(id));
+      .filter((id) => /^-\d+$/.test(id) || /^@[\w-]+$/.test(id));
     if (ids.length > 0) return ids;
   } catch (err) {
     console.error('getReminderDestinations:', err);

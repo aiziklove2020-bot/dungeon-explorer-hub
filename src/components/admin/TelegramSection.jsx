@@ -263,6 +263,15 @@ const TelegramSection = ({ showSaved }) => {
     setEditingChannel(null);
   };
 
+  // Whether this channel/group receives the automatic party-broadcast (cron
+  // + "פרסם מסיבות לטלגרם" button). Some group owners only want their own
+  // party posted there, not everyone else's — this lets them opt out
+  // without deleting the destination entirely (it can still be used for
+  // one-off manual sends via "שלח הודעה").
+  const toggleChannelBroadcast = (id) => {
+    setChannels((prev) => prev.map((c) => (c.id === id ? { ...c, broadcastEnabled: c.broadcastEnabled === false } : c)));
+  };
+
   const removeChannel = (id) => {
     if (!confirm(t('admin.telegram.confirmDeleteChannel'))) return;
     setChannels((prev) => prev.filter((c) => c.id !== id));
@@ -533,6 +542,16 @@ const TelegramSection = ({ showSaved }) => {
                   <>
                     <span className="font-medium">{c.name}</span>
                     <span className="text-zinc-500 text-sm font-mono">{c.chatId}</span>
+                    <label className="flex items-center gap-1.5 mr-auto cursor-pointer text-xs">
+                      <input
+                        type="checkbox"
+                        checked={c.broadcastEnabled !== false}
+                        onChange={() => toggleChannelBroadcast(c.id)}
+                      />
+                      <span className={c.broadcastEnabled === false ? 'text-zinc-500' : 'text-green-400'}>
+                        {t('admin.telegram.includeInPartyBroadcast') || 'לכלול בפרסום מסיבות אוטומטי'}
+                      </span>
+                    </label>
                     <button type="button" onClick={() => setEditingChannel(c.id)} className="text-zinc-400 hover:text-white">
                       <Edit2 size={14} />
                     </button>
