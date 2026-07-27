@@ -216,8 +216,14 @@ async function handleFixChannels(req, res) {
       updated.push({ id: 'avi2vs2', name: '2vs2 (אבי סווינגרס)', chatId: '@avi_swingers2', allowedAdvertiserIds: [AVI_ID] });
     }
 
-    await ref.update({ channels: updated });
-    return res.status(200).json({ ok: true, channels: updated });
+    // "רישומים לחמישי שישי" is a dedicated registrations list, not a
+    // party-promo group — exclude it from the automatic broadcast entirely.
+    const withRegistrationsFix = updated.map((c) =>
+      (c.name === 'רישומים לחמישי שישי' ? { ...c, broadcastEnabled: false } : c)
+    );
+
+    await ref.update({ channels: withRegistrationsFix });
+    return res.status(200).json({ ok: true, channels: withRegistrationsFix });
   } catch (err) {
     console.error('fix-channels:', err);
     return res.status(500).json({ error: err.message || 'Internal error' });
