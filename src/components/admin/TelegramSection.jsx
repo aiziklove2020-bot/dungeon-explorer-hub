@@ -4,6 +4,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import { getTelegramSettings, updateTelegramSettings } from '../../firebase/settings';
 import { getRegistrationSettings } from '../../firebase/settings';
 import { getBotInfo, MESSAGE_KEYS, REGISTRATION_TYPE_KEYS, BALANCE_PUBLISH_TYPE_KEYS, VARIABLES_REFERENCE, buildMessagePreview, sendTelegramNotification } from '../../firebase/telegram';
+import { getAllAdvertisers } from '../../firebase/advertisers';
 import { Plus, Trash2, Edit2, ChevronDown, ChevronRight, Send, Eye, Mail } from 'lucide-react';
 
 const BUILT_IN_MESSAGE_KEYS = [MESSAGE_KEYS.REGISTRATION, MESSAGE_KEYS.BALANCE_PUBLISH, MESSAGE_KEYS.NEW_PARTY, MESSAGE_KEYS.NEW_EXTERNAL_PARTY, MESSAGE_KEYS.NEW_STORE_ITEM, MESSAGE_KEYS.NEW_STORE_ORDER, MESSAGE_KEYS.NEW_WORKSHOP, MESSAGE_KEYS.NEW_WORKSHOP_REGISTRATION];
@@ -127,10 +128,12 @@ const TelegramSection = ({ showSaved }) => {
   const [sendMsgChannelIds, setSendMsgChannelIds] = useState([]);
   const [sendingMsg, setSendingMsg] = useState(false);
   const [sendMsgResult, setSendMsgResult] = useState(null);
+  const [advertisers, setAdvertisers] = useState([]);
 
   const load = async () => {
     setLoading(true);
     try {
+      getAllAdvertisers().then((all) => setAdvertisers(all.filter((a) => a.status === 'approved'))).catch(() => setAdvertisers([]));
       const [tg, reg] = await Promise.all([getTelegramSettings(), getRegistrationSettings()]);
       if (tg.legacy) {
         setLegacy(tg.legacy);
@@ -270,6 +273,28 @@ const TelegramSection = ({ showSaved }) => {
   // one-off manual sends via "שלח הודעה").
   const toggleChannelBroadcast = (id) => {
     setChannels((prev) => prev.map((c) => (c.id === id ? { ...c, broadcastEnabled: c.broadcastEnabled === false } : c)));
+  };
+
+  // Restricts WHICH advertisers' parties may be posted into this channel —
+  // separate from the on/off switch above. Empty/absent allowedAdvertiserIds
+  // means "everyone" (current default); once restricted, only parties
+  // created by one of the checked advertisers (or parties added directly by
+  // the site admin, which have no createdBy) go there.
+  const toggleChannelRestricted = (id) => {
+    setChannels((prev) => prev.map((c) => {
+      if (c.id !== id) return c;
+      const isRestricted = Array.isArray(c.allowedAdvertiserIds);
+      return { ...c, allowedAdvertiserIds: isRestricted ? undefined : [] };
+    }));
+  };
+
+  const toggleChannelAdvertiser = (channelId, advertiserId) => {
+    setChannels((prev) => prev.map((c) => {
+      if (c.id !== channelId) return c;
+      const current = c.allowedAdvertiserIds || [];
+      const next = current.includes(advertiserId) ? current.filter((a) => a !== advertiserId) : [...current, advertiserId];
+      return { ...c, allowedAdvertiserIds: next };
+    }));
   };
 
   const removeChannel = (id) => {
@@ -520,7 +545,8 @@ const TelegramSection = ({ showSaved }) => {
           </div>
           <ul className="space-y-2">
             {channels.map((c) => (
-              <li key={c.id} className="flex items-center gap-3 p-3 bg-zinc-900/60 rounded-xl border border-zinc-800">
+              <li key={c.id} className="p-3 bg-zinc-900/60 rounded-xl border border-zinc-800 space-y-2">
+                <div className="flex items-center gap-3">
                 {editingChannel === c.id ? (
                   <>
                     <input
@@ -559,6 +585,39 @@ const TelegramSection = ({ showSaved }) => {
                       <Trash2 size={14} />
                     </button>
                   </>
+                )}
+                </div>
+
+                {editingChannel !== c.id && c.broadcastEnabled !== false && (
+                  <div className="pt-2 border-t border-zinc-800">
+                    <label className="flex items-center gap-1.5 cursor-pointer text-xs mb-1.5">
+                      <input
+                        type="checkbox"
+                        checked={Array.isArray(c.allowedAdvertiserIds)}
+                        onChange={() => toggleChannelRestricted(c.id)}
+                      />
+                      <span className="text-zinc-400">
+                        {t('admin.telegram.restrictToApprovedAdvertisers') || 'רק מפרסמים נבחרים מותרים לפרסם כאן'}
+                      </span>
+                    </label>
+                    {Array.isArray(c.allowedAdvertiserIds) && (
+                      <div className="flex flex-wrap gap-2 mr-5">
+                        {advertisers.length === 0 && (
+                          <span className="text-zinc-600 text-xs">{t('admin.telegram.noApprovedAdvertisers') || 'אין מפרסמים מאושרים'}</span>
+                        )}
+                        {advertisers.map((a) => (
+                          <label key={a.id} className="flex items-center gap-1 cursor-pointer text-xs bg-black/30 border border-zinc-800 rounded-lg px-2 py-1">
+                            <input
+                              type="checkbox"
+                              checked={c.allowedAdvertiserIds.includes(a.id)}
+                              onChange={() => toggleChannelAdvertiser(c.id, a.id)}
+                            />
+                            {a.businessName || a.contactName || a.phoneNumber}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
               </li>
             ))}

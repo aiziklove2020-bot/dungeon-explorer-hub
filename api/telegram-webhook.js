@@ -51,22 +51,35 @@ function sanitizeChatId(raw) {
   return s;
 }
 
+// Returns [{ chatId, allowedAdvertiserIds }] — allowedAdvertiserIds is null
+// when the destination accepts every advertiser's parties (the default),
+// or an array restricting it to specific approved advertisers only (set via
+// the "רק מפרסמים נבחרים מותרים לפרסם כאן" picker in the ערוצים panel).
 async function getReminderDestinations(admin) {
   try {
     const snap = await admin.firestore().collection('settings').doc('telegram').get();
     const channels = snap.exists ? snap.data()?.channels : null;
-    const ids = (channels || [])
+    const dests = (channels || [])
       // Group/channel owners can opt out of the automatic party broadcast
       // (checkbox in the ערוצים panel) without deleting the destination —
       // some only want their own party posted there, not everyone else's.
       .filter((c) => c.broadcastEnabled !== false)
-      .map((c) => sanitizeChatId(c.chatId))
-      .filter((id) => /^-\d+$/.test(id) || /^@[\w-]+$/.test(id));
-    if (ids.length > 0) return ids;
+      .map((c) => ({ chatId: sanitizeChatId(c.chatId), allowedAdvertiserIds: Array.isArray(c.allowedAdvertiserIds) ? c.allowedAdvertiserIds : null }))
+      .filter((d) => /^-\d+$/.test(d.chatId) || /^@[\w-]+$/.test(d.chatId));
+    if (dests.length > 0) return dests;
   } catch (err) {
     console.error('getReminderDestinations:', err);
   }
-  return [REMINDER_CHANNEL_CHAT_ID, REMINDER_GROUP_CHAT_ID];
+  return [{ chatId: REMINDER_CHANNEL_CHAT_ID, allowedAdvertiserIds: null }, { chatId: REMINDER_GROUP_CHAT_ID, allowedAdvertiserIds: null }];
+}
+
+// A party without createdBy was added directly by the site admin (not
+// through an advertiser account) — always allowed everywhere, since it's
+// not "someone else's" content from the group owner's perspective.
+function partyAllowedFor(party, allowedAdvertiserIds) {
+  if (!allowedAdvertiserIds) return true;
+  if (!party.createdBy) return true;
+  return allowedAdvertiserIds.includes(party.createdBy);
 }
 
 async function initAdmin() {
@@ -244,9 +257,10 @@ async function sendAllPartyReminders() {
 
   const results = [];
   for (const party of activeParties) {
-    for (const chatId of destinations) {
-      const data = await sendReminderToChat(botToken, chatId, party);
-      results.push({ party: party.title || party.name, chatId, ok: data.ok, description: data.description });
+    for (const dest of destinations) {
+      if (!partyAllowedFor(party, dest.allowedAdvertiserIds)) continue;
+      const data = await sendReminderToChat(botToken, dest.chatId, party);
+      results.push({ party: party.title || party.name, chatId: dest.chatId, ok: data.ok, description: data.description });
       await sleep(1200); // stay well under Telegram's per-chat rate limit
     }
   }
