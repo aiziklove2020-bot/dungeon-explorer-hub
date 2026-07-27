@@ -181,6 +181,25 @@ function isPromoAuthorized(req) {
   return key === secret;
 }
 
+// ?job=bot-info — returns the @username of the bot behind TELEGRAM_BOT_TOKEN
+// (the one used for all sends/reminders), so it can be confirmed against
+// whichever bot was actually added to a given Telegram group. getMe only
+// returns public bot info, nothing sensitive.
+async function handleBotInfo(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    return res.status(503).json({ error: 'Server not configured (missing TELEGRAM_BOT_TOKEN)' });
+  }
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+    const data = await r.json();
+    return res.status(200).json({ ok: data.ok, username: data.result?.username, name: data.result?.first_name });
+  } catch (err) {
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 // One-off migration (?job=fix-channels): applies the specific channel-list
 // corrections worked out with the admin in chat — fixes מוניק's chat_id and
 // advertiser allowlist, and adds the new 2vs2/אבי סווינגרס channel. Only
@@ -425,6 +444,9 @@ export default async function handler(req, res) {
     }
     if (job === 'recent-chats') {
       return handleRecentChats(req, res);
+    }
+    if (job === 'bot-info') {
+      return handleBotInfo(req, res);
     }
     return handlePartyReminders(req, res);
   }
