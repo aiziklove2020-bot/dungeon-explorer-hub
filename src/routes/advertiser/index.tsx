@@ -190,6 +190,27 @@ function AdvertiserPanel({
         </button>
       </div>
 
+      {!editingParty && (
+        <div className="mb-6 rounded-2xl border border-primary/40 bg-primary/5 p-5 text-sm leading-relaxed">
+          <p className="mb-2 font-bold text-primary">חשוב לפני שאתם מפרסמים מסיבה</p>
+          <ul className="list-disc space-y-1 pr-5">
+            <li>
+              אם ההרשמה למסיבה מתבצעת <strong>דרך וואטסאפ</strong> — חובה למלא את מספר הוואטסאפ
+              בשדה הייעודי בטופס, לא רק לכתוב אותו בתיאור. אחרת המסיבה עלולה להופיע בטעות
+              בהרשמה הפנימית של האתר.
+            </li>
+            <li>
+              אם ההרשמה מתבצעת <strong>דרך קישור חיצוני</strong> (כרטיסים, אתר אחר וכו') —
+              יש להזין אותו בשדה קישור ההרשמה.
+            </li>
+            <li>
+              פרסום המסיבות לקבוצות הטלגרם נעשה <strong>אוטומטית</strong> לפי לוח זמנים קבוע —
+              אין צורך (ואין אפשרות) לפרסם אותה בעצמכם.
+            </li>
+          </ul>
+        </div>
+      )}
+
       {editingParty ? (
         <PartyEditor party={editingParty} onSave={handleSave} onCancel={() => setEditingParty(null)} />
       ) : (
