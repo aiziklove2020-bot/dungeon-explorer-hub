@@ -230,6 +230,41 @@ async function handleFixChannels(req, res) {
   }
 }
 
+// The bot runs in webhook mode (see POST handler below), so getUpdates
+// can't be used to discover a chat_id (Telegram rejects it while a webhook
+// is active). Instead, every incoming POST update's chat is best-effort
+// logged to Firestore (capped list) so a group's real id can be read back
+// after someone sends any message there — see recordSeenChat() + the POST
+// handler, and ?job=recent-chats below to read the capped list.
+async function recordSeenChat(admin, chat) {
+  if (!chat) return;
+  try {
+    const ref = admin.firestore().collection('settings').doc('telegramSeenChats');
+    const snap = await ref.get();
+    const list = snap.exists ? (snap.data()?.chats || []) : [];
+    const withoutDup = list.filter((c) => c.id !== chat.id);
+    const next = [{ id: chat.id, title: chat.title || chat.username || chat.first_name || '', type: chat.type, seenAt: new Date().toISOString() }, ...withoutDup].slice(0, 30);
+    await ref.set({ chats: next });
+  } catch (err) {
+    console.error('recordSeenChat:', err);
+  }
+}
+
+// ?job=recent-chats — reads back the capped list of chats the bot has seen
+// (via recordSeenChat), so the correct chat_id for a group can be found
+// with certainty after someone sends any message there.
+async function handleRecentChats(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  try {
+    const admin = await initAdmin();
+    const snap = await admin.firestore().collection('settings').doc('telegramSeenChats').get();
+    return res.status(200).json({ ok: true, chats: snap.exists ? (snap.data()?.chats || []) : [] });
+  } catch (err) {
+    console.error('recent-chats:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 // One-off connectivity check for a single destination (?job=test-group&chatId=...),
 // so a specific entry from the admin channel list can be verified without
 // running the full broadcast. chatId goes through the same sanitizer as the
@@ -388,6 +423,9 @@ export default async function handler(req, res) {
     if (job === 'fix-channels') {
       return handleFixChannels(req, res);
     }
+    if (job === 'recent-chats') {
+      return handleRecentChats(req, res);
+    }
     return handlePartyReminders(req, res);
   }
   if (req.method !== 'POST') {
@@ -398,16 +436,7 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const msg = body?.message || body?.edited_message;
-    if (!msg?.text) {
-      return res.status(200).json({ ok: true });
-    }
-
-    const replyTo = msg.reply_to_message;
-    if (!replyTo?.message_id) {
-      return res.status(200).json({ ok: true });
-    }
-
-    const replyToMsgId = String(replyTo.message_id);
+    const anyChat = msg?.chat || body?.my_chat_member?.chat || body?.channel_post?.chat;
 
     if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
       console.error('telegram-webhook: GOOGLE_APPLICATION_CREDENTIALS_JSON not set - replies will not reach the website');
@@ -420,6 +449,22 @@ export default async function handler(req, res) {
       console.error('Firebase init:', e);
       return res.status(200).json({ ok: true });
     }
+
+    // Best-effort: remember every chat the bot hears from, so a group's
+    // real chat_id can be looked up later (?job=recent-chats) instead of
+    // guessed from a partial/mistyped value.
+    if (anyChat) await recordSeenChat(admin, anyChat);
+
+    if (!msg?.text) {
+      return res.status(200).json({ ok: true });
+    }
+
+    const replyTo = msg.reply_to_message;
+    if (!replyTo?.message_id) {
+      return res.status(200).json({ ok: true });
+    }
+
+    const replyToMsgId = String(replyTo.message_id);
 
     const mapSnap = await admin.firestore().collection('supportChatTelegramMap').doc(replyToMsgId).get();
     const sessionId = mapSnap?.data?.()?.sessionId;
