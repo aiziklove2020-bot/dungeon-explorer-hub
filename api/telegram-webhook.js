@@ -73,13 +73,15 @@ async function getReminderDestinations(admin) {
   return [{ chatId: REMINDER_CHANNEL_CHAT_ID, allowedAdvertiserIds: null }, { chatId: REMINDER_GROUP_CHAT_ID, allowedAdvertiserIds: null }];
 }
 
-// A party without createdBy was added directly by the site admin (not
-// through an advertiser account) — always allowed everywhere, since it's
-// not "someone else's" content from the group owner's perspective.
+// Deliberately strict: a party with no advertiser attached (e.g. added
+// directly by the site admin with no owner tagged) does NOT get a free
+// pass into restricted groups — only an explicitly-approved advertiser's
+// parties do. This is intentional so a mistake can never leak a party into
+// a competitor's group; an untagged party still reaches every unrestricted
+// (allowedAdvertiserIds === null) destination as normal.
 function partyAllowedFor(party, allowedAdvertiserIds) {
   if (!allowedAdvertiserIds) return true;
-  if (!party.createdBy) return true;
-  return allowedAdvertiserIds.includes(party.createdBy);
+  return !!party.createdBy && allowedAdvertiserIds.includes(party.createdBy);
 }
 
 async function initAdmin() {
@@ -173,6 +175,49 @@ function isPromoAuthorized(req) {
   if (!secret) return false; // must be explicitly configured — no lenient default for a public-facing job
   const key = req.query?.key || new URL(req.url, 'http://x').searchParams.get('key');
   return key === secret;
+}
+
+// One-off migration (?job=fix-channels): applies the specific channel-list
+// corrections worked out with the admin in chat — fixes מוניק's chat_id and
+// advertiser allowlist, and adds the new 2vs2/אבי סווינגרס channel. Only
+// touches the `channels` field on settings/telegram (via .update, not a full
+// doc overwrite) so bot tokens/message templates on that doc are untouched.
+// Safe to leave in place; re-running it is idempotent (upserts by id).
+async function handleFixChannels(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  try {
+    const admin = await initAdmin();
+    const ref = admin.firestore().collection('settings').doc('telegram');
+    const snap = await ref.get();
+    const channels = snap.exists ? (snap.data()?.channels || []) : [];
+
+    const BOUTIQUE_ID = 'lOmonxa5U8cgAr5K7Wjp';
+    const NO_LIMIT_ID = 'YaVU9sZVPI10mgLpIsXz';
+    const AVI_ID = 'SteUWXIgzPLVZVZ6Lu3a';
+
+    let found = false;
+    const updated = channels.map((c) => {
+      if (c.id === 'krjj67olds' || c.name === 'מוניק') {
+        found = true;
+        return { ...c, chatId: '-3413559919', allowedAdvertiserIds: [BOUTIQUE_ID, NO_LIMIT_ID] };
+      }
+      return c;
+    });
+    if (!found) {
+      updated.push({ id: 'krjj67olds', name: 'מוניק', chatId: '-3413559919', allowedAdvertiserIds: [BOUTIQUE_ID, NO_LIMIT_ID] });
+    }
+
+    const aviExists = updated.some((c) => c.chatId === '@avi_swingers2');
+    if (!aviExists) {
+      updated.push({ id: 'avi2vs2', name: '2vs2 (אבי סווינגרס)', chatId: '@avi_swingers2', allowedAdvertiserIds: [AVI_ID] });
+    }
+
+    await ref.update({ channels: updated });
+    return res.status(200).json({ ok: true, channels: updated });
+  } catch (err) {
+    console.error('fix-channels:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
 }
 
 // One-off connectivity check for a single destination (?job=test-group&chatId=...),
@@ -329,6 +374,9 @@ export default async function handler(req, res) {
     }
     if (job === 'manual-post') {
       return handleManualPost(req, res);
+    }
+    if (job === 'fix-channels') {
+      return handleFixChannels(req, res);
     }
     return handlePartyReminders(req, res);
   }

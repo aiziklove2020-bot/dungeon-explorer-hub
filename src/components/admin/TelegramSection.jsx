@@ -277,9 +277,11 @@ const TelegramSection = ({ showSaved }) => {
 
   // Restricts WHICH advertisers' parties may be posted into this channel —
   // separate from the on/off switch above. Empty/absent allowedAdvertiserIds
-  // means "everyone" (current default); once restricted, only parties
-  // created by one of the checked advertisers (or parties added directly by
-  // the site admin, which have no createdBy) go there.
+  // means "everyone" (current default); once restricted, ONLY parties
+  // created by one of the checked advertisers go there — a party with no
+  // advertiser attached (e.g. added directly by the site admin) is
+  // deliberately excluded rather than given a free pass, so a mistake can
+  // never leak it into a competitor's group.
   const toggleChannelRestricted = (id) => {
     setChannels((prev) => prev.map((c) => {
       if (c.id !== id) return c;
