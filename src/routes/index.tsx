@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Instagram, Facebook, Send, MessageCircle } from "lucide-react";
+import { Instagram, Facebook, Send, MessageCircle, Calendar } from "lucide-react";
 import heroImg from "@/assets/logo-heart.png";
 import aboutImg from "@/assets/about.jpg";
 import { PageLayout } from "@/components/PageLayout";
@@ -240,15 +240,15 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
                       height={1024}
                       className="h-[26rem] w-full bg-secondary object-contain transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute right-4 top-4 rounded-md bg-primary px-4 py-1 text-center">
-                      <span className="block text-sm font-bold text-primary-foreground">{e.day}</span>
-                      <span className="block text-xs text-primary-foreground/80">
-                        {formatEventDate(e.date)}
-                      </span>
-                    </div>
                   </div>
                   <div className="p-6">
-                    <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 text-sm font-bold text-primary">
+                      <Calendar size={16} />
+                      <span>{e.day}</span>
+                      <span className="text-muted-foreground">·</span>
+                      <span>{formatEventDate(e.date)}</span>
+                    </div>
+                    <div className="mt-2 text-center">
                       <h3 className="text-xl font-bold">{e.title}</h3>
                       {e.dj && (
                         <p className="mt-1 text-sm text-muted-foreground">{e.dj}</p>
@@ -260,7 +260,7 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
                           href={e.registrationLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                          className="btn-glow shrink-0 rounded-full bg-primary px-8 py-3 text-base font-bold text-primary-foreground transition-transform hover:scale-105"
                         >
                           רישום כרטיסים
                         </a>
@@ -269,16 +269,16 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
                           href={getWhatsAppHref(e.whatsappNumber)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#25D366] px-5 py-2 text-sm font-bold text-black transition-opacity hover:opacity-90"
+                          className="flex shrink-0 items-center gap-2 rounded-full bg-[#25D366] px-8 py-3 text-base font-bold text-black shadow-lg transition-transform hover:scale-105"
                         >
-                          <MessageCircle size={16} />
+                          <MessageCircle size={18} />
                           רישום דרך ווצאפ
                         </a>
                       ) : (
                         <Link
                           to="/register"
                           search={{ partyId: e.id || undefined }}
-                          className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                          className="btn-glow shrink-0 rounded-full bg-primary px-8 py-3 text-base font-bold text-primary-foreground transition-transform hover:scale-105"
                         >
                           רישום דרך האתר
                         </Link>
