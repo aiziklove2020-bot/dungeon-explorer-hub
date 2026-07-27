@@ -296,8 +296,19 @@ async function handleFixChannels(req, res) {
       (c.name === 'רישומים לחמישי שישי' ? { ...c, broadcastEnabled: false } : c)
     );
 
-    await ref.update({ channels: withRegistrationsFix });
-    return res.status(200).json({ ok: true, channels: withRegistrationsFix });
+    // These are the admin's own "open to everyone" groups — remove the
+    // restriction entirely (rather than listing every current advertiser)
+    // so a newly-approved advertiser is automatically allowed too, with no
+    // manual re-checking required per group.
+    const OPEN_CHANNEL_NAMES = ['מנוים מדברים בדסמ', 'מסיבות ליברליות ערוץ', 'מדברים בדסמ ערוץ', 'מסיבות בישראל', 'מדברים בדסמ קבוצה'];
+    const withOpenChannelsFix = withRegistrationsFix.map((c) => {
+      if (!OPEN_CHANNEL_NAMES.includes(c.name)) return c;
+      const { allowedAdvertiserIds, ...rest } = c;
+      return rest;
+    });
+
+    await ref.update({ channels: withOpenChannelsFix });
+    return res.status(200).json({ ok: true, channels: withOpenChannelsFix });
   } catch (err) {
     console.error('fix-channels:', err);
     return res.status(500).json({ error: err.message || 'Internal error' });
