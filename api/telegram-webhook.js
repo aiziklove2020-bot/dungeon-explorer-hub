@@ -46,7 +46,11 @@ const DEFAULT_RETENTION_HOURS = 48;
 // supergroups) or carry a stray "_<topic>" suffix copied from a topic link.
 // Best-effort normalize rather than silently skipping them.
 function sanitizeChatId(raw) {
-  let s = String(raw || '').trim().split('_')[0];
+  let s = String(raw || '').trim();
+  // Only strip a "_<topic>" suffix for numeric/negative ids (a stray
+  // topic-thread id copied from a link) — never for @usernames, which can
+  // legitimately contain underscores (e.g. @avi_swingers2).
+  if (/^-?\d+_\d+$/.test(s)) s = s.split('_')[0];
   if (/^\d+$/.test(s)) s = `-100${s}`;
   return s;
 }
