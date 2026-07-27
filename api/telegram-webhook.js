@@ -181,6 +181,24 @@ function isPromoAuthorized(req) {
   return key === secret;
 }
 
+// ?job=webhook-info — Telegram's own getWebhookInfo for the bot: shows the
+// registered URL, pending update count, and last delivery error. Explains
+// why recordSeenChat never captured anything even after tagging the bot.
+async function handleWebhookInfo(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    return res.status(503).json({ error: 'Server not configured (missing TELEGRAM_BOT_TOKEN)' });
+  }
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${botToken}/getWebhookInfo`);
+    const data = await r.json();
+    return res.status(200).json(data.result || data);
+  } catch (err) {
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 // ?job=bot-info — returns the @username of the bot behind TELEGRAM_BOT_TOKEN
 // (the one used for all sends/reminders), so it can be confirmed against
 // whichever bot was actually added to a given Telegram group. getMe only
@@ -447,6 +465,9 @@ export default async function handler(req, res) {
     }
     if (job === 'bot-info') {
       return handleBotInfo(req, res);
+    }
+    if (job === 'webhook-info') {
+      return handleWebhookInfo(req, res);
     }
     return handlePartyReminders(req, res);
   }
