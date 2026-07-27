@@ -42,6 +42,7 @@ function AdvertiserPage() {
       advertiserId={advertiserId}
       onLogout={() => {
         sessionStorage.removeItem("advertiser_id");
+        window.dispatchEvent(new Event("advertiser-auth-changed"));
         setAdvertiserId(null);
       }}
     />
@@ -62,6 +63,7 @@ function AdvertiserLogin({ onAuthenticated }: { onAuthenticated: (id: string) =>
       const result = await authenticateAdvertiser(phoneNumber, password);
       if (result.authenticated) {
         sessionStorage.setItem("advertiser_id", result.advertiser.id);
+        window.dispatchEvent(new Event("advertiser-auth-changed"));
         onAuthenticated(result.advertiser.id);
       } else {
         setError(result.error || "שגיאת התחברות");

@@ -32,6 +32,14 @@ export function SiteHeader() {
   const { forumUser, forumLogout } = useForumAuth();
   const navigate = useNavigate();
 
+  // Advertiser login (sessionStorage "advertiser_id", set in
+  // /advertiser) is a separate auth system from the forum/site login —
+  // without this the header always showed "היכנס" even while an advertiser
+  // was actively logged into their own panel.
+  const [advertiserLoggedIn, setAdvertiserLoggedIn] = useState(
+    () => typeof window !== "undefined" && !!sessionStorage.getItem("advertiser_id")
+  );
+
   useEffect(() => {
     let cancelled = false;
     getSiteConfig()
@@ -44,8 +52,31 @@ export function SiteHeader() {
     };
   }, []);
 
+  useEffect(() => {
+    const check = () => setAdvertiserLoggedIn(!!sessionStorage.getItem("advertiser_id"));
+    check();
+    // "storage" only fires in *other* tabs; the advertiser login/logout
+    // handlers dispatch this custom event too so the header updates
+    // immediately in the same tab.
+    window.addEventListener("focus", check);
+    window.addEventListener("storage", check);
+    window.addEventListener("advertiser-auth-changed", check);
+    return () => {
+      window.removeEventListener("focus", check);
+      window.removeEventListener("storage", check);
+      window.removeEventListener("advertiser-auth-changed", check);
+    };
+  }, []);
+
   function handleLogout() {
     forumLogout();
+    setOpen(false);
+    navigate({ to: "/" });
+  }
+
+  function handleAdvertiserLogout() {
+    sessionStorage.removeItem("advertiser_id");
+    setAdvertiserLoggedIn(false);
     setOpen(false);
     navigate({ to: "/" });
   }
@@ -87,6 +118,24 @@ export function SiteHeader() {
               <button
                 type="button"
                 onClick={handleLogout}
+                aria-label="התנתק"
+                className="flex shrink-0 items-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-bold text-foreground/80 transition-colors hover:border-primary hover:text-primary sm:px-4 sm:text-sm"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">התנתק</span>
+              </button>
+            </div>
+          ) : advertiserLoggedIn ? (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/advertiser"
+                className="max-w-[7rem] truncate text-xs font-bold text-primary sm:max-w-none sm:text-sm"
+              >
+                פאנל מפרסם
+              </Link>
+              <button
+                type="button"
+                onClick={handleAdvertiserLogout}
                 aria-label="התנתק"
                 className="flex shrink-0 items-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-bold text-foreground/80 transition-colors hover:border-primary hover:text-primary sm:px-4 sm:text-sm"
               >
@@ -137,6 +186,25 @@ export function SiteHeader() {
                     <button
                       type="button"
                       onClick={handleLogout}
+                      className="flex w-full items-center justify-center gap-2 rounded-full border border-border px-3 py-3 text-center text-base font-bold text-foreground/80 transition-colors hover:border-primary hover:text-primary"
+                    >
+                      <LogOut className="h-4 w-4" /> התנתק
+                    </button>
+                  </div>
+                ) : advertiserLoggedIn ? (
+                  <div className="mt-2 space-y-2">
+                    <SheetClose asChild>
+                      <Link
+                        to="/advertiser"
+                        onClick={() => setOpen(false)}
+                        className="block rounded-lg px-3 py-3 text-base font-bold text-primary transition-colors hover:bg-secondary"
+                      >
+                        פאנל מפרסם
+                      </Link>
+                    </SheetClose>
+                    <button
+                      type="button"
+                      onClick={handleAdvertiserLogout}
                       className="flex w-full items-center justify-center gap-2 rounded-full border border-border px-3 py-3 text-center text-base font-bold text-foreground/80 transition-colors hover:border-primary hover:text-primary"
                     >
                       <LogOut className="h-4 w-4" /> התנתק
