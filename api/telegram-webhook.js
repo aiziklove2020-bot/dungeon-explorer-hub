@@ -35,6 +35,13 @@
 import { requireTelegramWebhookSecret, requireAdminApiSecret } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 
+// Sending every active party to every allowed destination can take longer
+// than Vercel Hobby's default 10s function timeout, which caused the
+// platform to retry the whole invocation from scratch — duplicating every
+// message already sent. Raise the ceiling (Hobby allows up to 60s) so a
+// realistic batch finishes within one invocation instead of retrying.
+export const config = { maxDuration: 60 };
+
 // Fallback destinations, used only if the admin-configured channel list
 // (settings/telegram.channels — the "ערוצים" panel in the Telegram admin
 // tab) can't be read for some reason.
@@ -388,6 +395,36 @@ async function handleGroupPromo(req, res) {
 // Core sending logic, shared by the scheduled cron path and the admin
 // "פרסם מסיבות לטלגרם" manual-trigger button — only the auth check differs
 // between the two callers.
+// A stuck/retried invocation re-running the full send loop is exactly what
+// caused the duplicate-spam incident this fixes — guard against it with a
+// short Firestore lock. Any invocation that starts while another is still
+// "active" (per its own last-heartbeat, not just a fixed TTL) is rejected
+// outright rather than silently resending everything.
+const BROADCAST_LOCK_STALE_MS = 90_000;
+
+async function acquireBroadcastLock(admin) {
+  const ref = admin.firestore().collection('settings').doc('telegramBroadcastLock');
+  const now = Date.now();
+  const acquired = await admin.firestore().runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const lockedAt = snap.exists ? snap.data()?.lockedAt : null;
+    if (lockedAt && now - lockedAt < BROADCAST_LOCK_STALE_MS) {
+      return false;
+    }
+    tx.set(ref, { lockedAt: now });
+    return true;
+  });
+  return acquired ? ref : null;
+}
+
+async function releaseBroadcastLock(ref) {
+  try {
+    await ref.delete();
+  } catch (err) {
+    console.error('releaseBroadcastLock:', err);
+  }
+}
+
 async function sendAllPartyReminders() {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
@@ -398,31 +435,40 @@ async function sendAllPartyReminders() {
   }
 
   const admin = await initAdmin();
-  const settingsSnap = await admin.firestore().collection('settings').doc('partySettings').get();
-  const retentionHours = settingsSnap.exists ? settingsSnap.data()?.retentionHours : DEFAULT_RETENTION_HOURS;
-  const destinations = await getReminderDestinations(admin);
-
-  const partiesSnap = await admin.firestore().collection('parties').get();
-  const now = Date.now();
-  const activeParties = partiesSnap.docs
-    .map((d) => ({ id: d.id, ...d.data() }))
-    .filter((p) => !isPartyExpiredByDate(p.date?.toDate ? p.date.toDate() : p.date, retentionHours, now))
-    .sort((a, b) => {
-      const toMs = (d) => (d?.toDate ? d.toDate().getTime() : new Date(d).getTime());
-      return toMs(a.date) - toMs(b.date);
-    });
-
-  const results = [];
-  for (const party of activeParties) {
-    for (const dest of destinations) {
-      if (!partyAllowedFor(party, dest.allowedAdvertiserIds)) continue;
-      const data = await sendReminderToChat(botToken, dest.chatId, party);
-      results.push({ party: party.title || party.name, chatId: dest.chatId, ok: data.ok, description: data.description });
-      await sleep(1200); // stay well under Telegram's per-chat rate limit
-    }
+  const lockRef = await acquireBroadcastLock(admin);
+  if (!lockRef) {
+    throw new Error('Broadcast already in progress — try again in a minute');
   }
 
-  return { partiesSent: activeParties.length, destinationCount: destinations.length, results };
+  try {
+    const settingsSnap = await admin.firestore().collection('settings').doc('partySettings').get();
+    const retentionHours = settingsSnap.exists ? settingsSnap.data()?.retentionHours : DEFAULT_RETENTION_HOURS;
+    const destinations = await getReminderDestinations(admin);
+
+    const partiesSnap = await admin.firestore().collection('parties').get();
+    const now = Date.now();
+    const activeParties = partiesSnap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .filter((p) => !isPartyExpiredByDate(p.date?.toDate ? p.date.toDate() : p.date, retentionHours, now))
+      .sort((a, b) => {
+        const toMs = (d) => (d?.toDate ? d.toDate().getTime() : new Date(d).getTime());
+        return toMs(a.date) - toMs(b.date);
+      });
+
+    const results = [];
+    for (const party of activeParties) {
+      for (const dest of destinations) {
+        if (!partyAllowedFor(party, dest.allowedAdvertiserIds)) continue;
+        const data = await sendReminderToChat(botToken, dest.chatId, party);
+        results.push({ party: party.title || party.name, chatId: dest.chatId, ok: data.ok, description: data.description });
+        await sleep(400); // each send targets a different chat, so Telegram's ~1/sec-per-chat limit doesn't apply; this just stays well under the ~30/sec global limit
+      }
+    }
+
+    return { partiesSent: activeParties.length, destinationCount: destinations.length, results };
+  } finally {
+    await releaseBroadcastLock(lockRef);
+  }
 }
 
 async function handlePartyReminders(req, res) {
