@@ -263,12 +263,12 @@ async function handleFixChannels(req, res) {
     const updated = channels.map((c) => {
       if (c.id === 'krjj67olds' || c.name === 'מוניק') {
         found = true;
-        return { ...c, chatId: '-3413559919', allowedAdvertiserIds: [BOUTIQUE_ID, NO_LIMIT_ID] };
+        return { ...c, chatId: '-1003413559919', allowedAdvertiserIds: [BOUTIQUE_ID, NO_LIMIT_ID] };
       }
       return c;
     });
     if (!found) {
-      updated.push({ id: 'krjj67olds', name: 'מוניק', chatId: '-3413559919', allowedAdvertiserIds: [BOUTIQUE_ID, NO_LIMIT_ID] });
+      updated.push({ id: 'krjj67olds', name: 'מוניק', chatId: '-1003413559919', allowedAdvertiserIds: [BOUTIQUE_ID, NO_LIMIT_ID] });
     }
 
     const aviExists = updated.some((c) => c.chatId === '@avi_swingers2');
