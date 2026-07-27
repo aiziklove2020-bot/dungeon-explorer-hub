@@ -80,6 +80,12 @@ const COUPLE_TEMPLATE_PLACEHOLDER = `שם הגבר: {{registration.fullName}}
 
 const genId = () => Math.random().toString(36).slice(2, 12);
 
+// Synthetic id representing the site admin's own directly-added parties
+// (which have no real advertiser doc / createdBy). Not a real advertiser —
+// added to the picker so an admin can explicitly opt their own content
+// into a restricted channel, matching the same allowlist mechanism.
+const ADMIN_PSEUDO_ADVERTISER_ID = '__admin__';
+
 // Telegram preview: render only the small subset of HTML tags that Telegram's
 // `parse_mode=HTML` actually supports, and sanitize everything else with
 // DOMPurify so we share the same XSS layer used by the forum/blog renderer.
@@ -604,6 +610,14 @@ const TelegramSection = ({ showSaved }) => {
                     </label>
                     {Array.isArray(c.allowedAdvertiserIds) && (
                       <div className="flex flex-wrap gap-2 mr-5">
+                        <label className="flex items-center gap-1 cursor-pointer text-xs bg-black/30 border border-amber-800 rounded-lg px-2 py-1">
+                          <input
+                            type="checkbox"
+                            checked={c.allowedAdvertiserIds.includes(ADMIN_PSEUDO_ADVERTISER_ID)}
+                            onChange={() => toggleChannelAdvertiser(c.id, ADMIN_PSEUDO_ADVERTISER_ID)}
+                          />
+                          <span className="text-amber-400">{t('admin.telegram.adminOwnParties') || 'אני (המנהל הראשי)'}</span>
+                        </label>
                         {advertisers.length === 0 && (
                           <span className="text-zinc-600 text-xs">{t('admin.telegram.noApprovedAdvertisers') || 'אין מפרסמים מאושרים'}</span>
                         )}

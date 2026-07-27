@@ -77,15 +77,22 @@ async function getReminderDestinations(admin) {
   return [{ chatId: REMINDER_CHANNEL_CHAT_ID, allowedAdvertiserIds: null }, { chatId: REMINDER_GROUP_CHAT_ID, allowedAdvertiserIds: null }];
 }
 
+// Matches the frontend's ADMIN_PSEUDO_ADVERTISER_ID (TelegramSection.jsx) —
+// not a real advertiser doc, just an explicit opt-in checkbox so the admin
+// can allow their own directly-added parties into a restricted channel.
+const ADMIN_PSEUDO_ADVERTISER_ID = '__admin__';
+
 // Deliberately strict: a party with no advertiser attached (e.g. added
 // directly by the site admin with no owner tagged) does NOT get a free
-// pass into restricted groups — only an explicitly-approved advertiser's
-// parties do. This is intentional so a mistake can never leak a party into
-// a competitor's group; an untagged party still reaches every unrestricted
-// (allowedAdvertiserIds === null) destination as normal.
+// pass into restricted groups — only an explicitly-approved advertiser (or
+// the admin themself, if checked in the picker) does. This is intentional
+// so a mistake can never leak a party into a competitor's group; an
+// untagged party still reaches every unrestricted (allowedAdvertiserIds
+// === null) destination as normal.
 function partyAllowedFor(party, allowedAdvertiserIds) {
   if (!allowedAdvertiserIds) return true;
-  return !!party.createdBy && allowedAdvertiserIds.includes(party.createdBy);
+  if (party.createdBy) return allowedAdvertiserIds.includes(party.createdBy);
+  return allowedAdvertiserIds.includes(ADMIN_PSEUDO_ADVERTISER_ID);
 }
 
 async function initAdmin() {
