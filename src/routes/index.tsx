@@ -262,7 +262,7 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
                           rel="noopener noreferrer"
                           className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                         >
-                          הזמנה
+                          רישום כרטיסים
                         </a>
                       ) : getWhatsAppHref(e.whatsappNumber) ? (
                         <a
@@ -272,7 +272,7 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
                           className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#25D366] px-5 py-2 text-sm font-bold text-black transition-opacity hover:opacity-90"
                         >
                           <MessageCircle size={16} />
-                          הזמנה בוואטסאפ
+                          רישום דרך ווצאפ
                         </a>
                       ) : (
                         <Link
@@ -280,7 +280,7 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
                           search={{ partyId: e.id || undefined }}
                           className="shrink-0 rounded-full border border-primary px-6 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                         >
-                          הזמנה
+                          רישום דרך האתר
                         </Link>
                       )}
                     </div>
