@@ -583,7 +583,7 @@ const TelegramSection = ({ showSaved }) => {
                         onChange={() => toggleChannelBroadcast(c.id)}
                       />
                       <span className={c.broadcastEnabled === false ? 'text-zinc-500' : 'text-green-400'}>
-                        {t('admin.telegram.includeInPartyBroadcast') || 'לכלול בפרסום מסיבות אוטומטי'}
+                        לכלול בפרסום מסיבות אוטומטי
                       </span>
                     </label>
                     <button type="button" onClick={() => setEditingChannel(c.id)} className="text-zinc-400 hover:text-white">
@@ -605,7 +605,7 @@ const TelegramSection = ({ showSaved }) => {
                         onChange={() => toggleChannelRestricted(c.id)}
                       />
                       <span className="text-zinc-400">
-                        {t('admin.telegram.restrictToApprovedAdvertisers') || 'רק מפרסמים נבחרים מותרים לפרסם כאן'}
+                        רק מפרסמים נבחרים מותרים לפרסם כאן
                       </span>
                     </label>
                     {Array.isArray(c.allowedAdvertiserIds) && (
@@ -616,10 +616,10 @@ const TelegramSection = ({ showSaved }) => {
                             checked={c.allowedAdvertiserIds.includes(ADMIN_PSEUDO_ADVERTISER_ID)}
                             onChange={() => toggleChannelAdvertiser(c.id, ADMIN_PSEUDO_ADVERTISER_ID)}
                           />
-                          <span className="text-amber-400">{t('admin.telegram.adminOwnParties') || 'אני (המנהל הראשי)'}</span>
+                          <span className="text-amber-400">אני (המנהל הראשי)</span>
                         </label>
                         {advertisers.length === 0 && (
-                          <span className="text-zinc-600 text-xs">{t('admin.telegram.noApprovedAdvertisers') || 'אין מפרסמים מאושרים'}</span>
+                          <span className="text-zinc-600 text-xs">אין מפרסמים מאושרים</span>
                         )}
                         {advertisers.map((a) => (
                           <label key={a.id} className="flex items-center gap-1 cursor-pointer text-xs bg-black/30 border border-zinc-800 rounded-lg px-2 py-1">
