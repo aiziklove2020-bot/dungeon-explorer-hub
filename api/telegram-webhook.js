@@ -261,6 +261,25 @@ async function handleBotInfo(req, res) {
 // touches the `channels` field on settings/telegram (via .update, not a full
 // doc overwrite) so bot tokens/message templates on that doc are untouched.
 // Safe to leave in place; re-running it is idempotent (upserts by id).
+// One-off: this specific party ("מסיבת ט"ו באב של זוגות ליברלים", doc
+// Peo1JfBR4h0p91enqRHG) was marked "internal" (on-site registration) but its
+// description says "WhatsApp only" with the whatsappNumber field left empty
+// by the advertiser — so it wasn't excluded from /register like other
+// WhatsApp-contact parties are. Number confirmed directly by the admin in
+// chat (matches the advertiser's other party).
+async function handleFixPartyWhatsapp(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  try {
+    const admin = await initAdmin();
+    const ref = admin.firestore().collection('parties').doc('Peo1JfBR4h0p91enqRHG');
+    await ref.update({ whatsappNumber: '0559364370' });
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error('fix-party-whatsapp:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 async function handleFixChannels(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
   try {
@@ -546,6 +565,9 @@ export default async function handler(req, res) {
     }
     if (job === 'fix-channels') {
       return handleFixChannels(req, res);
+    }
+    if (job === 'fix-party-whatsapp') {
+      return handleFixPartyWhatsapp(req, res);
     }
     if (job === 'recent-chats') {
       return handleRecentChats(req, res);
