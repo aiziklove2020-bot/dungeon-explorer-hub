@@ -6,18 +6,28 @@
 
 const cache = new Map();
 const pendingRequests = new Map(); // Track pending requests to deduplicate
-const CACHE_TTL = 600000; // 10 minutes cache (increased from 5 minutes to further reduce database reads - parties rarely change)
+const CACHE_TTL = 600000; // 10 minutes cache — for data that changes rarely
+
+// This cache is per-process (in-memory), so a browser-side invalidateCache()
+// call can never reach the server's own SSR process cache — an admin
+// deleting/editing a party wouldn't show up on the public site for up to
+// CACHE_TTL. Parties change far more often than settings/users do, so they
+// get a much shorter TTL to bound that staleness window.
+const SHORT_CACHE_TTL = 30000; // 30 seconds
+const SHORT_TTL_KEY_PREFIXES = ['activeParties'];
+
+const ttlFor = (key) => (SHORT_TTL_KEY_PREFIXES.some((p) => key.startsWith(p)) ? SHORT_CACHE_TTL : CACHE_TTL);
 
 export const getCached = (key) => {
   const cached = cache.get(key);
   if (!cached) return null;
-  
+
   const now = Date.now();
-  if (now - cached.timestamp > CACHE_TTL) {
+  if (now - cached.timestamp > ttlFor(key)) {
     cache.delete(key);
     return null;
   }
-  
+
   return cached.data;
 };
 
