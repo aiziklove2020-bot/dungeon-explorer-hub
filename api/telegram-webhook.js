@@ -181,6 +181,29 @@ function isPromoAuthorized(req) {
   return key === secret;
 }
 
+// ?job=set-webhook — (re)registers the webhook URL with Telegram. Found via
+// ?job=webhook-info that the url was empty (25 updates stuck undelivered) —
+// this had nothing to do with any specific group, no webhook meant nothing
+// was ever reaching this server at all.
+async function handleSetWebhook(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    return res.status(503).json({ error: 'Server not configured (missing TELEGRAM_BOT_TOKEN)' });
+  }
+  const webhookUrl = 'https://www.libralparty.net/api/telegram-webhook';
+  const secretToken = process.env.TELEGRAM_WEBHOOK_SECRET;
+  try {
+    const params = new URLSearchParams({ url: webhookUrl, drop_pending_updates: 'true' });
+    if (secretToken) params.set('secret_token', secretToken);
+    const r = await fetch(`https://api.telegram.org/bot${botToken}/setWebhook?${params.toString()}`);
+    const data = await r.json();
+    return res.status(200).json({ ok: data.ok, description: data.description, webhookUrl, secretConfigured: Boolean(secretToken) });
+  } catch (err) {
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 // ?job=webhook-info — Telegram's own getWebhookInfo for the bot: shows the
 // registered URL, pending update count, and last delivery error. Explains
 // why recordSeenChat never captured anything even after tagging the bot.
@@ -468,6 +491,9 @@ export default async function handler(req, res) {
     }
     if (job === 'webhook-info') {
       return handleWebhookInfo(req, res);
+    }
+    if (job === 'set-webhook') {
+      return handleSetWebhook(req, res);
     }
     return handlePartyReminders(req, res);
   }
