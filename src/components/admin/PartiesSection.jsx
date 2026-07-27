@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { RotateCcw, Plus, Trash2, Clock, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminLoader from './AdminLoader';
-import { getActiveParties, createParty, updateParty, deleteParty, adminRemoveUserFromParty, recomputeAllPartiesExpiration, deleteExpiredParties } from '../../firebase/parties';
+import { getAllParties, createParty, updateParty, deleteParty, adminRemoveUserFromParty, recomputeAllPartiesExpiration } from '../../firebase/parties';
 import { createUserFromRegistration, getAllUsers } from '../../firebase/users';
 import { getPartySettings, updatePartySettings } from '../../firebase/partySettings';
-import { DEFAULT_PARTY_RETENTION_HOURS } from '../../../shared/partyExpiry.js';
+import { DEFAULT_PARTY_RETENTION_HOURS, isPartyExpiredByDate } from '../../../shared/partyExpiry.js';
 import PartyEditor from './PartyEditor';
 import RegistrationItem from './RegistrationItem';
 import CoupleRegistrationItem from './CoupleRegistrationItem';
@@ -40,20 +40,13 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
   // a one-shot notice with the count of parties that were rewritten.
   const [retentionPublishNotice, setRetentionPublishNotice] = useState(null);
 
-  const loadActiveParties = async (bustCache = false) => {
+  const loadActiveParties = async () => {
     try {
       setLoading(true);
-      if (bustCache) {
-        const { clearCache } = await import('../../utils/cache');
-        clearCache('activeParties');
-      }
-      // Fire-and-forget cleanup so stale docs don't linger in the admin list.
-      const deleted = await deleteExpiredParties().catch(() => 0);
-      if (deleted > 0) {
-        const { clearCache } = await import('../../utils/cache');
-        clearCache('activeParties');
-      }
-      const parties = await getActiveParties();
+      // Full visibility for the admin: every party, expired or not — no
+      // auto-cleanup here (that used to silently delete "expired" docs on
+      // every load, before the admin ever saw them).
+      const parties = await getAllParties();
       const toMs = (d) => {
         const dt = d instanceof Date ? d : d?.toDate ? d.toDate() : new Date(d);
         const t = dt?.getTime?.();
@@ -447,6 +440,11 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                         {party.createdByType === 'advertiser' && (
                           <span className="px-2 py-1 rounded text-xs font-bold bg-indigo-600">
                             פורסם ע"י מפרסם
+                          </span>
+                        )}
+                        {isPartyExpiredByDate(party.date, retentionHours) && (
+                          <span className="px-2 py-1 rounded text-xs font-bold bg-zinc-700 text-zinc-300">
+                            פג תוקף
                           </span>
                         )}
                       </div>

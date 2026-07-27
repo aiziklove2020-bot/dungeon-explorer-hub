@@ -14,7 +14,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './config';
-import { sendBalanceMatchNotification, sendNewPartyTelegram, sendNewExternalPartyTelegram } from './telegram';
+import { sendBalanceMatchNotification } from './telegram';
 import { isUserBlocked } from './users';
 import { getActiveParties as getActivePartiesFromDataAccess, getBalanceMatches as getBalanceMatchesFromDataAccess, getPartyById as getPartyByIdFromDataAccess, getUserByPhone, invalidateCache } from './dataAccess';
 import {
@@ -92,20 +92,13 @@ export const createParty = async (partyData) => {
 
     const created = { id: newPartyRef.id, ...party };
 
-    // Announce the new party to Telegram immediately — this used to only
-    // fire as a side effect of the GitHub "Publish" button, which the
-    // homepage/registration flows no longer depend on for parties to go
-    // live, so it silently stopped firing. No-ops quietly if Telegram isn't
-    // configured (see sendNewPartyTelegram/sendNewExternalPartyTelegram).
-    try {
-      if (created.partyType === 'external') {
-        await sendNewExternalPartyTelegram(created, 'he');
-      } else {
-        await sendNewPartyTelegram(created, 'he');
-      }
-    } catch (notifyError) {
-      console.error('createParty: Telegram notify failed:', notifyError);
-    }
+    // No immediate Telegram announcement here on purpose: the scheduled/
+    // manual broadcast (api/telegram-webhook.js sendAllPartyReminders) is
+    // now the single source of truth for posting parties to Telegram — it
+    // already covers every active party a few times a week and respects
+    // per-channel advertiser permissions, a lock against duplicate runs,
+    // etc. Notifying immediately here too meant a party could get posted
+    // twice through two uncoordinated paths.
 
     return created;
   } catch (error) {
@@ -115,6 +108,23 @@ export const createParty = async (partyData) => {
 
 // Re-export from dataAccess for backward compatibility
 export const getActiveParties = getActivePartiesFromDataAccess;
+
+/** Admin-only: every party regardless of expiry status, so the main
+ * management panel has full visibility (unlike the public/active-only
+ * views elsewhere on the site). */
+export const getAllParties = async () => {
+  const partiesRef = collection(db, PARTIES_COLLECTION);
+  const snap = await getDocs(partiesRef);
+  return snap.docs
+    .map((d) => {
+      const data = d.data();
+      return { id: d.id, ...data, date: data.date?.toDate ? data.date.toDate() : data.date };
+    })
+    .sort((a, b) => {
+      const toMs = (v) => (v instanceof Date ? v.getTime() : new Date(v).getTime());
+      return toMs(a.date) - toMs(b.date);
+    });
+};
 
 
 export const registerToParty = async (partyId, userId, userName, userGender) => {
