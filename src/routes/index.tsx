@@ -242,10 +242,10 @@ function Index({ heroImageUrl }: { heroImageUrl?: string }) {
                     />
                   </div>
                   <div className="p-6">
-                    <div className="flex items-center justify-center gap-2 text-sm font-bold text-primary">
+                    <div className="flex items-center justify-center gap-2 text-sm font-bold text-white">
                       <Calendar size={16} />
                       <span>{e.day}</span>
-                      <span className="text-muted-foreground">·</span>
+                      <span className="text-white/60">·</span>
                       <span>{formatEventDate(e.date)}</span>
                     </div>
                     <div className="mt-2 text-center">
