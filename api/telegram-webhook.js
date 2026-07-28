@@ -249,7 +249,45 @@ async function handleBotInfo(req, res) {
   try {
     const r = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
     const data = await r.json();
-    return res.status(200).json({ ok: data.ok, username: data.result?.username, name: data.result?.first_name });
+    return res.status(200).json({ ok: data.ok, id: data.result?.id, username: data.result?.username, name: data.result?.first_name });
+  } catch (err) {
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
+// ?job=chat-status&chatId=<id> — checks the bot's actual membership status
+// (member/administrator/left/kicked) in a given chat, plus getChat details.
+// Added because sendMessage can report {ok:true} for a message the members
+// never actually see (e.g. sent into a hidden/archived forum topic, or a
+// chat_id that resolves to a different/wrong chat than the one being
+// eyeballed in the Telegram app) — this cross-checks against the chat
+// itself rather than trusting the send response alone.
+async function handleChatStatus(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    return res.status(503).json({ error: 'Server not configured (missing TELEGRAM_BOT_TOKEN)' });
+  }
+  const rawChatId = req.query?.chatId || new URL(req.url, 'http://x').searchParams.get('chatId');
+  if (!rawChatId) {
+    return res.status(400).json({ error: 'Missing chatId query param' });
+  }
+  const chatId = sanitizeChatId(rawChatId);
+  try {
+    const meR = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+    const me = (await meR.json()).result;
+
+    const chatR = await fetch(`https://api.telegram.org/bot${botToken}/getChat?chat_id=${encodeURIComponent(chatId)}`);
+    const chatData = await chatR.json();
+
+    const memberR = await fetch(`https://api.telegram.org/bot${botToken}/getChatMember?chat_id=${encodeURIComponent(chatId)}&user_id=${me.id}`);
+    const memberData = await memberR.json();
+
+    return res.status(200).json({
+      chatIdTried: chatId,
+      chat: chatData.ok ? { id: chatData.result.id, title: chatData.result.title, type: chatData.result.type, isForum: chatData.result.is_forum || false } : { error: chatData.description },
+      botMembership: memberData.ok ? { status: memberData.result.status } : { error: memberData.description },
+    });
   } catch (err) {
     return res.status(500).json({ error: err.message || 'Internal error' });
   }
@@ -617,6 +655,9 @@ export default async function handler(req, res) {
     }
     if (job === 'webhook-info') {
       return handleWebhookInfo(req, res);
+    }
+    if (job === 'chat-status') {
+      return handleChatStatus(req, res);
     }
     if (job === 'set-webhook') {
       return handleSetWebhook(req, res);
