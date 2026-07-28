@@ -334,6 +334,36 @@ async function handleFixChannels(req, res) {
   }
 }
 
+// GET ?job=fix-chatids — one-off correction for channels whose chatId was
+// entered without the "-100" supergroup prefix (e.g. "-3989635097" instead
+// of "-1003989635097"), discovered via ?job=recent-chats. sanitizeChatId()
+// can't auto-fix these because they already start with "-", so it never
+// applies the -100 prepend that only kicks in for purely-numeric ids.
+async function handleFixChatIds(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  try {
+    const admin = await initAdmin();
+    const ref = admin.firestore().collection('settings').doc('telegram');
+    const snap = await ref.get();
+    const channels = snap.exists ? (snap.data()?.channels || []) : [];
+
+    const CORRECTIONS = {
+      '-3989635097': '-1003989635097', // "sins"
+      '-2291618623': '-1002291618623', // "NO LIMIT"
+    };
+
+    const updated = channels.map((c) =>
+      CORRECTIONS[c.chatId] ? { ...c, chatId: CORRECTIONS[c.chatId] } : c
+    );
+
+    await ref.update({ channels: updated });
+    return res.status(200).json({ ok: true, channels: updated });
+  } catch (err) {
+    console.error('fix-chatids:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 // The bot runs in webhook mode (see POST handler below), so getUpdates
 // can't be used to discover a chat_id (Telegram rejects it while a webhook
 // is active). Instead, every incoming POST update's chat is best-effort
@@ -565,6 +595,9 @@ export default async function handler(req, res) {
     }
     if (job === 'fix-channels') {
       return handleFixChannels(req, res);
+    }
+    if (job === 'fix-chatids') {
+      return handleFixChatIds(req, res);
     }
     if (job === 'fix-party-whatsapp') {
       return handleFixPartyWhatsapp(req, res);
