@@ -485,7 +485,7 @@ async function releaseBroadcastLock(ref) {
   }
 }
 
-async function sendAllPartyReminders() {
+async function sendAllPartyReminders(targetChatId) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
     throw new Error('Server not configured (missing TELEGRAM_BOT_TOKEN)');
@@ -503,7 +503,10 @@ async function sendAllPartyReminders() {
   try {
     const settingsSnap = await admin.firestore().collection('settings').doc('partySettings').get();
     const retentionHours = settingsSnap.exists ? settingsSnap.data()?.retentionHours : DEFAULT_RETENTION_HOURS;
-    const destinations = await getReminderDestinations(admin);
+    let destinations = await getReminderDestinations(admin);
+    if (targetChatId) {
+      destinations = destinations.filter((d) => d.chatId === targetChatId);
+    }
 
     const partiesSnap = await admin.firestore().collection('parties').get();
     const now = Date.now();
@@ -557,10 +560,14 @@ async function handleManualPostCheck(req, res) {
 // Same sending logic as the cron, but triggered on demand from the browser,
 // authenticated via the shared ADMIN_API_SECRET (Bearer header) used by
 // every other admin-only endpoint (see lib/apiAuth.js).
+// Optional &chatId=<id> restricts the send to a single destination channel
+// (e.g. to re-send to just one group that was fixed/added, without
+// re-broadcasting to every other group).
 async function handleManualPost(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
+  const targetChatId = req.query?.chatId || new URL(req.url, 'http://x').searchParams.get('chatId') || undefined;
   try {
-    const { partiesSent, results } = await sendAllPartyReminders();
+    const { partiesSent, results } = await sendAllPartyReminders(targetChatId);
     return res.status(200).json({ ok: true, partiesSent, results });
   } catch (err) {
     console.error('manual-post:', err);
