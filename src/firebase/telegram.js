@@ -761,9 +761,27 @@ export const sendBalancePublishToChannels = async (partiesWithBalance, siteUrl =
   return { sent, failed };
 };
 
+/**
+ * MATCH_NOTIFICATION has no bot of its own in the admin settings (it's
+ * deliberately excluded from the admin Telegram UI's message list — see
+ * TelegramSection.jsx's `withoutMatch` filter), so getTelegramConfigForMessage
+ * always returns null for it. Without this fallback, every balance-related
+ * DM (match found, couple confirmation, waiting-for-balance) silently
+ * failed with "No bot or username" since callers passed botToken: null.
+ * Falls back to the REGISTRATION message's bot — the same bot users already
+ * message during registration, so a chat with it already exists.
+ */
+async function getBalanceDmBotToken(explicitToken) {
+  if (explicitToken) return explicitToken;
+  const matchConfig = await getTelegramConfigForMessage(MESSAGE_KEYS.MATCH_NOTIFICATION);
+  if (matchConfig?.enabled && matchConfig.botToken) return matchConfig.botToken;
+  const regConfig = await getTelegramConfigForMessage(MESSAGE_KEYS.REGISTRATION);
+  return regConfig?.botToken || null;
+}
+
 export const sendBalanceMatchNotification = async (telegramUsername, matchedPerson, party, botToken, language = 'he') => {
   try {
-    let token = botToken;
+    let token = await getBalanceDmBotToken(botToken);
     let parseMode = 'HTML';
     let template = null;
     const config = await getTelegramConfigForMessage(MESSAGE_KEYS.MATCH_NOTIFICATION);
@@ -812,11 +830,7 @@ export const sendBalanceMatchNotification = async (telegramUsername, matchedPers
  */
 export const sendCoupleRegistrationConfirmation = async (telegramUsername, botToken) => {
   try {
-    let token = botToken;
-    const config = await getTelegramConfigForMessage(MESSAGE_KEYS.MATCH_NOTIFICATION);
-    if (config?.enabled && config.botToken) {
-      token = config.botToken;
-    }
+    const token = await getBalanceDmBotToken(botToken);
     if (!telegramUsername || !token) return { success: false, message: 'No bot or username', error: 'config' };
 
     const cleanUsername = telegramUsername.replace(/^@+/, '');
@@ -856,11 +870,7 @@ export const sendCoupleRegistrationConfirmation = async (telegramUsername, botTo
  */
 export const sendWaitingForBalanceNotification = async (telegramUsername, party, botToken) => {
   try {
-    let token = botToken;
-    const config = await getTelegramConfigForMessage(MESSAGE_KEYS.MATCH_NOTIFICATION);
-    if (config?.enabled && config.botToken) {
-      token = config.botToken;
-    }
+    const token = await getBalanceDmBotToken(botToken);
     if (!telegramUsername || !token) return { success: false, message: 'No bot or username', error: 'config' };
 
     const cleanUsername = telegramUsername.replace(/^@+/, '');
