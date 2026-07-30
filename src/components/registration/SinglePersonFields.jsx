@@ -132,9 +132,12 @@ export default function SinglePersonFields({
         </p>
         <p className="font-bold mb-1">איך נרשמים נכון:</p>
         <ol className="list-decimal pr-5 space-y-1">
-          <li>פותחים את אפליקציית טלגרם ומחפשים את הבוט שלנו: <strong>@talkingbdsm_bot</strong></li>
-          <li>לוחצים <strong>Start</strong> בשיחה עם הבוט (חובה, אחרת ההודעות לא יגיעו).</li>
-          <li>מזינים כאן למטה את שם המשתמש שלכם בטלגרם (בלי הצורך לכתוב @).</li>
+          <li>מזינים למטה את שם המשתמש שלכם בטלגרם (בלי הצורך לכתוב @).</li>
+          <li>
+            בלחיצה על <strong>"שלח בקשת רישום"</strong> ייפתח אוטומטית חלון עם הבוט שלנו,
+            <strong> @talkingbdsm_bot</strong> — שם חובה ללחוץ <strong>Start</strong> (חד־פעמי,
+            בלי זה ההודעות לא יגיעו).
+          </li>
         </ol>
         <p className="mt-2">
           לאחר ההרשמה תקבלו הודעה בטלגרם שאתם ממתינים לאיזון, וברגע שנמצא לכם זיווג —

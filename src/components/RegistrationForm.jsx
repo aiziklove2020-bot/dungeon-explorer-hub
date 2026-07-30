@@ -127,6 +127,15 @@ const RegistrationForm = ({ onCancel, partyId }) => {
       setTelegramError('');
       return;
     }
+    // Telegram bots can't message a user who never opened a chat with them
+    // first (anti-spam rule, applies to every bot) — so singles need a
+    // chat with @talkingbdsm_bot open before balance DMs can reach them.
+    // Opened here, synchronously inside the click handler, so the browser
+    // treats it as part of the user's own gesture instead of a blocked
+    // popup, making it feel like one action instead of two.
+    if (!isCoupleRegType(formData.regType)) {
+      window.open('https://t.me/talkingbdsm_bot', '_blank');
+    }
     const ok = await submit(formData);
     if (ok) {
       setStep(3);
