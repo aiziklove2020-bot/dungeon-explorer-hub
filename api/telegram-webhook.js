@@ -345,16 +345,27 @@ async function handleCleanupTestReg(req, res) {
   }
 }
 
+// GET ?job=fix-notified-flag&partyId=<x>&malePhone=<y>&femalePhone=<z> —
+// clears a wrongly-set notified flag (from before the send-result-checking
+// fix shipped, or before phone-based resolution existed) so the admin
+// panel's button reappears for a genuine retry.
 async function handleFixNotifiedFlag(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
+  const url = new URL(req.url, 'http://x');
+  const partyId = req.query?.partyId || url.searchParams.get('partyId');
+  const malePhone = req.query?.malePhone || url.searchParams.get('malePhone');
+  const femalePhone = req.query?.femalePhone || url.searchParams.get('femalePhone');
+  if (!partyId || !malePhone || !femalePhone) {
+    return res.status(400).json({ error: 'Missing partyId, malePhone, or femalePhone' });
+  }
   try {
     const admin = await initAdmin();
-    const ref = admin.firestore().collection('parties').doc('eUYKOumUvNmhXiXEYYUU');
+    const ref = admin.firestore().collection('parties').doc(partyId);
     const snap = await ref.get();
     if (!snap.exists) return res.status(404).json({ error: 'Party not found' });
     const balanceMatches = snap.data()?.balanceMatches || [];
     const updated = balanceMatches.map((m) =>
-      m.maleName === 'רועי צור' && m.femaleName === 'דניאל דרורי' ? { ...m, notified: false } : m
+      m.malePhone === malePhone && m.femalePhone === femalePhone ? { ...m, notified: false } : m
     );
     await ref.update({ balanceMatches: updated });
     return res.status(200).json({ ok: true, balanceMatches: updated });
