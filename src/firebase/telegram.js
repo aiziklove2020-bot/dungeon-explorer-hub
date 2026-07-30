@@ -805,6 +805,48 @@ export const sendBalanceMatchNotification = async (telegramUsername, matchedPers
 };
 
 /**
+ * Couples don't need "you've been matched with X" — they already know who
+ * their partner is. Instead they get a plain registration-confirmed message
+ * telling them what to say at the door. Reuses the match-notification bot
+ * token config since that's the one already configured for balance DMs.
+ */
+export const sendCoupleRegistrationConfirmation = async (telegramUsername, botToken) => {
+  try {
+    let token = botToken;
+    const config = await getTelegramConfigForMessage(MESSAGE_KEYS.MATCH_NOTIFICATION);
+    if (config?.enabled && config.botToken) {
+      token = config.botToken;
+    }
+    if (!telegramUsername || !token) return { success: false, message: 'No bot or username', error: 'config' };
+
+    const cleanUsername = telegramUsername.replace(/^@+/, '');
+    if (!cleanUsername) return { success: false, message: 'Invalid username', error: 'username' };
+
+    const text = '🎉 נרשמתם בהצלחה!\n\nבכניסה יש להגיד שהגעתם דרך חן ואיציק.';
+
+    const { data } = await relayTelegramApi('sendMessage', token, {
+      chat_id: `@${cleanUsername}`,
+      text
+    });
+
+    if (data.ok) {
+      return { success: true, message: `Sent to @${cleanUsername}` };
+    }
+    const errMsg = data.description || 'Unknown error';
+    if (errMsg.includes('chat not found') || errMsg.includes('Chat not found')) {
+      return {
+        success: false,
+        message: `User @${cleanUsername} hasn't started the bot. They need to start a conversation with the bot first.`,
+        error: 'chat_not_found'
+      };
+    }
+    return { success: false, message: `Failed to send to @${cleanUsername}: ${errMsg}`, error: errMsg };
+  } catch (error) {
+    return { success: false, message: `Error: ${error.message}`, error: error.message };
+  }
+};
+
+/**
  * Send new party notification to configured channels. Call after createParty.
  * If party has imageURL (public HTTPS), sends the image via sendPhoto with caption; otherwise sends text only.
  * Caption is built without party.imageURL so the link never appears in the message; if sendPhoto fails, falls back to text-only.
