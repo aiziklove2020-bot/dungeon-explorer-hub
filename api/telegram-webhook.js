@@ -324,6 +324,27 @@ async function handleFixPartyWhatsapp(req, res) {
 // "דניאל דרורי" on Dungeon X Lucifer Fetish Party shows "✓ נשלח" despite
 // nothing having reached them. Clears that one entry's notified flag so
 // the button reappears and a real retry (after they press Start) can work.
+// One-off cleanup: removes the fake test registration ("בדיקת מערכת",
+// 0500000001) created while verifying the TelegramVerifyStep block —
+// intentionally never had a startable bot username, so it's permanently
+// stuck and safe to delete outright.
+async function handleCleanupTestReg(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  try {
+    const admin = await initAdmin();
+    const ref = admin.firestore().collection('parties').doc('eUYKOumUvNmhXiXEYYUU');
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ error: 'Party not found' });
+    const registrations = snap.data()?.registrations || [];
+    const updated = registrations.filter((r) => r.phoneNumber !== '0500000001');
+    await ref.update({ registrations: updated });
+    return res.status(200).json({ ok: true, removed: registrations.length - updated.length });
+  } catch (err) {
+    console.error('cleanup-test-reg:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 async function handleFixNotifiedFlag(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
   try {
@@ -884,6 +905,9 @@ export default async function handler(req, res) {
     }
     if (job === 'seed-phone-chat') {
       return handleSeedPhoneChat(req, res);
+    }
+    if (job === 'cleanup-test-reg') {
+      return handleCleanupTestReg(req, res);
     }
     if (job === 'recent-chats') {
       return handleRecentChats(req, res);
