@@ -132,7 +132,11 @@ export default function SinglePersonFields({
         </p>
         <p className="font-bold mb-1">איך נרשמים נכון:</p>
         <ol className="list-decimal pr-5 space-y-1">
-          <li>מזינים למטה את שם המשתמש שלכם בטלגרם (בלי הצורך לכתוב @).</li>
+          <li>
+            מזינים למטה את <strong>שם המשתמש</strong> שלכם בטלגרם (בלי הצורך לכתוב @) —
+            <strong> לא</strong> את השם שמוצג בפרופיל. אם אין לכם שם משתמש בטלגרם, צריך
+            להגדיר אחד קודם: טלגרם ← הגדרות ← Username.
+          </li>
           <li>
             בלחיצה על <strong>"שלח בקשת רישום"</strong> ייפתח אוטומטית חלון עם הבוט שלנו,
             <strong> @talkingbdsm_bot</strong> — שם חובה ללחוץ <strong>Start</strong> (חד־פעמי,
@@ -212,7 +216,11 @@ export default function SinglePersonFields({
           </div>
           {telegramError && <p id={telegramErrorId} className="registration-form-error">{telegramError}</p>}
           {!telegramError && hasTriedSubmit && validationErrors.telegram && (
-            <p id={telegramErrorId} className="registration-form-error">חובה להזין שם משתמש טלגרם</p>
+            <p id={telegramErrorId} className="registration-form-error">
+              {telegram.trim()
+                ? 'זה לא נראה כמו שם משתמש טלגרם תקין (בלי רווחים, 5-32 תווים) — זה שם המשתמש שלכם, לא השם שמוצג בפרופיל'
+                : 'חובה להזין שם משתמש טלגרם'}
+            </p>
           )}
         </div>
       </div>
