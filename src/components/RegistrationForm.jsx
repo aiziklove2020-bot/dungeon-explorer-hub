@@ -19,6 +19,7 @@ import { useCoupleOneRegistered } from './registration/useCoupleOneRegistered';
 import { useSubmitRegistration } from './registration/useSubmitRegistration';
 import TypePicker from './registration/TypePicker';
 import SuccessScreen from './registration/SuccessScreen';
+import TelegramVerifyStep from './registration/TelegramVerifyStep';
 import SinglePersonFields from './registration/SinglePersonFields';
 import CoupleFields from './registration/CoupleFields';
 import FemaleArrivalFields from './registration/FemaleArrivalFields';
@@ -136,11 +137,21 @@ const RegistrationForm = ({ onCancel, partyId }) => {
     if (!isCoupleRegType(formData.regType)) {
       window.open('https://t.me/talkingbdsm_bot', '_blank');
     }
-    const ok = await submit(formData);
-    if (ok) {
+    const result = await submit(formData);
+    if (!result?.success) return;
+    if (result.telegramVerified) {
       setStep(3);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // Registration is already written, but we can't confirm the person
+      // can actually receive Telegram messages yet — block the success
+      // screen until we can, instead of silently leaving them unreachable.
+      setStep('verify');
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  if (step === 'verify') {
+    return <TelegramVerifyStep formData={formData} onVerified={() => setStep(3)} />;
   }
 
   if (step === 3) {

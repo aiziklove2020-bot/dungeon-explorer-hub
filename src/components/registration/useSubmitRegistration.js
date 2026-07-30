@@ -231,10 +231,11 @@ async function dispatchTelegramNotifications({
 }
 
 /**
- * Fire-and-forget: DMs the registrant directly (not the admin channel) that
- * they're registered and waiting for a balance match. Singles only — a
- * second DM (sendBalanceMatchNotification) follows once the admin runs the
- * balance. Requires a real telegramUsername, which the form now enforces.
+ * Checks (and, the moment it succeeds, also sends the "waiting for
+ * balance" DM) whether this registrant has pressed Start on the bot yet.
+ * Singles only — a second DM (sendBalanceMatchNotification) follows once
+ * the admin runs the balance. Requires a real telegramUsername, which the
+ * form now enforces.
  *
  * Goes straight to a dedicated server job (?job=send-waiting-balance)
  * rather than through firebase/telegram.js's resolveTelegramChatId: that
@@ -243,18 +244,33 @@ async function dispatchTelegramNotifications({
  * and shouldn't get — exposing it here would let anyone probe whether a
  * given Telegram handle has messaged our bot. This endpoint instead
  * verifies server-side that phone+telegramUsername+partyId actually match
- * a registration that was just created before it resolves/sends anything.
+ * a registration that was just created before it resolves/sends anything,
+ * so it's safe to call from an anonymous client and safe to poll — an
+ * attacker would need a real phone+party+username combination matching an
+ * actual just-created registration, not just a guessed username.
+ *
+ * Returns true once at least one selected party confirms delivery
+ * (chat_id resolution isn't party-specific — a single confirmed party is
+ * enough to know the person has started the bot).
  */
-async function dispatchWaitingForBalanceNotification({ formData, telegramUsername }) {
-  if (!telegramUsername) return;
+export async function checkTelegramStarted({ formData, telegramUsername }) {
+  if (!telegramUsername) return true; // nothing to verify — shouldn't happen, form requires it for singles
   const cleanUsername = telegramUsername.replace(/^@+/, '');
   const phone = cleanPhone(formData.phone);
 
   for (const partyId of formData.selectedParties) {
     const qs = new URLSearchParams({ phone, telegramUsername: cleanUsername, partyId });
-    // eslint-disable-next-line no-await-in-loop
-    await fetch(`/api/telegram-webhook?job=send-waiting-balance&${qs.toString()}`).catch(() => {});
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      const res = await fetch(`/api/telegram-webhook?job=send-waiting-balance&${qs.toString()}`);
+      // eslint-disable-next-line no-await-in-loop
+      const data = await res.json();
+      if (data?.ok) return true;
+    } catch {
+      // try the next party
+    }
   }
+  return false;
 }
 
 /**
@@ -355,19 +371,20 @@ export function useSubmitRegistration({ saveRegistration, activeParties, t }) {
         // Telegram is non-critical; registration already succeeded.
       }
 
-      if (!isCoupleRegType(formData.regType)) {
-        try {
-          await dispatchWaitingForBalanceNotification({ formData, telegramUsername });
-        } catch {
-          // Telegram is non-critical; registration already succeeded.
-        }
+      // Couples don't need Telegram verification (their confirmation DM is
+      // optional, sent later by the admin on balance). Singles do — the
+      // whole point of requiring a Telegram username is reaching them for
+      // balance results, so the registration flow now blocks on confirming
+      // they've actually pressed Start rather than just hoping they will.
+      if (isCoupleRegType(formData.regType)) {
+        return { success: true, telegramVerified: true };
       }
-
-      return true;
+      const telegramVerified = await checkTelegramStarted({ formData, telegramUsername }).catch(() => false);
+      return { success: true, telegramVerified, telegramUsername };
     } catch (error) {
       // eslint-disable-next-line no-alert
       alert(`${t('error')}: ${error.message || t('anErrorOccurred')}`);
-      return false;
+      return { success: false };
     } finally {
       setLoading(false);
     }

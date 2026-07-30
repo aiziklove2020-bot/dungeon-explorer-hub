@@ -97,7 +97,7 @@ describe('useSubmitRegistration', () => {
       ok = await result.current.submit(singleForm());
     });
 
-    expect(ok).toBe(true);
+    expect(ok.success).toBe(true);
     expect(mocks.registerToPartyNew).toHaveBeenCalledTimes(1);
     expect(mocks.registerToPartyNew).toHaveBeenCalledWith(
       'p1',
@@ -138,7 +138,7 @@ describe('useSubmitRegistration', () => {
       ok = await result.current.submit(singleForm());
     });
 
-    expect(ok).toBe(true);
+    expect(ok.success).toBe(true);
     expect(mocks.sendRegistrationTelegram).toHaveBeenCalledTimes(1);
   });
 
@@ -150,7 +150,7 @@ describe('useSubmitRegistration', () => {
       ok = await result.current.submit(coupleForm());
     });
 
-    expect(ok).toBe(true);
+    expect(ok.success).toBe(true);
     expect(mocks.registerCoupleToParty).toHaveBeenCalledTimes(1);
     const [partyId, male, female] = mocks.registerCoupleToParty.mock.calls[0];
     expect(partyId).toBe('p1');
@@ -169,7 +169,7 @@ describe('useSubmitRegistration', () => {
       ok = await result.current.submit(singleForm());
     });
 
-    expect(ok).toBe(false);
+    expect(ok.success).toBe(false);
     expect(result.current.telegramError).toBe('accountBlocked');
     expect(mocks.registerToPartyNew).not.toHaveBeenCalled();
   });
@@ -188,7 +188,7 @@ describe('useSubmitRegistration', () => {
       ok = await result.current.submit(singleForm());
     });
 
-    expect(ok).toBe(false);
+    expect(ok.success).toBe(false);
     expect(result.current.telegramError).toBe('alreadyRegistered');
     expect(mocks.registerToPartyNew).not.toHaveBeenCalled();
   });
@@ -210,7 +210,7 @@ describe('useSubmitRegistration', () => {
       ok = await result.current.submit(coupleForm());
     });
 
-    expect(ok).toBe(false);
+    expect(ok.success).toBe(false);
     expect(result.current.telegramError).toBe('registration.coupleBothAlreadyRegistered');
     expect(mocks.registerCoupleToParty).not.toHaveBeenCalled();
   });
@@ -224,7 +224,7 @@ describe('useSubmitRegistration', () => {
       ok = await result.current.submit(coupleForm());
     });
 
-    expect(ok).toBe(false);
+    expect(ok.success).toBe(false);
     expect(result.current.telegramError).toBe('registration.coupleBothAlreadyRegistered');
   });
 
@@ -237,7 +237,7 @@ describe('useSubmitRegistration', () => {
       ok = await result.current.submit(coupleForm());
     });
 
-    expect(ok).toBe(false);
+    expect(ok.success).toBe(false);
     expect(result.current.telegramError).toBe('registration.coupleSamePhone');
   });
 
@@ -250,7 +250,7 @@ describe('useSubmitRegistration', () => {
       ok = await result.current.submit(singleForm());
     });
 
-    expect(ok).toBe(true);
+    expect(ok.success).toBe(true);
     expect(mocks.saveRegistration).toHaveBeenCalledTimes(1);
   });
 });
