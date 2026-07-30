@@ -343,6 +343,29 @@ async function handleFixNotifiedFlag(req, res) {
   }
 }
 
+// GET ?job=seed-phone-chat&phone=<x>&chatId=<y> — manually seeds a
+// phone_<phone> -> chatId mapping. For registrants who pressed Start
+// before the ?start=<phone> deep link shipped, or whose chat_id is
+// otherwise already known (e.g. via ?job=recent-chats) but never got
+// linked to their phone automatically.
+async function handleSeedPhoneChat(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  const url = new URL(req.url, 'http://x');
+  const phone = req.query?.phone || url.searchParams.get('phone');
+  const chatId = req.query?.chatId || url.searchParams.get('chatId');
+  if (!phone || !chatId) {
+    return res.status(400).json({ error: 'Missing phone or chatId query param' });
+  }
+  try {
+    const admin = await initAdmin();
+    await recordPhoneChatId(admin, phone, Number(chatId));
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error('seed-phone-chat:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 async function handleFixChannels(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
   try {
@@ -858,6 +881,9 @@ export default async function handler(req, res) {
     }
     if (job === 'fix-notified-flag') {
       return handleFixNotifiedFlag(req, res);
+    }
+    if (job === 'seed-phone-chat') {
+      return handleSeedPhoneChat(req, res);
     }
     if (job === 'recent-chats') {
       return handleRecentChats(req, res);
