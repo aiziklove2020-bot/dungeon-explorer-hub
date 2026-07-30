@@ -5,7 +5,7 @@ import { useContent } from '../../context/ContentContext';
 import AdminLoader from './AdminLoader';
 import { getActiveParties, getPartyById, adminRemoveUserFromParty, unmatchBalance, saveBalanceMatches, getBalanceMatches, convertCoupleToSingles } from '../../firebase/parties';
 import { createUserFromRegistration } from '../../firebase/users';
-import { sendBalancePublishToChannels, genderFromRegistration } from '../../firebase/telegram';
+import { sendBalancePublishToChannels, genderFromRegistration, sendBalanceMatchNotification } from '../../firebase/telegram';
 import { createBalanceForParty } from '../../utils/balanceMatching';
 // xlsx (~600 KB gzipped) is dynamically imported on first export click; see
 // `loadXLSX()` below. Keeps the admin route bundle small for users who never
@@ -359,10 +359,38 @@ const MatchesSection = ({ showSaved }) => {
       const existingMatchedPairs = existingBalance.filter(m => m.isMatched);
       const newMatchedPairs = newBalanceMatches.filter(m => m.isMatched);
       const newUnmatchedPairs = newBalanceMatches.filter(m => !m.isMatched);
-      
+
       const mergedBalance = [...existingMatchedPairs, ...newMatchedPairs, ...newUnmatchedPairs];
 
       await saveBalanceMatches(party.id, mergedBalance);
+
+      // Notify each newly-matched side on Telegram with the other side's
+      // details — only pairs with both a male and female side (couples or
+      // balance matches), not the leftover unmatched entries.
+      const partyForNotification = { ...party, name: party.name || party.title || 'מסיבה' };
+      for (const pair of newMatchedPairs) {
+        if (!pair.femalePhone || !pair.malePhone) continue;
+        const maleType = pair.isCouple ? 'couple' : 'single-male-balance';
+        const femaleType = pair.isCouple ? 'couple' : 'single-female-balance';
+        if (pair.maleTelegram) {
+          sendBalanceMatchNotification(
+            pair.maleTelegram,
+            { fullName: pair.femaleName, phoneNumber: pair.femalePhone, telegramUsername: pair.femaleTelegram, registrationType: femaleType },
+            partyForNotification,
+            null,
+            'he'
+          ).catch(() => {});
+        }
+        if (pair.femaleTelegram) {
+          sendBalanceMatchNotification(
+            pair.femaleTelegram,
+            { fullName: pair.maleName, phoneNumber: pair.malePhone, telegramUsername: pair.maleTelegram, registrationType: maleType },
+            partyForNotification,
+            null,
+            'he'
+          ).catch(() => {});
+        }
+      }
 
       setPartyBalances(prev => ({
         ...prev,
