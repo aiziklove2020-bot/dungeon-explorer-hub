@@ -24,6 +24,7 @@ export function getValidationErrors(formData) {
   } else {
     if (!formData.fullName?.trim()) errors.fullName = true;
     if (!isValidIsraeliPhone(formData.phone)) errors.phone = true;
+    if (!formData.telegram?.trim()) errors.telegram = true;
   }
 
   if (!formData.selectedParties || formData.selectedParties.length === 0) {

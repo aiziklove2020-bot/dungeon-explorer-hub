@@ -231,6 +231,26 @@ async function dispatchTelegramNotifications({
 }
 
 /**
+ * Fire-and-forget: DMs the registrant directly (not the admin channel) that
+ * they're registered and waiting for a balance match. Singles only — a
+ * second DM (sendBalanceMatchNotification) follows once the admin runs the
+ * balance. Requires a real telegramUsername, which the form now enforces.
+ */
+async function dispatchWaitingForBalanceNotification({ formData, telegramUsername }) {
+  if (!telegramUsername) return;
+  const { getPartyById } = await import('../../firebase/parties');
+  const { sendWaitingForBalanceNotification } = await import('../../firebase/telegram');
+
+  for (const partyId of formData.selectedParties) {
+    // eslint-disable-next-line no-await-in-loop
+    const party = await getPartyById(partyId);
+    if (!party) continue;
+    // eslint-disable-next-line no-await-in-loop
+    await sendWaitingForBalanceNotification(telegramUsername, party, null);
+  }
+}
+
+/**
  * Orchestrates the entire submit pipeline for the registration form.
  *
  * Returns state + a `submit` function that the shell wires to its form
@@ -326,6 +346,14 @@ export function useSubmitRegistration({ saveRegistration, activeParties, t }) {
         });
       } catch {
         // Telegram is non-critical; registration already succeeded.
+      }
+
+      if (!isCoupleRegType(formData.regType)) {
+        try {
+          await dispatchWaitingForBalanceNotification({ formData, telegramUsername });
+        } catch {
+          // Telegram is non-critical; registration already succeeded.
+        }
       }
 
       return true;

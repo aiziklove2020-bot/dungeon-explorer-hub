@@ -847,6 +847,51 @@ export const sendCoupleRegistrationConfirmation = async (telegramUsername, botTo
 };
 
 /**
+ * First-stage DM sent right after a single registers for balance matching:
+ * confirms registration and sets the expectation that a second message
+ * (sendBalanceMatchNotification, with the matched person's details) follows
+ * once the admin runs the balance. Reuses the same bot token config as the
+ * match notification since it's the bot the user already started a chat
+ * with during registration.
+ */
+export const sendWaitingForBalanceNotification = async (telegramUsername, party, botToken) => {
+  try {
+    let token = botToken;
+    const config = await getTelegramConfigForMessage(MESSAGE_KEYS.MATCH_NOTIFICATION);
+    if (config?.enabled && config.botToken) {
+      token = config.botToken;
+    }
+    if (!telegramUsername || !token) return { success: false, message: 'No bot or username', error: 'config' };
+
+    const cleanUsername = telegramUsername.replace(/^@+/, '');
+    if (!cleanUsername) return { success: false, message: 'Invalid username', error: 'username' };
+
+    const partyName = party?.name || party?.title || 'המסיבה';
+    const text = `🎉 נרשמתם בהצלחה ל${partyName}!\n\nאתם ברשימת ההמתנה לאיזון. ברגע שיימצא לכם זיווג מתאים, תקבלו כאן הודעה נוספת עם הפרטים.`;
+
+    const { data } = await relayTelegramApi('sendMessage', token, {
+      chat_id: `@${cleanUsername}`,
+      text
+    });
+
+    if (data.ok) {
+      return { success: true, message: `Sent to @${cleanUsername}` };
+    }
+    const errMsg = data.description || 'Unknown error';
+    if (errMsg.includes('chat not found') || errMsg.includes('Chat not found')) {
+      return {
+        success: false,
+        message: `User @${cleanUsername} hasn't started the bot. They need to start a conversation with the bot first.`,
+        error: 'chat_not_found'
+      };
+    }
+    return { success: false, message: `Failed to send to @${cleanUsername}: ${errMsg}`, error: errMsg };
+  } catch (error) {
+    return { success: false, message: `Error: ${error.message}`, error: error.message };
+  }
+};
+
+/**
  * Send new party notification to configured channels. Call after createParty.
  * If party has imageURL (public HTTPS), sends the image via sendPhoto with caption; otherwise sends text only.
  * Caption is built without party.imageURL so the link never appears in the message; if sendPhoto fails, falls back to text-only.

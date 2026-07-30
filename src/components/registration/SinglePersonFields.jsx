@@ -123,6 +123,25 @@ export default function SinglePersonFields({
         )}
       </div>
 
+      <div className="rounded-xl border border-primary/40 bg-primary/5 p-4 text-sm leading-relaxed mb-4">
+        <p className="font-bold text-primary mb-1">⚠️ חובה טלגרם אמיתי כדי להירשם</p>
+        <p className="mb-2">
+          ההרשמה שלכם מבוססת על איזון בין גברים ונשים סינגלים. כדי שנוכל להודיע לכם
+          כשנמצא לכם זיווג (עם הפרטים של הצד השני), חובה להזין שם משתמש טלגרם אמיתי
+          ופעיל — לא בדוי.
+        </p>
+        <p className="font-bold mb-1">איך נרשמים נכון:</p>
+        <ol className="list-decimal pr-5 space-y-1">
+          <li>פותחים את אפליקציית טלגרם ומחפשים את הבוט שלנו: <strong>@talkingbdsm_bot</strong></li>
+          <li>לוחצים <strong>Start</strong> בשיחה עם הבוט (חובה, אחרת ההודעות לא יגיעו).</li>
+          <li>מזינים כאן למטה את שם המשתמש שלכם בטלגרם (בלי הצורך לכתוב @).</li>
+        </ol>
+        <p className="mt-2">
+          לאחר ההרשמה תקבלו הודעה בטלגרם שאתם ממתינים לאיזון, וברגע שנמצא לכם זיווג —
+          הודעה שנייה עם הפרטים של מי שהתאזנתם איתם.
+        </p>
+      </div>
+
       <div className="registration-form-grid">
         <div className="registration-form-field">
           <label htmlFor={phoneId} className="registration-form-label">{`${t('registration.phone')} *`}</label>
@@ -159,26 +178,39 @@ export default function SinglePersonFields({
         </div>
 
         <div className="registration-form-field">
-          <label htmlFor={telegramId} className="registration-form-label">{t('registration.telegram')}</label>
-          <input
-            id={telegramId}
-            type="text"
-            aria-invalid={!!telegramError}
-            aria-describedby={telegramError ? telegramErrorId : undefined}
-            className={`registration-form-input ${inputErrorClass(false, false, Boolean(telegramError))}`}
-            placeholder="@username"
-            value={telegram}
-            onChange={(e) =>
-              handleTelegramChange(e, (value) => {
-                setFormData({ ...formData, telegram: value });
-                if (value) setTelegramError('');
-              })
-            }
-            onBlur={(e) => {
-              if (e.target.value.trim().replace(/@/g, '')) setTelegramError('');
-            }}
-          />
+          <label htmlFor={telegramId} className="registration-form-label">{`${t('registration.telegram')} *`}</label>
+          <div
+            key={shakeKey(validationErrors.telegram, shakeTrigger, hasTriedSubmit)}
+            className={shakeWrapClass(validationErrors.telegram, hasTriedSubmit)}
+          >
+            <input
+              id={telegramId}
+              required
+              type="text"
+              aria-invalid={(hasTriedSubmit && !!validationErrors.telegram) || !!telegramError}
+              aria-describedby={telegramError || (hasTriedSubmit && validationErrors.telegram) ? telegramErrorId : undefined}
+              className={`registration-form-input ${inputErrorClass(
+                validationErrors.telegram,
+                hasTriedSubmit,
+                Boolean(telegramError)
+              )}`}
+              placeholder="@username"
+              value={telegram}
+              onChange={(e) =>
+                handleTelegramChange(e, (value) => {
+                  setFormData({ ...formData, telegram: value });
+                  if (value) setTelegramError('');
+                })
+              }
+              onBlur={(e) => {
+                if (e.target.value.trim().replace(/@/g, '')) setTelegramError('');
+              }}
+            />
+          </div>
           {telegramError && <p id={telegramErrorId} className="registration-form-error">{telegramError}</p>}
+          {!telegramError && hasTriedSubmit && validationErrors.telegram && (
+            <p id={telegramErrorId} className="registration-form-error">חובה להזין שם משתמש טלגרם</p>
+          )}
         </div>
       </div>
     </>
