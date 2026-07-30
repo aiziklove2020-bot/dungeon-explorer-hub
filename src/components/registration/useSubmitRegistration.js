@@ -235,18 +235,25 @@ async function dispatchTelegramNotifications({
  * they're registered and waiting for a balance match. Singles only — a
  * second DM (sendBalanceMatchNotification) follows once the admin runs the
  * balance. Requires a real telegramUsername, which the form now enforces.
+ *
+ * Goes straight to a dedicated server job (?job=send-waiting-balance)
+ * rather than through firebase/telegram.js's resolveTelegramChatId: that
+ * helper needs an admin-secret header to look up an arbitrary username
+ * (see MatchesSection.jsx), which this anonymous public flow doesn't have
+ * and shouldn't get — exposing it here would let anyone probe whether a
+ * given Telegram handle has messaged our bot. This endpoint instead
+ * verifies server-side that phone+telegramUsername+partyId actually match
+ * a registration that was just created before it resolves/sends anything.
  */
 async function dispatchWaitingForBalanceNotification({ formData, telegramUsername }) {
   if (!telegramUsername) return;
-  const { getPartyById } = await import('../../firebase/parties');
-  const { sendWaitingForBalanceNotification } = await import('../../firebase/telegram');
+  const cleanUsername = telegramUsername.replace(/^@+/, '');
+  const phone = cleanPhone(formData.phone);
 
   for (const partyId of formData.selectedParties) {
+    const qs = new URLSearchParams({ phone, telegramUsername: cleanUsername, partyId });
     // eslint-disable-next-line no-await-in-loop
-    const party = await getPartyById(partyId);
-    if (!party) continue;
-    // eslint-disable-next-line no-await-in-loop
-    await sendWaitingForBalanceNotification(telegramUsername, party, null);
+    await fetch(`/api/telegram-webhook?job=send-waiting-balance&${qs.toString()}`).catch(() => {});
   }
 }
 

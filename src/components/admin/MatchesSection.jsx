@@ -7,6 +7,7 @@ import { getActiveParties, getPartyById, adminRemoveUserFromParty, unmatchBalanc
 import { createUserFromRegistration } from '../../firebase/users';
 import { sendBalancePublishToChannels, genderFromRegistration, sendBalanceMatchNotification, sendCoupleRegistrationConfirmation } from '../../firebase/telegram';
 import { createBalanceForParty } from '../../utils/balanceMatching';
+import { adminAuthHeader } from '../../utils/adminApi';
 // xlsx (~600 KB gzipped) is dynamically imported on first export click; see
 // `loadXLSX()` below. Keeps the admin route bundle small for users who never
 // export.
@@ -370,11 +371,12 @@ const MatchesSection = ({ showSaved }) => {
       // matched with X" details message is only for singles balanced
       // against a stranger.
       const partyForNotification = { ...party, name: party.name || party.title || 'מסיבה' };
+      const telegramAuthHeaders = adminAuthHeader();
       for (const pair of newMatchedPairs) {
         if (!pair.femalePhone || !pair.malePhone) continue;
         if (pair.isCouple) {
-          if (pair.maleTelegram) sendCoupleRegistrationConfirmation(pair.maleTelegram, null).catch(() => {});
-          if (pair.femaleTelegram) sendCoupleRegistrationConfirmation(pair.femaleTelegram, null).catch(() => {});
+          if (pair.maleTelegram) sendCoupleRegistrationConfirmation(pair.maleTelegram, null, telegramAuthHeaders).catch(() => {});
+          if (pair.femaleTelegram) sendCoupleRegistrationConfirmation(pair.femaleTelegram, null, telegramAuthHeaders).catch(() => {});
           continue;
         }
         if (pair.maleTelegram) {
@@ -383,7 +385,8 @@ const MatchesSection = ({ showSaved }) => {
             { fullName: pair.femaleName, phoneNumber: pair.femalePhone, telegramUsername: pair.femaleTelegram, registrationType: 'single-female-balance' },
             partyForNotification,
             null,
-            'he'
+            'he',
+            telegramAuthHeaders
           ).catch(() => {});
         }
         if (pair.femaleTelegram) {
@@ -392,7 +395,8 @@ const MatchesSection = ({ showSaved }) => {
             { fullName: pair.maleName, phoneNumber: pair.malePhone, telegramUsername: pair.maleTelegram, registrationType: 'single-male-balance' },
             partyForNotification,
             null,
-            'he'
+            'he',
+            telegramAuthHeaders
           ).catch(() => {});
         }
       }
