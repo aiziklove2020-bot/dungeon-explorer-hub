@@ -19,7 +19,9 @@ const BalanceTables = ({
   onToggleEntered,
   registeringClient,
   allUsersMap,
-  onLoadBalance
+  onLoadBalance,
+  onApproveMatch,
+  approvingMatchKey
 }) => {
   const { t } = useLanguage();
   const [usersInTable, setUsersInTable] = useState(new Map());
@@ -195,7 +197,8 @@ const BalanceTables = ({
         maleTelegram: maleCouple.telegramUsername || '',
         femaleTelegram: femaleCouple.telegramUsername || '',
         coupleId: maleCouple.coupleId,
-        entered: existingMatch?.entered || false
+        entered: existingMatch?.entered || false,
+        notified: existingMatch?.notified || false
       };
       
       if (maleCouple.phoneNumber) {
@@ -220,7 +223,8 @@ const BalanceTables = ({
         femaleName: couple.gender === 'female' ? (couple.fullName || couple.userName || '') : couple.partnerName || '',
         malePhone: couple.gender === 'male' ? couple.phoneNumber : (couple.partnerPhone || ''),
         femalePhone: couple.gender === 'female' ? couple.phoneNumber : (couple.partnerPhone || ''),
-        entered: existingMatch?.entered || false
+        entered: existingMatch?.entered || false,
+        notified: existingMatch?.notified || false
       };
     }
   });
@@ -370,6 +374,24 @@ const BalanceTables = ({
                         <span className="matched-pair__couple-badge">
                           💑 {t('admin.balanceTables.couples')}
                         </span>
+                      )}
+                      {onApproveMatch && (
+                        pair.match?.notified ? (
+                          <span className="matched-pair__notified-badge" title={t('admin.balanceTables.detailsSentTitle') || 'הפרטים נשלחו לשני הצדדים'}>
+                            ✓ {t('admin.balanceTables.detailsSent') || 'נשלח'}
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => onApproveMatch(pair)}
+                            disabled={approvingMatchKey === `${party.id}:${pair.male.phoneNumber}:${pair.female.phoneNumber}`}
+                            className="matched-pair__approve-btn"
+                            title={t('admin.balanceTables.approveAndSendTitle') || 'שולח לכל צד את הפרטים של הצד השני'}
+                          >
+                            {approvingMatchKey === `${party.id}:${pair.male.phoneNumber}:${pair.female.phoneNumber}`
+                              ? '...'
+                              : (t('admin.balanceTables.approveAndSend') || 'אשר ושלח פרטים')}
+                          </button>
+                        )
                       )}
                       <button
                         onClick={() => handleUnmatch(pair.male)}

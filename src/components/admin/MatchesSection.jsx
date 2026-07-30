@@ -33,6 +33,7 @@ const MatchesSection = ({ showSaved }) => {
   const [registeringClient, setRegisteringClient] = useState(null);
   const [allUsersMap, setAllUsersMap] = useState(new Map()); // Map of phoneNumber -> user
   const [publishingToTelegramPartyId, setPublishingToTelegramPartyId] = useState(null);
+  const [approvingMatchKey, setApprovingMatchKey] = useState(null);
 
   const handlePublishPartyToTelegram = async (party) => {
     if (publishingToTelegramPartyId) return;
@@ -363,43 +364,12 @@ const MatchesSection = ({ showSaved }) => {
 
       const mergedBalance = [...existingMatchedPairs, ...newMatchedPairs, ...newUnmatchedPairs];
 
+      // Pairing is created immediately, but nobody's details are sent yet —
+      // that requires an explicit per-pair approval (see handleApproveMatch)
+      // so a stranger who just registered can't automatically receive a
+      // real person's phone/Telegram without the admin reviewing the pair
+      // first.
       await saveBalanceMatches(party.id, mergedBalance);
-
-      // Notify each newly-matched side on Telegram. Couples already know
-      // who their partner is, so they just get a plain "registered
-      // successfully, say this at the door" message — the "you've been
-      // matched with X" details message is only for singles balanced
-      // against a stranger.
-      const partyForNotification = { ...party, name: party.name || party.title || 'מסיבה' };
-      const telegramAuthHeaders = adminAuthHeader();
-      for (const pair of newMatchedPairs) {
-        if (!pair.femalePhone || !pair.malePhone) continue;
-        if (pair.isCouple) {
-          if (pair.maleTelegram) sendCoupleRegistrationConfirmation(pair.maleTelegram, null, telegramAuthHeaders).catch(() => {});
-          if (pair.femaleTelegram) sendCoupleRegistrationConfirmation(pair.femaleTelegram, null, telegramAuthHeaders).catch(() => {});
-          continue;
-        }
-        if (pair.maleTelegram) {
-          sendBalanceMatchNotification(
-            pair.maleTelegram,
-            { fullName: pair.femaleName, phoneNumber: pair.femalePhone, telegramUsername: pair.femaleTelegram, registrationType: 'single-female-balance' },
-            partyForNotification,
-            null,
-            'he',
-            telegramAuthHeaders
-          ).catch(() => {});
-        }
-        if (pair.femaleTelegram) {
-          sendBalanceMatchNotification(
-            pair.femaleTelegram,
-            { fullName: pair.maleName, phoneNumber: pair.malePhone, telegramUsername: pair.maleTelegram, registrationType: 'single-male-balance' },
-            partyForNotification,
-            null,
-            'he',
-            telegramAuthHeaders
-          ).catch(() => {});
-        }
-      }
 
       setPartyBalances(prev => ({
         ...prev,
@@ -411,6 +381,84 @@ const MatchesSection = ({ showSaved }) => {
       alert(`${t('admin.balanceTables.errorCreatingBalance')}: ${error.message}`);
     } finally {
       setCreatingBalance(null);
+    }
+  };
+
+  // Sends each side's Telegram DM for ONE specific pair, on explicit admin
+  // approval — pairing (handleCreateBalance) no longer sends anything on
+  // its own. A stranger who just registered shouldn't automatically get a
+  // real person's phone/Telegram the moment the admin bulk-runs "צור
+  // איזון"; the admin has to look at the specific pair and approve it.
+  const handleApproveMatch = async (party, pair) => {
+    const matchKey = `${party.id}:${pair.male.phoneNumber}:${pair.female.phoneNumber}`;
+    try {
+      setApprovingMatchKey(matchKey);
+      const authHeaders = adminAuthHeader();
+      const partyForNotification = { ...party, name: party.name || party.title || 'מסיבה' };
+      const isCouple = !!pair.match?.isCouple;
+      const maleTelegram = pair.male.telegramUsername;
+      const femaleTelegram = pair.female.telegramUsername;
+
+      if (isCouple) {
+        if (maleTelegram) await sendCoupleRegistrationConfirmation(maleTelegram, null, authHeaders).catch(() => {});
+        if (femaleTelegram) await sendCoupleRegistrationConfirmation(femaleTelegram, null, authHeaders).catch(() => {});
+      } else {
+        if (maleTelegram) {
+          await sendBalanceMatchNotification(
+            maleTelegram,
+            { fullName: pair.female.fullName || pair.female.userName, phoneNumber: pair.female.phoneNumber, telegramUsername: femaleTelegram, registrationType: 'single-female-balance' },
+            partyForNotification,
+            null,
+            'he',
+            authHeaders
+          ).catch(() => {});
+        }
+        if (femaleTelegram) {
+          await sendBalanceMatchNotification(
+            femaleTelegram,
+            { fullName: pair.male.fullName || pair.male.userName, phoneNumber: pair.male.phoneNumber, telegramUsername: maleTelegram, registrationType: 'single-male-balance' },
+            partyForNotification,
+            null,
+            'he',
+            authHeaders
+          ).catch(() => {});
+        }
+      }
+
+      const existing = partyBalances[party.id] || [];
+      let found = false;
+      const updated = existing.map((m) => {
+        const sameCouple = pair.match?.coupleId && m.coupleId === pair.match.coupleId;
+        const samePhones = m.malePhone === pair.male.phoneNumber && m.femalePhone === pair.female.phoneNumber;
+        if (sameCouple || samePhones) {
+          found = true;
+          return { ...m, notified: true, notifiedAt: new Date().toISOString() };
+        }
+        return m;
+      });
+      if (!found) {
+        updated.push({
+          isMatched: true,
+          isCouple,
+          coupleId: pair.match?.coupleId,
+          maleName: pair.male.fullName || pair.male.userName || '',
+          femaleName: pair.female.fullName || pair.female.userName || '',
+          malePhone: pair.male.phoneNumber || '',
+          femalePhone: pair.female.phoneNumber || '',
+          maleTelegram: maleTelegram || '',
+          femaleTelegram: femaleTelegram || '',
+          notified: true,
+          notifiedAt: new Date().toISOString(),
+        });
+      }
+
+      await saveBalanceMatches(party.id, updated);
+      setPartyBalances(prev => ({ ...prev, [party.id]: updated }));
+      showSaved();
+    } catch (error) {
+      alert(`${t('admin.balanceTables.errorApprovingMatch') || 'שגיאה באישור ההתאמה'}: ${error.message}`);
+    } finally {
+      setApprovingMatchKey(null);
     }
   };
 
@@ -609,6 +657,8 @@ const MatchesSection = ({ showSaved }) => {
                     onRefresh={loadActiveParties}
                     registeringClient={registeringClient}
                     allUsersMap={allUsersMap}
+                    onApproveMatch={(pair) => handleApproveMatch(party, pair)}
+                    approvingMatchKey={approvingMatchKey}
                     onLoadBalance={async () => {
                       // Lazy load balance matches only when BalanceTables is rendered
                       // CRITICAL: This function is stable - BalanceTables uses ref to prevent loops
