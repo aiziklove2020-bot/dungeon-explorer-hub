@@ -399,30 +399,49 @@ const MatchesSection = ({ showSaved }) => {
       const maleTelegram = pair.male.telegramUsername;
       const femaleTelegram = pair.female.telegramUsername;
 
+      // Track each side's actual send result — the old version marked
+      // "notified" unconditionally regardless of whether anything really
+      // went out, so a "chat_not_found" failure (person hasn't pressed
+      // Start yet) silently showed "✓ נשלח" even though nothing arrived.
+      const results = [];
       if (isCouple) {
-        if (maleTelegram) await sendCoupleRegistrationConfirmation(maleTelegram, null, authHeaders).catch(() => {});
-        if (femaleTelegram) await sendCoupleRegistrationConfirmation(femaleTelegram, null, authHeaders).catch(() => {});
+        if (maleTelegram) results.push({ side: pair.male.fullName || pair.male.userName || 'צד א׳', result: await sendCoupleRegistrationConfirmation(maleTelegram, null, authHeaders).catch((e) => ({ success: false, message: e.message })) });
+        if (femaleTelegram) results.push({ side: pair.female.fullName || pair.female.userName || 'צד ב׳', result: await sendCoupleRegistrationConfirmation(femaleTelegram, null, authHeaders).catch((e) => ({ success: false, message: e.message })) });
       } else {
         if (maleTelegram) {
-          await sendBalanceMatchNotification(
+          const result = await sendBalanceMatchNotification(
             maleTelegram,
             { fullName: pair.female.fullName || pair.female.userName, phoneNumber: pair.female.phoneNumber, telegramUsername: femaleTelegram, registrationType: 'single-female-balance' },
             partyForNotification,
             null,
             'he',
             authHeaders
-          ).catch(() => {});
+          ).catch((e) => ({ success: false, message: e.message }));
+          results.push({ side: pair.male.fullName || pair.male.userName || 'צד א׳', result });
         }
         if (femaleTelegram) {
-          await sendBalanceMatchNotification(
+          const result = await sendBalanceMatchNotification(
             femaleTelegram,
             { fullName: pair.male.fullName || pair.male.userName, phoneNumber: pair.male.phoneNumber, telegramUsername: maleTelegram, registrationType: 'single-male-balance' },
             partyForNotification,
             null,
             'he',
             authHeaders
-          ).catch(() => {});
+          ).catch((e) => ({ success: false, message: e.message }));
+          results.push({ side: pair.female.fullName || pair.female.userName || 'צד ב׳', result });
         }
+      }
+
+      const failures = results.filter((r) => !r.result?.success);
+      const anySucceeded = results.some((r) => r.result?.success);
+
+      if (failures.length > 0) {
+        const lines = failures.map((f) => `${f.side}: ${f.result?.error === 'chat_not_found' ? 'עדיין לא לחץ/ה Start בבוט הטלגרם' : (f.result?.message || 'שליחה נכשלה')}`);
+        alert(`שים לב — לא כל ההודעות נשלחו:\n${lines.join('\n')}${anySucceeded ? '\n\n(לצד השני כן נשלח בהצלחה)' : ''}`);
+      }
+
+      if (!anySucceeded) {
+        return; // nothing actually sent — don't mark as notified
       }
 
       const existing = partyBalances[party.id] || [];

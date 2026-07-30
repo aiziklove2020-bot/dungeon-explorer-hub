@@ -318,6 +318,31 @@ async function handleFixPartyWhatsapp(req, res) {
   }
 }
 
+// One-off: the pre-fix version of the admin panel's "אשר ושלח פרטים"
+// button marked a pair as notified even when every send genuinely failed
+// (e.g. neither side has pressed Start on the bot yet), so "רועי צור" /
+// "דניאל דרורי" on Dungeon X Lucifer Fetish Party shows "✓ נשלח" despite
+// nothing having reached them. Clears that one entry's notified flag so
+// the button reappears and a real retry (after they press Start) can work.
+async function handleFixNotifiedFlag(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  try {
+    const admin = await initAdmin();
+    const ref = admin.firestore().collection('parties').doc('eUYKOumUvNmhXiXEYYUU');
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ error: 'Party not found' });
+    const balanceMatches = snap.data()?.balanceMatches || [];
+    const updated = balanceMatches.map((m) =>
+      m.maleName === 'רועי צור' && m.femaleName === 'דניאל דרורי' ? { ...m, notified: false } : m
+    );
+    await ref.update({ balanceMatches: updated });
+    return res.status(200).json({ ok: true, balanceMatches: updated });
+  } catch (err) {
+    console.error('fix-notified-flag:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 async function handleFixChannels(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
   try {
@@ -787,6 +812,9 @@ export default async function handler(req, res) {
     }
     if (job === 'fix-party-whatsapp') {
       return handleFixPartyWhatsapp(req, res);
+    }
+    if (job === 'fix-notified-flag') {
+      return handleFixNotifiedFlag(req, res);
     }
     if (job === 'recent-chats') {
       return handleRecentChats(req, res);
