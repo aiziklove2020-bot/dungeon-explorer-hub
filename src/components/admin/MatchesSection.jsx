@@ -405,28 +405,30 @@ const MatchesSection = ({ showSaved }) => {
       // Start yet) silently showed "✓ נשלח" even though nothing arrived.
       const results = [];
       if (isCouple) {
-        if (maleTelegram) results.push({ side: pair.male.fullName || pair.male.userName || 'צד א׳', result: await sendCoupleRegistrationConfirmation(maleTelegram, null, authHeaders).catch((e) => ({ success: false, message: e.message })) });
-        if (femaleTelegram) results.push({ side: pair.female.fullName || pair.female.userName || 'צד ב׳', result: await sendCoupleRegistrationConfirmation(femaleTelegram, null, authHeaders).catch((e) => ({ success: false, message: e.message })) });
+        if (maleTelegram || pair.male.phoneNumber) results.push({ side: pair.male.fullName || pair.male.userName || 'צד א׳', result: await sendCoupleRegistrationConfirmation(maleTelegram, null, authHeaders, pair.male.phoneNumber).catch((e) => ({ success: false, message: e.message })) });
+        if (femaleTelegram || pair.female.phoneNumber) results.push({ side: pair.female.fullName || pair.female.userName || 'צד ב׳', result: await sendCoupleRegistrationConfirmation(femaleTelegram, null, authHeaders, pair.female.phoneNumber).catch((e) => ({ success: false, message: e.message })) });
       } else {
-        if (maleTelegram) {
+        if (maleTelegram || pair.male.phoneNumber) {
           const result = await sendBalanceMatchNotification(
             maleTelegram,
             { fullName: pair.female.fullName || pair.female.userName, phoneNumber: pair.female.phoneNumber, telegramUsername: femaleTelegram, registrationType: 'single-female-balance' },
             partyForNotification,
             null,
             'he',
-            authHeaders
+            authHeaders,
+            pair.male.phoneNumber
           ).catch((e) => ({ success: false, message: e.message }));
           results.push({ side: pair.male.fullName || pair.male.userName || 'צד א׳', result });
         }
-        if (femaleTelegram) {
+        if (femaleTelegram || pair.female.phoneNumber) {
           const result = await sendBalanceMatchNotification(
             femaleTelegram,
             { fullName: pair.male.fullName || pair.male.userName, phoneNumber: pair.male.phoneNumber, telegramUsername: maleTelegram, registrationType: 'single-male-balance' },
             partyForNotification,
             null,
             'he',
-            authHeaders
+            authHeaders,
+            pair.female.phoneNumber
           ).catch((e) => ({ success: false, message: e.message }));
           results.push({ side: pair.female.fullName || pair.female.userName || 'צד ב׳', result });
         }

@@ -134,8 +134,16 @@ const RegistrationForm = ({ onCancel, partyId }) => {
     // Opened here, synchronously inside the click handler, so the browser
     // treats it as part of the user's own gesture instead of a blocked
     // popup, making it feel like one action instead of two.
+    //
+    // Uses a deep link (?start=<phone>) rather than a bare bot link: a real
+    // registrant had no Telegram @username at all (only a display name),
+    // so username-based matching could never find him even though he
+    // genuinely pressed Start. Telegram passes this payload as the text of
+    // the /start command, letting the server link the press back to this
+    // exact registration by phone number — works with or without a
+    // username.
     if (!isCoupleRegType(formData.regType)) {
-      window.open('https://t.me/talkingbdsm_bot', '_blank');
+      window.open(`https://t.me/talkingbdsm_bot?start=${formData.phone}`, '_blank');
     }
     const result = await submit(formData);
     if (!result?.success) return;

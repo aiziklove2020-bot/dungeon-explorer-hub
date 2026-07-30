@@ -469,6 +469,30 @@ async function recordUserChatId(admin, chat) {
   }
 }
 
+// Real-world incident: a registrant had no Telegram @username at all (only
+// a display name), so recordUserChatId() above had nothing to key on and
+// he could never be reached even though he genuinely pressed Start.
+// Fixed at the source: the registration form now opens the bot via a
+// deep link (https://t.me/talkingbdsm_bot?start=<phone>) instead of a
+// bare link. Telegram delivers that payload as the text of the /start
+// command ("/start <phone>"), so it works identically whether or not the
+// user has a username — this is the reliable path; username-keyed
+// lookups remain only as a fallback for anyone who started the bot before
+// this shipped.
+async function recordPhoneChatId(admin, phone, chatId) {
+  const cleanedPhone = String(phone || '').replace(/\D/g, '');
+  if (!cleanedPhone || !chatId) return;
+  try {
+    await admin.firestore().collection('telegramUserChats').doc(`phone_${cleanedPhone}`).set({
+      chatId,
+      phone: cleanedPhone,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error('recordPhoneChatId:', err);
+  }
+}
+
 // ?job=recent-chats — reads back the capped list of chats the bot has seen
 // (via recordSeenChat), so the correct chat_id for a group can be found
 // with certainty after someone sends any message there.
@@ -516,27 +540,47 @@ async function handleBackfillUserChats(req, res) {
   }
 }
 
-// GET ?job=resolve-chat-id&username=<x> — admin-only. Telegram's
+// Phone-keyed lookup (from the /start deep-link payload) always wins when
+// available — it works for people with no Telegram username at all, unlike
+// the username-keyed fallback. See recordPhoneChatId() for how it's
+// populated.
+async function resolveChatIdByPhoneOrUsername(admin, phone, username) {
+  const cleanedPhone = String(phone || '').replace(/\D/g, '');
+  if (cleanedPhone) {
+    const phoneSnap = await admin.firestore().collection('telegramUserChats').doc(`phone_${cleanedPhone}`).get();
+    const phoneChatId = phoneSnap.exists ? phoneSnap.data()?.chatId : null;
+    if (phoneChatId) return phoneChatId;
+  }
+  const cleanedUsername = String(username || '').replace(/^@+/, '').trim().toLowerCase();
+  if (!cleanedUsername) return null;
+  const usernameSnap = await admin.firestore().collection('telegramUserChats').doc(cleanedUsername).get();
+  return usernameSnap.exists ? usernameSnap.data()?.chatId ?? null : null;
+}
+
+// GET ?job=resolve-chat-id&username=<x>&phone=<y> — admin-only. Telegram's
 // sendMessage with chat_id: "@username" unreliably fails ("chat not
 // found") even for users who have an active chat with the bot — confirmed
 // by testing: the same user fails by @username, succeeds by numeric
-// chat_id. This resolves the numeric id recorded by recordUserChatId() so
-// the admin panel's balance-match / couple-confirmation DMs (both
-// triggered from an authenticated admin action in MatchesSection.jsx) can
-// send reliably. Gated by the same ADMIN_API_SECRET as every other
-// admin-only endpoint — not exposed to the public registration flow, which
-// uses the separate verification-based ?job=send-waiting-balance instead.
+// chat_id. This resolves the numeric id recorded by recordUserChatId() /
+// recordPhoneChatId() so the admin panel's balance-match /
+// couple-confirmation DMs (both triggered from an authenticated admin
+// action in MatchesSection.jsx) can send reliably. Gated by the same
+// ADMIN_API_SECRET as every other admin-only endpoint — not exposed to the
+// public registration flow, which uses the separate verification-based
+// ?job=send-waiting-balance instead.
 async function handleResolveChatId(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
-  const rawUsername = req.query?.username || new URL(req.url, 'http://x').searchParams.get('username');
+  const url = new URL(req.url, 'http://x');
+  const rawUsername = req.query?.username || url.searchParams.get('username');
+  const rawPhone = req.query?.phone || url.searchParams.get('phone');
   const username = String(rawUsername || '').replace(/^@+/, '').trim().toLowerCase();
-  if (!username) {
-    return res.status(400).json({ error: 'Missing username query param' });
+  if (!username && !rawPhone) {
+    return res.status(400).json({ error: 'Missing username or phone query param' });
   }
   try {
     const admin = await initAdmin();
-    const snap = await admin.firestore().collection('telegramUserChats').doc(username).get();
-    return res.status(200).json({ ok: true, chatId: snap.exists ? snap.data()?.chatId ?? null : null });
+    const chatId = await resolveChatIdByPhoneOrUsername(admin, rawPhone, username);
+    return res.status(200).json({ ok: true, chatId });
   } catch (err) {
     console.error('resolve-chat-id:', err);
     return res.status(500).json({ error: err.message || 'Internal error' });
@@ -578,8 +622,7 @@ async function handleSendWaitingBalance(req, res) {
       return res.status(200).json({ ok: false, reason: 'not_found' });
     }
 
-    const chatSnap = await admin.firestore().collection('telegramUserChats').doc(telegramUsername.toLowerCase()).get();
-    const chatId = chatSnap.exists ? chatSnap.data()?.chatId : null;
+    const chatId = await resolveChatIdByPhoneOrUsername(admin, phone, telegramUsername);
     if (!chatId) {
       return res.status(200).json({ ok: false, reason: 'chat_not_found' });
     }
@@ -870,6 +913,14 @@ export default async function handler(req, res) {
     if (anyChat) {
       await recordSeenChat(admin, anyChat);
       await recordUserChatId(admin, anyChat);
+    }
+
+    // "/start <phone>" — the deep-link payload the registration form opens
+    // (?start=<phone>). Works regardless of whether the user has a
+    // Telegram username, unlike recordUserChatId() above.
+    const startMatch = msg?.text && /^\/start(?:\s+(\S+))?/.exec(msg.text);
+    if (startMatch?.[1] && anyChat?.id) {
+      await recordPhoneChatId(admin, startMatch[1], anyChat.id);
     }
 
     if (!msg?.text) {

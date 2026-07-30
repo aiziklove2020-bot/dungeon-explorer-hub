@@ -800,11 +800,14 @@ async function getBalanceDmBotToken(explicitToken) {
  * ?job=send-waiting-balance endpoint instead (see useSubmitRegistration.js),
  * which needs no shared secret at all.
  */
-async function resolveTelegramChatId(username, authHeaders = {}) {
+async function resolveTelegramChatId(username, authHeaders = {}, phone = '') {
   const key = String(username || '').replace(/^@+/, '').trim().toLowerCase();
-  if (!key) return null;
+  if (!key && !phone) return null;
   try {
-    const res = await fetch(`/api/telegram-webhook?job=resolve-chat-id&username=${encodeURIComponent(key)}`, {
+    const qs = new URLSearchParams();
+    if (key) qs.set('username', key);
+    if (phone) qs.set('phone', phone);
+    const res = await fetch(`/api/telegram-webhook?job=resolve-chat-id&${qs.toString()}`, {
       headers: authHeaders
     });
     const data = await res.json().catch(() => null);
@@ -814,7 +817,7 @@ async function resolveTelegramChatId(username, authHeaders = {}) {
   }
 }
 
-export const sendBalanceMatchNotification = async (telegramUsername, matchedPerson, party, botToken, language = 'he', authHeaders = {}) => {
+export const sendBalanceMatchNotification = async (telegramUsername, matchedPerson, party, botToken, language = 'he', authHeaders = {}, recipientPhone = '') => {
   try {
     let token = await getBalanceDmBotToken(botToken);
     let parseMode = 'HTML';
@@ -825,16 +828,15 @@ export const sendBalanceMatchNotification = async (telegramUsername, matchedPers
       parseMode = config.parseMode || 'HTML';
       template = config.template;
     }
-    if (!telegramUsername || !token) return { success: false, message: 'No bot or username', error: 'config' };
+    if ((!telegramUsername && !recipientPhone) || !token) return { success: false, message: 'No bot or username', error: 'config' };
 
-    let cleanUsername = telegramUsername.replace(/^@+/, '');
-    if (!cleanUsername) return { success: false, message: 'Invalid username', error: 'username' };
+    const cleanUsername = (telegramUsername || '').replace(/^@+/, '');
 
-    const resolvedChatId = await resolveTelegramChatId(cleanUsername, authHeaders);
+    const resolvedChatId = await resolveTelegramChatId(cleanUsername, authHeaders, recipientPhone);
     if (!resolvedChatId) {
       return {
         success: false,
-        message: `User @${cleanUsername} hasn't started the bot. They need to start a conversation with the bot first.`,
+        message: `User @${cleanUsername || '(no username)'} hasn't started the bot. They need to start a conversation with the bot first.`,
         error: 'chat_not_found'
       };
     }
@@ -872,19 +874,18 @@ export const sendBalanceMatchNotification = async (telegramUsername, matchedPers
  * telling them what to say at the door. Reuses the match-notification bot
  * token config since that's the one already configured for balance DMs.
  */
-export const sendCoupleRegistrationConfirmation = async (telegramUsername, botToken, authHeaders = {}) => {
+export const sendCoupleRegistrationConfirmation = async (telegramUsername, botToken, authHeaders = {}, recipientPhone = '') => {
   try {
     const token = await getBalanceDmBotToken(botToken);
-    if (!telegramUsername || !token) return { success: false, message: 'No bot or username', error: 'config' };
+    if ((!telegramUsername && !recipientPhone) || !token) return { success: false, message: 'No bot or username', error: 'config' };
 
-    const cleanUsername = telegramUsername.replace(/^@+/, '');
-    if (!cleanUsername) return { success: false, message: 'Invalid username', error: 'username' };
+    const cleanUsername = (telegramUsername || '').replace(/^@+/, '');
 
-    const resolvedChatId = await resolveTelegramChatId(cleanUsername, authHeaders);
+    const resolvedChatId = await resolveTelegramChatId(cleanUsername, authHeaders, recipientPhone);
     if (!resolvedChatId) {
       return {
         success: false,
-        message: `User @${cleanUsername} hasn't started the bot. They need to start a conversation with the bot first.`,
+        message: `User @${cleanUsername || '(no username)'} hasn't started the bot. They need to start a conversation with the bot first.`,
         error: 'chat_not_found'
       };
     }
