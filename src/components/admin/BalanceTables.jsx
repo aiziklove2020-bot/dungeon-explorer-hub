@@ -376,22 +376,23 @@ const BalanceTables = ({
                         </span>
                       )}
                       {onApproveMatch && (
-                        pair.match?.notified ? (
-                          <span className="matched-pair__notified-badge" title="הפרטים נשלחו לשני הצדדים">
-                            ✓ נשלח
-                          </span>
-                        ) : (
+                        <>
+                          {pair.match?.notified && (
+                            <span className="matched-pair__notified-badge" title="הפרטים נשלחו לשני הצדדים">
+                              ✓ נשלח
+                            </span>
+                          )}
                           <button
                             onClick={() => onApproveMatch(pair)}
                             disabled={approvingMatchKey === `${party.id}:${pair.male.phoneNumber}:${pair.female.phoneNumber}`}
                             className="matched-pair__approve-btn"
-                            title="שולח לכל צד את הפרטים של הצד השני"
+                            title="שולח שוב לכל צד את הפרטים של הצד השני — אפשר לשלוח כמה פעמים שרוצים"
                           >
                             {approvingMatchKey === `${party.id}:${pair.male.phoneNumber}:${pair.female.phoneNumber}`
                               ? '...'
-                              : 'אשר ושלח פרטים'}
+                              : (pair.match?.notified ? 'שלח שוב' : 'אשר ושלח פרטים')}
                           </button>
-                        )
+                        </>
                       )}
                       <button
                         onClick={() => handleUnmatch(pair.male)}
