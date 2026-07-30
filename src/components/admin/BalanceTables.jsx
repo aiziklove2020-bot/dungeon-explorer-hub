@@ -377,19 +377,19 @@ const BalanceTables = ({
                       )}
                       {onApproveMatch && (
                         pair.match?.notified ? (
-                          <span className="matched-pair__notified-badge" title={t('admin.balanceTables.detailsSentTitle') || 'הפרטים נשלחו לשני הצדדים'}>
-                            ✓ {t('admin.balanceTables.detailsSent') || 'נשלח'}
+                          <span className="matched-pair__notified-badge" title="הפרטים נשלחו לשני הצדדים">
+                            ✓ נשלח
                           </span>
                         ) : (
                           <button
                             onClick={() => onApproveMatch(pair)}
                             disabled={approvingMatchKey === `${party.id}:${pair.male.phoneNumber}:${pair.female.phoneNumber}`}
                             className="matched-pair__approve-btn"
-                            title={t('admin.balanceTables.approveAndSendTitle') || 'שולח לכל צד את הפרטים של הצד השני'}
+                            title="שולח לכל צד את הפרטים של הצד השני"
                           >
                             {approvingMatchKey === `${party.id}:${pair.male.phoneNumber}:${pair.female.phoneNumber}`
                               ? '...'
-                              : (t('admin.balanceTables.approveAndSend') || 'אשר ושלח פרטים')}
+                              : 'אשר ושלח פרטים'}
                           </button>
                         )
                       )}

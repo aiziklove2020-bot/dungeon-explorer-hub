@@ -456,7 +456,7 @@ const MatchesSection = ({ showSaved }) => {
       setPartyBalances(prev => ({ ...prev, [party.id]: updated }));
       showSaved();
     } catch (error) {
-      alert(`${t('admin.balanceTables.errorApprovingMatch') || 'שגיאה באישור ההתאמה'}: ${error.message}`);
+      alert(`שגיאה באישור ההתאמה: ${error.message}`);
     } finally {
       setApprovingMatchKey(null);
     }
