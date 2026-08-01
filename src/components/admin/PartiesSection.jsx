@@ -429,13 +429,13 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         <h3 className="text-lg md:text-xl font-bold">{party.name || party.title}</h3>
                         <span className={`px-2 py-1 rounded text-xs font-bold ${
-                          !party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal')
-                            ? (party.partyType === 'exchange' ? 'bg-purple-600' : 'bg-red-600')
-                            : 'bg-blue-600'
+                          party.partyType === 'exchange' ? 'bg-purple-600'
+                            : party.partyType === 'external' ? 'bg-blue-600'
+                            : 'bg-red-600'
                         }`}>
-                          {!party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal')
-                            ? (party.partyType === 'exchange' ? t('admin.exchangeParty') : t('admin.internalParty'))
-                            : t('admin.externalParty')}
+                          {party.partyType === 'exchange' ? t('admin.exchangeParty')
+                            : party.partyType === 'external' ? t('admin.externalParty')
+                            : t('admin.internalParty')}
                         </span>
                         {party.createdByType === 'advertiser' && (
                           <span className="px-2 py-1 rounded text-xs font-bold bg-indigo-600">
