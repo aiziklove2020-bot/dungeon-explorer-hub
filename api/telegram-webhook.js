@@ -467,6 +467,37 @@ async function handleFixChannels(req, res) {
 // request deletion and the site would silently never act on it. This and
 // ?job=process-delete-request are the read/update side, surfaced in the
 // admin panel's new "בקשות מחיקה" tab (DeleteRequestsSection.jsx).
+// GET ?job=migrate-support-chat-secret — one-off: settings/supportChat was
+// publicly readable (Firestore rules allow read: true on the whole
+// `settings` collection), exposing the support bot's token to anyone with
+// no authentication. settings/private/{document=**} is already locked to
+// admin-SDK-only access in the rules but nothing used it. Copies
+// botToken+chatId to settings/private/supportChat/config (matching the
+// already-locked-down path) and strips them from the public doc, leaving
+// only the genuinely-public fields (enabled, siteUrl) there. Safe to run —
+// grepped the codebase first: nothing client-side reads or writes
+// botToken/chatId on the public doc, only enabled/siteUrl (SupportChat.jsx).
+async function handleMigrateSupportChatSecret(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  try {
+    const admin = await initAdmin();
+    const publicRef = admin.firestore().collection('settings').doc('supportChat');
+    const snap = await publicRef.get();
+    if (!snap.exists) return res.status(404).json({ error: 'settings/supportChat not found' });
+    const data = snap.data();
+    const { botToken, chatId, ...publicFields } = data;
+    if (!botToken && !chatId) {
+      return res.status(200).json({ ok: true, message: 'Already migrated (no secret fields present)' });
+    }
+    await admin.firestore().collection('settings').doc('private').collection('supportChat').doc('config').set({ botToken, chatId });
+    await publicRef.set(publicFields);
+    return res.status(200).json({ ok: true, movedFields: Object.keys({ botToken, chatId }).filter((k) => data[k] !== undefined) });
+  } catch (err) {
+    console.error('migrate-support-chat-secret:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 async function handleListDeleteRequests(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
   try {
@@ -963,6 +994,9 @@ export default async function handler(req, res) {
     }
     if (job === 'fix-chatids') {
       return handleFixChatIds(req, res);
+    }
+    if (job === 'migrate-support-chat-secret') {
+      return handleMigrateSupportChatSecret(req, res);
     }
     if (job === 'list-delete-requests') {
       return handleListDeleteRequests(req, res);

@@ -179,8 +179,19 @@ export default async function handler(req, res) {
       return res.status(503).json({ error: 'Server configuration error' });
     }
 
-    const snap = await admin.firestore().collection('settings').doc('supportChat').get();
-    const d = snap?.data?.() || {};
+    // settings/supportChat was publicly readable (Firestore rules allow read:
+    // true on the whole `settings` collection), which meant this bot's token
+    // could be read by anyone with no auth at all. settings/private/{doc} is
+    // already locked to admin-SDK-only access in the rules — moving the
+    // secret fields there is the actual fix; falls back to the old public
+    // doc only until the one-off migration (?job=migrate-support-chat-secret)
+    // has run.
+    const privateSnap = await admin.firestore().collection('settings').doc('private').collection('supportChat').doc('config').get();
+    let d = privateSnap.exists ? privateSnap.data() : null;
+    if (!d) {
+      const legacySnap = await admin.firestore().collection('settings').doc('supportChat').get();
+      d = legacySnap?.data?.() || {};
+    }
     const botToken = d.botToken;
     const chatId = d.chatId;
 
