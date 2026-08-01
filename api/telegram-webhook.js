@@ -452,6 +452,54 @@ async function handleFixChannels(req, res) {
   }
 }
 
+// GET ?job=list-delete-requests — account-deletion requests submitted via
+// /delete-account (src/firebase/deleteRequests.js) were being written to
+// Firestore but nothing anywhere ever read them back — no admin UI, no
+// notification, nothing. A real privacy/compliance gap: someone could
+// request deletion and the site would silently never act on it. This and
+// ?job=process-delete-request are the read/update side, surfaced in the
+// admin panel's new "בקשות מחיקה" tab (DeleteRequestsSection.jsx).
+async function handleListDeleteRequests(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  try {
+    const admin = await initAdmin();
+    const snap = await admin.firestore().collection('deleteRequests').orderBy('createdAt', 'desc').limit(200).get();
+    const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return res.status(200).json({ ok: true, rows });
+  } catch (err) {
+    console.error('list-delete-requests:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
+const DELETE_REQUEST_STATUSES = new Set(['pending', 'done', 'dismissed']);
+
+// GET ?job=process-delete-request&requestId=<x>&status=<pending|done|dismissed>
+// Marks the request's status — this endpoint does NOT itself delete any
+// user data (that stays a deliberate manual step for the admin, given how
+// much a phone number can touch: users, registrations, forum posts, chat
+// messages), it just tracks that the request was seen and handled.
+async function handleProcessDeleteRequest(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  const url = new URL(req.url, 'http://x');
+  const requestId = req.query?.requestId || url.searchParams.get('requestId');
+  const status = req.query?.status || url.searchParams.get('status');
+  if (!requestId || !DELETE_REQUEST_STATUSES.has(status)) {
+    return res.status(400).json({ error: 'Missing requestId or invalid status' });
+  }
+  try {
+    const admin = await initAdmin();
+    await admin.firestore().collection('deleteRequests').doc(requestId).update({
+      status,
+      processedAt: new Date().toISOString(),
+    });
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error('process-delete-request:', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 // GET ?job=fix-chatids — one-off correction for channels whose chatId was
 // entered without the "-100" supergroup prefix (e.g. "-3989635097" instead
 // of "-1003989635097"), discovered via ?job=recent-chats. sanitizeChatId()
@@ -907,6 +955,12 @@ export default async function handler(req, res) {
     }
     if (job === 'fix-chatids') {
       return handleFixChatIds(req, res);
+    }
+    if (job === 'list-delete-requests') {
+      return handleListDeleteRequests(req, res);
+    }
+    if (job === 'process-delete-request') {
+      return handleProcessDeleteRequest(req, res);
     }
     if (job === 'fix-party-whatsapp') {
       return handleFixPartyWhatsapp(req, res);

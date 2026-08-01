@@ -16,6 +16,7 @@ export const adminTabs = [
   { id: 'forumUsers', label: 'משתמשי פורום' },
   { id: 'liveChat', label: 'צ׳אט' },
   { id: 'chatReports', label: 'דיווחי צ׳אט' },
+  { id: 'deleteRequests', label: 'בקשות מחיקה' },
   { id: 'blog',     label: 'בלוג' },
   { id: 'users',    label: 'ניהול משתמשים' },
   { id: 'subscriptions', label: 'ניהול מנויים' },

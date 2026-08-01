@@ -26,6 +26,7 @@ import ForumAdminSection from '../components/admin/ForumAdminSection';
 import ForumUsersSection from '../components/admin/ForumUsersSection';
 import LiveChatSection from '../components/admin/LiveChatSection';
 import ChatReportsSection from '../components/admin/ChatReportsSection';
+import DeleteRequestsSection from '../components/admin/DeleteRequestsSection';
 import BlogAdminSection from '../components/admin/BlogAdminSection';
 import SubscriptionsSection from '../components/admin/SubscriptionsSection';
 import SiteDesignSection from '../components/admin/SiteDesignSection';
@@ -266,6 +267,7 @@ const Admin = () => {
           {activeSection === 'forumUsers' && <ForumUsersSection showSaved={showSaved} />}
           {activeSection === 'liveChat'  && <LiveChatSection showSaved={showSaved} />}
           {activeSection === 'chatReports' && <ChatReportsSection showSaved={showSaved} />}
+          {activeSection === 'deleteRequests' && <DeleteRequestsSection showSaved={showSaved} />}
           {activeSection === 'blog'      && <BlogAdminSection showSaved={showSaved} />}
           {activeSection === 'users'     && <UsersSection showSaved={showSaved} />}
           {activeSection === 'subscriptions' && <SubscriptionsSection showSaved={showSaved} />}
