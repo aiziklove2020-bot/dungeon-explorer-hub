@@ -242,7 +242,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
         />
         <p className="text-zinc-500 text-xs mt-1">
-          {t('admin.noPhoneInDescription') || 'לא להזין מספר טלפון בתיאור — יש שדה וואטסאפ ייעודי למטה.'}
+          לא להזין מספר טלפון בתיאור — יש שדה וואטסאפ ייעודי למטה.
         </p>
       </div>
       <div className="space-y-1 text-right">
