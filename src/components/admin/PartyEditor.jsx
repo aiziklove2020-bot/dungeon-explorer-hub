@@ -15,12 +15,26 @@ const getHebrewDayName = (dateString) => {
   }
 };
 
+// Parties are saved as local midnight (see handleSave below), so reading
+// the date back out must use local getFullYear/getMonth/getDate — not
+// toISOString(), which converts to UTC first. Israel is UTC+2/+3, so local
+// midnight becomes 21:00-22:00 the *previous* UTC day, and toISOString()
+// silently showed the wrong (one day earlier) date the moment an admin
+// opened a party to edit it — exactly what was reported as "clicking the
+// date gives different dates".
+const toLocalDateInputValue = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 const PartyEditor = ({ party, onSave, onCancel }) => {
   const { t } = useLanguage();
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState(() => {
     const partyDate = party.date instanceof Date ? party.date : new Date(party.date);
-    const dateInput = partyDate.toISOString().split('T')[0];
+    const dateInput = toLocalDateInputValue(partyDate);
     return {
       name: party.name || party.title || '',
       title: party.title || party.name || '',
