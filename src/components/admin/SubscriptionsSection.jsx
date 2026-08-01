@@ -37,7 +37,7 @@ const SubscriptionsSection = ({ showSaved }) => {
       showSaved();
     } catch (error) {
       console.error('Error updating subscription:', error);
-      window.alert(`${t('admin.actionFailed') || 'הפעולה נכשלה'}: ${error.message || error}`);
+      window.alert(`הפעולה נכשלה: ${error.message || error}`);
     }
   };
 

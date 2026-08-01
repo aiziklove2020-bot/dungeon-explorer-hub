@@ -180,7 +180,7 @@ const Workshops = ({ navigate: handleNavigate }) => {
                   <div className="workshop-card-image-wrap">
                     <img
                       src={w.imageUrl}
-                      alt={w.title || t('workshops.imageAlt') || 'תמונת סדנא'}
+                      alt={w.title || 'תמונת סדנא'}
                       className="workshop-card-image"
                       loading="lazy"
                       decoding="async"
@@ -365,7 +365,7 @@ function MyRegistrationsList({ registrationIds, onUnregister, siteUser, actionId
             <div className="workshop-card-image-wrap">
               <img
                 src={w.imageUrl}
-                alt={w.title || t('workshops.imageAlt') || 'תמונת סדנא'}
+                alt={w.title || 'תמונת סדנא'}
                 className="workshop-card-image"
                 loading="lazy"
                 decoding="async"

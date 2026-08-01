@@ -122,7 +122,7 @@ const LiveChatSection = ({ showSaved }) => {
 
       <div className="border-t border-zinc-800 pt-6 space-y-3">
         <div className="text-white font-bold">
-          {t('admin.liveChat.clearRoomsTitle') || 'ניקוי הודעות'}
+          ניקוי הודעות
         </div>
         <p className="text-zinc-400 text-sm leading-relaxed">
           {t('admin.liveChat.clearRoomsIntro') ||
@@ -143,9 +143,7 @@ const LiveChatSection = ({ showSaved }) => {
                 className="flex items-center gap-2 text-red-400 hover:text-red-300 disabled:opacity-50 text-sm font-bold"
               >
                 <Trash2 size={16} />
-                {clearingRoomId === room.id
-                  ? (t('admin.liveChat.clearing') || 'מוחק…')
-                  : (t('admin.liveChat.clearRoom') || 'מחק הודעות')}
+                {clearingRoomId === room.id ? 'מוחק…' : 'מחק הודעות'}
               </button>
             </div>
           ))}

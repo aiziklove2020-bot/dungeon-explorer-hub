@@ -314,7 +314,7 @@ const formatNewPartyNotification = (party, language = 'he') => {
   const t = (key) => getTranslation(key, language);
   const dateStr = formatDateOnly(party?.date, language);
   const name = party?.name || party?.title || t('telegram.party');
-  return `🆕 <b>${t('telegram.newParty') || 'מסיבה חדשה'}</b>\n\n<b>${t('telegram.party')}:</b> ${name}${party?.day ? `\n<b>${t('telegram.day') || 'יום'}:</b> ${party.day}` : ''}\n<b>${t('telegram.date')}:</b> ${dateStr}${party?.time ? `\n<b>${t('telegram.time')}:</b> ${party.time}` : ''}${party?.dj ? `\n<b>${t('telegram.dj')}:</b> ${party.dj}` : ''}${party?.maleLimit != null ? `\n<b>${t('telegram.maleLimit')}:</b> ${party.maleLimit}` : ''}${party?.femaleLimit != null ? `\n<b>${t('telegram.femaleLimit')}:</b> ${party.femaleLimit}` : ''}${party?.description ? `\n${party.description}` : ''}`;
+  return `🆕 <b>${t('telegram.newParty') || 'מסיבה חדשה'}</b>\n\n<b>${t('telegram.party')}:</b> ${name}${party?.day ? `\n<b>יום:</b> ${party.day}` : ''}\n<b>${t('telegram.date')}:</b> ${dateStr}${party?.time ? `\n<b>${t('telegram.time')}:</b> ${party.time}` : ''}${party?.dj ? `\n<b>${t('telegram.dj')}:</b> ${party.dj}` : ''}${party?.maleLimit != null ? `\n<b>${t('telegram.maleLimit')}:</b> ${party.maleLimit}` : ''}${party?.femaleLimit != null ? `\n<b>${t('telegram.femaleLimit')}:</b> ${party.femaleLimit}` : ''}${party?.description ? `\n${party.description}` : ''}`;
 };
 
 /** Default format when no template for new external party notification */
@@ -323,7 +323,7 @@ const formatNewExternalPartyNotification = (party, partyUrl, language = 'he') =>
   const dateStr = formatDateOnly(party?.date, language);
   const name = party?.name || party?.title || t('telegram.party');
   let msg = `🌐 <b>${t('telegram.newExternalParty') || 'אירוע חיצוני חדש'}</b>\n\n<b>${t('telegram.party')}:</b> ${name}`;
-  if (party?.day) msg += `\n<b>${t('telegram.day') || 'יום'}:</b> ${party.day}`;
+  if (party?.day) msg += `\n<b>יום:</b> ${party.day}`;
   msg += `\n<b>${t('telegram.date')}:</b> ${dateStr}`;
   if (party?.time) msg += `\n<b>${t('telegram.time')}:</b> ${party.time}`;
   if (party?.dj) msg += `\n<b>${t('telegram.dj')}:</b> ${party.dj}`;

@@ -243,7 +243,7 @@ const UserProfile = () => {
                      className="w-32 h-32 rounded-lg overflow-hidden border border-zinc-700 hover:border-pink-500 transition-colors block">
                     <img
                       src={p.url}
-                      alt={`${profileUser?.nickname || t('profile.user') || 'משתמש'} - ${t('profile.photo') || 'תמונה'} ${i + 1}`}
+                      alt={`${profileUser?.nickname || 'משתמש'} - תמונה ${i + 1}`}
                       className="w-full h-full object-cover"
                       loading="lazy"
                       decoding="async"
