@@ -135,7 +135,15 @@ const CAPTION_LIMIT = 1024; // Telegram caption limit
 function buildReminderCaption(party) {
   const header = [`🎉 ${party.title || party.name || 'מסיבה'}`];
   if (party.day || party.date) {
-    const dateStr = party.date?.toDate ? party.date.toDate().toLocaleDateString('he-IL') : '';
+    // Vercel functions run in UTC. party.date is stored as Israel local
+    // midnight, so formatting it with toLocaleDateString('he-IL') and no
+    // explicit timeZone used the *server's* UTC calendar date instead —
+    // for a party stored as e.g. 2026-08-07 00:00 Israel time
+    // (2026-08-06T21:00:00Z), that showed "6.8" instead of "7.8" in the
+    // actual Telegram broadcast caption. Same root cause as the
+    // PartyEditor date-field bug fixed earlier, just in the outbound
+    // message instead of the admin form.
+    const dateStr = party.date?.toDate ? party.date.toDate().toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' }) : '';
     header.push([party.day, dateStr].filter(Boolean).join(' · '));
   }
   if (party.dj) header.push(`🎧 ${party.dj}`);
