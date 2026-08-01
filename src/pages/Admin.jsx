@@ -1,4 +1,5 @@
 import { useState, useTransition, useEffect, useRef } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useContent } from '../context/ContentContext';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -44,6 +45,10 @@ const Admin = () => {
     sessionStorage.getItem('admin_authenticated') === 'true'
   );
   const [activeSection, setActiveSection] = useState('parties');
+  // Advanced tools (DB backup, DB read-log, git history) are real working
+  // features, just rarely-clicked/technical — collapsed by default to keep
+  // the main tab row focused, not removed.
+  const [showAdvancedTabs, setShowAdvancedTabs] = useState(false);
   const [saved, setSaved] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishMessage, setPublishMessage] = useState('');
@@ -236,8 +241,8 @@ const Admin = () => {
           onLogout={handleLogout}
         />
 
-        <div className="flex flex-nowrap sm:flex-wrap gap-2 mb-6 md:mb-8 border-b border-zinc-800 pb-3 md:pb-4 overflow-x-auto overscroll-x-contain touch-pan-x -mx-1 px-1 sm:mx-0 sm:px-0">
-          {adminTabs.map(tab => (
+        <div className="flex flex-nowrap sm:flex-wrap gap-2 mb-2 pb-1 overflow-x-auto overscroll-x-contain touch-pan-x -mx-1 px-1 sm:mx-0 sm:px-0">
+          {adminTabs.filter(tab => !tab.advanced).map(tab => (
             <button
               key={tab.id}
               onClick={() => startTransition(() => setActiveSection(tab.id))}
@@ -250,7 +255,34 @@ const Admin = () => {
               {tab.label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => setShowAdvancedTabs((v) => !v)}
+            className="shrink-0 flex items-center gap-1 px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap touch-manipulation bg-zinc-900 text-zinc-500 hover:text-white transition-all"
+          >
+            מתקדם
+            {showAdvancedTabs ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
         </div>
+
+        {showAdvancedTabs && (
+          <div className="flex flex-nowrap sm:flex-wrap gap-2 mb-6 md:mb-8 border-b border-zinc-800 pb-3 md:pb-4 overflow-x-auto overscroll-x-contain touch-pan-x -mx-1 px-1 sm:mx-0 sm:px-0">
+            {adminTabs.filter(tab => tab.advanced).map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => startTransition(() => setActiveSection(tab.id))}
+                className={`shrink-0 px-3 md:px-4 py-2 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all whitespace-nowrap touch-manipulation ${
+                  activeSection === tab.id
+                    ? 'bg-red-600 text-white'
+                    : 'bg-zinc-900 text-zinc-500 hover:text-white'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {!showAdvancedTabs && <div className="mb-6 md:mb-8" />}
 
         <div className="space-y-6">
           {activeSection === 'siteDesign' && <SiteDesignSection showSaved={showSaved} />}
