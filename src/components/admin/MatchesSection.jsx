@@ -364,11 +364,6 @@ const MatchesSection = ({ showSaved }) => {
 
       const mergedBalance = [...existingMatchedPairs, ...newMatchedPairs, ...newUnmatchedPairs];
 
-      // Pairing is created immediately, but nobody's details are sent yet —
-      // that requires an explicit per-pair approval (see handleApproveMatch)
-      // so a stranger who just registered can't automatically receive a
-      // real person's phone/Telegram without the admin reviewing the pair
-      // first.
       await saveBalanceMatches(party.id, mergedBalance);
 
       setPartyBalances(prev => ({
@@ -377,6 +372,20 @@ const MatchesSection = ({ showSaved }) => {
       }));
 
       showSaved();
+
+      // Reverted per explicit request: back to sending each newly-matched
+      // pair's details automatically the moment "צור איזון" creates them,
+      // same as the original behavior — no separate manual approval step.
+      for (const m of newMatchedPairs) {
+        if (!m.malePhone || !m.femalePhone) continue;
+        const pair = {
+          male: { phoneNumber: m.malePhone, telegramUsername: m.maleTelegram, fullName: m.maleName },
+          female: { phoneNumber: m.femalePhone, telegramUsername: m.femaleTelegram, fullName: m.femaleName },
+          match: m,
+        };
+        // eslint-disable-next-line no-await-in-loop
+        await handleApproveMatch(party, pair).catch(() => {});
+      }
     } catch (error) {
       alert(`${t('admin.balanceTables.errorCreatingBalance')}: ${error.message}`);
     } finally {
