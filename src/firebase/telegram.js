@@ -761,65 +761,9 @@ export const sendBalancePublishToChannels = async (partiesWithBalance, siteUrl =
   return { sent, failed };
 };
 
-/**
- * MATCH_NOTIFICATION has no bot of its own in the admin settings (it's
- * deliberately excluded from the admin Telegram UI's message list — see
- * TelegramSection.jsx's `withoutMatch` filter), so getTelegramConfigForMessage
- * always returns null for it. Without this fallback, every balance-related
- * DM (match found, couple confirmation, waiting-for-balance) silently
- * failed with "No bot or username" since callers passed botToken: null.
- * Falls back to the REGISTRATION message's bot — the same bot users already
- * message during registration, so a chat with it already exists.
- */
-async function getBalanceDmBotToken(explicitToken) {
-  if (explicitToken) return explicitToken;
-  const matchConfig = await getTelegramConfigForMessage(MESSAGE_KEYS.MATCH_NOTIFICATION);
-  if (matchConfig?.enabled && matchConfig.botToken) return matchConfig.botToken;
-  const regConfig = await getTelegramConfigForMessage(MESSAGE_KEYS.REGISTRATION);
-  return regConfig?.botToken || null;
-}
-
-/**
- * Telegram's sendMessage with chat_id: "@username" unreliably returns
- * "chat not found" even for a user who has an active chat with the bot —
- * confirmed by testing the exact same user: fails by @username, succeeds
- * by numeric chat_id. api/telegram-webhook.js's recordUserChatId() persists
- * username -> numeric chat_id into the `telegramUserChats` collection on
- * every incoming private message.
- *
- * Firestore rules don't whitelist that collection for direct client reads
- * (only specific public collections like parties/settings are open), so
- * resolution goes through the admin-gated ?job=resolve-chat-id endpoint
- * instead — `authHeaders` must be the caller's adminAuthHeader() (see
- * utils/adminApi.js). Deliberately NOT read from here automatically: this
- * module is imported by the public registration flow too, and baking an
- * admin-secret reference into this shared file would risk it ending up in
- * a JS chunk downloadable from the public registration page. Callers with
- * an admin session (MatchesSection.jsx) pass their own headers in; the
- * public registration flow uses the separate verification-based
- * ?job=send-waiting-balance endpoint instead (see useSubmitRegistration.js),
- * which needs no shared secret at all.
- */
-async function resolveTelegramChatId(username, authHeaders = {}, phone = '') {
-  const key = String(username || '').replace(/^@+/, '').trim().toLowerCase();
-  if (!key && !phone) return null;
+export const sendBalanceMatchNotification = async (telegramUsername, matchedPerson, party, botToken, language = 'he') => {
   try {
-    const qs = new URLSearchParams();
-    if (key) qs.set('username', key);
-    if (phone) qs.set('phone', phone);
-    const res = await fetch(`/api/telegram-webhook?job=resolve-chat-id&${qs.toString()}`, {
-      headers: authHeaders
-    });
-    const data = await res.json().catch(() => null);
-    return data?.ok ? (data.chatId ?? null) : null;
-  } catch {
-    return null;
-  }
-}
-
-export const sendBalanceMatchNotification = async (telegramUsername, matchedPerson, party, botToken, language = 'he', authHeaders = {}, recipientPhone = '') => {
-  try {
-    let token = await getBalanceDmBotToken(botToken);
+    let token = botToken;
     let parseMode = 'HTML';
     let template = null;
     const config = await getTelegramConfigForMessage(MESSAGE_KEYS.MATCH_NOTIFICATION);
@@ -828,73 +772,19 @@ export const sendBalanceMatchNotification = async (telegramUsername, matchedPers
       parseMode = config.parseMode || 'HTML';
       template = config.template;
     }
-    if ((!telegramUsername && !recipientPhone) || !token) return { success: false, message: 'No bot or username', error: 'config' };
+    if (!telegramUsername || !token) return { success: false, message: 'No bot or username', error: 'config' };
 
-    const cleanUsername = (telegramUsername || '').replace(/^@+/, '');
-
-    const resolvedChatId = await resolveTelegramChatId(cleanUsername, authHeaders, recipientPhone);
-    if (!resolvedChatId) {
-      return {
-        success: false,
-        message: `User @${cleanUsername || '(no username)'} hasn't started the bot. They need to start a conversation with the bot first.`,
-        error: 'chat_not_found'
-      };
-    }
+    let cleanUsername = telegramUsername.replace(/^@+/, '');
+    if (!cleanUsername) return { success: false, message: 'Invalid username', error: 'username' };
 
     const text = template
       ? replacePlaceholders(template, { matchedPerson, party })
       : formatBalanceMatchNotification(matchedPerson, party, language);
 
     const { data } = await relayTelegramApi('sendMessage', token, {
-      chat_id: resolvedChatId,
+      chat_id: `@${cleanUsername}`,
       text,
       ...(parseMode && { parse_mode: parseMode })
-    });
-
-    if (data.ok) {
-      return { success: true, message: `Sent to @${cleanUsername}` };
-    }
-    const errMsg = data.description || 'Unknown error';
-    if (errMsg.includes('chat not found') || errMsg.includes('Chat not found')) {
-      return {
-        success: false,
-        message: `User @${cleanUsername} hasn't started the bot. They need to start a conversation with the bot first.`,
-        error: 'chat_not_found'
-      };
-    }
-    return { success: false, message: `Failed to send to @${cleanUsername}: ${errMsg}`, error: errMsg };
-  } catch (error) {
-    return { success: false, message: `Error: ${error.message}`, error: error.message };
-  }
-};
-
-/**
- * Couples don't need "you've been matched with X" — they already know who
- * their partner is. Instead they get a plain registration-confirmed message
- * telling them what to say at the door. Reuses the match-notification bot
- * token config since that's the one already configured for balance DMs.
- */
-export const sendCoupleRegistrationConfirmation = async (telegramUsername, botToken, authHeaders = {}, recipientPhone = '') => {
-  try {
-    const token = await getBalanceDmBotToken(botToken);
-    if ((!telegramUsername && !recipientPhone) || !token) return { success: false, message: 'No bot or username', error: 'config' };
-
-    const cleanUsername = (telegramUsername || '').replace(/^@+/, '');
-
-    const resolvedChatId = await resolveTelegramChatId(cleanUsername, authHeaders, recipientPhone);
-    if (!resolvedChatId) {
-      return {
-        success: false,
-        message: `User @${cleanUsername || '(no username)'} hasn't started the bot. They need to start a conversation with the bot first.`,
-        error: 'chat_not_found'
-      };
-    }
-
-    const text = '🎉 נרשמתם בהצלחה!\n\nבכניסה יש להגיד שהגעתם דרך חן ואיציק.';
-
-    const { data } = await relayTelegramApi('sendMessage', token, {
-      chat_id: resolvedChatId,
-      text
     });
 
     if (data.ok) {

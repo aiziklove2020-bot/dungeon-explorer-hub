@@ -19,7 +19,6 @@ import { useCoupleOneRegistered } from './registration/useCoupleOneRegistered';
 import { useSubmitRegistration } from './registration/useSubmitRegistration';
 import TypePicker from './registration/TypePicker';
 import SuccessScreen from './registration/SuccessScreen';
-import TelegramVerifyStep from './registration/TelegramVerifyStep';
 import SinglePersonFields from './registration/SinglePersonFields';
 import CoupleFields from './registration/CoupleFields';
 import FemaleArrivalFields from './registration/FemaleArrivalFields';
@@ -128,38 +127,11 @@ const RegistrationForm = ({ onCancel, partyId }) => {
       setTelegramError('');
       return;
     }
-    // Telegram bots can't message a user who never opened a chat with them
-    // first (anti-spam rule, applies to every bot) — so singles need a
-    // chat with @talkingbdsm_bot open before balance DMs can reach them.
-    // Opened here, synchronously inside the click handler, so the browser
-    // treats it as part of the user's own gesture instead of a blocked
-    // popup, making it feel like one action instead of two.
-    //
-    // Uses a deep link (?start=<phone>) rather than a bare bot link: a real
-    // registrant had no Telegram @username at all (only a display name),
-    // so username-based matching could never find him even though he
-    // genuinely pressed Start. Telegram passes this payload as the text of
-    // the /start command, letting the server link the press back to this
-    // exact registration by phone number — works with or without a
-    // username.
-    if (!isCoupleRegType(formData.regType)) {
-      window.open(`https://t.me/talkingbdsm_bot?start=${formData.phone}`, '_blank');
-    }
-    const result = await submit(formData);
-    if (!result?.success) return;
-    if (result.telegramVerified) {
+    const ok = await submit(formData);
+    if (ok) {
       setStep(3);
-    } else {
-      // Registration is already written, but we can't confirm the person
-      // can actually receive Telegram messages yet — block the success
-      // screen until we can, instead of silently leaving them unreachable.
-      setStep('verify');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  if (step === 'verify') {
-    return <TelegramVerifyStep formData={formData} onVerified={() => setStep(3)} />;
   }
 
   if (step === 3) {

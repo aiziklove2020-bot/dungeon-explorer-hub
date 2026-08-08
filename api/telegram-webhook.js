@@ -326,86 +326,6 @@ async function handleFixPartyWhatsapp(req, res) {
   }
 }
 
-// One-off: the pre-fix version of the admin panel's "אשר ושלח פרטים"
-// button marked a pair as notified even when every send genuinely failed
-// (e.g. neither side has pressed Start on the bot yet), so "רועי צור" /
-// "דניאל דרורי" on Dungeon X Lucifer Fetish Party shows "✓ נשלח" despite
-// nothing having reached them. Clears that one entry's notified flag so
-// the button reappears and a real retry (after they press Start) can work.
-// One-off cleanup: removes the fake test registration ("בדיקת מערכת",
-// 0500000001) created while verifying the TelegramVerifyStep block —
-// intentionally never had a startable bot username, so it's permanently
-// stuck and safe to delete outright.
-async function handleCleanupTestReg(req, res) {
-  if (!requireAdminApiSecret(req, res)) return;
-  try {
-    const admin = await initAdmin();
-    const ref = admin.firestore().collection('parties').doc('eUYKOumUvNmhXiXEYYUU');
-    const snap = await ref.get();
-    if (!snap.exists) return res.status(404).json({ error: 'Party not found' });
-    const registrations = snap.data()?.registrations || [];
-    const updated = registrations.filter((r) => r.phoneNumber !== '0500000001');
-    await ref.update({ registrations: updated });
-    return res.status(200).json({ ok: true, removed: registrations.length - updated.length });
-  } catch (err) {
-    console.error('cleanup-test-reg:', err);
-    return res.status(500).json({ error: err.message || 'Internal error' });
-  }
-}
-
-// GET ?job=fix-notified-flag&partyId=<x>&malePhone=<y>&femalePhone=<z> —
-// clears a wrongly-set notified flag (from before the send-result-checking
-// fix shipped, or before phone-based resolution existed) so the admin
-// panel's button reappears for a genuine retry.
-async function handleFixNotifiedFlag(req, res) {
-  if (!requireAdminApiSecret(req, res)) return;
-  const url = new URL(req.url, 'http://x');
-  const partyId = req.query?.partyId || url.searchParams.get('partyId');
-  const malePhone = req.query?.malePhone || url.searchParams.get('malePhone');
-  const femalePhone = req.query?.femalePhone || url.searchParams.get('femalePhone');
-  if (!partyId || !malePhone || !femalePhone) {
-    return res.status(400).json({ error: 'Missing partyId, malePhone, or femalePhone' });
-  }
-  try {
-    const admin = await initAdmin();
-    const ref = admin.firestore().collection('parties').doc(partyId);
-    const snap = await ref.get();
-    if (!snap.exists) return res.status(404).json({ error: 'Party not found' });
-    const balanceMatches = snap.data()?.balanceMatches || [];
-    const updated = balanceMatches.map((m) =>
-      m.malePhone === malePhone && m.femalePhone === femalePhone ? { ...m, notified: false } : m
-    );
-    await ref.update({ balanceMatches: updated });
-    return res.status(200).json({ ok: true, balanceMatches: updated });
-  } catch (err) {
-    console.error('fix-notified-flag:', err);
-    return res.status(500).json({ error: err.message || 'Internal error' });
-  }
-}
-
-// GET ?job=seed-phone-chat&phone=<x>&chatId=<y> — manually seeds a
-// phone_<phone> -> chatId mapping. For registrants who pressed Start
-// before the ?start=<phone> deep link shipped, or whose chat_id is
-// otherwise already known (e.g. via ?job=recent-chats) but never got
-// linked to their phone automatically.
-async function handleSeedPhoneChat(req, res) {
-  if (!requireAdminApiSecret(req, res)) return;
-  const url = new URL(req.url, 'http://x');
-  const phone = req.query?.phone || url.searchParams.get('phone');
-  const chatId = req.query?.chatId || url.searchParams.get('chatId');
-  if (!phone || !chatId) {
-    return res.status(400).json({ error: 'Missing phone or chatId query param' });
-  }
-  try {
-    const admin = await initAdmin();
-    await recordPhoneChatId(admin, phone, Number(chatId));
-    return res.status(200).json({ ok: true });
-  } catch (err) {
-    console.error('seed-phone-chat:', err);
-    return res.status(500).json({ error: err.message || 'Internal error' });
-  }
-}
-
 async function handleFixChannels(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
   try {
@@ -589,52 +509,6 @@ async function recordSeenChat(admin, chat) {
   }
 }
 
-// Telegram's sendMessage with chat_id: "@username" unreliably returns
-// "chat not found" even for users who have an active chat with the bot —
-// confirmed by testing: the exact same user fails by @username but sends
-// fine by their numeric chat_id. So every private chat with a username is
-// persisted here (username -> numeric chat_id), and all outbound DMs
-// (balance match, waiting-for-balance, couple confirmation) resolve
-// through this map instead of guessing at "@username" resolution.
-async function recordUserChatId(admin, chat) {
-  if (!chat || chat.type !== 'private' || !chat.username) return;
-  try {
-    const key = String(chat.username).toLowerCase();
-    await admin.firestore().collection('telegramUserChats').doc(key).set({
-      chatId: chat.id,
-      username: chat.username,
-      firstName: chat.first_name || '',
-      updatedAt: new Date().toISOString(),
-    });
-  } catch (err) {
-    console.error('recordUserChatId:', err);
-  }
-}
-
-// Real-world incident: a registrant had no Telegram @username at all (only
-// a display name), so recordUserChatId() above had nothing to key on and
-// he could never be reached even though he genuinely pressed Start.
-// Fixed at the source: the registration form now opens the bot via a
-// deep link (https://t.me/talkingbdsm_bot?start=<phone>) instead of a
-// bare link. Telegram delivers that payload as the text of the /start
-// command ("/start <phone>"), so it works identically whether or not the
-// user has a username — this is the reliable path; username-keyed
-// lookups remain only as a fallback for anyone who started the bot before
-// this shipped.
-async function recordPhoneChatId(admin, phone, chatId) {
-  const cleanedPhone = String(phone || '').replace(/\D/g, '');
-  if (!cleanedPhone || !chatId) return;
-  try {
-    await admin.firestore().collection('telegramUserChats').doc(`phone_${cleanedPhone}`).set({
-      chatId,
-      phone: cleanedPhone,
-      updatedAt: new Date().toISOString(),
-    });
-  } catch (err) {
-    console.error('recordPhoneChatId:', err);
-  }
-}
-
 // ?job=recent-chats — reads back the capped list of chats the bot has seen
 // (via recordSeenChat), so the correct chat_id for a group can be found
 // with certainty after someone sends any message there.
@@ -650,143 +524,6 @@ async function handleRecentChats(req, res) {
   }
 }
 
-// One-off: backfills telegramUserChats from the existing capped
-// telegramSeenChats log, for users who pressed Start on the bot before
-// recordUserChatId() started running on every webhook update. For private
-// chats, telegramSeenChats' `title` field already holds the username (see
-// recordSeenChat's fallback chain), so this recovers them without asking
-// anyone to press Start again.
-async function handleBackfillUserChats(req, res) {
-  if (!requireAdminApiSecret(req, res)) return;
-  try {
-    const admin = await initAdmin();
-    const snap = await admin.firestore().collection('settings').doc('telegramSeenChats').get();
-    const chats = snap.exists ? (snap.data()?.chats || []) : [];
-    const privateChats = chats.filter((c) => c.type === 'private' && c.title);
-    let written = 0;
-    for (const c of privateChats) {
-      const key = String(c.title).toLowerCase();
-      // eslint-disable-next-line no-await-in-loop
-      await admin.firestore().collection('telegramUserChats').doc(key).set({
-        chatId: c.id,
-        username: c.title,
-        firstName: '',
-        updatedAt: c.seenAt || new Date().toISOString(),
-      });
-      written++;
-    }
-    return res.status(200).json({ ok: true, written, entries: privateChats });
-  } catch (err) {
-    console.error('backfill-user-chats:', err);
-    return res.status(500).json({ error: err.message || 'Internal error' });
-  }
-}
-
-// Phone-keyed lookup (from the /start deep-link payload) always wins when
-// available — it works for people with no Telegram username at all, unlike
-// the username-keyed fallback. See recordPhoneChatId() for how it's
-// populated.
-async function resolveChatIdByPhoneOrUsername(admin, phone, username) {
-  const cleanedPhone = String(phone || '').replace(/\D/g, '');
-  if (cleanedPhone) {
-    const phoneSnap = await admin.firestore().collection('telegramUserChats').doc(`phone_${cleanedPhone}`).get();
-    const phoneChatId = phoneSnap.exists ? phoneSnap.data()?.chatId : null;
-    if (phoneChatId) return phoneChatId;
-  }
-  const cleanedUsername = String(username || '').replace(/^@+/, '').trim().toLowerCase();
-  if (!cleanedUsername) return null;
-  const usernameSnap = await admin.firestore().collection('telegramUserChats').doc(cleanedUsername).get();
-  return usernameSnap.exists ? usernameSnap.data()?.chatId ?? null : null;
-}
-
-// GET ?job=resolve-chat-id&username=<x>&phone=<y> — admin-only. Telegram's
-// sendMessage with chat_id: "@username" unreliably fails ("chat not
-// found") even for users who have an active chat with the bot — confirmed
-// by testing: the same user fails by @username, succeeds by numeric
-// chat_id. This resolves the numeric id recorded by recordUserChatId() /
-// recordPhoneChatId() so the admin panel's balance-match /
-// couple-confirmation DMs (both triggered from an authenticated admin
-// action in MatchesSection.jsx) can send reliably. Gated by the same
-// ADMIN_API_SECRET as every other admin-only endpoint — not exposed to the
-// public registration flow, which uses the separate verification-based
-// ?job=send-waiting-balance instead.
-async function handleResolveChatId(req, res) {
-  if (!requireAdminApiSecret(req, res)) return;
-  const url = new URL(req.url, 'http://x');
-  const rawUsername = req.query?.username || url.searchParams.get('username');
-  const rawPhone = req.query?.phone || url.searchParams.get('phone');
-  const username = String(rawUsername || '').replace(/^@+/, '').trim().toLowerCase();
-  if (!username && !rawPhone) {
-    return res.status(400).json({ error: 'Missing username or phone query param' });
-  }
-  try {
-    const admin = await initAdmin();
-    const chatId = await resolveChatIdByPhoneOrUsername(admin, rawPhone, username);
-    return res.status(200).json({ ok: true, chatId });
-  } catch (err) {
-    console.error('resolve-chat-id:', err);
-    return res.status(500).json({ error: err.message || 'Internal error' });
-  }
-}
-
-// POST ?job=send-waiting-balance — deliberately NOT gated by the admin
-// secret, since this fires from the public registration form (anonymous
-// visitor, no secret available to them). Instead of an open "resolve any
-// username" lookup (which would let anyone check whether an arbitrary
-// Telegram handle has messaged our bot — a real privacy risk on a
-// discretion-focused site), the caller must supply the exact phone +
-// telegramUsername + partyId they just registered with, and this verifies
-// a matching registration actually exists in that party's `registrations`
-// array before resolving/sending anything. An attacker would need a real
-// phone+party+username combination that matches an actual just-created
-// registration, not just a guessed username.
-async function handleSendWaitingBalance(req, res) {
-  try {
-    const url = new URL(req.url, 'http://x');
-    const phone = String(req.query?.phone || url.searchParams.get('phone') || '').trim();
-    const telegramUsername = String(req.query?.telegramUsername || url.searchParams.get('telegramUsername') || '').replace(/^@+/, '').trim();
-    const partyId = String(req.query?.partyId || url.searchParams.get('partyId') || '').trim();
-    if (!phone || !telegramUsername || !partyId) {
-      return res.status(400).json({ error: 'Missing phone, telegramUsername, or partyId' });
-    }
-
-    const admin = await initAdmin();
-    const partySnap = await admin.firestore().collection('parties').doc(partyId).get();
-    if (!partySnap.exists) {
-      return res.status(200).json({ ok: false, reason: 'not_found' });
-    }
-    const party = partySnap.data();
-    const registrations = party?.registrations || [];
-    const matches = registrations.some(
-      (r) => r.phoneNumber === phone && String(r.telegramUsername || '').replace(/^@+/, '').toLowerCase() === telegramUsername.toLowerCase()
-    );
-    if (!matches) {
-      return res.status(200).json({ ok: false, reason: 'not_found' });
-    }
-
-    const chatId = await resolveChatIdByPhoneOrUsername(admin, phone, telegramUsername);
-    if (!chatId) {
-      return res.status(200).json({ ok: false, reason: 'chat_not_found' });
-    }
-
-    const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    if (!botToken) {
-      return res.status(503).json({ error: 'Server not configured (missing TELEGRAM_BOT_TOKEN)' });
-    }
-    const partyName = party?.name || party?.title || 'המסיבה';
-    const text = `🎉 נרשמתם בהצלחה ל${partyName}!\n\nאתם ברשימת ההמתנה לאיזון. ברגע שיימצא לכם זיווג מתאים, תקבלו כאן הודעה נוספת עם הפרטים.`;
-    const r = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text })
-    });
-    const data = await r.json();
-    return res.status(200).json({ ok: data.ok, description: data.description });
-  } catch (err) {
-    console.error('send-waiting-balance:', err);
-    return res.status(500).json({ error: err.message || 'Internal error' });
-  }
-}
 
 // One-off connectivity check for a single destination (?job=test-group&chatId=...),
 // so a specific entry from the admin channel list can be verified without
@@ -1007,26 +744,8 @@ export default async function handler(req, res) {
     if (job === 'fix-party-whatsapp') {
       return handleFixPartyWhatsapp(req, res);
     }
-    if (job === 'fix-notified-flag') {
-      return handleFixNotifiedFlag(req, res);
-    }
-    if (job === 'seed-phone-chat') {
-      return handleSeedPhoneChat(req, res);
-    }
-    if (job === 'cleanup-test-reg') {
-      return handleCleanupTestReg(req, res);
-    }
     if (job === 'recent-chats') {
       return handleRecentChats(req, res);
-    }
-    if (job === 'backfill-user-chats') {
-      return handleBackfillUserChats(req, res);
-    }
-    if (job === 'resolve-chat-id') {
-      return handleResolveChatId(req, res);
-    }
-    if (job === 'send-waiting-balance') {
-      return handleSendWaitingBalance(req, res);
     }
     if (job === 'bot-info') {
       return handleBotInfo(req, res);
@@ -1067,18 +786,7 @@ export default async function handler(req, res) {
     // Best-effort: remember every chat the bot hears from, so a group's
     // real chat_id can be looked up later (?job=recent-chats) instead of
     // guessed from a partial/mistyped value.
-    if (anyChat) {
-      await recordSeenChat(admin, anyChat);
-      await recordUserChatId(admin, anyChat);
-    }
-
-    // "/start <phone>" — the deep-link payload the registration form opens
-    // (?start=<phone>). Works regardless of whether the user has a
-    // Telegram username, unlike recordUserChatId() above.
-    const startMatch = msg?.text && /^\/start(?:\s+(\S+))?/.exec(msg.text);
-    if (startMatch?.[1] && anyChat?.id) {
-      await recordPhoneChatId(admin, startMatch[1], anyChat.id);
-    }
+    if (anyChat) await recordSeenChat(admin, anyChat);
 
     if (!msg?.text) {
       return res.status(200).json({ ok: true });
