@@ -17,6 +17,8 @@ const formatDateOnly = (date, language = 'he') => {
   });
 };
 
+const SITE_URL = 'https://libralparty.net';
+
 const buildPartyPayload = (party, language, partyUrl) => ({
   name: party?.name || party?.title || '',
   day: party?.day || '',
@@ -27,7 +29,7 @@ const buildPartyPayload = (party, language, partyUrl) => ({
   femaleLimit: party?.femaleLimit ?? '',
   description: party?.description || '',
   imageURL: party?.imageURL || '',
-  partyUrl: partyUrl || '',
+  partyUrl: partyUrl || SITE_URL,
 });
 
 const postToBot = async (payload) => {
