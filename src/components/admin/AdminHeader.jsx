@@ -18,6 +18,8 @@ const AdminHeader = ({
   onPublish,
   postingParties,
   onPostParties,
+  postingPartiesWhatsApp,
+  onPostPartiesWhatsApp,
   onImport,
   onReset,
   onViewSite,
@@ -87,6 +89,19 @@ const AdminHeader = ({
             <Megaphone size={16} />
           )}
           {postingParties ? 'מפרסם...' : 'פרסם מסיבות לטלגרם'}
+        </button>
+        <button
+          onClick={onPostPartiesWhatsApp}
+          disabled={postingPartiesWhatsApp}
+          title="שולח עכשיו את כל המסיבות הפעילות באתר לוואטסאפ, דרך הבוט שרץ על המחשב שלך (localhost:3000)"
+          className="bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+        >
+          {postingPartiesWhatsApp ? (
+            <Loader2 size={16} className="animate-spin shrink-0" />
+          ) : (
+            <Megaphone size={16} />
+          )}
+          {postingPartiesWhatsApp ? 'מפרסם...' : 'פרסם מסיבות לוואטסאפ'}
         </button>
         <button
           onClick={onImport}

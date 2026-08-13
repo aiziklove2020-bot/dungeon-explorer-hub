@@ -55,6 +55,7 @@ const Admin = () => {
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
   const [postingParties, setPostingParties] = useState(false);
+  const [postingPartiesWhatsApp, setPostingPartiesWhatsApp] = useState(false);
   const [partiesRefreshKey, setPartiesRefreshKey] = useState(0);
   const [publishedCommitSha, setPublishedCommitSha] = useState(null);
   const [deployStatusLoading, setDeployStatusLoading] = useState(false);
@@ -183,6 +184,25 @@ const Admin = () => {
     }
   };
 
+  const handlePostPartiesWhatsApp = async () => {
+    if (postingPartiesWhatsApp) return;
+    if (!confirm('לפרסם עכשיו את כל המסיבות הפעילות באתר לוואטסאפ? (דורש שהבוט ירוץ על המחשב שלך)')) return;
+    setPostingPartiesWhatsApp(true);
+    try {
+      const { sendAllPartiesWhatsApp } = await import('../firebase/whatsapp');
+      const { partiesSent, total } = await sendAllPartiesWhatsApp();
+      if (partiesSent === 0 && total > 0) {
+        alert('לא נשלח כלום — ודא שהבוט רץ על המחשב שלך (npm start בתיקיית whatsapp-bot).');
+      } else {
+        alert(`הפרסום לוואטסאפ הושלם.\nמסיבות שפורסמו: ${partiesSent} מתוך ${total}`);
+      }
+    } catch (err) {
+      alert(`הפרסום לוואטסאפ נכשל: ${err.message}`);
+    } finally {
+      setPostingPartiesWhatsApp(false);
+    }
+  };
+
   const handleImportFromGit = async () => {
     if (importing) return;
     const doParties = confirm(
@@ -231,6 +251,7 @@ const Admin = () => {
           deployStatus={deployStatus}
           importing={importing} importMessage={importMessage} onImport={handleImportFromGit}
           postingParties={postingParties} onPostParties={handlePostParties}
+          postingPartiesWhatsApp={postingPartiesWhatsApp} onPostPartiesWhatsApp={handlePostPartiesWhatsApp}
           onReset={() => {
             if (confirm(t('admin.resetConfirm') || 'האם אתה בטוח שברצונך לאפס את כל התוכן לברירות מחדל?')) {
               resetToDefaults();
