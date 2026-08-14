@@ -343,9 +343,18 @@ export default async function handler(req, res) {
     const jsonParties = JSON.stringify(partiesOnly, null, 2);
     const authHeader = GITHUB_TOKEN.startsWith('ghp_') ? `token ${GITHUB_TOKEN}` : `Bearer ${GITHUB_TOKEN}`;
 
-
-    const getFileSha = async (filePath) => {
-      const response = await fetch(
+    // Uses the Contents API (one PUT per file) instead of the low-level Git
+    // Database API (blobs/trees/commits/refs). GitHub fine-grained PATs are
+    // unreliable against the Git Database API even with Contents: read+write
+    // granted — this endpoint kept failing with "branch not found or no
+    // access" despite a correctly-scoped token. The Contents API is fully
+    // supported by fine-grained tokens and needs no separate branch/ref
+    // lookup: it reads+writes each file directly on the target branch.
+    // Trade-off: each file lands in its own commit instead of one atomic
+    // commit for all of them — acceptable here since these are generated
+    // files, not something anyone diffs by hand.
+    const putFile = async (filePath, content, message) => {
+      const getRes = await fetch(
         `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}?ref=${encodeURIComponent(GITHUB_BRANCH)}`,
         {
           headers: {
@@ -355,144 +364,50 @@ export default async function handler(req, res) {
           }
         }
       );
-      if (response.status === 404) return null;
-      if (!response.ok) throw new Error(`GitHub API: ${response.status} - ${await response.text()}`);
-      const data = await response.json();
-      return data.sha;
-    };
-
-    const createBlob = async (content) => {
-      const response = await fetch(
-        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/blobs`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: authHeader,
-            Accept: 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-            'User-Agent': 'TBDSM-Publish'
-          },
-          body: JSON.stringify({ content: Buffer.from(content, 'utf-8').toString('base64'), encoding: 'base64' })
-        }
-      );
-      if (!response.ok) throw new Error(`Create blob: ${response.status} - ${await response.text()}`);
-      return response.json();
-    };
-
-    const createTree = async (baseTreeSha, files) => {
-      const response = await fetch(
-        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/trees`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: authHeader,
-            Accept: 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-            'User-Agent': 'TBDSM-Publish'
-          },
-          body: JSON.stringify({ base_tree: baseTreeSha, tree: files })
-        }
-      );
-      if (!response.ok) throw new Error(`Create tree: ${response.status} - ${await response.text()}`);
-      return response.json();
-    };
-
-    const createCommit = async (treeSha, parentSha, message) => {
-      const response = await fetch(
-        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/commits`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: authHeader,
-            Accept: 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-            'User-Agent': 'TBDSM-Publish'
-          },
-          body: JSON.stringify({ message, tree: treeSha, parents: [parentSha] })
-        }
-      );
-      if (!response.ok) throw new Error(`Create commit: ${response.status} - ${await response.text()}`);
-      return response.json();
-    };
-
-    const updateRef = async (commitSha) => {
-      const response = await fetch(
-        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/refs/heads/${encodeURIComponent(GITHUB_BRANCH)}`,
-        {
-          method: 'PATCH',
-          headers: {
-            Authorization: authHeader,
-            Accept: 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-            'User-Agent': 'TBDSM-Publish'
-          },
-          body: JSON.stringify({ sha: commitSha })
-        }
-      );
-      if (!response.ok) throw new Error(`Update ref: ${response.status} - ${await response.text()}`);
-      return response.json();
-    };
-
-    const refRes = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/refs/heads/${encodeURIComponent(GITHUB_BRANCH)}`,
-      {
-        headers: {
-          Authorization: authHeader,
-          Accept: 'application/vnd.github.v3+json',
-          'User-Agent': 'TBDSM-Publish'
-        }
+      if (!getRes.ok && getRes.status !== 404) {
+        throw new Error(`Branch "${GITHUB_BRANCH}" not found or no access (reading ${filePath}): ${getRes.status} - ${await getRes.text()}`);
       }
-    );
+      const existingSha = getRes.status === 404 ? undefined : (await getRes.json()).sha;
 
-    if (!refRes.ok) {
-      return res.status(500).json({
-        error: 'Failed to get branch',
-        message: `Branch "${GITHUB_BRANCH}" not found or no access. Ensure GITHUB_OWNER, GITHUB_REPO and GITHUB_TOKEN are correct.`,
-        status: refRes.status
-      });
-    }
-
-    const refData = await refRes.json();
-    const currentCommitSha = refData.object.sha;
-
-    const commitRes = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/commits/${currentCommitSha}`,
-      {
-        headers: {
-          Authorization: authHeader,
-          Accept: 'application/vnd.github.v3+json',
-          'User-Agent': 'TBDSM-Publish'
+      const putRes = await fetch(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: authHeader,
+            Accept: 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+            'User-Agent': 'TBDSM-Publish'
+          },
+          body: JSON.stringify({
+            message,
+            content: Buffer.from(content, 'utf-8').toString('base64'),
+            branch: GITHUB_BRANCH,
+            ...(existingSha ? { sha: existingSha } : {})
+          })
         }
-      }
-    );
-    if (!commitRes.ok) throw new Error(`Get commit: ${commitRes.status}`);
-    const commitData = await commitRes.json();
-    const baseTreeSha = commitData.tree.sha;
-
-    const blob = await createBlob(jsonContent);
-    const blobBase = await createBlob(jsonContentBase);
-    const blobParties = await createBlob(jsonParties);
-    const filePaths = [GITHUB_FILE_PATH];
-    const publicPath = `public/${GITHUB_FILE_PATH}`;
-    if (GITHUB_FILE_PATH === 'content/content.json') {
-      filePaths.push(publicPath);
-      filePaths.push('content/content-base.json', 'public/content/content-base.json', 'content/parties.json', 'public/content/parties.json');
-    }
-    const treeFiles = [
-      { path: GITHUB_FILE_PATH, mode: '100644', type: 'blob', sha: blob.sha },
-      ...(GITHUB_FILE_PATH === 'content/content.json' ? [
-        { path: publicPath, mode: '100644', type: 'blob', sha: blob.sha },
-        { path: 'content/content-base.json', mode: '100644', type: 'blob', sha: blobBase.sha },
-        { path: 'public/content/content-base.json', mode: '100644', type: 'blob', sha: blobBase.sha },
-        { path: 'content/parties.json', mode: '100644', type: 'blob', sha: blobParties.sha },
-        { path: 'public/content/parties.json', mode: '100644', type: 'blob', sha: blobParties.sha }
-      ] : [])
-    ];
-    const tree = await createTree(baseTreeSha, treeFiles);
+      );
+      if (!putRes.ok) throw new Error(`Write ${filePath}: ${putRes.status} - ${await putRes.text()}`);
+      return putRes.json();
+    };
 
     const commitMessage = (req.body && req.body.commitMessage) || `Update site content - ${new Date().toISOString()}`;
-    const commit = await createCommit(tree.sha, currentCommitSha, commitMessage);
-    await updateRef(commit.sha);
+    const publicPath = `public/${GITHUB_FILE_PATH}`;
+    const filesToWrite = [{ path: GITHUB_FILE_PATH, content: jsonContent }];
+    if (GITHUB_FILE_PATH === 'content/content.json') {
+      filesToWrite.push(
+        { path: publicPath, content: jsonContent },
+        { path: 'content/content-base.json', content: jsonContentBase },
+        { path: 'public/content/content-base.json', content: jsonContentBase },
+        { path: 'content/parties.json', content: jsonParties },
+        { path: 'public/content/parties.json', content: jsonParties }
+      );
+    }
+
+    const results = [];
+    for (const f of filesToWrite) {
+      results.push(await putFile(f.path, f.content, commitMessage));
+    }
 
     // Mark valid parties as published (needsPublish: false) after Git push
     await Promise.all(validParties.map(p => p._ref.update({ needsPublish: false })));
@@ -500,8 +415,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       message: `Content published to branch ${GITHUB_BRANCH}`,
-      commit: { sha: commit.sha, message: commitMessage, url: commit.url },
-      files: filePaths,
+      commit: { sha: results[0]?.commit?.sha, message: commitMessage, url: results[0]?.commit?.html_url },
+      files: filesToWrite.map((f) => f.path),
       branch: GITHUB_BRANCH
     });
   } catch (error) {
