@@ -37,6 +37,23 @@ function buildInstagramCaption(party) {
   return lines.join('\n');
 }
 
+// Instagram Stories are a fixed 9:16 frame; Meta zooms/crops any other-ratio
+// image to fill it, cutting off the top/bottom or sides. Party images are
+// hosted on Cloudinary, so instead of letting that happen we ask Cloudinary
+// to pad the image onto a 1080x1920 canvas (b_auto picks a fill color from
+// the image itself) — the full original image stays visible, just letterboxed.
+// (b_blurred requires a paid Cloudinary add-on and 400s on this account, so
+// b_auto — solid-color padding, no add-on needed — is used instead.)
+// Falls back to the original URL untouched for any non-Cloudinary image.
+function toStoryImageUrl(imageUrl) {
+  if (typeof imageUrl !== 'string') return imageUrl;
+  const marker = '/image/upload/';
+  const idx = imageUrl.indexOf(marker);
+  if (!imageUrl.includes('res.cloudinary.com') || idx === -1) return imageUrl;
+  const insertAt = idx + marker.length;
+  return `${imageUrl.slice(0, insertAt)}w_1080,h_1920,c_pad,b_auto/${imageUrl.slice(insertAt)}`;
+}
+
 async function runWindsorAction({ apiKey, account, action, params }) {
   const res = await fetch(`${WINDSOR_ACTIONS_URL}?api_key=${encodeURIComponent(apiKey)}`, {
     method: 'POST',
@@ -125,7 +142,7 @@ async function handleInstagramPublish(req, res) {
         apiKey: WINDSOR_API_KEY,
         account: IG_ACCOUNT_ID,
         action: 'create_story',
-        params: { image_url: imageUrl },
+        params: { image_url: toStoryImageUrl(imageUrl) },
       });
     }
 
