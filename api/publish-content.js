@@ -280,6 +280,7 @@ export default async function handler(req, res) {
       description: party.description || '',
       registrationLink: party.registrationLink || '',
       partyType: party.partyType || 'internal',
+      publishToInstagram: party.publishToInstagram === true,
       expiration: resolveExpirationIso(party)
     }));
 
@@ -293,6 +294,7 @@ export default async function handler(req, res) {
       description: party.description || '',
       registrationLink: party.registrationLink || '',
       partyType: 'external',
+      publishToInstagram: party.publishToInstagram === true,
       expiration: resolveExpirationIso(party)
     }));
 
