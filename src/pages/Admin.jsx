@@ -56,6 +56,7 @@ const Admin = () => {
   const [importMessage, setImportMessage] = useState('');
   const [postingParties, setPostingParties] = useState(false);
   const [postingPartiesWhatsApp, setPostingPartiesWhatsApp] = useState(false);
+  const [postingPartiesInstagram, setPostingPartiesInstagram] = useState(false);
   const [partiesRefreshKey, setPartiesRefreshKey] = useState(0);
   const [publishedCommitSha, setPublishedCommitSha] = useState(null);
   const [deployStatusLoading, setDeployStatusLoading] = useState(false);
@@ -199,6 +200,49 @@ const Admin = () => {
     }
   };
 
+  // Posts every currently active party to Instagram (feed post + story each),
+  // one at a time. Mirrors handlePostParties (Telegram) / handlePostPartiesWhatsApp,
+  // but runs client-side since there's no dedup/cron job for Instagram yet —
+  // each click re-posts every active party, same behavior as the other two buttons.
+  const handlePostPartiesInstagram = async () => {
+    if (postingPartiesInstagram) return;
+    if (!confirm('לפרסם עכשיו את כל המסיבות הפעילות באתר לאינסטגרם (פוסט + סטורי לכל אחת)?')) return;
+    setPostingPartiesInstagram(true);
+    try {
+      const { getActiveParties } = await import('../firebase/parties');
+      const parties = await getActiveParties();
+      const publishable = parties.filter((p) => p.imageURL || p.img);
+      let sent = 0;
+      const errors = [];
+      for (const party of publishable) {
+        try {
+          const res = await fetch('/api/publish-content', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...adminAuthHeader() },
+            body: JSON.stringify({ job: 'instagram-publish', partyId: party.id }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            errors.push(`${party.name || party.title}: ${data.message || data.error || 'שגיאה'}`);
+          } else {
+            sent += 1;
+          }
+        } catch (err) {
+          errors.push(`${party.name || party.title}: ${err.message}`);
+        }
+      }
+      alert(
+        `הפרסום לאינסטגרם הושלם.\nפורסמו בהצלחה: ${sent}/${publishable.length}` +
+        (errors.length ? `\n\nשגיאות:\n${errors.join('\n')}` : '')
+      );
+      showSaved();
+    } catch (err) {
+      alert(`הפרסום לאינסטגרם נכשל: ${err.message}`);
+    } finally {
+      setPostingPartiesInstagram(false);
+    }
+  };
+
   const handleImportFromGit = async () => {
     if (importing) return;
     const doParties = confirm(
@@ -248,6 +292,7 @@ const Admin = () => {
           importing={importing} importMessage={importMessage} onImport={handleImportFromGit}
           postingParties={postingParties} onPostParties={handlePostParties}
           postingPartiesWhatsApp={postingPartiesWhatsApp} onPostPartiesWhatsApp={handlePostPartiesWhatsApp}
+          postingPartiesInstagram={postingPartiesInstagram} onPostPartiesInstagram={handlePostPartiesInstagram}
           onReset={() => {
             if (confirm(t('admin.resetConfirm') || 'האם אתה בטוח שברצונך לאפס את כל התוכן לברירות מחדל?')) {
               resetToDefaults();
