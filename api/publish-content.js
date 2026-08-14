@@ -343,51 +343,50 @@ export default async function handler(req, res) {
     const jsonParties = JSON.stringify(partiesOnly, null, 2);
     const authHeader = GITHUB_TOKEN.startsWith('ghp_') ? `token ${GITHUB_TOKEN}` : `Bearer ${GITHUB_TOKEN}`;
 
-    // Uses the Contents API (one PUT per file) instead of the low-level Git
-    // Database API (blobs/trees/commits/refs). GitHub fine-grained PATs are
-    // unreliable against the Git Database API even with Contents: read+write
-    // granted — this endpoint kept failing with "branch not found or no
-    // access" despite a correctly-scoped token. The Contents API is fully
-    // supported by fine-grained tokens and needs no separate branch/ref
-    // lookup: it reads+writes each file directly on the target branch.
-    // Trade-off: each file lands in its own commit instead of one atomic
-    // commit for all of them — acceptable here since these are generated
-    // files, not something anyone diffs by hand.
-    const putFile = async (filePath, content, message) => {
-      const getRes = await fetch(
-        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}?ref=${encodeURIComponent(GITHUB_BRANCH)}`,
-        {
-          headers: {
-            Authorization: authHeader,
-            Accept: 'application/vnd.github.v3+json',
-            'User-Agent': 'TBDSM-Publish'
-          }
+    // GITHUB_BRANCH (main) rejects direct Contents-API writes with
+    // "Resource not accessible by personal access token" — main has a
+    // ruleset requiring changes to land via Pull Request, which blocks
+    // direct-to-branch API writes regardless of token permissions. So this
+    // writes to a short-lived branch off GITHUB_BRANCH instead, opens a PR,
+    // and tries to auto-merge it with the same token. If the ruleset also
+    // requires human review, the merge attempt fails gracefully and the
+    // response includes the PR url so the admin can merge it with one click.
+    const ghFetch = async (url, options = {}) => {
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          Authorization: authHeader,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'TBDSM-Publish',
+          ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+          ...(options.headers || {})
         }
+      });
+      return res;
+    };
+
+    const putFile = async (branch, filePath, content, message) => {
+      const getRes = await ghFetch(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}?ref=${encodeURIComponent(branch)}`
       );
       if (!getRes.ok && getRes.status !== 404) {
-        throw new Error(`Branch "${GITHUB_BRANCH}" not found or no access (reading ${filePath}): ${getRes.status} - ${await getRes.text()}`);
+        throw new Error(`Reading ${filePath} on "${branch}": ${getRes.status} - ${await getRes.text()}`);
       }
       const existingSha = getRes.status === 404 ? undefined : (await getRes.json()).sha;
 
-      const putRes = await fetch(
+      const putRes = await ghFetch(
         `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`,
         {
           method: 'PUT',
-          headers: {
-            Authorization: authHeader,
-            Accept: 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-            'User-Agent': 'TBDSM-Publish'
-          },
           body: JSON.stringify({
             message,
             content: Buffer.from(content, 'utf-8').toString('base64'),
-            branch: GITHUB_BRANCH,
+            branch,
             ...(existingSha ? { sha: existingSha } : {})
           })
         }
       );
-      if (!putRes.ok) throw new Error(`Write ${filePath}: ${putRes.status} - ${await putRes.text()}`);
+      if (!putRes.ok) throw new Error(`Write ${filePath} on "${branch}": ${putRes.status} - ${await putRes.text()}`);
       return putRes.json();
     };
 
@@ -404,18 +403,90 @@ export default async function handler(req, res) {
       );
     }
 
+    // 1. Resolve the base branch's current commit SHA (Contents API GET on
+    //    a file works fine with fine-grained tokens; used here purely to
+    //    read the branch's latest commit via its response header-free JSON —
+    //    actually simplest is git/refs, which read-only calls tolerate fine;
+    //    it's writes that the ruleset blocks).
+    const baseRefRes = await ghFetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/refs/heads/${encodeURIComponent(GITHUB_BRANCH)}`
+    );
+    if (!baseRefRes.ok) {
+      return res.status(500).json({
+        error: 'Failed to read base branch',
+        message: `Branch "${GITHUB_BRANCH}" not found or no read access: ${baseRefRes.status} - ${await baseRefRes.text()}`
+      });
+    }
+    const baseSha = (await baseRefRes.json()).object.sha;
+
+    // 2. Create a short-lived branch off it.
+    const workBranch = `content-publish-${Date.now()}`;
+    const createRefRes = await ghFetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/refs`,
+      { method: 'POST', body: JSON.stringify({ ref: `refs/heads/${workBranch}`, sha: baseSha }) }
+    );
+    if (!createRefRes.ok) {
+      return res.status(500).json({
+        error: 'Failed to create publish branch',
+        message: `${createRefRes.status} - ${await createRefRes.text()}`
+      });
+    }
+
+    // 3. Write every file to that branch.
     const results = [];
     for (const f of filesToWrite) {
-      results.push(await putFile(f.path, f.content, commitMessage));
+      results.push(await putFile(workBranch, f.path, f.content, commitMessage));
+    }
+
+    // 4. Open a PR from it into the base branch.
+    const prRes = await ghFetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/pulls`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          title: commitMessage,
+          head: workBranch,
+          base: GITHUB_BRANCH,
+          body: 'Automated content publish from the admin panel.'
+        })
+      }
+    );
+    if (!prRes.ok) {
+      return res.status(500).json({
+        error: 'Failed to open publish PR',
+        message: `${prRes.status} - ${await prRes.text()}`,
+        branch: workBranch
+      });
+    }
+    const pr = await prRes.json();
+
+    // 5. Try to auto-merge it. If the ruleset requires human review this
+    //    fails — that's fine, the PR still exists for a one-click merge.
+    let merged = false;
+    let mergeMessage = null;
+    const mergeRes = await ghFetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/pulls/${pr.number}/merge`,
+      { method: 'PUT', body: JSON.stringify({ commit_title: commitMessage, merge_method: 'squash' }) }
+    );
+    if (mergeRes.ok) {
+      merged = true;
+    } else {
+      mergeMessage = `${mergeRes.status} - ${await mergeRes.text()}`;
     }
 
     // Mark valid parties as published (needsPublish: false) after Git push
-    await Promise.all(validParties.map(p => p._ref.update({ needsPublish: false })));
+    if (merged) {
+      await Promise.all(validParties.map(p => p._ref.update({ needsPublish: false })));
+    }
 
     return res.status(200).json({
       success: true,
-      message: `Content published to branch ${GITHUB_BRANCH}`,
-      commit: { sha: results[0]?.commit?.sha, message: commitMessage, url: results[0]?.commit?.html_url },
+      message: merged
+        ? `Content published and merged into ${GITHUB_BRANCH}`
+        : `PR opened but needs a manual merge (branch protection on ${GITHUB_BRANCH}) — click pr_url to merge it.`,
+      merged,
+      pr_url: pr.html_url,
+      merge_error: merged ? null : mergeMessage,
       files: filesToWrite.map((f) => f.path),
       branch: GITHUB_BRANCH
     });
