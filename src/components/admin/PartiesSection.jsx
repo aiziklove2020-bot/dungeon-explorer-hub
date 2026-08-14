@@ -240,7 +240,9 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
     }
   };
 
-  // Manually publish a party to Instagram (feed post + story) via api/instagram-publish.js
+  // Manually publish a party to Instagram (feed post + story). Dispatched
+  // through api/publish-content.js (job: "instagram-publish") rather than its
+  // own file, to stay under the Vercel Hobby plan's 12-serverless-function limit.
   const handlePublishInstagram = async (party) => {
     const partyName = party.name || party.title || '';
     if (!party.imageURL && !party.img) {
@@ -252,13 +254,13 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
     }
     setPublishingInstagramId(party.id);
     try {
-      const res = await fetch('/api/instagram-publish', {
+      const res = await fetch('/api/publish-content', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...adminAuthHeader(),
         },
-        body: JSON.stringify({ partyId: party.id }),
+        body: JSON.stringify({ job: 'instagram-publish', partyId: party.id }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.ok) {
