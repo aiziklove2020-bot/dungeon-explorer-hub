@@ -33,7 +33,7 @@ function buildInstagramCaption(party) {
   const lines = [];
   if (party.description) lines.push(party.description);
   lines.push('');
-  lines.push('https://libralparty.net/');
+  lines.push('www.talkingbdsm.net');
   return lines.join('\n');
 }
 
