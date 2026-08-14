@@ -59,21 +59,16 @@ export const sendNewExternalPartyWhatsApp = async (party, partyUrl, language = '
 /**
  * Send every currently-active party to WhatsApp in one go. Mirrors the
  * "פרסם מסיבות לטלגרם" admin button (sendAllPartyReminders in
- * api/telegram-webhook.js), but runs client-side since the WhatsApp bot only
- * runs on the admin's own machine and can't be reached from Vercel's servers.
+ * api/telegram-webhook.js) — delegates to the bot's own /broadcast-parties
+ * endpoint, which reads Firestore directly and applies each group's
+ * allowedAdvertiserIds filter (e.g. a partner venue's group only gets their
+ * own parties + the Dungeon's, never competitors'). Do NOT reimplement this
+ * client-side via sendNewPartyWhatsApp per party — that path has no filter
+ * and would leak every party into every group.
  */
-export const sendAllPartiesWhatsApp = async (language = 'he') => {
-  const { getActiveParties } = await import('./parties');
-  const parties = await getActiveParties();
-  const results = [];
-  let sent = 0;
-  for (const party of parties) {
-    const isExternal = party.partyType === 'external';
-    const ok = isExternal
-      ? await sendNewExternalPartyWhatsApp(party, party.registrationLink || '', language)
-      : await sendNewPartyWhatsApp(party, language);
-    if (ok) sent += 1;
-    results.push({ party: party.name || party.title, ok });
-  }
-  return { partiesSent: sent, total: parties.length, results };
+export const sendAllPartiesWhatsApp = async () => {
+  const res = await fetch(`${WHATSAPP_BOT_URL}/broadcast-parties`, { method: 'POST' });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `HTTP ${res.status}`);
+  return { partiesSent: data.partiesSent ?? 0, total: data.partiesSent ?? 0, results: data.results || [] };
 };

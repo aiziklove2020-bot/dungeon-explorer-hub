@@ -190,12 +190,8 @@ const Admin = () => {
     setPostingPartiesWhatsApp(true);
     try {
       const { sendAllPartiesWhatsApp } = await import('../firebase/whatsapp');
-      const { partiesSent, total } = await sendAllPartiesWhatsApp();
-      if (partiesSent === 0 && total > 0) {
-        alert('לא נשלח כלום — ודא שהבוט רץ על המחשב שלך (npm start בתיקיית whatsapp-bot).');
-      } else {
-        alert(`הפרסום לוואטסאפ הושלם.\nמסיבות שפורסמו: ${partiesSent} מתוך ${total}`);
-      }
+      const { partiesSent } = await sendAllPartiesWhatsApp();
+      alert(`הפרסום לוואטסאפ הושלם.\nמסיבות שנבדקו: ${partiesSent} (כל קבוצה מקבלת רק את מה שמותר לה).`);
     } catch (err) {
       alert(`הפרסום לוואטסאפ נכשל: ${err.message}`);
     } finally {
