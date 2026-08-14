@@ -108,7 +108,7 @@ const AdminHeader = ({
         <button
           onClick={onPostPartiesInstagram}
           disabled={postingPartiesInstagram}
-          title="מפרסם עכשיו את כל המסיבות הפעילות באתר לאינסטגרם (פוסט + סטורי לכל אחת), דרך Windsor.ai"
+          title="מפרסם רק את המסיבות המסומנות &quot;כלול באינסטגרם&quot; (פוסט + סטורי לכל אחת), דרך Windsor.ai"
           className="bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-600 hover:opacity-90 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
         >
           {postingPartiesInstagram ? (

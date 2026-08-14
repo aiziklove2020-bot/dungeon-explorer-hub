@@ -206,12 +206,20 @@ const Admin = () => {
   // each click re-posts every active party, same behavior as the other two buttons.
   const handlePostPartiesInstagram = async () => {
     if (postingPartiesInstagram) return;
-    if (!confirm('לפרסם עכשיו את כל המסיבות הפעילות באתר לאינסטגרם (פוסט + סטורי לכל אחת)?')) return;
+    if (!confirm('לפרסם עכשיו את כל המסיבות שמסומנות "כלול באינסטגרם" לאינסטגרם (פוסט + סטורי לכל אחת)?')) return;
     setPostingPartiesInstagram(true);
     try {
       const { getActiveParties } = await import('../firebase/parties');
       const parties = await getActiveParties();
-      const publishable = parties.filter((p) => p.imageURL || p.img);
+      // Only parties explicitly marked "כלול באינסטגרם" in the editor — the
+      // admin wants this scoped to a specific line (talking_b_d_s_m /
+      // "Dungeon") rather than every active party on the site, to avoid
+      // spamming/risking that Instagram account with unrelated content.
+      const publishable = parties.filter((p) => p.publishToInstagram === true && (p.imageURL || p.img));
+      if (publishable.length === 0) {
+        alert('אין מסיבות המסומנות "כלול באינסטגרם" כרגע. סמן/י מסיבה בעריכה כדי לכלול אותה.');
+        return;
+      }
       let sent = 0;
       const errors = [];
       for (const party of publishable) {
