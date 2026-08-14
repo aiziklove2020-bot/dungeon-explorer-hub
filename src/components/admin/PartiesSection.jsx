@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RotateCcw, Plus, Trash2, Clock, AlertTriangle } from 'lucide-react';
+import { RotateCcw, Plus, Trash2, Clock, AlertTriangle, Instagram } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminLoader from './AdminLoader';
 import { getAllParties, createParty, updateParty, deleteParty, adminRemoveUserFromParty, recomputeAllPartiesExpiration } from '../../firebase/parties';
@@ -10,6 +10,7 @@ import PartyEditor from './PartyEditor';
 import RegistrationItem from './RegistrationItem';
 import CoupleRegistrationItem from './CoupleRegistrationItem';
 import PartyImage from '../PartyImage';
+import { adminAuthHeader } from '../../utils/adminApi';
 
 /**
  * Retention-hours preset options shown in the admin select. Picked to cover the
@@ -28,6 +29,7 @@ const RETENTION_OPTIONS = [
 const PartiesSection = ({ showSaved, refreshKey }) => {
   const { t } = useLanguage();
   const [activeParties, setActiveParties] = useState([]);
+  const [publishingInstagramId, setPublishingInstagramId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [editingParty, setEditingParty] = useState(null);
   const [isAddingEvent, setIsAddingEvent] = useState(false);
@@ -235,6 +237,41 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
       showSaved();
     } catch (error) {
       alert(`${t('admin.errorDeletingParty')}: ${error.message}`);
+    }
+  };
+
+  // Manually publish a party to Instagram (feed post + story). Dispatched
+  // through api/publish-content.js (job: "instagram-publish") rather than its
+  // own file, to stay under the Vercel Hobby plan's 12-serverless-function limit.
+  const handlePublishInstagram = async (party) => {
+    const partyName = party.name || party.title || '';
+    if (!party.imageURL && !party.img) {
+      alert('לאירוע הזה אין תמונה, לא ניתן לפרסם לאינסטגרם.');
+      return;
+    }
+    if (!window.confirm(`לפרסם את "${partyName}" לאינסטגרם (פוסט + סטורי)?`)) {
+      return;
+    }
+    setPublishingInstagramId(party.id);
+    try {
+      const res = await fetch('/api/publish-content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...adminAuthHeader(),
+        },
+        body: JSON.stringify({ job: 'instagram-publish', partyId: party.id }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) {
+        throw new Error(json.message || json.error || 'שגיאה לא ידועה');
+      }
+      showSaved();
+      alert('פורסם בהצלחה לאינסטגרם ✅');
+    } catch (error) {
+      alert(`שגיאה בפרסום לאינסטגרם: ${error.message}`);
+    } finally {
+      setPublishingInstagramId(null);
     }
   };
 
@@ -463,6 +500,16 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                         className="bg-red-600 hover:bg-red-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex-1 sm:flex-none"
                       >
                         {t('admin.edit')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handlePublishInstagram(party)}
+                        disabled={publishingInstagramId === party.id}
+                        className="bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-600 hover:opacity-90 disabled:opacity-50 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 justify-center"
+                        aria-label={`פרסם לאינסטגרם: ${party.name || party.title || ''}`}
+                      >
+                        <Instagram size={14} className="md:w-4 md:h-4" aria-hidden="true" />
+                        {publishingInstagramId === party.id ? 'מפרסם…' : 'פרסם לאינסטגרם'}
                       </button>
                       <button
                         type="button"
