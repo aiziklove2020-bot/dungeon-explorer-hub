@@ -57,6 +57,22 @@ export const registerAdvertiser = async ({ businessName, contactName, phoneNumbe
     createdAt: Timestamp.now()
   };
   await setDoc(newRef, data);
+
+  // Best-effort admin alert (Telegram) — previously nothing notified the
+  // admin of a new signup at all, so a pending advertiser only surfaced if
+  // someone happened to check the admin panel's Advertisers tab. Never
+  // blocks/fails registration if this doesn't go through.
+  fetch('/api/support-chat-send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      job: 'advertiser-signup',
+      businessName: data.businessName,
+      contactName: data.contactName,
+      phoneNumber: data.phoneNumber,
+    }),
+  }).catch(() => {});
+
   return { id: newRef.id, ...data };
 };
 
