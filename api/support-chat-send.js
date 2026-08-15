@@ -182,6 +182,65 @@ async function handleAdvertiserSignupAlert(req, res, body) {
   }
 }
 
+async function handleAgentAlert(req, res, body) {
+  const message = (body.message || '').trim().slice(0, 2000);
+  if (!message) {
+    return res.status(400).json({ error: 'message required' });
+  }
+
+  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+    return res.status(503).json({ error: 'Not configured' });
+  }
+
+  let admin;
+  try {
+    admin = (await import('firebase-admin')).default;
+    if (!admin.firestore) {
+      const [{ getApps }, { getFirestore }] = await Promise.all([
+        import('firebase-admin/app'),
+        import('firebase-admin/firestore')
+      ]);
+      Object.defineProperty(admin, 'apps', { get: () => getApps(), configurable: true });
+      admin.firestore = () => getFirestore();
+    }
+    if (!admin.apps?.length) {
+      const cred = admin.cert(JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON));
+      admin.initializeApp({ credential: cred, projectId: process.env.GCLOUD_PROJECT || 'tbdsm-5acca' });
+    }
+  } catch (e) {
+    console.error('agent-alert Firebase init:', e.message);
+    return res.status(503).json({ error: 'Server configuration error' });
+  }
+
+  try {
+    const privateSnap = await admin.firestore().collection('settings').doc('private').collection('supportChat').doc('config').get();
+    let d = privateSnap.exists ? privateSnap.data() : null;
+    if (!d) {
+      const legacySnap = await admin.firestore().collection('settings').doc('supportChat').get();
+      d = legacySnap?.data?.() || {};
+    }
+    const botToken = d.botToken;
+    const chatId = d.chatId;
+    if (!botToken || !chatId) {
+      return res.status(503).json({ error: 'Telegram not configured' });
+    }
+
+    const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: `🤖 המלצת סוכן\n\n${message}` })
+    });
+    const result = await tgRes.json();
+    if (!result.ok) {
+      return res.status(502).json({ error: result.description || 'Telegram error' });
+    }
+    return res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error('agent-alert:', e.message);
+    return res.status(500).json({ error: e.message });
+  }
+}
+
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') {
@@ -208,6 +267,16 @@ export default async function handler(req, res) {
     // new serverless function (Vercel Hobby's 12-function limit).
     if (body.job === 'advertiser-signup') {
       return handleAdvertiserSignupAlert(req, res, body);
+    }
+
+    // POST { job: "agent-alert", message }: a scheduled cloud-agent routine
+    // (see claude.ai/code/routines) posts here with a plain-text
+    // recommendation — "party X is coming up and hasn't been promoted yet" —
+    // so it reaches the admin as a Telegram message, same recommend-only
+    // pattern as the advertiser-signup alert above. The agent never
+    // publishes anything itself; this is purely advisory.
+    if (body.job === 'agent-alert') {
+      return handleAgentAlert(req, res, body);
     }
 
     const { sessionId, text, displayName } = body;
