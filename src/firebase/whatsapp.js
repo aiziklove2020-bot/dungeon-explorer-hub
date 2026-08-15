@@ -107,14 +107,14 @@ export const sendFileWhatsApp = async ({ to, groupId, blob, filename, caption })
   else if (to) form.append('to', to);
   else throw new Error('Provide either "to" or "groupId"');
   if (caption) form.append('text', caption);
-  form.append('image', blob, filename);
+  form.append('file', blob, filename);
 
-  const res = await fetch(`${WHATSAPP_BOT_URL}/send`, {
+  const res = await fetch(`${WHATSAPP_BOT_URL}/send-file`, {
     method: 'POST',
     headers: { ...botAuthHeaders() },
     body: form,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+  if (!res.ok) throw new Error(data?.message || data?.error || `HTTP ${res.status}`);
   return true;
 };
