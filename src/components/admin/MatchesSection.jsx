@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { RotateCcw, Download, Users, Send } from 'lucide-react';
+import { RotateCcw, Download, Users, Send, MessageCircle, X } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useContent } from '../../context/ContentContext';
 import AdminLoader from './AdminLoader';
 import { getActiveParties, getPartyById, adminRemoveUserFromParty, unmatchBalance, saveBalanceMatches, getBalanceMatches, convertCoupleToSingles } from '../../firebase/parties';
 import { createUserFromRegistration } from '../../firebase/users';
 import { sendBalancePublishToChannels, genderFromRegistration } from '../../firebase/telegram';
+import { getWhatsappRecipients, getWhatsappGroups, sendFileWhatsApp } from '../../firebase/whatsapp';
 import { createBalanceForParty } from '../../utils/balanceMatching';
 // xlsx (~600 KB gzipped) is dynamically imported on first export click; see
 // `loadXLSX()` below. Keeps the admin route bundle small for users who never
@@ -32,6 +33,13 @@ const MatchesSection = ({ showSaved }) => {
   const [registeringClient, setRegisteringClient] = useState(null);
   const [allUsersMap, setAllUsersMap] = useState(new Map()); // Map of phoneNumber -> user
   const [publishingToTelegramPartyId, setPublishingToTelegramPartyId] = useState(null);
+  const [whatsappPickerParty, setWhatsappPickerParty] = useState(null); // { id, name } | null
+  const [whatsappRecipients, setWhatsappRecipients] = useState([]);
+  const [whatsappGroups, setWhatsappGroups] = useState([]);
+  const [whatsappLoadError, setWhatsappLoadError] = useState(null);
+  const [whatsappManualPhone, setWhatsappManualPhone] = useState('');
+  const [whatsappSelectedTarget, setWhatsappSelectedTarget] = useState(''); // 'phone:<num>' or 'group:<id>'
+  const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
 
   const handlePublishPartyToTelegram = async (party) => {
     if (publishingToTelegramPartyId) return;
@@ -377,18 +385,21 @@ const MatchesSection = ({ showSaved }) => {
     }
   };
 
-  const exportBalanceToXLSX = async (partyId, partyName) => {
+  // Shared by the "הורד XLSX" download and the "שלח בוואטסאפ" send flow, so
+  // both always produce the exact same file from the exact same data.
+  // Returns null (after alerting) when there's nothing matched to export.
+  const buildBalanceWorkbook = async (partyId) => {
     const balance = partyBalances[partyId];
     if (!balance || balance.length === 0) {
       alert(t('admin.balanceTables.noBalanceForParty') + '. ' + t('admin.balanceTables.pleaseCreateBalanceFirst'));
-      return;
+      return null;
     }
 
     const matchedBalances = balance.filter(match => match.isMatched === true);
 
     if (matchedBalances.length === 0) {
       alert(t('admin.balanceTables.noMatchedCouplesToExport'));
-      return;
+      return null;
     }
 
     const data = matchedBalances.map((match) => ({
@@ -406,12 +417,77 @@ const MatchesSection = ({ showSaved }) => {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'איזון');
+    return { XLSX, wb };
+  };
+
+  const exportBalanceToXLSX = async (partyId, partyName) => {
+    const built = await buildBalanceWorkbook(partyId);
+    if (!built) return;
+    const { XLSX, wb } = built;
 
     const partyNameSafe = (partyName || 'מסיבה').replace(/[^a-z0-9]/gi, '_');
     const filename = `איזון_${partyNameSafe}_${new Date().toISOString().split('T')[0]}.xlsx`;
 
     XLSX.writeFile(wb, filename);
     showSaved();
+  };
+
+  // Opens the recipient picker for a party's balance and eagerly loads the
+  // bot's saved recipients + groups (best-effort — if the local bot isn't
+  // running, the picker still opens with just the manual-phone-number option).
+  const openWhatsappPicker = async (partyId, partyName) => {
+    setWhatsappPickerParty({ id: partyId, name: partyName });
+    setWhatsappSelectedTarget('');
+    setWhatsappManualPhone('');
+    setWhatsappLoadError(null);
+    try {
+      const [recipients, groups] = await Promise.all([getWhatsappRecipients(), getWhatsappGroups()]);
+      setWhatsappRecipients(recipients);
+      setWhatsappGroups(groups);
+    } catch (err) {
+      setWhatsappRecipients([]);
+      setWhatsappGroups([]);
+      setWhatsappLoadError('לא ניתן להתחבר לבוט הוואטסאפ המקומי (ודא/י שהוא רץ) — עדיין אפשר להזין מספר טלפון ידנית.');
+    }
+  };
+
+  const closeWhatsappPicker = () => setWhatsappPickerParty(null);
+
+  const handleSendWhatsApp = async () => {
+    if (!whatsappPickerParty) return;
+    const manualDigits = whatsappManualPhone.replace(/[^\d]/g, '');
+    const target = whatsappSelectedTarget || (manualDigits ? `phone:${manualDigits}` : '');
+    if (!target) {
+      alert('בחר/י נמען, או הזן/י מספר טלפון.');
+      return;
+    }
+
+    const built = await buildBalanceWorkbook(whatsappPickerParty.id);
+    if (!built) return;
+    const { XLSX, wb } = built;
+
+    setSendingWhatsApp(true);
+    try {
+      const arrayBuffer = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+      const blob = new Blob([arrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const partyNameSafe = (whatsappPickerParty.name || 'מסיבה').replace(/[^a-z0-9]/gi, '_');
+      const filename = `איזון_${partyNameSafe}_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+      const [kind, value] = target.split(':');
+      await sendFileWhatsApp({
+        ...(kind === 'group' ? { groupId: value } : { to: value }),
+        blob,
+        filename,
+        caption: `איזון עבור ${whatsappPickerParty.name || 'מסיבה'}`,
+      });
+
+      showSaved();
+      closeWhatsappPicker();
+    } catch (err) {
+      alert(`שליחה נכשלה: ${err.message}`);
+    } finally {
+      setSendingWhatsApp(false);
+    }
   };
 
   const exportAllBalancesToXLSX = async () => {
@@ -542,6 +618,15 @@ const MatchesSection = ({ showSaved }) => {
                         <Download size={16} /> הורד XLSX
                       </button>
                     )}
+                    {partyBalance.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => openWhatsappPicker(party.id, party.name || party.title)}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
+                      >
+                        <MessageCircle size={16} /> שלח אקסל בוואטסאפ
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => handlePublishPartyToTelegram(party)}
@@ -598,6 +683,96 @@ const MatchesSection = ({ showSaved }) => {
           </div>
         )}
       </div>
+
+      {whatsappPickerParty && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={closeWhatsappPicker}>
+          <div
+            className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-md space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-bold">שליחת אקסל בוואטסאפ — {whatsappPickerParty.name}</h3>
+              <button onClick={closeWhatsappPicker} className="text-zinc-500 hover:text-white">
+                <X size={20} />
+              </button>
+            </div>
+
+            {whatsappLoadError && (
+              <p className="text-amber-400 text-sm">{whatsappLoadError}</p>
+            )}
+
+            {whatsappRecipients.length > 0 && (
+              <div className="space-y-1">
+                <label className="text-xs uppercase font-bold text-zinc-500">אנשי קשר שמורים</label>
+                <div className="space-y-1">
+                  {whatsappRecipients.map((r) => (
+                    <label key={r.phone} className="flex items-center gap-2 text-sm bg-black/30 p-2 rounded-lg cursor-pointer">
+                      <input
+                        type="radio"
+                        name="whatsappTarget"
+                        checked={whatsappSelectedTarget === `phone:${r.phone}`}
+                        onChange={() => setWhatsappSelectedTarget(`phone:${r.phone}`)}
+                      />
+                      {r.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {whatsappGroups.length > 0 && (
+              <div className="space-y-1">
+                <label className="text-xs uppercase font-bold text-zinc-500">קבוצות</label>
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {whatsappGroups.map((g) => (
+                    <label key={g.id} className="flex items-center gap-2 text-sm bg-black/30 p-2 rounded-lg cursor-pointer">
+                      <input
+                        type="radio"
+                        name="whatsappTarget"
+                        checked={whatsappSelectedTarget === `group:${g.id}`}
+                        onChange={() => setWhatsappSelectedTarget(`group:${g.id}`)}
+                      />
+                      {g.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <label className="text-xs uppercase font-bold text-zinc-500">או מספר טלפון (בינלאומי, למשל 972501234567)</label>
+              <input
+                type="text"
+                value={whatsappManualPhone}
+                onChange={(e) => {
+                  setWhatsappManualPhone(e.target.value);
+                  if (e.target.value) setWhatsappSelectedTarget('');
+                }}
+                placeholder="972501234567"
+                className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-emerald-600 outline-none text-white"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={closeWhatsappPicker}
+                className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-xl font-bold"
+              >
+                ביטול
+              </button>
+              <button
+                type="button"
+                onClick={handleSendWhatsApp}
+                disabled={sendingWhatsApp}
+                className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2"
+              >
+                <MessageCircle size={16} /> {sendingWhatsApp ? 'שולח…' : 'שלח'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
