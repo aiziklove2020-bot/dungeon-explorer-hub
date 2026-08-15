@@ -123,6 +123,65 @@ async function handleDiagnostic(req, res) {
   });
 }
 
+async function handleAdvertiserSignupAlert(req, res, body) {
+  const businessName = (body.businessName || '').trim();
+  const contactName = (body.contactName || '').trim();
+  const phoneNumber = (body.phoneNumber || '').trim();
+
+  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+    return res.status(503).json({ error: 'Not configured' });
+  }
+
+  let admin;
+  try {
+    admin = (await import('firebase-admin')).default;
+    if (!admin.firestore) {
+      const [{ getApps }, { getFirestore }] = await Promise.all([
+        import('firebase-admin/app'),
+        import('firebase-admin/firestore')
+      ]);
+      Object.defineProperty(admin, 'apps', { get: () => getApps(), configurable: true });
+      admin.firestore = () => getFirestore();
+    }
+    if (!admin.apps?.length) {
+      const cred = admin.cert(JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON));
+      admin.initializeApp({ credential: cred, projectId: process.env.GCLOUD_PROJECT || 'tbdsm-5acca' });
+    }
+  } catch (e) {
+    console.error('advertiser-signup alert Firebase init:', e.message);
+    return res.status(503).json({ error: 'Server configuration error' });
+  }
+
+  try {
+    const privateSnap = await admin.firestore().collection('settings').doc('private').collection('supportChat').doc('config').get();
+    let d = privateSnap.exists ? privateSnap.data() : null;
+    if (!d) {
+      const legacySnap = await admin.firestore().collection('settings').doc('supportChat').get();
+      d = legacySnap?.data?.() || {};
+    }
+    const botToken = d.botToken;
+    const chatId = d.chatId;
+    if (!botToken || !chatId) {
+      return res.status(503).json({ error: 'Telegram not configured' });
+    }
+
+    const msg = `📋 מפרסם/ת חדש/ה נרשם/ה — ממתין/ה לאישור\n\nעסק: ${businessName || '—'}\nאיש קשר: ${contactName || '—'}\nטלפון: ${phoneNumber || '—'}`;
+    const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: msg })
+    });
+    const result = await tgRes.json();
+    if (!result.ok) {
+      return res.status(502).json({ error: result.description || 'Telegram error' });
+    }
+    return res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error('advertiser-signup alert:', e.message);
+    return res.status(500).json({ error: e.message });
+  }
+}
+
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') {
@@ -138,6 +197,19 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
+
+    // POST { job: "advertiser-signup", businessName, contactName, phoneNumber }:
+    // fired best-effort (fire-and-forget, never blocks registration) right
+    // after a new advertiser signs up on /advertiser/register, so the admin
+    // actually finds out — previously nothing notified them at all, and a
+    // pending advertiser only surfaced by someone remembering to check the
+    // Advertisers admin tab. Reuses the same Telegram bot/chat already wired
+    // for support-chat messages (proven to reach the admin), rather than a
+    // new serverless function (Vercel Hobby's 12-function limit).
+    if (body.job === 'advertiser-signup') {
+      return handleAdvertiserSignupAlert(req, res, body);
+    }
+
     const { sessionId, text, displayName } = body;
 
     if (!sessionId || typeof sessionId !== 'string' || !SESSION_RE.test(sessionId.trim())) {
