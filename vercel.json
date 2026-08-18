@@ -1,6 +1,6 @@
 {
   "crons": [
-    { "path": "/api/telegram-webhook", "schedule": "0 9 * * 0,3,5" }
+    { "path": "/api/telegram-webhook", "schedule": "0 9 * * 0,2,3" }
   ],
   "headers": [
     {

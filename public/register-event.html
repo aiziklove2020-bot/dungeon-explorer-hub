@@ -1,0 +1,183 @@
+<!doctype html><html lang="he" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050506"><title>הרשמה למסיבה | LIBRAL PARTY</title>
+<link rel="icon" type="image/png" href="assets/logo-symbol.png">
+<link rel="stylesheet" href="assets/styles.css?v=202608182240"></head><body>
+
+<header class="topbar">
+  <a class="logo-wrap" href="index.html"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></a>
+  <div class="topbar-menu-group">
+    <a data-dashboard-link href="login.html" title="כניסה / הרשמה" class="login-link"><span>👤</span><small>כניסה / רישום</small></a>
+    <button class="icon-btn" data-menu aria-label="תפריט"><div class="menu-bars"><span></span><span></span><span></span></div></button>
+  </div>
+</header>
+<nav class="navbar">
+  <a href="index.html">בית</a><a href="events.html">מסיבות</a><a href="community.html">קהילה</a>
+  <a href="gallery.html">גלריה</a><a href="news.html">חדשות</a><a href="about.html">אודות</a>
+</nav>
+
+
+<aside class="drawer">
+ <div class="drawer-head"><span class="logo-wrap"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>מסיבות ליברליות בישראל</small></span></span><button data-close>✕</button></div>
+ <nav>
+  <a href="index.html"><span class="dr-ic">⌂</span><span class="dr-tx">בית</span></a><a href="about.html"><span class="dr-ic">ⓘ</span><span class="dr-tx">אודות</span></a><a href="calendar.html"><span class="dr-ic">▣</span><span class="dr-tx">לוח אירועים</span></a>
+  <a href="news.html"><span class="dr-ic">📣</span><span class="dr-tx">חדשות ועדכונים</span></a><a href="advertiser-login.html"><span class="dr-ic">🎟</span><span class="dr-tx">כניסת מפרסמים</span></a><a href="community.html"><span class="dr-ic">♧</span><span class="dr-tx">קהילה / צ׳אט</span></a>
+  <a href="store.html"><span class="dr-ic">🛍</span><span class="dr-tx">חנות</span></a><a href="profile.html"><span class="dr-ic">👤</span><span class="dr-tx">כניסה / הרשמה</span></a><a href="contact.html"><span class="dr-ic">☎</span><span class="dr-tx">צור קשר</span></a>
+ </nav>
+</aside><div class="scrim"></div>
+
+<main>
+<div class="container section">
+  <div class="section-title"><h1>הרשמה למסיבה</h1></div>
+
+  <div class="panel" id="regStep1">
+    <h2>בחרו מסיבה</h2>
+    <div id="partyPicker" class="cards"><p style="color:#aaa">טוען מסיבות פעילות...</p></div>
+  </div>
+
+  <div class="panel" id="regStep2" style="display:none;margin-top:20px">
+    <h2 id="selectedPartyTitle">פרטי הרשמה</h2>
+
+    <div id="whatsappOnly" style="display:none;text-align:center;padding:10px 0">
+      <p style="color:#aaa">ההרשמה למסיבה זו מתבצעת ישירות דרך וואטסאפ.</p>
+      <a class="btn primary full" id="whatsappLink" target="_blank" rel="noopener noreferrer">שליחת הודעה בוואטסאפ 🟢</a>
+      <button class="btn full" type="button" id="backToPartiesWa" style="margin-top:10px">חזרה לבחירת מסיבה</button>
+    </div>
+
+    <form class="form" id="regForm">
+      <label>סוג הרשמה
+        <select name="registrationType" id="typeSelect" required>
+          <option value="single-male-balance">סינגל מחפש איזון</option>
+          <option value="single-female-balance">סינגלית מחפשת איזון</option>
+          <option value="single-female-discount">סינגלית רוצה להירשם בהנחה</option>
+          <option value="couple">זוג המעוניין להירשם</option>
+        </select>
+      </label>
+      <div class="form-row">
+        <label>שם מלא<input required name="fullName" autocomplete="name"></label>
+        <label>טלפון<input required name="phoneNumber" type="tel" placeholder="050-0000000" autocomplete="tel"></label>
+      </div>
+      <label>טלגרם (אופציונלי)<input name="telegramUsername" placeholder="@username"></label>
+      <div id="partnerFields" style="display:none">
+        <div class="form-row">
+          <label>שם בן/בת הזוג<input name="partnerName"></label>
+          <label>טלפון בן/בת הזוג<input name="partnerPhone" type="tel"></label>
+        </div>
+      </div>
+      <label><span><input required type="checkbox" style="width:auto"> אני מעל גיל 18 ומאשר/ת את תנאי ההשתתפות</span></label>
+      <button class="btn primary full" type="submit">שליחת הרשמה</button>
+      <button class="btn full" type="button" id="backToParties">חזרה לבחירת מסיבה</button>
+    </form>
+  </div>
+
+  <div class="panel" id="regSuccess" style="display:none;text-align:center">
+    <h2>ההרשמה נשלחה! 🎉</h2>
+    <p style="color:#aaa">נציג שלנו ייצור איתך קשר לאישור סופי. נתראה במסיבה!</p>
+    <a class="btn primary" href="index.html">חזרה לדף הבית</a>
+  </div>
+</div>
+</main>
+
+<footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל</div></footer>
+
+<nav class="mobile-bottom">
+ <a href="index.html">⌂<small>בית</small></a><a href="about.html">ⓘ<small>אודות</small></a>
+ <a class="fab" href="register-event.html">🎫</a><a href="community.html">◌<small>קהילה</small></a><a href="contact.html">☎<small>יצירת קשר</small></a>
+</nav>
+
+<script src="assets/app.js?v=202608182240"></script>
+<script type="module">
+import "./assets/site-data.js?v=202608182224";
+
+let selectedParty = null;
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const picker = document.getElementById("partyPicker");
+  const step1 = document.getElementById("regStep1");
+  const step2 = document.getElementById("regStep2");
+  const form = document.getElementById("regForm");
+  const typeSelect = document.getElementById("typeSelect");
+  const partnerFields = document.getElementById("partnerFields");
+  const whatsappOnly = document.getElementById("whatsappOnly");
+  const whatsappLink = document.getElementById("whatsappLink");
+
+  const partyIdFromUrl = new URLSearchParams(location.search).get("partyId");
+
+  let events = [];
+  try {
+    events = await window.LPData.loadEvents();
+  } catch (err) {
+    picker.innerHTML = "<p style=\"color:#aaa\">לא הצלחנו לטעון מסיבות כרגע.</p>";
+    return;
+  }
+
+  if (events.length === 0) {
+    picker.innerHTML = "<p style=\"color:#aaa\">אין כרגע מסיבות פתוחות להרשמה.</p>";
+    return;
+  }
+
+  function showStep2(party) {
+    selectedParty = party;
+    document.getElementById("selectedPartyTitle").textContent = "פרטי הרשמה — " + party.title;
+    step1.style.display = "none";
+    step2.style.display = "";
+
+    if (party.whatsappNumber) {
+      form.style.display = "none";
+      whatsappOnly.style.display = "";
+      const digits = String(party.whatsappNumber).replace(/\D/g, "").replace(/^0/, "972");
+      whatsappLink.href = `https://wa.me/${digits}?text=${encodeURIComponent("היי, אני מעוניין/ת להירשם למסיבה: " + party.title)}`;
+    } else {
+      form.style.display = "";
+      whatsappOnly.style.display = "none";
+    }
+  }
+
+  picker.innerHTML = events.map(e => `<article class="card"><div class="event-cover" style="background-image:url('${e.img}')">${e.time ? `<span class="loc">◷ ${e.time}</span>` : ""}</div><div class="card-body"><h3>${e.title}</h3>${(e.day || e.date) ? `<div class="meta"><span>📅 ${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span></div>` : ""}<button type="button" class="btn card-cta" data-party="${e.id}">בחרו מסיבה זו</button></div></article>`).join("");
+  picker.querySelectorAll("[data-party]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const party = events.find(e => String(e.id) === btn.dataset.party);
+      if (party) showStep2(party);
+    });
+  });
+
+  const preselected = events.find(e => String(e.id) === partyIdFromUrl);
+  if (preselected) showStep2(preselected);
+
+  [document.getElementById("backToParties"), document.getElementById("backToPartiesWa")].forEach(btn => {
+    btn.addEventListener("click", () => {
+      step2.style.display = "none";
+      step1.style.display = "";
+    });
+  });
+
+  typeSelect.addEventListener("change", () => {
+    partnerFields.style.display = typeSelect.value === "couple" ? "" : "none";
+  });
+
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!selectedParty) return;
+    const f = new FormData(form);
+    const btn = form.querySelector("button[type=submit]");
+    btn.disabled = true;
+    try {
+      await window.LPData.registerForParty(selectedParty.id, {
+        fullName: f.get("fullName"),
+        phoneNumber: f.get("phoneNumber"),
+        telegramUsername: f.get("telegramUsername"),
+        registrationType: f.get("registrationType"),
+        partnerName: f.get("partnerName"),
+        partnerPhone: f.get("partnerPhone"),
+      });
+      step2.style.display = "none";
+      document.getElementById("regSuccess").style.display = "";
+    } catch (err) {
+      toast(err.message || "שגיאה בהרשמה, נסו שוב", "error");
+    } finally {
+      btn.disabled = false;
+    }
+  });
+});
+</script>
+</body></html>

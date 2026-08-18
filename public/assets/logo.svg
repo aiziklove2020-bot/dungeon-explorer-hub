@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 92" role="img" aria-label="LIBRAL PARTY">
+  <defs>
+    <filter id="g" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g transform="translate(8,9)" fill="none" stroke="#ff1739" stroke-width="7.5" stroke-linecap="round" filter="url(#g)">
+    <path d="M112 87 C102 57 88 36 74 40 C66 42 66 50 68 55 C62 48 54 40 44 41 C28 42 12 50 27 60 C7 77 12 107 37 112 C57 116 77 97 88 82 C100 68 112 87 112 87 C120 104 140 120 160 112 C180 104 182 77 164 64 C150 54 130 60 114 80 C104 92 112 87 112 87 Z"/>
+  </g>
+  <text x="225" y="50" fill="#ffffff" font-size="38" font-family="Georgia, 'Times New Roman', serif" letter-spacing="1.5">LIBRAL PARTY</text>
+  <text x="228" y="71" fill="#9a9aa2" font-size="9" font-family="Arial, sans-serif" letter-spacing="5">LIBERAL PARTIES ISRAEL</text>
+</svg>

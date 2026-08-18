@@ -152,7 +152,7 @@ function buildReminderCaption(party) {
   // this party's actual registration is external/WhatsApp — the Telegram
   // post intentionally doesn't expose those direct links, so people go
   // through the site.
-  const linkLine = `הרשמה: https://www.libralparty.net/register`;
+  const linkLine = `הרשמה: https://www.libralparty.net/`;
 
   // Reserve space for the header and link line first, so the link (added last)
   // can never be pushed past CAPTION_LIMIT by a long description — only the
@@ -193,7 +193,7 @@ const PROMO_MESSAGE = [
   'בואו באהבה 🩶 כל פרסום מסיבות בקבוצה נעשה רק דרך לינק אחד — אתר הקהילה. ככה כולם רואים את כל המסיבות במקום אחד, מסודר וברור.',
   '',
   'להרשמה כמפרסם ופרסום המסיבה שלכם:',
-  'https://www.libralparty.net/advertiser/register'
+  'https://www.libralparty.net/advertiser-register.html'
 ].join('\n');
 
 function isPromoAuthorized(req) {

@@ -35,16 +35,20 @@ const AdminHeader = ({
 
   return (
     <>
-      <div className="mb-8 flex justify-between items-start">
-        <div>
-          <h1 className="text-4xl font-black italic mb-2">
-            <span className="text-red-600">ADMIN</span> PANEL
-          </h1>
-          <p className="text-zinc-500 text-sm">{t('admin.panelSubtitle')}</p>
+      <div className="mb-8 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <img src="/assets/logo-symbol.png" alt="" style={{ width: 44, height: 44 }} />
+          <div>
+            <h1 style={{ fontFamily: 'Georgia,"Times New Roman",serif', fontWeight: 700, fontSize: 26 }}>
+              LIBRAL PARTY <span style={{ color: '#ff1739' }}>ניהול</span>
+            </h1>
+            <p style={{ color: '#a9a9b2', fontSize: 13 }}>{t('admin.panelSubtitle')}</p>
+          </div>
         </div>
         <button
           onClick={onLogout}
-          className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
+          className="text-white text-sm font-bold flex items-center gap-2"
+          style={{ background: 'transparent', border: '1px solid #ff1739', borderRadius: 15, padding: '10px 16px' }}
         >
           <X size={16} /> {t('admin.logout')}
         </button>
@@ -57,86 +61,97 @@ const AdminHeader = ({
         </div>
       )}
 
-      <div className="flex flex-wrap gap-3 mb-6">
-        <button
-          type="button"
-          onClick={onViewSite}
-          className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
-          title={t('admin.editSite')}
-        >
-          <Eye size={16} /> {t('admin.editSite')}
-        </button>
-        <button
-          onClick={onPublish}
-          disabled={publishing}
-          title={t('admin.publishTitle')}
-          className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
-        >
-          {publishing ? (
-            <Loader2 size={16} className="animate-spin shrink-0" />
-          ) : (
-            <Upload size={16} />
-          )}
-          {publishing ? t('admin.publishing') : t('admin.publish')}
-        </button>
-        <button
-          onClick={onPostParties}
-          disabled={postingParties}
-          title="שולח עכשיו את כל המסיבות הפעילות באתר לטלגרם, בלי לחכות ללו&quot;ז האוטומטי"
-          className="bg-purple-700 hover:bg-purple-600 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
-        >
-          {postingParties ? (
-            <Loader2 size={16} className="animate-spin shrink-0" />
-          ) : (
-            <Megaphone size={16} />
-          )}
-          {postingParties ? 'מפרסם...' : 'פרסם מסיבות לטלגרם'}
-        </button>
-        <button
-          onClick={onPostPartiesWhatsApp}
-          disabled={postingPartiesWhatsApp}
-          title="שולח עכשיו את כל המסיבות הפעילות באתר לוואטסאפ, דרך הבוט שרץ על המחשב שלך (localhost:3000)"
-          className="bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
-        >
-          {postingPartiesWhatsApp ? (
-            <Loader2 size={16} className="animate-spin shrink-0" />
-          ) : (
-            <Megaphone size={16} />
-          )}
-          {postingPartiesWhatsApp ? 'מפרסם...' : 'פרסם מסיבות לוואטסאפ'}
-        </button>
-        <button
-          onClick={onPostPartiesInstagram}
-          disabled={postingPartiesInstagram}
-          title="מפרסם רק את המסיבות המסומנות &quot;כלול באינסטגרם&quot; (פוסט + סטורי לכל אחת), דרך Windsor.ai"
-          className="bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-600 hover:opacity-90 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
-        >
-          {postingPartiesInstagram ? (
-            <Loader2 size={16} className="animate-spin shrink-0" />
-          ) : (
-            <Instagram size={16} />
-          )}
-          {postingPartiesInstagram ? 'מפרסם...' : 'פרסם מסיבות לאינסטגרם'}
-        </button>
-        <button
-          onClick={onImport}
-          disabled={importing}
-          title={t('admin.importTitle')}
-          className="bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
-        >
-          {importing ? (
-            <Loader2 size={16} className="animate-spin shrink-0" />
-          ) : (
-            <Download size={16} />
-          )}
-          {importing ? t('admin.importing') : t('admin.import')}
-        </button>
-        <button
-          onClick={onReset}
-          className="bg-red-900/50 hover:bg-red-900 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2"
-        >
-          <RotateCcw size={16} /> {t('admin.resetBtn')}
-        </button>
+      <div
+        className="mb-6 p-4"
+        style={{ background: 'linear-gradient(180deg,#101014,#0a0a0c)', border: '1px solid #2d2d34', borderRadius: 20 }}
+      >
+        <div className="flex flex-wrap items-start gap-x-8 gap-y-4">
+
+          <div>
+            <p className="text-xs font-bold uppercase mb-2" style={{ color: '#8f8f97', letterSpacing: 1 }}>כללי</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={onViewSite}
+                title={t('admin.editSite')}
+                className="text-white text-sm font-bold flex items-center gap-2"
+                style={{ background: '#15151a', border: '1px solid #2d2d34', borderRadius: 15, padding: '10px 16px' }}
+              >
+                <Eye size={16} style={{ color: '#3ecf6d' }} /> {t('admin.editSite')}
+              </button>
+              <button
+                onClick={onPublish}
+                disabled={publishing}
+                title={t('admin.publishTitle')}
+                className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
+                style={{ background: 'linear-gradient(135deg,#ff1739,#cf0026)', borderRadius: 15, padding: '10px 16px' }}
+              >
+                {publishing ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Upload size={16} />}
+                {publishing ? t('admin.publishing') : t('admin.publish')}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-bold uppercase mb-2" style={{ color: '#8f8f97', letterSpacing: 1 }}>פרסום מסיבות</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={onPostParties}
+                disabled={postingParties}
+                title="שולח עכשיו את כל המסיבות הפעילות באתר לטלגרם, בלי לחכות ללו&quot;ז האוטומטי"
+                className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
+                style={{ background: '#15151a', border: '1px solid #2d2d34', borderRadius: 15, padding: '10px 16px' }}
+              >
+                {postingParties ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Megaphone size={16} style={{ color: '#ad43ff' }} />}
+                {postingParties ? 'מפרסם...' : 'טלגרם'}
+              </button>
+              <button
+                onClick={onPostPartiesWhatsApp}
+                disabled={postingPartiesWhatsApp}
+                title="שולח עכשיו את כל המסיבות הפעילות באתר לוואטסאפ, דרך הבוט שרץ על המחשב שלך (localhost:3000)"
+                className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
+                style={{ background: '#15151a', border: '1px solid #2d2d34', borderRadius: 15, padding: '10px 16px' }}
+              >
+                {postingPartiesWhatsApp ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Megaphone size={16} style={{ color: '#3ecf6d' }} />}
+                {postingPartiesWhatsApp ? 'מפרסם...' : 'וואטסאפ'}
+              </button>
+              <button
+                onClick={onPostPartiesInstagram}
+                disabled={postingPartiesInstagram}
+                title="מפרסם רק את המסיבות המסומנות &quot;כלול באינסטגרם&quot; (פוסט + סטורי לכל אחת), דרך Windsor.ai"
+                className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
+                style={{ background: '#15151a', border: '1px solid #2d2d34', borderRadius: 15, padding: '10px 16px' }}
+              >
+                {postingPartiesInstagram ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Instagram size={16} style={{ color: '#f3b82d' }} />}
+                {postingPartiesInstagram ? 'מפרסם...' : 'אינסטגרם'}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-bold uppercase mb-2" style={{ color: '#8f8f97', letterSpacing: 1 }}>נתונים</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={onImport}
+                disabled={importing}
+                title={t('admin.importTitle')}
+                className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
+                style={{ background: '#15151a', border: '1px solid #2d2d34', borderRadius: 15, padding: '10px 16px' }}
+              >
+                {importing ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Download size={16} />}
+                {importing ? t('admin.importing') : t('admin.import')}
+              </button>
+              <button
+                onClick={onReset}
+                className="text-white text-sm font-bold flex items-center gap-2"
+                style={{ background: 'transparent', border: '1px solid #7c1828', color: '#ff5a72', borderRadius: 15, padding: '10px 16px' }}
+              >
+                <RotateCcw size={16} /> {t('admin.resetBtn')}
+              </button>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       {publishMessage && (

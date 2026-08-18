@@ -572,3 +572,101 @@
   padding: 8px 16px;
   font-size: 14px;
 }
+
+/* ==========================================================================
+   LIBRAL PARTY admin theme — retunes the Tailwind utility classes every
+   admin section already uses (bg-zinc-*, border-zinc-*, bg-red-*, rounded-*)
+   to the public site's actual palette/radii, so every feature (parties,
+   forum, subscriptions, links, RSS, etc.) looks like one consistent product
+   instead of default dark-mode Tailwind, without editing 18+ section files
+   individually. Scoped to .lp-admin-theme (set on the Admin page root).
+   ========================================================================== */
+.lp-admin-theme {
+  font-family: Arial, Heebo, sans-serif;
+}
+
+/* Card / panel surfaces */
+.lp-admin-theme .bg-zinc-900,
+.lp-admin-theme .bg-zinc-900\/50,
+.lp-admin-theme .bg-zinc-900\/60,
+.lp-admin-theme .bg-zinc-950\/80 {
+  background: linear-gradient(180deg, #101014, #0a0a0c) !important;
+}
+.lp-admin-theme .bg-zinc-800,
+.lp-admin-theme .bg-zinc-800\/50,
+.lp-admin-theme .bg-zinc-800\/40 {
+  background: #15151a !important;
+}
+.lp-admin-theme .bg-zinc-700,
+.lp-admin-theme .bg-zinc-600 {
+  background: #1c1c22 !important;
+}
+.lp-admin-theme .bg-black\/40 {
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Borders */
+.lp-admin-theme .border-zinc-800,
+.lp-admin-theme .border-zinc-700,
+.lp-admin-theme .border-zinc-700\/50,
+.lp-admin-theme .border-zinc-600,
+.lp-admin-theme .border-white\/5 {
+  border-color: #2d2d34 !important;
+}
+
+/* Muted text */
+.lp-admin-theme .text-zinc-500,
+.lp-admin-theme .text-zinc-600,
+.lp-admin-theme .text-zinc-700 {
+  color: #8f8f97 !important;
+}
+.lp-admin-theme .text-zinc-400,
+.lp-admin-theme .text-zinc-300,
+.lp-admin-theme .text-zinc-200 {
+  color: #c7c7cd !important;
+}
+
+/* Brand red — cards, buttons, focus rings, accents */
+.lp-admin-theme .bg-red-600,
+.lp-admin-theme .bg-red-700,
+.lp-admin-theme .bg-red-800 {
+  background: linear-gradient(135deg, #ff1739, #cf0026) !important;
+}
+.lp-admin-theme .hover\:bg-red-500:hover,
+.lp-admin-theme .hover\:bg-red-600:hover {
+  filter: brightness(1.1);
+}
+.lp-admin-theme .border-red-600,
+.lp-admin-theme .border-red-700,
+.lp-admin-theme .focus\:border-red-600:focus {
+  border-color: #ff1739 !important;
+}
+.lp-admin-theme .text-red-600,
+.lp-admin-theme .text-red-500,
+.lp-admin-theme .text-red-400,
+.lp-admin-theme .text-red-300 {
+  color: #ff1739 !important;
+}
+.lp-admin-theme .bg-red-900,
+.lp-admin-theme .bg-red-900\/50,
+.lp-admin-theme .bg-red-900\/30,
+.lp-admin-theme .bg-red-900\/40,
+.lp-admin-theme .bg-red-900\/60 {
+  background: rgba(255, 23, 57, 0.14) !important;
+}
+
+/* Corner radii — match the site's rounded-pill / 15-20px language */
+.lp-admin-theme .rounded-xl {
+  border-radius: 15px !important;
+}
+.lp-admin-theme .rounded-2xl {
+  border-radius: 20px !important;
+}
+.lp-admin-theme .rounded-lg {
+  border-radius: 12px !important;
+}
+
+/* Section cards: consistent shadow so every feature reads as one system */
+.lp-admin-theme .rounded-2xl.border {
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+}

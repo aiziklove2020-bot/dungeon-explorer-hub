@@ -1,0 +1,67 @@
+<!doctype html><html lang="he" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050506"><title>פרסום אירוע | LIBRAL PARTY</title>
+<link rel="icon" type="image/png" href="assets/logo-symbol.png">
+<link rel="stylesheet" href="assets/styles.css?v=202608182240"></head><body>
+
+<header class="topbar">
+  <a class="logo-wrap" href="index.html"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></a>
+  <div class="topbar-menu-group">
+    <a data-dashboard-link href="login.html" title="כניסה / הרשמה" class="login-link"><span>👤</span><small>כניסה / רישום</small></a>
+    <button class="icon-btn" data-menu aria-label="תפריט"><div class="menu-bars"><span></span><span></span><span></span></div></button>
+  </div>
+</header>
+<nav class="navbar">
+  <a href="index.html">בית</a><a href="events.html">מסיבות</a><a href="community.html">קהילה</a>
+  <a href="gallery.html">גלריה</a><a href="news.html">חדשות</a><a href="about.html">אודות</a>
+</nav>
+
+
+<aside class="drawer">
+ <div class="drawer-head"><span class="logo-wrap"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>מסיבות ליברליות בישראל</small></span></span><button data-close>✕</button></div>
+ <nav>
+  <a href="index.html"><span class="dr-ic">⌂</span><span class="dr-tx">בית</span></a><a href="about.html"><span class="dr-ic">ⓘ</span><span class="dr-tx">אודות</span></a><a href="calendar.html"><span class="dr-ic">▣</span><span class="dr-tx">לוח אירועים</span></a>
+  <a href="news.html"><span class="dr-ic">📣</span><span class="dr-tx">חדשות ועדכונים</span></a><a href="advertiser-login.html"><span class="dr-ic">🎟</span><span class="dr-tx">כניסת מפרסמים</span></a><a href="community.html"><span class="dr-ic">♧</span><span class="dr-tx">קהילה / צ׳אט</span></a>
+  <a href="store.html"><span class="dr-ic">🛍</span><span class="dr-tx">חנות</span></a><a href="profile.html"><span class="dr-ic">👤</span><span class="dr-tx">כניסה / הרשמה</span></a><a href="contact.html"><span class="dr-ic">☎</span><span class="dr-tx">צור קשר</span></a>
+ </nav>
+</aside><div class="scrim"></div>
+<main>
+<div class="dashboard"><aside class="sidebar"><h3>מפרסמים</h3><a href="advertiser-dashboard.html">▦ דשבורד</a><a class="active" href="create-event.html">＋ פרסום אירוע חדש</a><a href="index.html">⌂ חזרה לאתר</a></aside>
+<section class="dash-content"><div class="section-title"><h1>פרסום אירוע חדש</h1></div><div class="panel"><form class="form" id="createEvent"><div class="form-row"><label>שם האירוע<input required name="title"></label><label>DJ<input name="dj"></label></div><div class="form-row"><label>תאריך<input required type="date" name="date"></label><label>שעת התחלה<input required type="time" name="time"></label></div><label>סוג המסיבה<select name="category"><option value="">בחרו סוג...</option><option value="חילופי זוגות">חילופי זוגות</option><option value="בדסמ">בדסמ</option><option value="מאנץ'">מאנץ'</option><option value="פסטיבל">פסטיבל</option></select></label><label>כתובת תמונה<input name="img" placeholder="https://..."></label><label>תיאור — כתבו והסבירו מה מייחד את המסיבה<textarea required rows="6" name="desc" placeholder="לדוגמה: קוד לבוש, קהל יעד, אווירה, מה כלול בכניסה..."></textarea></label><label><span><input type="checkbox" required style="width:auto"> אני מאשר/ת שכל המידע נכון ועומד בתנאי הפרסום</span></label><button class="btn primary">פרסום האירוע</button></form></div></section></div></main>
+<footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל</div></footer>
+
+<nav class="mobile-bottom">
+ <a href="index.html">⌂<small>בית</small></a><a href="about.html">ⓘ<small>אודות</small></a>
+ <a class="fab" href="register-event.html">🎫</a><a href="community.html">◌<small>קהילה</small></a><a href="contact.html">☎<small>יצירת קשר</small></a>
+</nav>
+
+<script src="assets/app.js?v=202608182240"></script>
+<script type="module">
+import "./assets/site-data.js?v=202608182224";
+document.addEventListener("DOMContentLoaded", () => {
+  const u = LP.current();
+  if (!u || u.role !== "advertiser") { location = "advertiser-login.html"; return; }
+  document.getElementById("createEvent").addEventListener("submit", async e => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const btn = e.target.querySelector("button");
+    btn.disabled = true;
+    try {
+      await window.LPData.createAdvertiserParty(u.id, {
+        title: f.get("title"),
+        dj: f.get("dj"),
+        date: f.get("date"),
+        time: f.get("time"),
+        imageURL: f.get("img"),
+        description: f.get("desc"),
+      });
+      toast("האירוע פורסם באתר");
+      setTimeout(() => location = "advertiser-dashboard.html", 900);
+    } catch (err) {
+      toast(err.message || "שגיאה בפרסום האירוע", "error");
+    } finally {
+      btn.disabled = false;
+    }
+  });
+});
+</script></body></html>

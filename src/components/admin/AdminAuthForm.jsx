@@ -91,28 +91,39 @@ const AdminAuthForm = ({ onAuthenticated }) => {
 
   if (isFirstLogin) {
     return (
-      <div className="min-h-dvh bg-black text-white flex items-center justify-center" dir="rtl">
+      <div
+        className="min-h-dvh text-white flex items-center justify-center px-4"
+        dir="rtl"
+        style={{ background: '#050506', fontFamily: 'Arial, Heebo, sans-serif' }}
+      >
         <SEO title="Admin" noindex />
-        <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-8 rounded-2xl max-w-md w-full mx-4">
+        <div
+          className="w-full p-8"
+          style={{
+            maxWidth: 440,
+            background: 'linear-gradient(180deg,#101014,#0a0a0c)',
+            border: '1px solid #2d2d34',
+            borderRadius: 24,
+          }}
+        >
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-yellow-600/20 border border-yellow-600/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock size={32} className="text-yellow-600" />
-            </div>
-            <h1 className="text-3xl font-black italic mb-2">
-              <span className="text-yellow-600">{t('adminLogin.setPasswordTitle')}</span>
+            <img src="/assets/logo-symbol.png" alt="" className="mx-auto mb-3" style={{ width: 64, height: 64 }} />
+            <h1 className="mb-1" style={{ fontFamily: 'Georgia,"Times New Roman",serif', fontWeight: 700, fontSize: 22, color: '#f3b82d' }}>
+              {t('adminLogin.setPasswordTitle')}
             </h1>
-            <p className="text-zinc-500 text-sm">{t('adminLogin.setPasswordSubtitle')}</p>
+            <p style={{ color: '#a9a9b2', fontSize: 13 }}>{t('adminLogin.setPasswordSubtitle')}</p>
           </div>
 
           <form onSubmit={handlePasswordSetup} className="space-y-4">
             <div className="space-y-1 text-right">
-              <label htmlFor={newPasswordId} className="text-xs uppercase font-bold text-zinc-400">{t('adminLogin.newPasswordLabel')}</label>
+              <label htmlFor={newPasswordId} className="text-xs uppercase font-bold" style={{ color: '#a9a9b2' }}>{t('adminLogin.newPasswordLabel')}</label>
               <input
                 id={newPasswordId}
                 type="password"
                 value={newPassword}
                 onChange={(e) => { setNewPassword(e.target.value); setPasswordSetupError(''); }}
-                className="w-full bg-black/40 border border-zinc-800 p-4 rounded-xl focus:border-yellow-600 outline-none text-white text-right"
+                className="w-full outline-none text-white text-right"
+                style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #2d2d34', borderRadius: 15, padding: '14px 16px' }}
                 placeholder={t('adminLogin.newPasswordPlaceholderFull')}
                 autoComplete="new-password"
                 autoFocus
@@ -123,13 +134,14 @@ const AdminAuthForm = ({ onAuthenticated }) => {
               />
             </div>
             <div className="space-y-1 text-right">
-              <label htmlFor={confirmPasswordId} className="text-xs uppercase font-bold text-zinc-400">{t('adminLogin.confirmPasswordLabel')}</label>
+              <label htmlFor={confirmPasswordId} className="text-xs uppercase font-bold" style={{ color: '#a9a9b2' }}>{t('adminLogin.confirmPasswordLabel')}</label>
               <input
                 id={confirmPasswordId}
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => { setConfirmPassword(e.target.value); setPasswordSetupError(''); }}
-                className="w-full bg-black/40 border border-zinc-800 p-4 rounded-xl focus:border-yellow-600 outline-none text-white text-right"
+                className="w-full outline-none text-white text-right"
+                style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #2d2d34', borderRadius: 15, padding: '14px 16px' }}
                 placeholder={t('adminLogin.confirmPasswordPlaceholderFull')}
                 autoComplete="new-password"
                 minLength={4}
@@ -137,13 +149,14 @@ const AdminAuthForm = ({ onAuthenticated }) => {
               />
             </div>
             {passwordSetupError && (
-              <p id={setupErrorId} className="text-red-400 text-sm text-right" role="alert">{passwordSetupError}</p>
+              <p id={setupErrorId} className="text-sm text-right" style={{ color: '#ff1739' }} role="alert">{passwordSetupError}</p>
             )}
             <button
               type="submit"
               disabled={loading}
               aria-disabled={loading}
-              className="w-full bg-yellow-600 hover:bg-yellow-500 text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full text-white font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
+              style={{ background: 'linear-gradient(135deg,#f3b82d,#c98f10)', borderRadius: 15, minHeight: 54 }}
             >
               {loading ? (
                 <div className="loader-inline"><Loader size="small" /></div>
@@ -158,28 +171,39 @@ const AdminAuthForm = ({ onAuthenticated }) => {
   }
 
   return (
-    <div className="min-h-dvh bg-black text-white flex items-center justify-center" dir="rtl">
+    <div
+      className="min-h-dvh text-white flex items-center justify-center px-4"
+      dir="rtl"
+      style={{ background: '#050506', fontFamily: 'Arial, Heebo, sans-serif' }}
+    >
       <SEO title="Admin" noindex />
-      <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-8 rounded-2xl max-w-md w-full mx-4">
+      <div
+        className="w-full p-8"
+        style={{
+          maxWidth: 440,
+          background: 'linear-gradient(180deg,#101014,#0a0a0c)',
+          border: '1px solid #2d2d34',
+          borderRadius: 24,
+        }}
+      >
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-red-600/20 border border-red-600/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lock size={32} className="text-red-600" />
-          </div>
-          <h1 className="text-3xl font-black italic mb-2">
-            <span lang="en"><span className="text-red-600">ADMIN</span> PANEL</span>
+          <img src="/assets/logo-symbol.png" alt="" className="mx-auto mb-3" style={{ width: 64, height: 64 }} />
+          <h1 className="mb-1" style={{ fontFamily: 'Georgia,"Times New Roman",serif', fontWeight: 700, fontSize: 24 }}>
+            LIBRAL PARTY
           </h1>
-          <p className="text-zinc-400 text-sm">{t('adminLogin.loginTitle')}</p>
+          <p style={{ color: '#a9a9b2', fontSize: 13, letterSpacing: 1 }}>{t('adminLogin.loginTitle')}</p>
         </div>
 
         <form onSubmit={handlePasswordSubmit} className="space-y-4">
           <div className="space-y-1 text-right">
-            <label htmlFor={usernameId} className="text-xs uppercase font-bold text-zinc-400">{t('adminLogin.usernameLabel')}</label>
+            <label htmlFor={usernameId} className="text-xs uppercase font-bold" style={{ color: '#a9a9b2' }}>{t('adminLogin.usernameLabel')}</label>
             <input
               id={usernameId}
               type="text"
               value={username}
               onChange={(e) => { setUsername(e.target.value); setPasswordError(''); }}
-              className="w-full bg-black/40 border border-zinc-800 p-4 rounded-xl focus:border-red-600 outline-none text-white text-right"
+              className="w-full outline-none text-white text-right"
+              style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #2d2d34', borderRadius: 15, padding: '14px 16px' }}
               placeholder={t('adminLogin.usernamePlaceholderFull')}
               autoComplete="username"
               autoFocus
@@ -187,13 +211,14 @@ const AdminAuthForm = ({ onAuthenticated }) => {
             />
           </div>
           <div className="space-y-1 text-right">
-            <label htmlFor={passwordId} className="text-xs uppercase font-bold text-zinc-400">{t('adminLogin.passwordLabel')}</label>
+            <label htmlFor={passwordId} className="text-xs uppercase font-bold" style={{ color: '#a9a9b2' }}>{t('adminLogin.passwordLabel')}</label>
             <input
               id={passwordId}
               type="password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setPasswordError(''); }}
-              className="w-full bg-black/40 border border-zinc-800 p-4 rounded-xl focus:border-red-600 outline-none text-white text-right"
+              className="w-full outline-none text-white text-right"
+              style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #2d2d34', borderRadius: 15, padding: '14px 16px' }}
               placeholder={t('adminLogin.passwordPlaceholderFull')}
               autoComplete="current-password"
               required
@@ -201,14 +226,19 @@ const AdminAuthForm = ({ onAuthenticated }) => {
               aria-describedby={passwordError ? passwordErrorId : undefined}
             />
             {passwordError && (
-              <p id={passwordErrorId} className="text-red-400 text-sm text-right mt-1" role="alert">{passwordError}</p>
+              <p id={passwordErrorId} className="text-sm text-right mt-1" style={{ color: '#ff1739' }} role="alert">{passwordError}</p>
             )}
           </div>
           <button
             type="submit"
             disabled={loading}
             aria-disabled={loading}
-            className="w-full bg-red-600 hover:bg-red-500 text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full text-white font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
+            style={{
+              background: 'linear-gradient(135deg,#ff1739,#cf0026)',
+              borderRadius: 15,
+              minHeight: 54,
+            }}
           >
             {loading ? (
               <div className="loader-inline"><Loader size="small" /></div>

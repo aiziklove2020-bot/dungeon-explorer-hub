@@ -23,12 +23,10 @@ import WorkshopsSection from '../components/admin/WorkshopsSection';
 import DBLoggerSection from '../components/admin/DBLoggerSection';
 import DBSection from '../components/admin/DBSection';
 import GitHistorySection from '../components/admin/GitHistorySection';
-import ForumAdminSection from '../components/admin/ForumAdminSection';
 import ForumUsersSection from '../components/admin/ForumUsersSection';
 import LiveChatSection from '../components/admin/LiveChatSection';
 import ChatReportsSection from '../components/admin/ChatReportsSection';
 import DeleteRequestsSection from '../components/admin/DeleteRequestsSection';
-import BlogAdminSection from '../components/admin/BlogAdminSection';
 import SubscriptionsSection from '../components/admin/SubscriptionsSection';
 import SiteDesignSection from '../components/admin/SiteDesignSection';
 import { adminAuthHeader } from '../utils/adminApi';
@@ -287,7 +285,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-dvh bg-black text-white py-6 sm:py-8" dir="rtl">
+    <div className="lp-admin-theme min-h-dvh text-white py-6 sm:py-8" dir="rtl" style={{ background: '#050506' }}>
       <SEO title="Admin" noindex />
       <div className="container mx-auto px-3 sm:px-4 max-w-6xl">
 
@@ -316,11 +314,12 @@ const Admin = () => {
             <button
               key={tab.id}
               onClick={() => startTransition(() => setActiveSection(tab.id))}
-              className={`shrink-0 px-3 md:px-4 py-2 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all whitespace-nowrap touch-manipulation ${
+              className="shrink-0 px-4 py-2 text-xs md:text-sm font-bold transition-all whitespace-nowrap touch-manipulation"
+              style={
                 activeSection === tab.id
-                  ? 'bg-red-600 text-white'
-                  : 'bg-zinc-900 text-zinc-400 hover:text-white'
-              }`}
+                  ? { background: 'linear-gradient(135deg,#ff1739,#cf0026)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
+                  : { background: 'transparent', color: '#a9a9b2', borderRadius: 999, border: '1px solid #2d2d34' }
+              }
             >
               {tab.label}
             </button>
@@ -328,7 +327,8 @@ const Admin = () => {
           <button
             type="button"
             onClick={() => setShowAdvancedTabs((v) => !v)}
-            className="shrink-0 flex items-center gap-1 px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap touch-manipulation bg-zinc-900 text-zinc-500 hover:text-white transition-all"
+            className="shrink-0 flex items-center gap-1 px-4 py-2 text-xs md:text-sm font-bold whitespace-nowrap touch-manipulation transition-all"
+            style={{ background: 'transparent', color: '#a9a9b2', borderRadius: 999, border: '1px solid #2d2d34' }}
           >
             מתקדם
             {showAdvancedTabs ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -336,16 +336,17 @@ const Admin = () => {
         </div>
 
         {showAdvancedTabs && (
-          <div className="flex flex-nowrap sm:flex-wrap gap-2 mb-6 md:mb-8 border-b border-zinc-800 pb-3 md:pb-4 overflow-x-auto overscroll-x-contain touch-pan-x -mx-1 px-1 sm:mx-0 sm:px-0">
+          <div className="flex flex-nowrap sm:flex-wrap gap-2 mb-6 md:mb-8 pb-3 md:pb-4 overflow-x-auto overscroll-x-contain touch-pan-x -mx-1 px-1 sm:mx-0 sm:px-0" style={{ borderBottom: '1px solid #2d2d34' }}>
             {adminTabs.filter(tab => tab.advanced).map(tab => (
               <button
                 key={tab.id}
                 onClick={() => startTransition(() => setActiveSection(tab.id))}
-                className={`shrink-0 px-3 md:px-4 py-2 md:py-2 rounded-xl text-xs md:text-sm font-bold transition-all whitespace-nowrap touch-manipulation ${
+                className="shrink-0 px-4 py-2 text-xs md:text-sm font-bold transition-all whitespace-nowrap touch-manipulation"
+                style={
                   activeSection === tab.id
-                    ? 'bg-red-600 text-white'
-                    : 'bg-zinc-900 text-zinc-500 hover:text-white'
-                }`}
+                    ? { background: 'linear-gradient(135deg,#ff1739,#cf0026)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
+                    : { background: 'transparent', color: '#7a7a82', borderRadius: 999, border: '1px solid #2d2d34' }
+                }
               >
                 {tab.label}
               </button>
@@ -365,12 +366,10 @@ const Admin = () => {
           {activeSection === 'workshops' && <WorkshopsSection showSaved={showSaved} />}
           {activeSection === 'db'        && <DBSection />}
           {activeSection === 'dbLogger'  && <DBLoggerSection />}
-          {activeSection === 'forum'     && <ForumAdminSection showSaved={showSaved} />}
           {activeSection === 'forumUsers' && <ForumUsersSection showSaved={showSaved} />}
           {activeSection === 'liveChat'  && <LiveChatSection showSaved={showSaved} />}
           {activeSection === 'chatReports' && <ChatReportsSection showSaved={showSaved} />}
           {activeSection === 'deleteRequests' && <DeleteRequestsSection showSaved={showSaved} />}
-          {activeSection === 'blog'      && <BlogAdminSection showSaved={showSaved} />}
           {activeSection === 'users'     && <UsersSection showSaved={showSaved} />}
           {activeSection === 'subscriptions' && <SubscriptionsSection showSaved={showSaved} />}
           {activeSection === 'admins'    && <AdminsSection showSaved={showSaved} />}

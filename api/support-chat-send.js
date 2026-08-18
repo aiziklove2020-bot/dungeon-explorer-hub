@@ -333,8 +333,29 @@ export default async function handler(req, res) {
       const legacySnap = await admin.firestore().collection('settings').doc('supportChat').get();
       d = legacySnap?.data?.() || {};
     }
-    const botToken = d.botToken;
-    const chatId = d.chatId;
+    let botToken = d.botToken;
+    let chatId = d.chatId;
+
+    // No dedicated support-chat bot configured — fall back to the same bot
+    // already set up in Admin → טלגרם (the party-announcements bot), so the
+    // support widget works without requiring a separate, never-exposed
+    // config document to be filled in first.
+    if (!botToken || !chatId) {
+      const tgSnap = await admin.firestore().collection('settings').doc('telegram').get();
+      const tg = tgSnap.exists ? tgSnap.data() : null;
+      if (tg) {
+        if (Array.isArray(tg.bots) && tg.bots.length > 0) {
+          botToken = botToken || tg.bots[0]?.token;
+        } else {
+          botToken = botToken || tg.botToken;
+        }
+        if (Array.isArray(tg.channels) && tg.channels.length > 0) {
+          chatId = chatId || tg.channels[0]?.chatId;
+        } else {
+          chatId = chatId || tg.chatId;
+        }
+      }
+    }
 
     if (!botToken || !chatId) {
       return res.status(503).json({ error: 'Support chat not configured' });

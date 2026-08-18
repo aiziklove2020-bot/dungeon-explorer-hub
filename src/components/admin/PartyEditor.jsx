@@ -49,6 +49,8 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
       registrationLink: party.registrationLink || '',
       whatsappNumber: party.whatsappNumber || '',
       partyType: party.partyType || 'internal',
+      category: party.category || '',
+      city: party.city || '',
       publishToInstagram: party.publishToInstagram === true
     };
   });
@@ -232,6 +234,52 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           <p className="text-zinc-500 text-xs mt-1">
             {t('admin.partyTypeDescription')}
           </p>
+        </div>
+        <div className="space-y-1 text-right">
+          <label className="text-xs uppercase font-bold text-zinc-500">קטגוריה (לסינון באתר)</label>
+          <select
+            value={formData.category}
+            onChange={e => setFormData(prev => ({...prev, category: e.target.value}))}
+            className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+          >
+            <option value="">— זיהוי אוטומטי מהטקסט —</option>
+            <option value="חילופי זוגות">חילופי זוגות</option>
+            <option value="בדסמ">בדסמ</option>
+            <option value="מאנץ'">מאנץ'</option>
+            <option value="פסטיבל">פסטיבל</option>
+          </select>
+          <p className="text-zinc-500 text-xs mt-1">
+            קובע איך המסיבה תסונן בדף "מסיבות". אם לא נבחר — המערכת תנסה לזהות לפי הכותרת/תיאור.
+          </p>
+        </div>
+        <div className="space-y-1 text-right">
+          <label className="text-xs uppercase font-bold text-zinc-500">אזור/עיר (לסינון באתר)</label>
+          <select
+            value={formData.city}
+            onChange={e => setFormData(prev => ({...prev, city: e.target.value}))}
+            className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+          >
+            <option value="">— זיהוי אוטומטי מהכותרת —</option>
+            <option value="תל אביב">תל אביב</option>
+            <option value="ירושלים">ירושלים</option>
+            <option value="חיפה">חיפה</option>
+            <option value="ראשון לציון">ראשון לציון</option>
+            <option value="פתח תקווה">פתח תקווה</option>
+            <option value="אשדוד">אשדוד</option>
+            <option value="נתניה">נתניה</option>
+            <option value="באר שבע">באר שבע</option>
+            <option value="חולון">חולון</option>
+            <option value="רמת גן">רמת גן</option>
+            <option value="בת ים">בת ים</option>
+            <option value="רחובות">רחובות</option>
+            <option value="אשקלון">אשקלון</option>
+            <option value="הרצליה">הרצליה</option>
+            <option value="כפר סבא">כפר סבא</option>
+            <option value="רעננה">רעננה</option>
+            <option value="מודיעין">מודיעין</option>
+            <option value="נהריה">נהריה</option>
+            <option value="אילת">אילת</option>
+          </select>
         </div>
       </div>
       <label className="flex items-center gap-2 text-sm bg-black/40 border border-zinc-800 p-3 rounded-xl cursor-pointer select-none">

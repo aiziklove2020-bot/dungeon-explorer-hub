@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RotateCcw, Search, Shield, ShieldOff, Ban, CheckCircle, Trash2, KeyRound, Mail, MailCheck, MessageSquareOff, Link2 } from 'lucide-react';
+import { RotateCcw, Search, Shield, ShieldOff, Ban, CheckCircle, Trash2, KeyRound, Mail, MailCheck, MessageSquareOff, Link2, Scale, XCircle } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminLoader from './AdminLoader';
 import PhoneLink from '../PhoneLink';
@@ -16,6 +16,7 @@ import {
   setForumUserEmail,
   adminMarkForumEmailVerified,
   backfillForumNicknameLower,
+  updateForumUser,
 } from '../../firebase/forumUsers';
 import { purgeForumUserFromChat } from '../../firebase/liveChat';
 
@@ -122,6 +123,24 @@ const ForumUsersSection = ({ showSaved }) => {
     if (!window.confirm('לסמן ידנית את האימייל כמאומת?')) return;
     try {
       await adminMarkForumEmailVerified(fu.id);
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleApproveBalance = async (fu, days) => {
+    const expiry = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+    try {
+      await updateForumUser(fu.id, { subscriptionExpiry: expiry });
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleRevokeBalance = async (fu) => {
+    if (!window.confirm(`לבטל את אישור האיזון המגדרי של "${fu.nickname}"?`)) return;
+    try {
+      await updateForumUser(fu.id, { subscriptionExpiry: null });
       await load();
       showSaved();
     } catch (err) { alert(err.message || 'שגיאה'); }
@@ -313,7 +332,41 @@ const ForumUsersSection = ({ showSaved }) => {
                   {linkedUser
                     ? <>מקושר למשתמש אתר: <span className="text-zinc-300">{linkedUser.name}</span> — <PhoneLink phone={linkedUser.phoneNumber}>{linkedUser.phoneNumber}</PhoneLink></>
                     : 'לא מקושר לחשבון אתר'}
+                  {fu.gender && <span> · מגדר: {fu.gender === 'female' ? 'אישה' : 'גבר'}</span>}
                 </p>
+
+                {fu.gender === 'female' ? (
+                  <div className="mb-3 px-3 py-2 rounded-lg bg-emerald-900/30 border border-emerald-800 text-emerald-300 text-xs font-bold">
+                    ⚖️ מנוי זהב אוטומטי — נשים פטורות מאישור איזון
+                  </div>
+                ) : (
+                  <div className="mb-3 px-3 py-2 rounded-lg bg-black/30 border border-zinc-800 text-xs">
+                    ⚖️ איזון מגדרי:{' '}
+                    {fu.subscriptionExpiry && new Date(fu.subscriptionExpiry).getTime() > Date.now() ? (
+                      <span className="text-emerald-400 font-bold">מאושר עד {new Date(fu.subscriptionExpiry).toLocaleDateString('he-IL')}</span>
+                    ) : (
+                      <span className="text-zinc-500">לא מאושר</span>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {fu.gender !== 'female' && (
+                    <>
+                      <button onClick={() => handleApproveBalance(fu, 1)} className="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
+                        <Scale size={11} /> אשר איזון ליום אחד
+                      </button>
+                      <button onClick={() => handleApproveBalance(fu, 365)} className="flex items-center gap-1 bg-emerald-800 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
+                        <Scale size={11} /> אשר איזון לשנה
+                      </button>
+                      {fu.subscriptionExpiry && (
+                        <button onClick={() => handleRevokeBalance(fu)} className="flex items-center gap-1 bg-red-900/60 hover:bg-red-800 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
+                          <XCircle size={11} /> בטל אישור
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
 
                 <div className="flex flex-wrap gap-2">
                   <button
