@@ -4,7 +4,7 @@
 <link rel="icon" type="image/png" href="assets/logo-symbol.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/styles.css?v=202608191555"></head><body>
+<link rel="stylesheet" href="assets/styles.css?v=202608191610"></head><body>
 
 <header class="topbar">
   <a class="logo-wrap" href="/"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></a>
@@ -36,9 +36,9 @@
  <a class="fab" href="/register-event">🎫</a><a href="/community">◌<small>קהילה</small></a><a href="/contact">☎<small>יצירת קשר</small></a>
 </nav>
 
-<script src="assets/app.js?v=202608191555"></script>
+<script src="assets/app.js?v=202608191610"></script>
 <script type="module">
-import "./assets/site-data.js?v=202608191555";
+import "./assets/site-data.js?v=202608191610";
 document.addEventListener("DOMContentLoaded", async () => {
  const id = new URLSearchParams(location.search).get("id");
  const events = await window.LPData.loadEvents().catch(() => []);
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
  const ticketHref = e.partyType === "external" && e.registrationLink ? e.registrationLink : `register-event.html?partyId=${e.id}`;
  document.getElementById("eventDetail").innerHTML=`
  <div class="grid-2"><div class="panel" style="padding:0;overflow:hidden"><div style="height:520px;background:#050505 url('${e.img}') center/contain no-repeat"></div></div>
- <div class="panel"><span class="badge red" style="position:static;display:inline-block">${e.type}</span><h1 style="font-size:44px;direction:ltr;text-align:right;margin-bottom:5px">${e.title}</h1>
+ <div class="panel">${e.category ? `<span class="badge red" style="position:static;display:inline-block">${e.category}</span>` : ""}<h1 style="font-size:44px;direction:ltr;text-align:right;margin-bottom:5px">${e.title}</h1>
  <p style="font-size:18px;color:#aaa;line-height:1.8">${e.desc}</p><div class="chips">${e.day ? `<span class="chip">📅 ${e.day}${e.date ? ", " + e.date : ""}</span>` : (e.date ? `<span class="chip">📅 ${e.date}</span>` : "")}${e.time ? `<span class="chip">◷ ${e.time}</span>` : ""}${e.dj ? `<span class="chip">🎧 DJ ${e.dj}</span>` : ""}<span class="chip">21+</span></div>
  <hr style="border:0;border-top:1px solid #2c2c33;margin:22px 0"><h3>על האירוע</h3><p style="color:#aaa;line-height:1.8">אירוע קהילתי למבוגרים בלבד. יש לכבד את כללי המקום, פרטיות המשתתפים והסכמה מלאה בכל אינטראקציה.</p>
  <div style="display:grid;gap:10px;margin-top:22px"><a class="btn primary full" href="${ticketHref}" target="${e.partyType === 'external' ? '_blank' : '_self'}">לרכישת כרטיסים 🎟</a><button class="btn full" id="favBtn">♡ שמירה למועדפים</button></div></div></div>`;
