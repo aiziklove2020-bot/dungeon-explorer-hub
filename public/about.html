@@ -4,7 +4,7 @@
 <link rel="icon" type="image/png" href="assets/logo-symbol.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/styles.css?v=202608190910"></head><body>
+<link rel="stylesheet" href="assets/styles.css?v=202608191320"></head><body>
 
 <header class="topbar">
   <a class="logo-wrap" href="/"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></a>
@@ -36,9 +36,9 @@
  <a class="fab" href="/register-event">🎫</a><a href="/community">◌<small>קהילה</small></a><a href="/contact">☎<small>יצירת קשר</small></a>
 </nav>
 
-<script src="assets/app.js?v=202608190910"></script>
+<script src="assets/app.js?v=202608191320"></script>
 <script type="module">
-import "./assets/site-data.js?v=202608190910";
+import "./assets/site-data.js?v=202608191320";
 document.addEventListener("DOMContentLoaded", async () => {
   const box = document.getElementById("aboutBox");
   // Markdown-style **bold** from the admin's rich-text editor was rendering
@@ -58,9 +58,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }).join("");
     const entryNote = a.entryNote ? `
       <div class="panel" style="text-align:center;margin-top:20px;border:2px solid #ff1739;background:rgba(255,23,57,.08)">
-        <div class="badge red" style="display:inline-flex;margin-bottom:10px">⚠️ חובה לומר בכניסה</div>
-        <p style="color:#fff;font-size:20px;font-weight:700;margin:0">${renderText(a.entryNote)}</p>
-        <p style="color:#ff8a8a;font-size:14px;margin-top:10px">בלי המשפט הזה בדיוק — לא תקבלו את ההנחה בכניסה!</p>
+        <p style="color:#ff8a8a;font-size:13px;margin:0 0 12px;font-weight:600">⚠️ חובה לומר בדיוק את המשפט הבא בכניסה</p>
+        <div style="display:inline-block;color:#ffabb6;background:rgba(87,0,20,.72);border:1px solid #ff1739;font-size:18px;font-weight:700;padding:12px 22px;border-radius:20px;white-space:normal;line-height:1.4">${renderText(a.entryNote)}</div>
+        <p style="color:#ff8a8a;font-size:14px;margin-top:12px">בלי המשפט הזה בדיוק — לא תקבלו את ההנחה בכניסה!</p>
       </div>` : "";
     box.innerHTML = `
       <div class="panel" style="text-align:center"><h2>${a.roleTitle || "החזון שלנו"}</h2><p style="color:#aaa;line-height:1.9">${renderText(a.roleText)}</p>${a.roleSubtext ? `<p style="color:#aaa;line-height:1.9;margin-top:10px">${renderText(a.roleSubtext)}</p>` : ""}</div>
