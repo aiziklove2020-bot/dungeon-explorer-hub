@@ -33626,7 +33626,11 @@ async function ZV() {
 	} catch {
 		e = await ej().catch(() => []);
 	}
-	return [...e || []].sort((e, t) => XV(e) - XV(t)).map(YV);
+	let t = Date.now();
+	return (e || []).filter((e) => {
+		let n = e.expiration?.toDate?.() || (e.expiration ? new Date(e.expiration) : null);
+		return n ? n.getTime() >= t : XV(e) >= t - 1440 * 60 * 1e3;
+	}).sort((e, t) => XV(e) - XV(t)).map(YV);
 }
 async function QV() {
 	return (await mk().catch(() => ({})))?.about || {};

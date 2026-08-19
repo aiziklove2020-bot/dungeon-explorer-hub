@@ -139,7 +139,17 @@ async function loadEvents() {
   } catch {
     parties = await getActiveParties().catch(() => []);
   }
-  const sorted = [...(parties || [])].sort((a, b) => partyDateMs(a) - partyDateMs(b));
+  // status stays "active" in Firestore after a party's date has passed —
+  // nothing flips it automatically — so expired parties kept showing on the
+  // site indefinitely. Drop anything whose explicit `expiration` timestamp
+  // (or, lacking one, its party date) is in the past.
+  const now = Date.now();
+  const notExpired = (parties || []).filter((p: any) => {
+    const exp = p.expiration?.toDate?.() || (p.expiration ? new Date(p.expiration) : null);
+    if (exp) return exp.getTime() >= now;
+    return partyDateMs(p) >= now - 24 * 60 * 60 * 1000;
+  });
+  const sorted = notExpired.sort((a, b) => partyDateMs(a) - partyDateMs(b));
   return sorted.map(toEventShape);
 }
 
