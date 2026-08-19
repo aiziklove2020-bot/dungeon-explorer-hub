@@ -2,7 +2,9 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#050506"><title>פרסום אירוע | LIBRAL PARTY</title>
 <link rel="icon" type="image/png" href="assets/logo-symbol.png">
-<link rel="stylesheet" href="assets/styles.css?v=202608190755"></head><body>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/styles.css?v=202608190836"></head><body>
 
 <header class="topbar">
   <a class="logo-wrap" href="index.html"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></a>
@@ -42,6 +44,7 @@
     <li>קהל היעד (זוגות / סינגלים / סינגליות)</li>
     <li>מה כלול בכניסה (בר, מזנון, חדרים)</li>
     <li>אזור כללי (למשל "מרכז הארץ") — הכתובת המדויקת נמסרת למאושרים בלבד</li>
+    <li><b style="color:#fff">חובה לבחור אזור/עיר בטופס</b> — לפיו הגולשים מסננים מסיבות באתר</li>
   </ul>
   <p style="color:#8f8f98;margin:0 0 8px"><b style="color:#ff5a72">✗ לא לכתוב בתיאור:</b></p>
   <ul style="color:#a9a9b2;line-height:1.9;margin:0;padding-inline-start:22px">
@@ -52,7 +55,8 @@
   </ul>
 </div>
 
-<div class="panel"><form class="form" id="createEvent"><div class="form-row"><label>שם האירוע<input required name="title"></label><label>DJ<input name="dj"></label></div><div class="form-row"><label>תאריך<input required type="date" name="date"></label><label>שעת התחלה<input required type="time" name="time"></label></div><label>סוג המסיבה<select name="category" id="catSelect"><option value="">בחרו סוג...</option><option value="חילופי זוגות">חילופי זוגות</option><option value="בדסמ">בדסמ</option><option value="מאנץ'">מאנץ'</option><option value="פסטיבל">פסטיבל</option><option value="__other__">אחר — הקלידו בעצמכם</option></select></label>
+<div class="panel"><form class="form" id="createEvent"><div class="form-row"><label>שם האירוע<input required name="title"></label><label>DJ<input name="dj"></label></div><div class="form-row"><label>תאריך<input required type="date" name="date"></label><label>שעת התחלה<input required type="time" name="time"></label></div><label>אזור / עיר<select name="city" required><option value="">בחרו אזור...</option><option>תל אביב</option><option>ירושלים</option><option>חיפה</option><option>ראשון לציון</option><option>פתח תקווה</option><option>אשדוד</option><option>נתניה</option><option>באר שבע</option><option>חולון</option><option>רמת גן</option><option>בת ים</option><option>רחובות</option><option>אשקלון</option><option>הרצליה</option><option>כפר סבא</option><option>רעננה</option><option>מודיעין</option><option>נהריה</option><option>אילת</option></select><small style="color:#8f8f98;display:block;margin-top:6px">חובה — לפי זה גולשים מסננים מסיבות באתר. הכתובת המדויקת לא נחשפת.</small></label>
+<label>סוג המסיבה<select name="category" id="catSelect"><option value="">בחרו סוג...</option><option value="חילופי זוגות">חילופי זוגות</option><option value="בדסמ">בדסמ</option><option value="מאנץ'">מאנץ'</option><option value="פסטיבל">פסטיבל</option><option value="__other__">אחר — הקלידו בעצמכם</option></select></label>
 <label id="catOtherWrap" style="display:none">פרטו את סוג המסיבה<input id="catOther" placeholder="לדוגמה: ערב היכרות, מסיבת פטיש, מסיבת חוף..."></label><label>תמונת המסיבה
   <input type="file" id="imgFile" accept="image/*" style="padding:12px">
   <small style="color:#8f8f98;display:block;margin-top:6px">בחרו תמונה מהמחשב, מהגלריה או צלמו בנייד • עד 5MB</small>
@@ -60,9 +64,20 @@
 <div id="imgStatus" style="display:none;margin:-4px 0 14px;font-size:14px"></div>
 <img id="imgPreview" alt="" style="display:none;width:100%;max-height:260px;object-fit:contain;background:#050505;border:1px solid #2d2d34;border-radius:14px;margin-bottom:14px">
 <input type="hidden" name="img" id="imgUrl"><label>תיאור — כתבו והסבירו מה מייחד את המסיבה<textarea required rows="6" name="desc" placeholder="לדוגמה: קוד לבוש, קהל יעד, אווירה, מה כלול בכניסה...&#10;&#10;⚠️ בלי מספרי טלפון — יש שדה ייעודי בהמשך"></textarea></label>
-<label>📞 טלפון ליצירת קשר (וואטסאפ)
+<label>איך נרשמים למסיבה?
+  <select name="regMode" id="regMode">
+    <option value="site">רישום דרך האתר (מומלץ)</option>
+    <option value="whatsapp">פנייה בוואטסאפ</option>
+    <option value="link">לינק חיצוני לכרטיסים</option>
+  </select>
+</label>
+<label id="waWrap" style="display:none">📞 טלפון ליצירת קשר (וואטסאפ)
   <input name="whatsapp" type="tel" placeholder="050-0000000" dir="ltr" autocomplete="tel">
   <small style="color:#8f8f98;display:block;margin-top:6px">זה המקום היחיד להזין מספר טלפון. הקישור לוואטסאפ ייווצר אוטומטית.</small>
+</label>
+<label id="linkWrap" style="display:none">🔗 לינק לרכישת כרטיסים
+  <input name="ticketLink" type="url" placeholder="https://..." dir="ltr">
+  <small style="color:#8f8f98;display:block;margin-top:6px">הקישור למכירת הכרטיסים שלכם — גולשים יועברו אליו ישירות.</small>
 </label><label><span><input type="checkbox" required style="width:auto"> אני מאשר/ת שכל המידע נכון ועומד בתנאי הפרסום</span></label><button class="btn primary">פרסום האירוע</button></form></div></section></div></main>
 <footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל</div></footer>
 
@@ -71,9 +86,9 @@
  <a class="fab" href="register-event.html">🎫</a><a href="community.html">◌<small>קהילה</small></a><a href="contact.html">☎<small>יצירת קשר</small></a>
 </nav>
 
-<script src="assets/app.js?v=202608190755"></script>
+<script src="assets/app.js?v=202608190836"></script>
 <script type="module">
-import "./assets/site-data.js?v=202608190755";
+import "./assets/site-data.js?v=202608190836";
 document.addEventListener("DOMContentLoaded", () => {
   const u = LP.current();
   if (!u || u.role !== "advertiser") { location = "advertiser-login.html"; return; }
@@ -124,6 +139,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (other) catOther.focus();
   });
 
+  const regMode = document.getElementById("regMode");
+  const waWrap = document.getElementById("waWrap");
+  const linkWrap = document.getElementById("linkWrap");
+  const syncRegMode = () => {
+    waWrap.style.display = regMode.value === "whatsapp" ? "" : "none";
+    linkWrap.style.display = regMode.value === "link" ? "" : "none";
+  };
+  regMode.addEventListener("change", syncRegMode);
+  syncRegMode();
+
   document.getElementById("createEvent").addEventListener("submit", async e => {
     e.preventDefault();
     if (uploading) { toast("רגע, התמונה עדיין נטענת...", "error"); return; }
@@ -135,6 +160,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (/(?:\+?972|0)\d{8,9}/.test(descRaw)) {
       toast("אין להזין מספר טלפון בתיאור — השתמשו בשדה הטלפון הייעודי", "error");
       return;
+    }
+
+    const mode = f.get("regMode");
+    if (mode === "whatsapp" && !String(f.get("whatsapp") || "").trim()) {
+      toast("נא להזין מספר וואטסאפ", "error"); return;
+    }
+    if (mode === "link" && !String(f.get("ticketLink") || "").trim()) {
+      toast("נא להזין לינק לכרטיסים", "error"); return;
     }
 
     let category = f.get("category") || "";
@@ -153,7 +186,9 @@ document.addEventListener("DOMContentLoaded", () => {
         imageURL: f.get("img"),
         description: f.get("desc"),
         category,
-        whatsappNumber: f.get("whatsapp"),
+        city: f.get("city"),
+        whatsappNumber: mode === "whatsapp" ? f.get("whatsapp") : "",
+        registrationLink: mode === "link" ? f.get("ticketLink") : "",
       });
       toast("האירוע פורסם באתר");
       setTimeout(() => location = "advertiser-dashboard.html", 900);

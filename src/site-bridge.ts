@@ -330,10 +330,14 @@ async function uploadImage(file: File) {
 }
 
 async function createAdvertiserParty(advertiserId: string, data: {
-  title: string; date: string; time: string; dj?: string; imageURL?: string; description: string; category?: string; whatsappNumber?: string;
+  title: string; date: string; time: string; dj?: string; imageURL?: string; description: string; category?: string; city?: string; whatsappNumber?: string; registrationLink?: string;
 }) {
   return createParty({
+    city: data.city || "",
     whatsappNumber: data.whatsappNumber || "",
+    // An external ticket link makes this an "external" party, which is what
+    // event.html keys off to send visitors straight to the seller.
+    registrationLink: data.registrationLink || "",
     title: data.title,
     name: data.title,
     date: data.date,
@@ -342,7 +346,7 @@ async function createAdvertiserParty(advertiserId: string, data: {
     imageURL: data.imageURL || "",
     description: data.description,
     category: data.category || "",
-    partyType: "internal",
+    partyType: data.registrationLink ? "external" : "internal",
     createdByAdvertiserId: advertiserId,
   });
 }

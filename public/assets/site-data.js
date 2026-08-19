@@ -33767,7 +33767,9 @@ async function uH(e) {
 }
 async function dH(e, t) {
 	return $A({
+		city: t.city || "",
 		whatsappNumber: t.whatsappNumber || "",
+		registrationLink: t.registrationLink || "",
 		title: t.title,
 		name: t.title,
 		date: t.date,
@@ -33776,7 +33778,7 @@ async function dH(e, t) {
 		imageURL: t.imageURL || "",
 		description: t.description,
 		category: t.category || "",
-		partyType: "internal",
+		partyType: t.registrationLink ? "external" : "internal",
 		createdByAdvertiserId: e
 	});
 }

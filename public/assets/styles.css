@@ -79,6 +79,11 @@ header.topbar,nav.navbar,main,footer.footer{position:relative;z-index:1}
 .btn.full{width:100%}
 .section{padding:34px 0}.section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .section-title h1,.section-title h2{margin:0;font-size:34px}.section-title a{color:var(--red);font-weight:700}
+/* A .btn inside a section title is a real button, not a text link — the rule
+   above was painting its label red on the red primary fill, which made
+   "+ אירוע חדש" unreadable on the advertiser dashboard. */
+.section-title a.btn{color:#fff}
+.section-title a.btn:not(.primary){color:var(--red)}
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
 .card{background:#0c0c0e;border:1px solid #3c3c43;border-radius:22px;overflow:hidden;box-shadow:0 18px 45px rgba(0,0,0,.35)}
 .event-cover{height:230px;background-size:contain;background-repeat:no-repeat;background-color:#050505;background-position:center;position:relative}
@@ -116,6 +121,18 @@ header.topbar,nav.navbar,main,footer.footer{position:relative;z-index:1}
 .banner-photo{position:relative;background-size:cover;background-position:center;overflow:hidden;border:1px solid #7c1828}
 .banner-photo::before{content:"";position:absolute;inset:0;background:rgba(7,0,1,.8);z-index:0}
 .banner-photo>*{position:relative;z-index:1}
+.app-banner{flex-direction:row;flex-wrap:wrap;gap:20px;text-align:right;justify-content:space-between;background:radial-gradient(circle at 85% 50%,rgba(255,23,57,.14),transparent 45%),#0a090a}
+.app-banner-icon{width:64px;height:64px;object-fit:contain;flex-shrink:0}
+.app-banner-text{flex:1 1 260px}
+.app-banner-text h2{font-size:26px;margin:0 0 6px}
+.app-banner-text p{margin:0}
+.app-banner-actions{display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0}
+@media(max-width:1000px){
+  .app-banner{flex-direction:column;text-align:center}
+  .app-banner-text{flex:1 1 auto}
+  .app-banner-actions{width:100%;justify-content:center}
+  .app-banner-actions .btn{flex:1 1 auto}
+}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 .panel{background:linear-gradient(180deg,#101014,#0a0a0c);border:1px solid var(--line);border-radius:20px;padding:22px}
 .panel h2,.panel h3{margin-top:0}
@@ -175,14 +192,7 @@ th,td{text-align:right;padding:14px;border-bottom:1px solid #25252b}th{color:#aa
  .hero-content{padding:300px 22px 35px;max-width:none}.hero-kicker{font-size:30px}.hero h1{font-size:39px}
  .cards{grid-template-columns:1fr}.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px}.filter{min-width:0;padding:13px 14px;font-size:14px;justify-content:space-between}.feature-strip{grid-template-columns:1fr 1fr}
  .grid-2{grid-template-columns:1fr}.dashboard{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}
- /* The advertiser sidebar holds the only "publish a new party" link. Hiding it
-    on mobile left advertisers with no way to reach that screen from a phone,
-    so it becomes a horizontal scrolling strip instead of disappearing. */
- .sidebar{border-left:0;border-bottom:1px solid #24242b;padding:12px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
- .sidebar::-webkit-scrollbar{display:none}
- .sidebar h3{display:none}
- .sidebar a{flex:0 0 auto;white-space:nowrap;padding:10px 14px;border:1px solid #2d2d34;border-radius:999px;font-size:14px;font-weight:700}
- .sidebar a.active{background:linear-gradient(135deg,var(--red),#cf0026);border-color:transparent;color:#fff}
+ .sidebar{display:none}
  .news-grid{grid-template-columns:1fr}.gallery{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr 1fr}
  .mobile-bottom{display:grid;position:fixed;bottom:0;left:0;right:0;height:72px;z-index:60;background:#050506;border-top:1px solid #2a2a30;grid-template-columns:repeat(5,1fr);direction:ltr}
  .mobile-bottom a{direction:rtl;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#b6b6bd;font-size:18px}.mobile-bottom small{font-size:10px}.mobile-bottom .fab{width:56px;height:56px;border-radius:50%;margin:auto;background:linear-gradient(135deg,var(--red),#b80020);transform:translateY(-12px);color:#fff}

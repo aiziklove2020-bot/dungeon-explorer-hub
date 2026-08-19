@@ -38,8 +38,43 @@ function toast(msg, kind="success"){
   requestAnimationFrame(()=>el.classList.add("show"));
   setTimeout(()=>{el.classList.remove("show");setTimeout(()=>el.remove(),250)},3200);
 }
+// Chrome fires this before the DOM handler below runs, so capture it at
+// module scope and let the banner's button replay it on demand.
+let lpInstallPrompt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); lpInstallPrompt = e; });
+
 document.addEventListener("DOMContentLoaded",()=>{
   document.querySelectorAll(".cyear").forEach(el=>el.textContent=new Date().getFullYear());
+
+  // "Install the app" banner (homepage). Uses the native PWA install prompt
+  // where the browser offers one, and falls back to per-platform manual
+  // instructions everywhere else (notably iOS Safari, which has no API).
+  const installBtn = document.getElementById("appInstallBtn");
+  const howBtn = document.getElementById("appHowBtn");
+  const howPanel = document.getElementById("appHowPanel");
+  if (installBtn) {
+    const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+    if (standalone) {
+      const banner = installBtn.closest(".app-banner");
+      if (banner) banner.style.display = "none";
+    }
+    installBtn.addEventListener("click", async () => {
+      if (lpInstallPrompt) {
+        lpInstallPrompt.prompt();
+        const { outcome } = await lpInstallPrompt.userChoice;
+        lpInstallPrompt = null;
+        if (outcome === "accepted") toast("האפליקציה מותקנת! 🎉");
+        return;
+      }
+      howPanel.style.display = "";
+      howPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    howBtn?.addEventListener("click", () => {
+      const open = howPanel.style.display !== "none";
+      howPanel.style.display = open ? "none" : "";
+      if (!open) howPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
 
   // Experimental animated starfield background — remove the block below to disable.
   (() => {

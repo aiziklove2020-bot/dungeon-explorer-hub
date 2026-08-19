@@ -2,7 +2,9 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#050506"><title>בית | LIBRAL PARTY</title>
 <link rel="icon" type="image/png" href="assets/logo-symbol.png">
-<link rel="stylesheet" href="assets/styles.css"></head><body>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/styles.css?v=202608190832"></head><body>
 
 <header class="topbar">
   <a class="logo-wrap" href="index.html"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></a>
@@ -44,6 +46,42 @@
 </div></section></div>
 <section class="feature-strip"><div class="feature"><span class="ico">♢</span><b>חוויה בלתי נשכחת</b></div><div class="feature"><span class="ico">◉</span><b>אווירה בטוחה ודיסקרטית</b></div><div class="feature"><span class="ico">♡</span><b>מסיבות בכל הארץ</b></div><div class="feature"><span class="ico">♧</span><b>קהילה תומכת ומכילה</b></div></section>
 <div class="container section"><div class="banner banner-photo" style="background-image:url('assets/community.jpg')"><div><h2>רוצים להיות חלק מהאתר שלנו?</h2><p>הצטרפו אלינו ועקבו אחרי כל המסיבות, החידושים והעדכונים.</p></div><a class="btn primary" href="register.html">הצטרפות לאתר שלנו</a></div></div>
+
+<div class="container section">
+  <div class="banner app-banner">
+    <img src="assets/logo-symbol.png" alt="" class="app-banner-icon">
+    <div class="app-banner-text">
+      <h2>📱 התקינו את האפליקציה</h2>
+      <p>גישה מהירה לכל המסיבות ישירות ממסך הבית — בלי חנות אפליקציות, בלי הורדות</p>
+    </div>
+    <div class="app-banner-actions">
+      <button type="button" class="btn primary" id="appInstallBtn">התקנה עכשיו ↓</button>
+      <a class="btn" href="TBDSM.apk" download>🤖 קובץ התקנה לאנדרואיד</a>
+      <button type="button" class="btn" id="appHowBtn">איך מתקינים?</button>
+    </div>
+  </div>
+  <div class="panel" id="appHowPanel" style="display:none;margin-top:14px">
+    <h3 style="margin:0 0 12px">התקנה ידנית — 3 שניות</h3>
+    <div class="grid-2">
+      <div>
+        <p style="color:#fff;font-weight:700;margin:0 0 6px">🍎 אייפון (Safari)</p>
+        <ol style="color:#a9a9b2;line-height:1.9;margin:0;padding-inline-start:20px">
+          <li>לחצו על כפתור השיתוף בתחתית המסך</li>
+          <li>גללו ובחרו <b>"הוסף למסך הבית"</b></li>
+          <li>לחצו <b>"הוסף"</b></li>
+        </ol>
+      </div>
+      <div>
+        <p style="color:#fff;font-weight:700;margin:0 0 6px">🤖 אנדרואיד (Chrome)</p>
+        <ol style="color:#a9a9b2;line-height:1.9;margin:0;padding-inline-start:20px">
+          <li>לחצו על תפריט <b>⋮</b> בפינה העליונה</li>
+          <li>בחרו <b>"התקן אפליקציה"</b></li>
+          <li>אשרו את ההתקנה</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
 </main>
 <footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל</div></footer>
 
@@ -52,9 +90,9 @@
  <a class="fab" href="register-event.html">🎫</a><a href="community.html">◌<small>קהילה</small></a><a href="contact.html">☎<small>יצירת קשר</small></a>
 </nav>
 
-<script src="assets/app.js"></script>
+<script src="assets/app.js?v=202608190832"></script>
 <script type="module">
-import "./assets/site-data.js";
+import "./assets/site-data.js?v=202608190832";
 document.addEventListener("DOMContentLoaded", async () => {
   const box = document.getElementById("eventCards");
   try {
