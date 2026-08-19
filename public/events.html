@@ -4,7 +4,7 @@
 <link rel="icon" type="image/png" href="assets/logo-symbol.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/styles.css?v=202608191337"></head><body>
+<link rel="stylesheet" href="assets/styles.css?v=202608191347"></head><body>
 
 <header class="topbar">
   <a class="logo-wrap" href="/"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></a>
@@ -29,7 +29,7 @@
 </aside><div class="scrim"></div>
 <main>
 <div class="container section"><div class="section-title"><h1>מסיבות ואירועים</h1></div>
-<div class="filters"><input class="filter" id="search" placeholder="חיפוש לפי שם..." /><select class="filter" id="type"><option value="">כל הסוגים</option><option>חילופי זוגות</option><option>בדסמ</option><option>מאנץ'</option><option>פסטיבל</option></select><select class="filter" id="city"><option value="">כל האזורים</option><option>תל אביב</option><option>ירושלים</option><option>חיפה</option><option>ראשון לציון</option><option>פתח תקווה</option><option>אשדוד</option><option>נתניה</option><option>באר שבע</option><option>חולון</option><option>רמת גן</option><option>בת ים</option><option>רחובות</option><option>אשקלון</option><option>הרצליה</option><option>כפר סבא</option><option>רעננה</option><option>מודיעין</option><option>נהריה</option><option>אילת</option></select><button class="filter" id="reset">איפוס סינון</button></div>
+<div class="filters"><input class="filter" id="search" placeholder="חיפוש לפי שם..." /><select class="filter" id="type"><option value="">כל הסוגים</option><option>חילופי זוגות</option><option>בדסמ</option><option>מאנץ'</option><option>פסטיבל</option></select><select class="filter" id="city"><option value="">כל האזורים</option><option>תל אביב</option><option>ירושלים</option><option>חיפה</option><option>ראשון לציון</option><option>פתח תקווה</option><option>אשדוד</option><option>נתניה</option><option>באר שבע</option><option>חולון</option><option>רמת גן</option><option>בת ים</option><option>רחובות</option><option>אשקלון</option><option>הרצליה</option><option>כפר סבא</option><option>רעננה</option><option>מודיעין</option><option>נהריה</option><option>אילת</option></select><input class="filter" type="date" id="date" /><button class="filter" id="reset">איפוס סינון</button></div>
 <div class="cards" id="dynamicEvents"></div></div></main>
 <footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
 
@@ -38,14 +38,14 @@
  <a class="fab" href="/register-event">🎫</a><a href="/community">◌<small>קהילה</small></a><a href="/contact">☎<small>יצירת קשר</small></a>
 </nav>
 
-<script src="assets/app.js?v=202608191337"></script>
+<script src="assets/app.js?v=202608191347"></script>
 <script type="module">
-import "./assets/site-data.js?v=202608191337";
+import "./assets/site-data.js?v=202608191347";
 document.addEventListener("DOMContentLoaded", async () => {
- const box=document.getElementById("dynamicEvents"), s=document.getElementById("search"), t=document.getElementById("type"), c=document.getElementById("city");
+ const box=document.getElementById("dynamicEvents"), s=document.getElementById("search"), t=document.getElementById("type"), c=document.getElementById("city"), d=document.getElementById("date");
  let allEvents = [];
  function render(){
-  let q=s.value.trim().toLowerCase(), data=allEvents.filter(e=>(!q||e.title.toLowerCase().includes(q))&&(!t.value||e.category===t.value)&&(!c.value||e.city===c.value));
+  let q=s.value.trim().toLowerCase(), data=allEvents.filter(e=>(!q||e.title.toLowerCase().includes(q))&&(!t.value||e.category===t.value)&&(!c.value||e.city===c.value)&&(!d.value||e.dateISO===d.value));
   box.innerHTML=data.map(e=>`<article class="card"><div class="event-cover" style="background-image:url('${e.img}')">${e.time ? `<span class="loc">◷ ${e.time}</span>` : ""}${e.category ? `<span class="badge red">${e.category}</span>` : ""}</div><div class="card-body"><h3>${e.title}</h3><p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p>${(e.day || e.date) ? `<div class="meta"><span>📅 ${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span></div>` : ""}<a class="btn card-cta" href="/event?id=${e.id}">לפרטים וכרטיסים 🎟</a></div></article>`).join("")||"<p>לא נמצאו אירועים.</p>";
  }
  try {
@@ -53,6 +53,6 @@ document.addEventListener("DOMContentLoaded", async () => {
  } catch (err) {
    box.innerHTML = "<p>לא הצלחנו לטעון אירועים כרגע.</p>";
  }
- [s,t,c].forEach(x=>x.addEventListener("input",render)); document.getElementById("reset").onclick=()=>{s.value="";t.value="";c.value="";render()};render();
+ [s,t,c,d].forEach(x=>x.addEventListener("input",render)); document.getElementById("reset").onclick=()=>{s.value="";t.value="";c.value="";d.value="";render()};render();
 });
 </script></body></html>

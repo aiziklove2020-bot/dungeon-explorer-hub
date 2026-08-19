@@ -37,6 +37,14 @@ function formatDateLabel(d: any): string {
   return `${String(dt.getDate()).padStart(2, "0")}.${String(dt.getMonth() + 1).padStart(2, "0")}.${dt.getFullYear()}`;
 }
 
+// Machine-sortable/filterable form (YYYY-MM-DD) alongside the display label —
+// the events page date filter compares against this, not the DD.MM.YYYY text.
+function formatDateISO(d: any): string {
+  const dt = d instanceof Date ? d : d?.toDate ? d.toDate() : new Date(d);
+  if (!dt || Number.isNaN(dt.getTime())) return "";
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+}
+
 // Real parties have no admin-managed "category" field yet — derive one from
 // the title/description text the organizer already wrote, so the filter
 // reflects real content instead of a fake fixed value. Order matters: more
@@ -85,6 +93,7 @@ function toEventShape(p: any) {
     // bare date with no weekday next to parties that had one.
     day: p.day || hebrewDayFromDate(p.date),
     date: formatDateLabel(p.date),
+    dateISO: formatDateISO(p.date),
     time: p.time || "",
     dj: p.dj || "",
     category: p.category || detectCategory(title, desc),
