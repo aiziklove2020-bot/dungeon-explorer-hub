@@ -268,9 +268,9 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
   };
 
   // Convert client to user with 1 year subscription
-  const handleConvertClientToUser = async (registration) => {
+  const handleConvertClientToUser = async (registration, tier = 'year') => {
     try {
-      await createUserFromRegistration(registration, 'registered');
+      await createUserFromRegistration(registration, 'registered', tier);
       loadActiveParties();
       showSaved();
     } catch (error) {

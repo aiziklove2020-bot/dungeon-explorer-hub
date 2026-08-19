@@ -33505,7 +33505,7 @@ function LV(e) {
 	return typeof t[e] == "function" ? t[e] : OP[e];
 }
 var RV = (...e) => LV("subscribeMessages")(...e), zV = (...e) => LV("ensureMainRoom")(...e), BV = (...e) => LV("joinRoom")(...e), VV = (...e) => LV("sendChatMessage")(...e);
-rA(), _k();
+H(), K(), rA(), _k();
 function HV(e) {
 	let t = e instanceof Date ? e : e?.toDate ? e.toDate() : new Date(e);
 	return !t || Number.isNaN(t.getTime()) ? "" : t.toLocaleDateString("he-IL", { weekday: "long" });
@@ -33608,7 +33608,20 @@ function YV(e) {
 	return Number.isFinite(t) ? t : Infinity;
 }
 async function XV() {
-	return [...await ej() || []].sort((e, t) => YV(e) - YV(t)).map(JV);
+	let e = null;
+	try {
+		e = (await Qu(O(E(W, "parties"), Tu("status", "==", "active")))).docs.map((e) => {
+			let t = e.data();
+			return {
+				id: e.id,
+				...t,
+				date: t.date?.toDate?.() || new Date(t.date)
+			};
+		});
+	} catch {
+		e = await ej().catch(() => []);
+	}
+	return [...e || []].sort((e, t) => YV(e) - YV(t)).map(JV);
 }
 async function ZV() {
 	return (await mk().catch(() => ({})))?.about || {};

@@ -1,19 +1,221 @@
 {
   "crons": [
-    { "path": "/api/telegram-webhook", "schedule": "0 9 * * 0,2,3" }
+    {
+      "path": "/api/telegram-webhook",
+      "schedule": "0 9 * * 0,2,3"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
       ]
     },
     {
       "source": "/assets/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=3600"
+        }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
+      "source": "/advertiser-dashboard",
+      "destination": "/advertiser-dashboard.html"
+    },
+    {
+      "source": "/advertiser-login",
+      "destination": "/advertiser-login.html"
+    },
+    {
+      "source": "/advertiser-register",
+      "destination": "/advertiser-register.html"
+    },
+    {
+      "source": "/calendar",
+      "destination": "/calendar.html"
+    },
+    {
+      "source": "/community",
+      "destination": "/community.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/contact.html"
+    },
+    {
+      "source": "/create-event",
+      "destination": "/create-event.html"
+    },
+    {
+      "source": "/event",
+      "destination": "/event.html"
+    },
+    {
+      "source": "/events",
+      "destination": "/events.html"
+    },
+    {
+      "source": "/faq",
+      "destination": "/faq.html"
+    },
+    {
+      "source": "/gallery",
+      "destination": "/gallery.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/membership",
+      "destination": "/membership.html"
+    },
+    {
+      "source": "/news",
+      "destination": "/news.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/profile.html"
+    },
+    {
+      "source": "/register",
+      "destination": "/register.html"
+    },
+    {
+      "source": "/register-event",
+      "destination": "/register-event.html"
+    },
+    {
+      "source": "/store",
+      "destination": "/store.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/about.html",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/advertiser-dashboard.html",
+      "destination": "/advertiser-dashboard",
+      "permanent": true
+    },
+    {
+      "source": "/advertiser-login.html",
+      "destination": "/advertiser-login",
+      "permanent": true
+    },
+    {
+      "source": "/advertiser-register.html",
+      "destination": "/advertiser-register",
+      "permanent": true
+    },
+    {
+      "source": "/calendar.html",
+      "destination": "/calendar",
+      "permanent": true
+    },
+    {
+      "source": "/community.html",
+      "destination": "/community",
+      "permanent": true
+    },
+    {
+      "source": "/contact.html",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/create-event.html",
+      "destination": "/create-event",
+      "permanent": true
+    },
+    {
+      "source": "/event.html",
+      "destination": "/event",
+      "permanent": true
+    },
+    {
+      "source": "/events.html",
+      "destination": "/events",
+      "permanent": true
+    },
+    {
+      "source": "/faq.html",
+      "destination": "/faq",
+      "permanent": true
+    },
+    {
+      "source": "/gallery.html",
+      "destination": "/gallery",
+      "permanent": true
+    },
+    {
+      "source": "/login.html",
+      "destination": "/login",
+      "permanent": true
+    },
+    {
+      "source": "/membership.html",
+      "destination": "/membership",
+      "permanent": true
+    },
+    {
+      "source": "/news.html",
+      "destination": "/news",
+      "permanent": true
+    },
+    {
+      "source": "/privacy.html",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/profile.html",
+      "destination": "/profile",
+      "permanent": true
+    },
+    {
+      "source": "/register.html",
+      "destination": "/register",
+      "permanent": true
+    },
+    {
+      "source": "/register-event.html",
+      "destination": "/register-event",
+      "permanent": true
+    },
+    {
+      "source": "/store.html",
+      "destination": "/store",
+      "permanent": true
+    },
+    {
+      "source": "/terms.html",
+      "destination": "/terms",
+      "permanent": true
     }
   ]
 }

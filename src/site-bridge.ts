@@ -7,6 +7,8 @@
 // owns local UI state (current logged-in user session, favorites list) until
 // auth is migrated too.
 import { getActiveParties, registerToPartyNew, createParty, getAllParties, getPartyById } from "./firebase/parties";
+import { collection, query, where, getDocsFromServer } from "firebase/firestore";
+import { db } from "./firebase/config";
 import { sendRegistrationTelegram } from "./firebase/telegram";
 import { getSocialLinks, getRssFeeds, getContent } from "./firebase/settings";
 import { registerForumUser, loginForumUser, getForumUserByEmail, updateForumUser, getForumUserById } from "./firebase/forumUsers";
@@ -104,8 +106,30 @@ function partyDateMs(p: any): number {
   return Number.isFinite(t) ? t : Infinity;
 }
 
+/**
+ * Always reads the party list straight from the server.
+ *
+ * getActiveParties() goes through two caches — an in-memory app cache and
+ * Firestore's IndexedDB persistence (see persistentLocalCache in
+ * firebase/config.js). IndexedDB survives a normal refresh, so visitors kept
+ * seeing a stale list and only clearing browser history fixed it.
+ * getDocsFromServer bypasses both, which is the right trade-off for a small
+ * public list that must always be current. Falls back to the cached path if
+ * the network read fails, so an offline visitor still sees something.
+ */
 async function loadEvents() {
-  const parties = await getActiveParties();
+  let parties: any[] | null = null;
+  try {
+    const snap = await getDocsFromServer(
+      query(collection(db, "parties"), where("status", "==", "active"))
+    );
+    parties = snap.docs.map((d) => {
+      const data: any = d.data();
+      return { id: d.id, ...data, date: data.date?.toDate?.() || new Date(data.date) };
+    });
+  } catch {
+    parties = await getActiveParties().catch(() => []);
+  }
   const sorted = [...(parties || [])].sort((a, b) => partyDateMs(a) - partyDateMs(b));
   return sorted.map(toEventShape);
 }

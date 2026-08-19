@@ -4,20 +4,22 @@
  * Imported by Admin.jsx to drive both the tab buttons and section rendering.
  */
 export const adminTabs = [
-  { id: 'siteDesign', label: 'עיצוב האתר (לוגו/באנרים/פופאפ)' },
+  // Order follows how the admin actually works day to day: balancing first,
+  // then the parties being balanced, then the people.
+  { id: 'matching', label: 'התאמות' },
   { id: 'parties',  label: 'מסיבות' },
+  { id: 'users',    label: 'ניהול משתמשים' },
+  { id: 'siteDesign', label: 'עיצוב האתר (לוגו/באנרים/פופאפ)' },
+  { id: 'forumUsers', label: 'משתמשי אתר' },
+  { id: 'subscriptions', label: 'ניהול מנויים' },
   { id: 'about',    label: 'אודות' },
   { id: 'contact',  label: 'צור קשר' },
-  { id: 'matching', label: 'התאמות' },
   { id: 'links',    label: 'קישורים וקבוצות' },
   { id: 'store',    label: 'חנות' },
   { id: 'workshops',label: 'סדנאות' },
-  { id: 'forumUsers', label: 'משתמשי אתר' },
   { id: 'liveChat', label: 'צ׳אט' },
   { id: 'chatReports', label: 'דיווחי צ׳אט' },
   { id: 'deleteRequests', label: 'בקשות מחיקה' },
-  { id: 'users',    label: 'ניהול משתמשים' },
-  { id: 'subscriptions', label: 'ניהול מנויים' },
   { id: 'admins',   label: 'ניהול אדמינים' },
   { id: 'advertisers', label: 'מפרסמים' },
   { id: 'rss',      label: 'RSS Feeds' },

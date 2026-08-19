@@ -62,6 +62,8 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
   }
 
   const regInfo = userInfo ? getUserRegistrationInfo(userInfo) : null;
+  const subTier = userInfo?.subscriptions?.parties?.tier
+    || (userInfo?.level === 'gold' ? 'gold' : null);
   const hasBalance = registration.balancedWith ? true : false;
   const isDiscount = registration.registrationType === 'single-female-discount' || registration.registrationType === 'female_discount';
 
@@ -80,9 +82,19 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
               {registration.gender === 'male' ? t('registrationItem.male') : t('registrationItem.female')}
             </span>
             {isUser ? (
-              <span className="px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-bold bg-green-600">
-                ✅ {t('registrationItem.user')}
-              </span>
+              <>
+                <span className="px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-bold bg-green-600">
+                  ✅ {t('registrationItem.user')}
+                </span>
+                {/* Which plan they hold, so the admin can tell a one-day
+                    gender-balance pass from a full-year subscription at a
+                    glance instead of only seeing "registered". */}
+                {subTier && (
+                  <span className={`px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-bold ${subTier === 'day' ? 'bg-sky-700' : subTier === 'gold' ? 'bg-yellow-600' : 'bg-emerald-700'}`}>
+                    {subTier === 'day' ? '📅 מנוי יומי' : subTier === 'gold' ? '⭐ זהב' : subTier === 'month' ? '📆 חודשי' : subTier === 'halfYear' ? '📆 חצי שנה' : '🗓 מנוי שנתי'}
+                  </span>
+                )}
+              </>
             ) : (
               <span className="px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-bold bg-zinc-600">
                 ❌ {t('registrationItem.client')}
@@ -128,12 +140,22 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
             </button>
           )}
           {!isUser && (
-            <button
-              onClick={() => onConvertToUser(registration)}
-              className="bg-green-600 hover:bg-green-500 text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap"
-            >
-              ✅ {t('registrationItem.makeUser')}
-            </button>
+            <>
+              <button
+                onClick={() => onConvertToUser(registration, 'day')}
+                className="bg-sky-700 hover:bg-sky-600 text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap"
+                title="אישור איזון מגדרי ליום אחד בלבד"
+              >
+                ✅ רשום ליום
+              </button>
+              <button
+                onClick={() => onConvertToUser(registration, 'year')}
+                className="bg-green-600 hover:bg-green-500 text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap"
+                title="מנוי לשנה שלמה"
+              >
+                ✅ רשום לשנה
+              </button>
+            </>
           )}
         </div>
       </div>

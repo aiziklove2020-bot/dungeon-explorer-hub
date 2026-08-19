@@ -263,9 +263,21 @@ export const updateUserDetails = async (userId, updates) => {
   }
 };
 
-export const createUserFromRegistration = async (registration, level = 'regular') => {
+/**
+ * @param {'day'|'year'} tier — how long the granted subscription lasts. The
+ *   admin picks this per registration (a one-off gender-balance pass vs. a
+ *   full year), so it can no longer be hardcoded to a year.
+ */
+export const createUserFromRegistration = async (registration, level = 'regular', tier = 'year') => {
+  const subscriptionExpiry = () => {
+    const d = new Date();
+    if (tier === 'day') d.setDate(d.getDate() + 1);
+    else d.setFullYear(d.getFullYear() + 1);
+    return d.toISOString();
+  };
+
   try {
-    
+
     if (!registration.phoneNumber || registration.phoneNumber.length !== 10 || !registration.phoneNumber.startsWith('05')) {
       throw new Error('מספר טלפון חייב להתחיל ב-05 ולהיות 10 ספרות');
     }
@@ -283,10 +295,8 @@ export const createUserFromRegistration = async (registration, level = 'regular'
       }
 
       if (level === 'registered') {
-        const oneYearFromNow = new Date();
-        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
         const nowIso = new Date().toISOString();
-        const expiryIso = oneYearFromNow.toISOString();
+        const expiryIso = subscriptionExpiry();
         updateData.registrationExpiry = expiryIso;
         updateData.registrationStartDate = nowIso;
         // Mirror onto the new subscriptions map so the new UI shows the user
@@ -295,11 +305,11 @@ export const createUserFromRegistration = async (registration, level = 'regular'
         const prevSubs = existingUser.subscriptions || {};
         updateData.subscriptions = {
           parties: {
-            tier: 'year',
+            tier,
             expiry: expiryIso,
             startDate: prevSubs.parties?.startDate || nowIso,
             lastRenewedAt: nowIso,
-            lastRenewalTier: 'year',
+            lastRenewalTier: tier,
           },
           exchangeParties: prevSubs.exchangeParties || null,
         };
@@ -340,19 +350,17 @@ export const createUserFromRegistration = async (registration, level = 'regular'
     };
 
     if (level === 'registered') {
-      const oneYearFromNow = new Date();
-      oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
       const nowIso = new Date().toISOString();
-      const expiryIso = oneYearFromNow.toISOString();
+      const expiryIso = subscriptionExpiry();
       userData.registrationExpiry = expiryIso;
       userData.registrationStartDate = nowIso;
       userData.subscriptions = {
         parties: {
-          tier: 'year',
+          tier,
           expiry: expiryIso,
           startDate: nowIso,
           lastRenewedAt: nowIso,
-          lastRenewalTier: 'year',
+          lastRenewalTier: tier,
         },
         exchangeParties: null,
       };

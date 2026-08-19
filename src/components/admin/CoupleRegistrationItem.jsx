@@ -52,12 +52,22 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
               </button>
             )}
             {!maleIsUser && maleReg && (
-              <button
-                onClick={() => onConvertToUser({ ...maleReg, gender: 'male', fullName: maleReg.fullName || maleReg.userName })}
-                className="bg-green-600 hover:bg-green-500 text-white px-2 py-1 rounded text-[10px] font-bold"
-              >
-                ✅ {t('registrationItem.makeUser')}
-              </button>
+              <>
+                <button
+                  onClick={() => onConvertToUser({ ...maleReg, gender: 'male', fullName: maleReg.fullName || maleReg.userName }, 'day')}
+                  className="bg-sky-700 hover:bg-sky-600 text-white px-2 py-1 rounded text-[10px] font-bold"
+                  title="אישור איזון מגדרי ליום אחד בלבד"
+                >
+                  ✅ ליום
+                </button>
+                <button
+                  onClick={() => onConvertToUser({ ...maleReg, gender: 'male', fullName: maleReg.fullName || maleReg.userName }, 'year')}
+                  className="bg-green-600 hover:bg-green-500 text-white px-2 py-1 rounded text-[10px] font-bold"
+                  title="מנוי לשנה שלמה"
+                >
+                  ✅ לשנה
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -89,12 +99,22 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
               </button>
             )}
             {!femaleIsUser && femaleReg && (
-              <button
-                onClick={() => onConvertToUser({ ...femaleReg, gender: 'female', fullName: femaleReg.fullName || femaleReg.userName })}
-                className="bg-green-600 hover:bg-green-500 text-white px-2 py-1 rounded text-[10px] font-bold"
-              >
-                ✅ {t('registrationItem.makeUser')}
-              </button>
+              <>
+                <button
+                  onClick={() => onConvertToUser({ ...femaleReg, gender: 'female', fullName: femaleReg.fullName || femaleReg.userName }, 'day')}
+                  className="bg-sky-700 hover:bg-sky-600 text-white px-2 py-1 rounded text-[10px] font-bold"
+                  title="אישור איזון מגדרי ליום אחד בלבד"
+                >
+                  ✅ ליום
+                </button>
+                <button
+                  onClick={() => onConvertToUser({ ...femaleReg, gender: 'female', fullName: femaleReg.fullName || femaleReg.userName }, 'year')}
+                  className="bg-green-600 hover:bg-green-500 text-white px-2 py-1 rounded text-[10px] font-bold"
+                  title="מנוי לשנה שלמה"
+                >
+                  ✅ לשנה
+                </button>
+              </>
             )}
           </div>
         </div>

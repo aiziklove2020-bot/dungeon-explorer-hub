@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const c=LP.current();
   document.querySelectorAll("[data-auth-label]").forEach(el=>el.textContent=c?c.name:"כניסה");
   document.querySelectorAll("[data-dashboard-link]").forEach(el=>{
-    el.href = c?.role==="advertiser" ? "advertiser-dashboard.html" : c?.role==="admin" ? "/admin" : "profile.html";
+    el.href = c?.role==="advertiser" ? "/advertiser-dashboard" : c?.role==="admin" ? "/admin" : "/profile";
     if (!c) return;
     const displayName = c.businessName || c.name || "מחובר/ת";
     const label = el.querySelector("small");
