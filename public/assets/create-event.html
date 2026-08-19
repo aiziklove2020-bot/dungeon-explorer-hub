@@ -27,7 +27,43 @@
 </aside><div class="scrim"></div>
 <main>
 <div class="dashboard"><aside class="sidebar"><h3>מפרסמים</h3><a href="advertiser-dashboard.html">▦ דשבורד</a><a class="active" href="create-event.html">＋ פרסום אירוע חדש</a><a href="index.html">⌂ חזרה לאתר</a></aside>
-<section class="dash-content"><div class="section-title"><h1>פרסום אירוע חדש</h1></div><div class="panel"><form class="form" id="createEvent"><div class="form-row"><label>שם האירוע<input required name="title"></label><label>DJ<input name="dj"></label></div><div class="form-row"><label>תאריך<input required type="date" name="date"></label><label>שעת התחלה<input required type="time" name="time"></label></div><label>סוג המסיבה<select name="category"><option value="">בחרו סוג...</option><option value="חילופי זוגות">חילופי זוגות</option><option value="בדסמ">בדסמ</option><option value="מאנץ'">מאנץ'</option><option value="פסטיבל">פסטיבל</option></select></label><label>כתובת תמונה<input name="img" placeholder="https://..."></label><label>תיאור — כתבו והסבירו מה מייחד את המסיבה<textarea required rows="6" name="desc" placeholder="לדוגמה: קוד לבוש, קהל יעד, אווירה, מה כלול בכניסה..."></textarea></label><label><span><input type="checkbox" required style="width:auto"> אני מאשר/ת שכל המידע נכון ועומד בתנאי הפרסום</span></label><button class="btn primary">פרסום האירוע</button></form></div></section></div></main>
+<section class="dash-content"><div class="section-title"><h1>פרסום אירוע חדש</h1></div>
+
+<div class="panel" style="border-color:#7c1828;margin-bottom:20px">
+  <h2 style="margin:0 0 12px">📋 איך לפרסם נכון</h2>
+  <div class="notice" style="margin-bottom:14px">
+    <b>אין להזין מספר טלפון או קישור לוואטסאפ בתיאור המסיבה.</b><br>
+    יש שדה ייעודי לטלפון בהמשך הטופס — הזינו אותו שם בלבד. תיאור שיכיל מספר טלפון יידחה אוטומטית ולא יפורסם.
+  </div>
+  <p style="color:#8f8f98;margin:0 0 8px"><b style="color:#35c76f">✓ כן לכתוב בתיאור:</b></p>
+  <ul style="color:#a9a9b2;line-height:1.9;margin:0 0 14px;padding-inline-start:22px">
+    <li>אווירת האירוע ומה מייחד אותו</li>
+    <li>קוד לבוש נדרש</li>
+    <li>קהל היעד (זוגות / סינגלים / סינגליות)</li>
+    <li>מה כלול בכניסה (בר, מזנון, חדרים)</li>
+    <li>אזור כללי (למשל "מרכז הארץ") — הכתובת המדויקת נמסרת למאושרים בלבד</li>
+  </ul>
+  <p style="color:#8f8f98;margin:0 0 8px"><b style="color:#ff5a72">✗ לא לכתוב בתיאור:</b></p>
+  <ul style="color:#a9a9b2;line-height:1.9;margin:0;padding-inline-start:22px">
+    <li>מספרי טלפון או קישורי וואטסאפ</li>
+    <li>קישורים לאתרים או קבוצות חיצוניות</li>
+    <li>תוכן מפורש מדי או תמונות עירום</li>
+    <li>כתובת מדויקת של המקום</li>
+  </ul>
+</div>
+
+<div class="panel"><form class="form" id="createEvent"><div class="form-row"><label>שם האירוע<input required name="title"></label><label>DJ<input name="dj"></label></div><div class="form-row"><label>תאריך<input required type="date" name="date"></label><label>שעת התחלה<input required type="time" name="time"></label></div><label>סוג המסיבה<select name="category" id="catSelect"><option value="">בחרו סוג...</option><option value="חילופי זוגות">חילופי זוגות</option><option value="בדסמ">בדסמ</option><option value="מאנץ'">מאנץ'</option><option value="פסטיבל">פסטיבל</option><option value="__other__">אחר — הקלידו בעצמכם</option></select></label>
+<label id="catOtherWrap" style="display:none">פרטו את סוג המסיבה<input id="catOther" placeholder="לדוגמה: ערב היכרות, מסיבת פטיש, מסיבת חוף..."></label><label>תמונת המסיבה
+  <input type="file" id="imgFile" accept="image/*" style="padding:12px">
+  <small style="color:#8f8f98;display:block;margin-top:6px">בחרו תמונה מהמחשב, מהגלריה או צלמו בנייד • עד 5MB</small>
+</label>
+<div id="imgStatus" style="display:none;margin:-4px 0 14px;font-size:14px"></div>
+<img id="imgPreview" alt="" style="display:none;width:100%;max-height:260px;object-fit:contain;background:#050505;border:1px solid #2d2d34;border-radius:14px;margin-bottom:14px">
+<input type="hidden" name="img" id="imgUrl"><label>תיאור — כתבו והסבירו מה מייחד את המסיבה<textarea required rows="6" name="desc" placeholder="לדוגמה: קוד לבוש, קהל יעד, אווירה, מה כלול בכניסה...&#10;&#10;⚠️ בלי מספרי טלפון — יש שדה ייעודי בהמשך"></textarea></label>
+<label>📞 טלפון ליצירת קשר (וואטסאפ)
+  <input name="whatsapp" type="tel" placeholder="050-0000000" dir="ltr" autocomplete="tel">
+  <small style="color:#8f8f98;display:block;margin-top:6px">זה המקום היחיד להזין מספר טלפון. הקישור לוואטסאפ ייווצר אוטומטית.</small>
+</label><label><span><input type="checkbox" required style="width:auto"> אני מאשר/ת שכל המידע נכון ועומד בתנאי הפרסום</span></label><button class="btn primary">פרסום האירוע</button></form></div></section></div></main>
 <footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל</div></footer>
 
 <nav class="mobile-bottom">
@@ -41,9 +77,71 @@ import "./assets/site-data.js";
 document.addEventListener("DOMContentLoaded", () => {
   const u = LP.current();
   if (!u || u.role !== "advertiser") { location = "advertiser-login.html"; return; }
+
+  // Upload as soon as a file is picked, so the party can be published the
+  // moment the form is submitted. Works from a desktop file picker and from
+  // a phone's gallery/camera (accept="image/*").
+  const fileInput = document.getElementById("imgFile");
+  const statusEl = document.getElementById("imgStatus");
+  const previewEl = document.getElementById("imgPreview");
+  const urlEl = document.getElementById("imgUrl");
+  let uploading = false;
+
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      statusEl.style.display = ""; statusEl.style.color = "#ff5a72";
+      statusEl.textContent = "התמונה גדולה מדי (מקסימום 5MB)";
+      fileInput.value = ""; return;
+    }
+    previewEl.src = URL.createObjectURL(file);
+    previewEl.style.display = "";
+    statusEl.style.display = ""; statusEl.style.color = "#a9a9b2";
+    statusEl.textContent = "מעלה תמונה...";
+    uploading = true;
+    try {
+      urlEl.value = await window.LPData.uploadImage(file);
+      statusEl.style.color = "#35c76f";
+      statusEl.textContent = "✓ התמונה הועלתה";
+    } catch (err) {
+      urlEl.value = "";
+      statusEl.style.color = "#ff5a72";
+      statusEl.textContent = err.message || "שגיאה בהעלאת התמונה";
+    } finally {
+      uploading = false;
+    }
+  });
+
+  // "אחר" reveals a free-text box so advertisers aren't boxed into the
+  // four preset categories.
+  const catSelect = document.getElementById("catSelect");
+  const catOtherWrap = document.getElementById("catOtherWrap");
+  const catOther = document.getElementById("catOther");
+  catSelect.addEventListener("change", () => {
+    const other = catSelect.value === "__other__";
+    catOtherWrap.style.display = other ? "" : "none";
+    if (other) catOther.focus();
+  });
+
   document.getElementById("createEvent").addEventListener("submit", async e => {
     e.preventDefault();
+    if (uploading) { toast("רגע, התמונה עדיין נטענת...", "error"); return; }
     const f = new FormData(e.target);
+
+    // Mirrors the admin PartyEditor rule: contact goes through the dedicated
+    // WhatsApp field, never buried in the description.
+    const descRaw = String(f.get("desc") || "").replace(/[\s\-().]/g, "");
+    if (/(?:\+?972|0)\d{8,9}/.test(descRaw)) {
+      toast("אין להזין מספר טלפון בתיאור — השתמשו בשדה הטלפון הייעודי", "error");
+      return;
+    }
+
+    let category = f.get("category") || "";
+    if (category === "__other__") {
+      category = (catOther.value || "").trim();
+      if (!category) { toast("נא לפרט את סוג המסיבה", "error"); catOther.focus(); return; }
+    }
     const btn = e.target.querySelector("button");
     btn.disabled = true;
     try {
@@ -54,6 +152,8 @@ document.addEventListener("DOMContentLoaded", () => {
         time: f.get("time"),
         imageURL: f.get("img"),
         description: f.get("desc"),
+        category,
+        whatsappNumber: f.get("whatsapp"),
       });
       toast("האירוע פורסם באתר");
       setTimeout(() => location = "advertiser-dashboard.html", 900);

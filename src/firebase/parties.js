@@ -72,12 +72,24 @@ export const createParty = async (partyData) => {
     const retentionHours = await resolveRetentionHours();
     const expirationTs = buildExpirationTimestamp(dateValue, retentionHours);
 
+    // Stamp the Hebrew weekday whenever the caller didn't supply one. The
+    // admin's PartyEditor derives `day` from a date *change*, so any other
+    // creation path (advertiser publish form, imports) could otherwise save a
+    // party with an empty day — which rendered a bare date on the site while
+    // every other card showed "יום שישי, 21.08.2026".
+    const dayName = partyData.day || (
+      dateValue instanceof Date && !Number.isNaN(dateValue.getTime())
+        ? dateValue.toLocaleDateString('he-IL', { weekday: 'long' })
+        : ''
+    );
+
     const party = {
       ...partyData,
+      day: dayName,
       date: Timestamp.fromDate(dateValue),
       createdAt: Timestamp.now(),
       registrations: partyData.registrations || [],
-      status: partyData.status || 'active', 
+      status: partyData.status || 'active',
       partyType: partyData.partyType || 'internal',
       needsPublish: true,
       ...(expirationTs ? { expiration: expirationTs } : {})

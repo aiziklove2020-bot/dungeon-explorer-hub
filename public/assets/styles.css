@@ -174,7 +174,15 @@ th,td{text-align:right;padding:14px;border-bottom:1px solid #25252b}th{color:#aa
  .hero{min-height:520px}.hero-img{inset:0;background-position:32% center}.hero::after{background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.92))}
  .hero-content{padding:300px 22px 35px;max-width:none}.hero-kicker{font-size:30px}.hero h1{font-size:39px}
  .cards{grid-template-columns:1fr}.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px}.filter{min-width:0;padding:13px 14px;font-size:14px;justify-content:space-between}.feature-strip{grid-template-columns:1fr 1fr}
- .grid-2{grid-template-columns:1fr}.dashboard{grid-template-columns:1fr}.sidebar{display:none}.stats{grid-template-columns:1fr 1fr}
+ .grid-2{grid-template-columns:1fr}.dashboard{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}
+ /* The advertiser sidebar holds the only "publish a new party" link. Hiding it
+    on mobile left advertisers with no way to reach that screen from a phone,
+    so it becomes a horizontal scrolling strip instead of disappearing. */
+ .sidebar{border-left:0;border-bottom:1px solid #24242b;padding:12px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+ .sidebar::-webkit-scrollbar{display:none}
+ .sidebar h3{display:none}
+ .sidebar a{flex:0 0 auto;white-space:nowrap;padding:10px 14px;border:1px solid #2d2d34;border-radius:999px;font-size:14px;font-weight:700}
+ .sidebar a.active{background:linear-gradient(135deg,var(--red),#cf0026);border-color:transparent;color:#fff}
  .news-grid{grid-template-columns:1fr}.gallery{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr 1fr}
  .mobile-bottom{display:grid;position:fixed;bottom:0;left:0;right:0;height:72px;z-index:60;background:#050506;border-top:1px solid #2a2a30;grid-template-columns:repeat(5,1fr);direction:ltr}
  .mobile-bottom a{direction:rtl;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#b6b6bd;font-size:18px}.mobile-bottom small{font-size:10px}.mobile-bottom .fab{width:56px;height:56px;border-radius:50%;margin:auto;background:linear-gradient(135deg,var(--red),#b80020);transform:translateY(-12px);color:#fff}

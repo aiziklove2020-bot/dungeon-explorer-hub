@@ -18,8 +18,16 @@ import {
   fetchSupportMessages,
 } from "./firebase/supportChat";
 import { getStoreSettings, getProducts, createOrder } from "./firebase/store";
+import { uploadPartyImage } from "./firebase/storage";
 import { registerAdvertiser, authenticateAdvertiser } from "./firebase/advertisers";
 import { ensureMainRoom, subscribeMessages, sendChatMessage, joinRoom } from "./firebase/liveChat";
+
+/** "יום שישי" from any Firestore/JS date shape; "" when unparseable. */
+function hebrewDayFromDate(d: any): string {
+  const dt = d instanceof Date ? d : d?.toDate ? d.toDate() : new Date(d);
+  if (!dt || Number.isNaN(dt.getTime())) return "";
+  return dt.toLocaleDateString("he-IL", { weekday: "long" });
+}
 
 function formatDateLabel(d: any): string {
   const dt = d instanceof Date ? d : d?.toDate ? d.toDate() : new Date(d);
@@ -33,7 +41,7 @@ function formatDateLabel(d: any): string {
 // specific keywords are checked first.
 const CATEGORY_KEYWORDS: { category: string; words: string[] }[] = [
   { category: "בדסמ", words: ["בדסמ", "בדס\"מ", "בדס״מ", "פמדום", "דאנג'ון", "דאנגאון", "פטיש", "fetish", "bdsm", "שליטה"] },
-  { category: "חילופי זוגות", words: ["חילופי זוגות", "סווינגר", "swinger", "חילופי-זוגות", "no limit"] },
+  { category: "חילופי זוגות", words: ["חילופי זוגות", "סווינגר", "swinger", "חילופי-זוגות", "no limit", "בוטיק", "פנתאון", "ליברל", "liberal", "זוגות"] },
   { category: "מאנץ'", words: ["מאנץ", "munch"] },
   { category: "פסטיבל", words: ["פסטיבל", "festival"] },
 ];
@@ -69,7 +77,11 @@ function toEventShape(p: any) {
   return {
     id: p.id,
     title,
-    day: p.day || "",
+    // Fall back to deriving the Hebrew weekday from the date: parties created
+    // outside the admin's PartyEditor (which auto-fills `day` on date change)
+    // can land in Firestore with an empty `day`, and the card then rendered a
+    // bare date with no weekday next to parties that had one.
+    day: p.day || hebrewDayFromDate(p.date),
     date: formatDateLabel(p.date),
     time: p.time || "",
     dj: p.dj || "",
@@ -307,10 +319,21 @@ function communityChat() {
 }
 
 /** Real advertiser party publishing — writes straight to the live parties collection. */
+/**
+ * Upload a party image straight from the browser (phone gallery/camera or a
+ * desktop file picker) to the same Cloudinary bucket the admin panel uses.
+ * The preset is unsigned, so no server credential is involved.
+ */
+async function uploadImage(file: File) {
+  const result: any = await uploadPartyImage(file, `adv_${Date.now()}`);
+  return typeof result === "string" ? result : result?.url || "";
+}
+
 async function createAdvertiserParty(advertiserId: string, data: {
-  title: string; date: string; time: string; dj?: string; imageURL?: string; description: string; category?: string;
+  title: string; date: string; time: string; dj?: string; imageURL?: string; description: string; category?: string; whatsappNumber?: string;
 }) {
   return createParty({
+    whatsappNumber: data.whatsappNumber || "",
     title: data.title,
     name: data.title,
     date: data.date,
@@ -370,6 +393,7 @@ async function loadNewsFeed() {
   login,
   getMembershipStatus,
   updateMyProfile,
+  uploadImage,
   createAdvertiserParty,
   loadAdvertiserParties,
   registerForParty,
