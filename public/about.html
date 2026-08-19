@@ -52,16 +52,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     const a = await window.LPData.loadAbout();
     const cards = (a.infoCards || []).map(c => `<div class="panel" style="text-align:center"><h2>${c.title || ""}</h2><p style="color:#aaa;line-height:1.8">${renderText(c.text)}</p></div>`).join("");
     const stepsArr = a.steps || [];
-    const steps = stepsArr.map((s, i) => {
-      const isLast = i === stepsArr.length - 1;
+    const steps = stepsArr.map((s) => {
       const desc = renderText(s.d).replace(/דרך/g, "<b>דרך</b>");
-      const note = isLast && a.entryNote ? ` ${renderText(a.entryNote)}` : "";
-      return `<div class="panel" style="text-align:center"><div class="badge red" style="display:inline-flex;margin-bottom:8px">${s.n}</div><h3 style="margin:0 0 6px">${s.t || ""}</h3><p style="color:#aaa;font-size:14px">${desc}${note}</p></div>`;
+      return `<div class="panel" style="text-align:center"><div class="badge red" style="display:inline-flex;margin-bottom:8px">${s.n}</div><h3 style="margin:0 0 6px">${s.t || ""}</h3><p style="color:#aaa;font-size:14px">${desc}</p></div>`;
     }).join("");
+    const entryNote = a.entryNote ? `
+      <div class="panel" style="text-align:center;margin-top:20px;border:2px solid #ff1739;background:rgba(255,23,57,.08)">
+        <div class="badge red" style="display:inline-flex;margin-bottom:10px">⚠️ חובה לומר בכניסה</div>
+        <p style="color:#fff;font-size:20px;font-weight:700;margin:0">${renderText(a.entryNote)}</p>
+        <p style="color:#ff8a8a;font-size:14px;margin-top:10px">בלי המשפט הזה בדיוק — לא תקבלו את ההנחה בכניסה!</p>
+      </div>` : "";
     box.innerHTML = `
       <div class="panel" style="text-align:center"><h2>${a.roleTitle || "החזון שלנו"}</h2><p style="color:#aaa;line-height:1.9">${renderText(a.roleText)}</p>${a.roleSubtext ? `<p style="color:#aaa;line-height:1.9;margin-top:10px">${renderText(a.roleSubtext)}</p>` : ""}</div>
       ${cards ? `<div class="grid-2" style="margin-top:20px">${cards}</div>` : ""}
       ${steps ? `<div class="cards" style="margin-top:20px">${steps}</div>` : ""}
+      ${entryNote}
     `;
   } catch (err) {
     box.innerHTML = "<p style=\"color:#aaa\">לא הצלחנו לטעון את תוכן העמוד כרגע.</p>";
