@@ -701,6 +701,33 @@ async function handleManualPost(req, res) {
   }
 }
 
+/**
+ * Permanently deletes party docs whose `expiration` timestamp has passed.
+ * `expiration` is computed at party-create/update time from the admin's
+ * "party retention hours" setting (see shared/partyExpiry.js) — e.g. with
+ * the current 1-hour setting, a Thursday party (ending at midnight) is
+ * deleted at 01:00. Called two ways: opportunistically (fire-and-forget
+ * from the public site's loadEvents(), so real traffic drives near-real-time
+ * cleanup) and by this file's existing cron as a backstop. Safe to call
+ * anytime — it only deletes docs already past their own stored expiration.
+ */
+async function handleCleanupExpiredParties(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  try {
+    const admin = await initAdmin();
+    const db = admin.firestore();
+    const now = admin.firestore.Timestamp.now();
+    const snap = await db.collection('parties').where('expiration', '<=', now).get();
+    if (snap.empty) return res.status(200).json({ ok: true, deleted: 0 });
+    const batch = db.batch();
+    snap.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+    return res.status(200).json({ ok: true, deleted: snap.size });
+  } catch (err) {
+    return res.status(200).json({ ok: false, deleted: 0, error: String(err?.message || err) });
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
@@ -737,6 +764,9 @@ export default async function handler(req, res) {
     }
     if (job === 'list-delete-requests') {
       return handleListDeleteRequests(req, res);
+    }
+    if (job === 'cleanup-parties') {
+      return handleCleanupExpiredParties(req, res);
     }
     if (job === 'process-delete-request') {
       return handleProcessDeleteRequest(req, res);

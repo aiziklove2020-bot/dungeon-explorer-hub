@@ -33626,11 +33626,11 @@ async function ZV() {
 	} catch {
 		e = await ej().catch(() => []);
 	}
-	let t = Date.now();
-	return (e || []).filter((e) => {
+	let t = Date.now(), n = (e || []).filter((e) => {
 		let n = e.expiration?.toDate?.() || (e.expiration ? new Date(e.expiration) : null);
 		return n ? n.getTime() >= t : XV(e) >= t - 1440 * 60 * 1e3;
-	}).sort((e, t) => XV(e) - XV(t)).map(YV);
+	});
+	return e && e.length !== n.length && fetch("/api/telegram-webhook?job=cleanup-parties").catch(() => {}), n.sort((e, t) => XV(e) - XV(t)).map(YV);
 }
 async function QV() {
 	return (await mk().catch(() => ({})))?.about || {};

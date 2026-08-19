@@ -149,6 +149,14 @@ async function loadEvents() {
     if (exp) return exp.getTime() >= now;
     return partyDateMs(p) >= now - 24 * 60 * 60 * 1000;
   });
+  // Filtering above only hides expired parties from THIS response — the docs
+  // stay in Firestore until something actually deletes them. Fire the cleanup
+  // endpoint in the background (not awaited, errors ignored) so real visits
+  // drive near-real-time permanent deletion instead of relying solely on the
+  // infrequent cron backstop.
+  if (parties && parties.length !== notExpired.length) {
+    fetch("/api/telegram-webhook?job=cleanup-parties").catch(() => {});
+  }
   const sorted = notExpired.sort((a, b) => partyDateMs(a) - partyDateMs(b));
   return sorted.map(toEventShape);
 }
