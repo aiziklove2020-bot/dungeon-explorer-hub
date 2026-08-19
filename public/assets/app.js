@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 
   document.querySelectorAll("[data-fav]").forEach(btn=>{
-    let id=Number(btn.dataset.fav), favs=LP.favorites();
+    let id=btn.dataset.fav, favs=LP.favorites();
     btn.textContent=favs.includes(id)?"♥":"♡";
     btn.addEventListener("click",()=>{
       let fs=LP.favorites(); fs=fs.includes(id)?fs.filter(x=>x!==id):[...fs,id]; LP.setFavorites(fs);

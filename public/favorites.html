@@ -1,6 +1,6 @@
 <!doctype html><html lang="he" dir="rtl"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#050506"><title>צור קשר | LIBRAL PARTY</title>
+<meta name="theme-color" content="#050506"><title>מועדפים | LIBRAL PARTY</title>
 <link rel="icon" type="image/png" href="assets/logo-symbol.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -27,8 +27,7 @@
   <a href="/store"><span class="dr-ic">🛍</span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic">👤</span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/contact"><span class="dr-ic">☎</span><span class="dr-tx">צור קשר</span></a>
  </nav>
 </aside><div class="scrim"></div>
-<main>
-<div class="container section"><div class="section-title"><h1>צור קשר</h1></div><div id="contactBox"><p style="color:#aaa">טוען...</p></div></div></main>
+<main><div class="container section"><div class="section-title"><h1>המועדפים שלי</h1><a href="/events">לכל האירועים</a></div><div class="cards" id="favs"></div></div></main>
 <footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
 
 <nav class="mobile-bottom">
@@ -40,20 +39,14 @@
 <script type="module">
 import "./assets/site-data.js?v=202608191430";
 document.addEventListener("DOMContentLoaded", async () => {
-  const box = document.getElementById("contactBox");
+  const box = document.getElementById("favs");
   try {
-    const c = await window.LPData.loadContact();
-    box.innerHTML = `
-      <div class="panel">
-        ${c.alertText ? `<div class="notice" style="margin-bottom:16px">${c.alertText}</div>` : ""}
-        <h2>דברו איתנו</h2>
-        <p style="color:#aaa;line-height:1.8">${c.description || ""}</p>
-        ${c.whatsappLink ? `<a class="btn primary full" style="margin-top:16px" href="${c.whatsappLink}" target="_blank" rel="noopener noreferrer">שליחת הודעה בוואטסאפ 🟢</a>` : ""}
-        ${c.importantNote ? `<p style="color:#777;font-size:13px;margin-top:14px">${c.importantNote}</p>` : ""}
-      </div>
-    `;
+    const ids = LP.favorites();
+    const events = await window.LPData.loadEvents();
+    const data = events.filter(e => ids.includes(e.id));
+    box.innerHTML = data.length ? data.map(e => `<article class="card"><div class="event-cover" style="background-image:url('${e.img}')">${e.time ? `<span class="loc">◷ ${e.time}</span>` : ""}</div><div class="card-body"><h3>${e.title}</h3><p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p><a class="btn primary" href="/event?id=${e.id}">לפרטים</a></div></article>`).join("") : `<div class="panel"><h2>עדיין אין מועדפים</h2><p style="color:#aaa">לחצו על הלב ליד אירוע כדי לשמור אותו כאן.</p><a class="btn primary" href="/events">למציאת מסיבה</a></div>`;
   } catch (err) {
-    box.innerHTML = "<p style=\"color:#aaa\">לא הצלחנו לטעון את פרטי יצירת הקשר כרגע.</p>";
+    box.innerHTML = "<p style=\"color:#aaa\">לא הצלחנו לטעון מועדפים כרגע.</p>";
   }
 });
 </script></body></html>

@@ -63,6 +63,10 @@
       "destination": "/event.html"
     },
     {
+      "source": "/favorites",
+      "destination": "/favorites.html"
+    },
+    {
       "source": "/events",
       "destination": "/events.html"
     },
@@ -155,6 +159,11 @@
     {
       "source": "/event.html",
       "destination": "/event",
+      "permanent": true
+    },
+    {
+      "source": "/favorites.html",
+      "destination": "/favorites",
       "permanent": true
     },
     {
