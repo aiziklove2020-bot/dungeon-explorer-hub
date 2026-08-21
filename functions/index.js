@@ -44,3 +44,4 @@ export { notifyChatMentionsOnMessageCreate } from './chatMentionsTrigger.js';
 export { issueForumChatToken } from './issueForumChatToken.js';
 export { sendLiveChatMessage } from './sendLiveChatMessage.js';
 export { sendLiveChatSystemLine } from './sendLiveChatSystemLine.js';
+export { autoProvisionFemaleUsers } from './autoProvisionFemaleUsers.js';
