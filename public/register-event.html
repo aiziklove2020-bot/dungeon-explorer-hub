@@ -98,6 +98,77 @@
 <script src="assets/app.js?v=202608191620"></script>
 <script type="module">
 import "./assets/site-data.js?v=202608191620";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Sends one extra, correctly-formatted couple notification using the
+// site's own configured "זוג" Telegram template — the automatic
+// notification from window.LPData.registerForParty can't produce this,
+// because registering each partner as their own single-type call (the
+// only way to get correct gender/DB records — see the couple submit
+// handler below) means neither call's registrationType is exactly
+// "couple", so the template lookup never resolves to templateCouple.
+// Best-effort: never blocks the registration itself on failure.
+async function sendCoupleTelegramNotification(party, maleFullName, malePhone, femaleFullName, femalePhone) {
+  try {
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJv0APn-Qmv59H2Behu3PhskObCaPHW_A",
+      authDomain: "tbdsm-5acca.firebaseapp.com",
+      projectId: "tbdsm-5acca",
+      storageBucket: "tbdsm-5acca.firebasestorage.app",
+      messagingSenderId: "905865425928",
+      appId: "1:905865425928:web:1898ebb5b8de87ecf3cdbd",
+    };
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const snap = await getDoc(doc(db, "settings", "telegram"));
+    if (!snap.exists()) return;
+    const settings = snap.data();
+    const msgConfig = (settings.messages || []).find((m) => m.key === "registration");
+    if (!msgConfig || !msgConfig.enabled || !msgConfig.templateCouple) return;
+    const bot = (settings.bots || []).find((b) => b.id === msgConfig.botId);
+    if (!bot || !bot.token) return;
+    const chatIds = (msgConfig.channelIds || [])
+      .map((id) => (settings.channels || []).find((c) => c.id === id))
+      .filter(Boolean)
+      .map((c) => c.chatId);
+    if (chatIds.length === 0) return;
+
+    const values = {
+      party: { name: party.title || party.name || "", date: party.date || "", time: party.time || "" },
+      registration: {
+        fullName: maleFullName,
+        phoneNumber: malePhone,
+        telegramUsername: "",
+        womanFullName: femaleFullName,
+        womanPhoneNumber: femalePhone,
+        womanTelegramUsername: "",
+        partyDays: "",
+      },
+    };
+    const text = msgConfig.templateCouple.replace(/\{\{([^}]+)\}\}/g, (_, path) => {
+      const parts = path.trim().split(".");
+      let v = values;
+      for (const p of parts) v = v && typeof v === "object" ? v[p] : undefined;
+      return v == null ? "" : String(v);
+    });
+
+    for (const chatId of chatIds) {
+      const chat_id = /^-?\d+$/.test(String(chatId).trim()) ? Number(String(chatId).trim()) : String(chatId).trim();
+      await fetch("/api/telegram-relay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          telegramMethod: "sendMessage",
+          botToken: bot.token,
+          payload: { chat_id, text, parse_mode: msgConfig.parseMode || "HTML" },
+        }),
+      }).catch(() => {});
+    }
+  } catch {
+    // best-effort
+  }
+}
 
 let selectedParty = null;
 
@@ -257,6 +328,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         partnerName: maleFullName,
         partnerPhone: malePhone,
       });
+      sendCoupleTelegramNotification(selectedParty, maleFullName, malePhone, femaleFullName, femalePhone).catch(() => {});
       step2.style.display = "none";
       document.getElementById("regSuccess").style.display = "";
     } catch (err) {
