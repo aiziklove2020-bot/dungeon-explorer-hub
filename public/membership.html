@@ -56,9 +56,72 @@
 
   <div class="notice" style="margin-top:20px">אישור איזון מגדרי ניתן לקבל עד השעה <b>21:00</b> ולא יאוחר מכך. הברזה / אי הגעה — קנס של <b>100 ₪</b>.</div>
 
-  <div style="text-align:center;margin-top:24px"><a class="btn primary" href="/register">הצטרפות כמנוי/ה ←</a></div>
+  <div class="panel" id="leadPanel" style="margin-top:24px;max-width:520px;margin-inline:auto">
+    <h2 style="margin:0 0 4px;text-align:center">רוצה להיות מנוי?</h2>
+    <p style="color:var(--muted);margin:0 0 18px;text-align:center">השאירו פרטים ונחזור אליכם עם כל המידע על המסלולים</p>
+
+    <form class="form" id="leadForm">
+      <div class="form-row">
+        <label>שם מלא<input required name="name" autocomplete="name"></label>
+        <label>טלפון<input required type="tel" name="phone" dir="ltr" placeholder="050-0000000" autocomplete="tel"></label>
+      </div>
+      <label>מסלול
+        <select required name="track" id="leadTrack">
+          <option value="parties">מסיבות בדסמ</option>
+          <option value="exchange">חילופי זוגות</option>
+          <option value="combo">מסלול משולב</option>
+        </select>
+      </label>
+      <label>רוצה להוסיף משהו? (לא חובה)<textarea name="message" rows="3"></textarea></label>
+      <button class="btn primary full" type="submit">שלחו לי פרטים</button>
+      <p id="leadMsg" style="text-align:center;margin:0;min-height:20px"></p>
+    </form>
+
+    <div id="leadDone" style="display:none;text-align:center;padding:10px 0">
+      <div style="font-size:34px;margin-bottom:8px">✅</div>
+      <h3 style="margin:0 0 6px">קיבלנו! ניצור איתך קשר בקרוב</h3>
+      <p style="color:var(--muted);margin:0">תודה שפנית אלינו — נחזור אליך בהקדם.</p>
+    </div>
+  </div>
 </div>
 </main>
+
+<script type="module">
+import "/assets/leads.js?v=202608191620";
+document.querySelectorAll('.cards .card').forEach((card, i) => {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', () => {
+    const track = ['parties', 'exchange', 'combo'][i];
+    document.getElementById('leadTrack').value = track;
+    document.getElementById('leadPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+});
+document.getElementById('leadForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const btn = e.target.querySelector('button');
+  const msg = document.getElementById('leadMsg');
+  msg.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'שולח...';
+  try {
+    await window.LPLeads.submitLead({
+      name: f.get('name'),
+      phone: f.get('phone'),
+      track: f.get('track'),
+      message: f.get('message'),
+      source: 'membership_page',
+    });
+    document.getElementById('leadForm').style.display = 'none';
+    document.getElementById('leadDone').style.display = 'block';
+  } catch (err) {
+    msg.style.color = '#ff6b6b';
+    msg.textContent = err.message || 'אירעה שגיאה, נסה שוב';
+    btn.disabled = false;
+    btn.textContent = 'שלחו לי פרטים';
+  }
+});
+</script>
 
 <footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
 
