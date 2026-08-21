@@ -170,6 +170,30 @@ async function sendCoupleTelegramNotification(party, maleFullName, malePhone, fe
   }
 }
 
+// window.LPData.registerForParty only dedupes by logged-in userId, not by
+// phone number — this form is anonymous (no login), so without this check
+// the same person could submit repeatedly to the same party.
+async function isPhoneAlreadyRegistered(partyId, phoneNumber) {
+  try {
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJv0APn-Qmv59H2Behu3PhskObCaPHW_A",
+      authDomain: "tbdsm-5acca.firebaseapp.com",
+      projectId: "tbdsm-5acca",
+      storageBucket: "tbdsm-5acca.firebasestorage.app",
+      messagingSenderId: "905865425928",
+      appId: "1:905865425928:web:1898ebb5b8de87ecf3cdbd",
+    };
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const snap = await getDoc(doc(db, "parties", partyId));
+    if (!snap.exists()) return false;
+    const registrations = snap.data().registrations || [];
+    return registrations.some((r) => r.phoneNumber === phoneNumber);
+  } catch {
+    return false;
+  }
+}
+
 let selectedParty = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -262,6 +286,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
       btn.disabled = true;
+      if (await isPhoneAlreadyRegistered(selectedParty.id, phoneNumber)) {
+        toast("מספר הטלפון הזה כבר רשום למסיבה הזו", "error");
+        btn.disabled = false;
+        return;
+      }
       try {
         await window.LPData.registerForParty(selectedParty.id, {
           fullName: f.get("fullName"),
@@ -307,6 +336,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     btn.disabled = true;
+    const [maleTaken, femaleTaken] = await Promise.all([
+      isPhoneAlreadyRegistered(selectedParty.id, malePhone),
+      isPhoneAlreadyRegistered(selectedParty.id, femalePhone),
+    ]);
+    if (maleTaken || femaleTaken) {
+      toast("אחד ממספרי הטלפון כבר רשום למסיבה הזו", "error");
+      btn.disabled = false;
+      return;
+    }
     // registrationType drives gender assignment server-side: anything not
     // exactly "couple" and not starting with "single-female" defaults to
     // male, so "single-male-couple" / "single-female-couple" get the

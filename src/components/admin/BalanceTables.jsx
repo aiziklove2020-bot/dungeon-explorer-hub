@@ -3,6 +3,7 @@ import { X, Link as LinkIcon, Trash2, UserPlus, RefreshCw, CalendarCheck, Star }
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getUserByPhone } from '../../firebase/users';
 import { genderFromRegistration } from '../../firebase/telegram';
+import { normalizeIsraeliPhone } from '../../utils/phone';
 import Loader from '../Loader';
 import PhoneLink from '../PhoneLink';
 import './BalanceTables.css';
@@ -62,21 +63,27 @@ const BalanceTables = ({
       const uniquePhoneNumbers = [...new Set(phoneNumbers)];
       
       // Use allUsersMap if provided (optimization to avoid DB calls)
+      // allUsersMap is keyed by the user doc's normalized phone
+      // (createUserFromRegistration always writes 05XXXXXXXX), but a
+      // registration's raw phoneNumber can still carry an international
+      // prefix (+972...) if it wasn't normalized at write time — normalize
+      // here too so the lookup doesn't miss a user that genuinely exists.
       if (allUsersMap && allUsersMap.size > 0) {
         uniquePhoneNumbers.forEach(phoneNumber => {
-          const user = allUsersMap.get(phoneNumber);
+          const normalized = normalizeIsraeliPhone(phoneNumber) || phoneNumber;
+          const user = allUsersMap.get(phoneNumber) || allUsersMap.get(normalized);
           userMap.set(phoneNumber, user !== null && user !== undefined && user.level !== 'blocked');
         });
         setUsersInTable(userMap);
         setCheckingUsers(false);
         return;
       }
-      
+
       // Fallback: if allUsersMap not provided, fetch users individually (should rarely happen)
       const fetchUsers = async () => {
         for (const phoneNumber of uniquePhoneNumbers) {
           try {
-            const user = await getUserByPhone(phoneNumber);
+            const user = await getUserByPhone(normalizeIsraeliPhone(phoneNumber) || phoneNumber);
             userMap.set(phoneNumber, user !== null && user !== undefined);
           } catch (error) {
             userMap.set(phoneNumber, false);
@@ -324,7 +331,35 @@ const BalanceTables = ({
         }
       }
     });
-    
+
+    // Legacy single-record couples: one registration (registrationType
+    // 'couple') carries the partner's name/phone in partnerName/partnerPhone
+    // instead of having a real second record + coupleId. These never land in
+    // couplesByCoupleId (no coupleId) and are deliberately excluded from the
+    // allMen loop below (isCouple(man) is true for them), so without this
+    // branch they'd never show up as a matched pair at all.
+    couples.forEach(couple => {
+      if (
+        couple.coupleId ||
+        !couple.phoneNumber ||
+        !couple.partnerName ||
+        processedPhones.has(couple.phoneNumber) ||
+        genderFromRegistration(couple) === 'female'
+      ) {
+        return;
+      }
+      const match = getMatch(couple);
+      if (!match || !match.isCouple) return;
+      const female = {
+        fullName: couple.partnerName,
+        phoneNumber: couple.partnerPhone || '',
+        isCouplePartner: true
+      };
+      pairs.push({ male: couple, female, match });
+      processedPhones.add(couple.phoneNumber);
+      if (female.phoneNumber) processedPhones.add(female.phoneNumber);
+    });
+
     allMen.forEach(man => {
       if (isMatched(man) && !isCouple(man) && !isClient(man) && !processedPhones.has(man.phoneNumber)) {
         const match = getMatch(man);
