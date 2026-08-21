@@ -191,6 +191,54 @@ const MatchesSection = ({ showSaved }) => {
     }
   };
 
+  // Swaps one side of an actual couple (registered via the couple form) with
+  // an unmatched walk-in single — e.g. one partner didn't show up. Stored as
+  // its own balance entry tagged `swapped: true` and anchored to the
+  // couple's coupleId, so it overrides the registration-derived pairing in
+  // BalanceTables without touching the underlying registration records.
+  const handleSwapCouplePartner = async (partyId, coupleMatch, keptPerson, newPartner, newPartnerGender) => {
+    try {
+      const coupleId = coupleMatch?.coupleId;
+      if (!coupleId) return;
+
+      const currentBalance = partyBalances[partyId] || [];
+      const previousOverride = currentBalance.find(m => m.isCouple && m.coupleId === coupleId && m.swapped);
+      const withoutOverride = currentBalance.filter(m => !(m.isCouple && m.coupleId === coupleId && m.swapped));
+
+      const male = newPartnerGender === 'male' ? newPartner : keptPerson;
+      const female = newPartnerGender === 'female' ? newPartner : keptPerson;
+
+      const newMatch = {
+        isCouple: true,
+        isMatched: true,
+        swapped: true,
+        coupleId,
+        maleName: male.fullName || male.userName || '',
+        malePhone: male.phoneNumber || '',
+        maleTelegram: male.telegramUsername || '',
+        femaleName: female.fullName || female.userName || '',
+        femalePhone: female.phoneNumber || '',
+        femaleTelegram: female.telegramUsername || '',
+        matchedAt: new Date().toISOString(),
+        matchType: 'manual',
+        entered: previousOverride?.entered || coupleMatch.entered || false
+      };
+
+      const updatedBalance = [...withoutOverride, newMatch];
+
+      await saveBalanceMatches(partyId, updatedBalance);
+
+      setPartyBalances(prev => ({
+        ...prev,
+        [partyId]: updatedBalance
+      }));
+
+      showSaved();
+    } catch (error) {
+      alert(`${t('admin.balanceTables.errorCreatingBalance')}: ${error.message}`);
+    }
+  };
+
   const handleToggleEntered = async (partyId, match) => {
     try {
       
@@ -670,6 +718,7 @@ const MatchesSection = ({ showSaved }) => {
                     onDeleteClient={handleDeleteClient}
                     onManualMatch={handleManualMatch}
                     onSwapPartner={handleSwapPartner}
+                    onSwapCouplePartner={handleSwapCouplePartner}
                     onToggleEntered={handleToggleEntered}
                     onRefresh={loadActiveParties}
                     registeringClient={registeringClient}

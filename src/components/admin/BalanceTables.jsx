@@ -17,6 +17,7 @@ const BalanceTables = ({
   onRefresh,
   onManualMatch,
   onSwapPartner,
+  onSwapCouplePartner,
   onToggleEntered,
   registeringClient,
   allUsersMap,
@@ -202,30 +203,37 @@ const BalanceTables = ({
   Object.values(couplesByCoupleId).forEach(coupleGroup => {
     const maleCouple = coupleGroup.find(c => c.gender === 'male');
     const femaleCouple = coupleGroup.find(c => c.gender === 'female');
-    
+
     if (maleCouple && femaleCouple) {
-      const existingMatch = balance?.find(m => 
+      // A manual swap (one partner didn't show up, replaced by an unmatched
+      // walk-in) is stored as its own balance entry tagged `swapped: true`,
+      // carrying whichever side got replaced — the other side stays as the
+      // original registration. Prefer it over the registration-derived pair
+      // when present.
+      const override = balance?.find(m => m.isCouple && m.coupleId === maleCouple.coupleId && m.swapped);
+      const existingMatch = override || balance?.find(m =>
         m.isCouple && m.coupleId === maleCouple.coupleId
       );
-      
+
       const matchData = {
         isCouple: true,
         isMatched: true,
-        maleName: maleCouple.fullName || maleCouple.userName || '',
-        femaleName: femaleCouple.fullName || femaleCouple.userName || '',
-        malePhone: maleCouple.phoneNumber || '',
-        femalePhone: femaleCouple.phoneNumber || '',
-        maleTelegram: maleCouple.telegramUsername || '',
-        femaleTelegram: femaleCouple.telegramUsername || '',
+        maleName: override ? override.maleName : (maleCouple.fullName || maleCouple.userName || ''),
+        femaleName: override ? override.femaleName : (femaleCouple.fullName || femaleCouple.userName || ''),
+        malePhone: override ? override.malePhone : (maleCouple.phoneNumber || ''),
+        femalePhone: override ? override.femalePhone : (femaleCouple.phoneNumber || ''),
+        maleTelegram: override ? (override.maleTelegram || '') : (maleCouple.telegramUsername || ''),
+        femaleTelegram: override ? (override.femaleTelegram || '') : (femaleCouple.telegramUsername || ''),
         coupleId: maleCouple.coupleId,
+        swapped: !!override,
         entered: existingMatch?.entered || false
       };
-      
-      if (maleCouple.phoneNumber) {
-        coupleMatchMap[maleCouple.phoneNumber] = matchData;
+
+      if (matchData.malePhone) {
+        coupleMatchMap[matchData.malePhone] = matchData;
       }
-      if (femaleCouple.phoneNumber) {
-        coupleMatchMap[femaleCouple.phoneNumber] = matchData;
+      if (matchData.femalePhone) {
+        coupleMatchMap[matchData.femalePhone] = matchData;
       }
     }
   });
@@ -316,18 +324,28 @@ const BalanceTables = ({
     Object.values(couplesByCoupleId).forEach(coupleGroup => {
       const maleCouple = coupleGroup.find(c => c.gender === 'male');
       const femaleCouple = coupleGroup.find(c => c.gender === 'female');
-      
+
       if (maleCouple && femaleCouple && maleCouple.coupleId && !processedCoupleIds.has(maleCouple.coupleId)) {
-        const match = getMatch(maleCouple);
-        if (match && match.isCouple) {
+        // A swap replaces whichever side didn't show up, so the match's
+        // malePhone/femalePhone may point at a different person than the
+        // couple's original registration — resolve the actual person to
+        // render on each side instead of assuming it's always maleCouple/femaleCouple.
+        const match = coupleMatchMap[maleCouple.phoneNumber] || coupleMatchMap[femaleCouple.phoneNumber];
+        if (match && match.isCouple && match.coupleId === maleCouple.coupleId) {
+          const effectiveMale = match.malePhone === maleCouple.phoneNumber
+            ? maleCouple
+            : (allMen.find(m => m.phoneNumber === match.malePhone) || { fullName: match.maleName, phoneNumber: match.malePhone, telegramUsername: match.maleTelegram || '' });
+          const effectiveFemale = match.femalePhone === femaleCouple.phoneNumber
+            ? femaleCouple
+            : (allWomen.find(w => w.phoneNumber === match.femalePhone) || { fullName: match.femaleName, phoneNumber: match.femalePhone, telegramUsername: match.femaleTelegram || '' });
           pairs.push({
-            male: maleCouple,
-            female: femaleCouple,
+            male: effectiveMale,
+            female: effectiveFemale,
             match: match
           });
           processedCoupleIds.add(maleCouple.coupleId);
-          processedPhones.add(maleCouple.phoneNumber);
-          processedPhones.add(femaleCouple.phoneNumber);
+          processedPhones.add(effectiveMale.phoneNumber);
+          processedPhones.add(effectiveFemale.phoneNumber);
         }
       }
     });
@@ -403,7 +421,7 @@ const BalanceTables = ({
                 const showingSwapFemale = showSwapFor?.phone === pair.female.phoneNumber && showSwapFor?.gender === 'female';
                 
                 return (
-                <div key={index} className={`matched-pair ${isEntered ? 'matched-pair--entered' : ''}`}>
+                <div key={pair.match?.coupleId || `${pair.male.phoneNumber}_${pair.female.phoneNumber}`} className={`matched-pair ${isEntered ? 'matched-pair--entered' : ''}`}>
                   <div className="matched-pair__header">
                     <label className="matched-pair__checkbox-label">
                       <input
@@ -461,11 +479,11 @@ const BalanceTables = ({
                             </button>
                           </span>
                         )}
-                        {!pair.match?.isCouple && unmatchedWomen.length > 0 && onSwapPartner && (
+                        {unmatchedWomen.length > 0 && (pair.match?.isCouple ? onSwapCouplePartner : onSwapPartner) && (
                           <button
                             onClick={() => setShowSwapFor(showingSwapMale ? null : { phone: pair.male.phoneNumber, gender: 'male' })}
                             className="person-card__swap-btn"
-                            title={t('admin.balanceTables.swapPartner') || 'החלף'}
+                            title={pair.match?.isCouple ? 'החלף בת זוג (למשל אם לא הגיעה)' : (t('admin.balanceTables.swapPartner') || 'החלף')}
                           >
                             <RefreshCw size={14} />
                           </button>
@@ -483,7 +501,10 @@ const BalanceTables = ({
                               <button
                                 key={wIndex}
                                 onClick={() => {
-                                  if (onSwapPartner) {
+                                  if (pair.match?.isCouple && onSwapCouplePartner) {
+                                    onSwapCouplePartner(party.id, pair.match, pair.male, woman, 'female');
+                                    setShowSwapFor(null);
+                                  } else if (onSwapPartner) {
                                     onSwapPartner(party.id, pair.match, pair.male, woman);
                                     setShowSwapFor(null);
                                   }
@@ -526,11 +547,11 @@ const BalanceTables = ({
                             {registeringClient === pair.female.phoneNumber ? '...' : <UserPlus size={12} />}
                           </button>
                         )}
-                        {!pair.match?.isCouple && unmatchedMen.length > 0 && onSwapPartner && (
+                        {unmatchedMen.length > 0 && (pair.match?.isCouple ? onSwapCouplePartner : onSwapPartner) && (
                           <button
                             onClick={() => setShowSwapFor(showingSwapFemale ? null : { phone: pair.female.phoneNumber, gender: 'female' })}
                             className="person-card__swap-btn"
-                            title={t('admin.balanceTables.swapPartner') || 'החלף'}
+                            title={pair.match?.isCouple ? 'החלף בן זוג (למשל אם לא הגיע)' : (t('admin.balanceTables.swapPartner') || 'החלף')}
                           >
                             <RefreshCw size={14} />
                           </button>
@@ -548,7 +569,10 @@ const BalanceTables = ({
                               <button
                                 key={mIndex}
                                 onClick={() => {
-                                  if (onSwapPartner) {
+                                  if (pair.match?.isCouple && onSwapCouplePartner) {
+                                    onSwapCouplePartner(party.id, pair.match, pair.female, man, 'male');
+                                    setShowSwapFor(null);
+                                  } else if (onSwapPartner) {
                                     onSwapPartner(party.id, pair.match, man, pair.female);
                                     setShowSwapFor(null);
                                   }
