@@ -15,6 +15,14 @@
  * 12-serverless-function limit — same reasoning as git-history.js absorbing
  * the old record-deploy-status route.
  *
+ * Same run also re-posts every active party marked "כלול באינסטגרם" to
+ * Instagram (see publishActiveInstagramParties, reusing publish-content.js's
+ * publishPartyToInstagram — server-side via Windsor.ai, no admin browser
+ * needed). WhatsApp is NOT included here: the WhatsApp bot only listens on
+ * the admin's own machine (VITE_WHATSAPP_BOT_URL defaults to localhost),
+ * unreachable from this cron — it stays a manual button until the bot is
+ * deployed somewhere with a public URL.
+ *
  * Auth: Vercel signs cron-triggered requests with `Authorization: Bearer
  * ${CRON_SECRET}` when that env var is set — verified below so this can't be
  * triggered by an arbitrary GET from outside Vercel.
@@ -611,6 +619,30 @@ async function releaseBroadcastLock(ref) {
   }
 }
 
+// Instagram side of the same scheduled run: posts every active party
+// explicitly marked "כלול באינסטגרם" (publishToInstagram) — same account
+// scoping the admin's manual "פרסם לאינסטגרם" button already applies (see
+// pages/Admin.jsx). No dedup/skip-if-already-posted by design, matching the
+// existing manual behavior and the Telegram reminder cadence the admin
+// chose this to mirror — re-running a few times a week just refreshes the
+// story and re-shares the feed post.
+async function publishActiveInstagramParties(admin, activeParties) {
+  const results = [];
+  const eligible = activeParties.filter((p) => p.publishToInstagram === true && (p.imageURL || p.img));
+  if (eligible.length === 0) return results;
+
+  const { publishPartyToInstagram } = await import('./publish-content.js');
+  for (const party of eligible) {
+    try {
+      const { postId, storyId } = await publishPartyToInstagram(party);
+      results.push({ party: party.title || party.name, ok: true, postId, storyId });
+    } catch (e) {
+      results.push({ party: party.title || party.name, ok: false, error: e.message });
+    }
+  }
+  return results;
+}
+
 async function sendAllPartyReminders(targetChatId) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
@@ -654,7 +686,12 @@ async function sendAllPartyReminders(targetChatId) {
       }
     }
 
-    return { partiesSent: activeParties.length, destinationCount: destinations.length, results };
+    // Instagram rides the same schedule, but only on the real full run — a
+    // manual resend to one fixed Telegram channel (targetChatId) shouldn't
+    // also trigger an Instagram post.
+    const instagramResults = targetChatId ? [] : await publishActiveInstagramParties(admin, activeParties);
+
+    return { partiesSent: activeParties.length, destinationCount: destinations.length, results, instagramResults };
   } finally {
     await releaseBroadcastLock(lockRef);
   }
@@ -665,8 +702,8 @@ async function handlePartyReminders(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
-    const { partiesSent, results } = await sendAllPartyReminders();
-    return res.status(200).json({ ok: true, partiesSent, results });
+    const { partiesSent, results, instagramResults } = await sendAllPartyReminders();
+    return res.status(200).json({ ok: true, partiesSent, results, instagramResults });
   } catch (err) {
     console.error('party-reminders:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
@@ -693,8 +730,8 @@ async function handleManualPost(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
   const targetChatId = req.query?.chatId || new URL(req.url, 'http://x').searchParams.get('chatId') || undefined;
   try {
-    const { partiesSent, results } = await sendAllPartyReminders(targetChatId);
-    return res.status(200).json({ ok: true, partiesSent, results });
+    const { partiesSent, results, instagramResults } = await sendAllPartyReminders(targetChatId);
+    return res.status(200).json({ ok: true, partiesSent, results, instagramResults });
   } catch (err) {
     console.error('manual-post:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });

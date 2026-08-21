@@ -63,6 +63,43 @@ const toStoryImageUrl = (imageUrl) => toCloudinaryPaddedUrl(imageUrl, 1080, 1920
 // image leans.
 const toFeedImageUrl = (imageUrl) => toCloudinaryPaddedUrl(imageUrl, 1080, 1350);
 
+// Posts one party's image straight to Instagram (feed post + optional story)
+// via Windsor.ai. Shared by the admin's manual "פרסם לאינסטגרם" button
+// (handleInstagramPublish below, over HTTP) and the scheduled cron in
+// telegram-webhook.js (called in-process — same env vars, no HTTP hop).
+// Throws on failure; the caller decides how to report/aggregate that.
+export async function publishPartyToInstagram(party, { includeStory = true } = {}) {
+  const WINDSOR_API_KEY = process.env.WINDSOR_API_KEY;
+  const IG_ACCOUNT_ID = process.env.WINDSOR_INSTAGRAM_ACCOUNT_ID;
+  if (!WINDSOR_API_KEY || !IG_ACCOUNT_ID) {
+    throw new Error('WINDSOR_API_KEY / WINDSOR_INSTAGRAM_ACCOUNT_ID are not set');
+  }
+  const imageUrl = party.imageURL || party.img;
+  if (!imageUrl) {
+    throw new Error('Party has no imageURL to publish');
+  }
+
+  const caption = buildInstagramCaption(party);
+  const postResult = await runWindsorAction({
+    apiKey: WINDSOR_API_KEY,
+    account: IG_ACCOUNT_ID,
+    action: 'create_image_post',
+    params: { image_url: toFeedImageUrl(imageUrl), caption },
+  });
+
+  let storyResult = null;
+  if (includeStory) {
+    storyResult = await runWindsorAction({
+      apiKey: WINDSOR_API_KEY,
+      account: IG_ACCOUNT_ID,
+      action: 'create_story',
+      params: { image_url: toStoryImageUrl(imageUrl) },
+    });
+  }
+
+  return { postId: postResult?.result || postResult, storyId: storyResult?.result || storyResult };
+}
+
 async function runWindsorAction({ apiKey, account, action, params }) {
   const res = await fetch(`${WINDSOR_ACTIONS_URL}?api_key=${encodeURIComponent(apiKey)}`, {
     method: 'POST',
@@ -77,15 +114,6 @@ async function runWindsorAction({ apiKey, account, action, params }) {
 }
 
 async function handleInstagramPublish(req, res) {
-  const WINDSOR_API_KEY = process.env.WINDSOR_API_KEY;
-  const IG_ACCOUNT_ID = process.env.WINDSOR_INSTAGRAM_ACCOUNT_ID;
-  if (!WINDSOR_API_KEY || !IG_ACCOUNT_ID) {
-    return res.status(503).json({
-      error: 'Server configuration error',
-      message: 'WINDSOR_API_KEY / WINDSOR_INSTAGRAM_ACCOUNT_ID are not set in environment variables',
-    });
-  }
-
   let body;
   try {
     body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
@@ -130,39 +158,12 @@ async function handleInstagramPublish(req, res) {
     if (!partyDoc.exists) {
       return res.status(404).json({ error: 'Party not found' });
     }
-    const party = partyDoc.data();
-    const imageUrl = party.imageURL || party.img;
-    if (!imageUrl) {
-      return res.status(400).json({ error: 'Party has no imageURL to publish' });
-    }
-
-    const caption = buildInstagramCaption(party);
-
-    const postResult = await runWindsorAction({
-      apiKey: WINDSOR_API_KEY,
-      account: IG_ACCOUNT_ID,
-      action: 'create_image_post',
-      params: { image_url: toFeedImageUrl(imageUrl), caption },
-    });
-
-    let storyResult = null;
-    if (includeStory) {
-      storyResult = await runWindsorAction({
-        apiKey: WINDSOR_API_KEY,
-        account: IG_ACCOUNT_ID,
-        action: 'create_story',
-        params: { image_url: toStoryImageUrl(imageUrl) },
-      });
-    }
-
-    return res.status(200).json({
-      ok: true,
-      postId: postResult?.result || postResult,
-      storyId: storyResult?.result || storyResult,
-    });
+    const { postId, storyId } = await publishPartyToInstagram(partyDoc.data(), { includeStory });
+    return res.status(200).json({ ok: true, postId, storyId });
   } catch (e) {
     console.error('instagram-publish error:', e.message);
-    return res.status(502).json({ error: 'Instagram publish failed', message: e.message });
+    const status = /WINDSOR_API_KEY|not set/.test(e.message) ? 503 : /no imageURL/.test(e.message) ? 400 : 502;
+    return res.status(status).json({ error: 'Instagram publish failed', message: e.message });
   }
 }
 
