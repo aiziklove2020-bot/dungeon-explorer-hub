@@ -18,10 +18,10 @@
  * Same run also re-posts every active party marked "כלול באינסטגרם" to
  * Instagram (see publishActiveInstagramParties, reusing publish-content.js's
  * publishPartyToInstagram — server-side via Windsor.ai, no admin browser
- * needed). WhatsApp is NOT included here: the WhatsApp bot only listens on
- * the admin's own machine (VITE_WHATSAPP_BOT_URL defaults to localhost),
- * unreachable from this cron — it stays a manual button until the bot is
- * deployed somewhere with a public URL.
+ * needed), and pokes the whatsapp-bot's /broadcast-parties (see
+ * publishActiveWhatsApp) once it's hosted somewhere public — set
+ * WHATSAPP_BOT_PUBLIC_URL + WHATSAPP_BOT_API_KEY to enable; until then this
+ * silently no-ops and WhatsApp stays the admin's manual button.
  *
  * Auth: Vercel signs cron-triggered requests with `Authorization: Bearer
  * ${CRON_SECRET}` when that env var is set — verified below so this can't be
@@ -619,6 +619,30 @@ async function releaseBroadcastLock(ref) {
   }
 }
 
+// WhatsApp side of the same scheduled run: pokes the whatsapp-bot's own
+// /broadcast-parties endpoint, now that the bot runs on a public host
+// (Render) instead of localhost. Silently does nothing until both env vars
+// are set — before that, WhatsApp stays the admin's manual button. The bot
+// has its own internal broadcastActiveParties() with the same
+// allowedAdvertiserIds filtering as here, so this call intentionally does
+// no per-party logic itself.
+async function publishActiveWhatsApp() {
+  const url = process.env.WHATSAPP_BOT_PUBLIC_URL;
+  const apiKey = process.env.WHATSAPP_BOT_API_KEY;
+  if (!url) return null;
+  try {
+    const res = await fetch(`${url.replace(/\/$/, '')}/broadcast-parties`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(apiKey ? { 'x-api-key': apiKey } : {}) },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return { ok: false, error: data?.message || `HTTP ${res.status}` };
+    return { ok: true, partiesSent: data.partiesSent, groupCount: data.groupCount };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
 // Instagram side of the same scheduled run: posts every active party
 // explicitly marked "כלול באינסטגרם" (publishToInstagram) — same account
 // scoping the admin's manual "פרסם לאינסטגרם" button already applies (see
@@ -690,8 +714,9 @@ async function sendAllPartyReminders(targetChatId) {
     // manual resend to one fixed Telegram channel (targetChatId) shouldn't
     // also trigger an Instagram post.
     const instagramResults = targetChatId ? [] : await publishActiveInstagramParties(admin, activeParties);
+    const whatsappResult = targetChatId ? null : await publishActiveWhatsApp();
 
-    return { partiesSent: activeParties.length, destinationCount: destinations.length, results, instagramResults };
+    return { partiesSent: activeParties.length, destinationCount: destinations.length, results, instagramResults, whatsappResult };
   } finally {
     await releaseBroadcastLock(lockRef);
   }
@@ -702,8 +727,8 @@ async function handlePartyReminders(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
-    const { partiesSent, results, instagramResults } = await sendAllPartyReminders();
-    return res.status(200).json({ ok: true, partiesSent, results, instagramResults });
+    const { partiesSent, results, instagramResults, whatsappResult } = await sendAllPartyReminders();
+    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult });
   } catch (err) {
     console.error('party-reminders:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
@@ -730,8 +755,8 @@ async function handleManualPost(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
   const targetChatId = req.query?.chatId || new URL(req.url, 'http://x').searchParams.get('chatId') || undefined;
   try {
-    const { partiesSent, results, instagramResults } = await sendAllPartyReminders(targetChatId);
-    return res.status(200).json({ ok: true, partiesSent, results, instagramResults });
+    const { partiesSent, results, instagramResults, whatsappResult } = await sendAllPartyReminders(targetChatId);
+    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult });
   } catch (err) {
     console.error('manual-post:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
