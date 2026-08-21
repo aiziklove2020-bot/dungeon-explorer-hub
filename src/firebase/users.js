@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import bcrypt from 'bcryptjs';
 import { db } from './config';
+import { normalizeIsraeliPhone } from '../utils/phone';
 import { getUserByPhone as getUserByPhoneFromDataAccess, getAllUsers as getAllUsersFromDataAccess, getUserById as getUserByIdFromDataAccess, invalidateCache } from './dataAccess';
 import {
   addOrExtendSubscription,
@@ -278,9 +279,14 @@ export const createUserFromRegistration = async (registration, level = 'regular'
 
   try {
 
-    if (!registration.phoneNumber || registration.phoneNumber.length !== 10 || !registration.phoneNumber.startsWith('05')) {
+    // Registrations can arrive with an international prefix (e.g. from a
+    // Telegram contact share, +972501234567) — normalize back to local
+    // form before validating, instead of rejecting a perfectly real number.
+    const normalizedPhone = normalizeIsraeliPhone(registration.phoneNumber);
+    if (!normalizedPhone || normalizedPhone.length !== 10 || !normalizedPhone.startsWith('05')) {
       throw new Error('מספר טלפון חייב להתחיל ב-05 ולהיות 10 ספרות');
     }
+    registration = { ...registration, phoneNumber: normalizedPhone };
 
     const existingUser = await getUserByPhone(registration.phoneNumber);
     if (existingUser) {
