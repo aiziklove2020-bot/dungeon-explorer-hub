@@ -14,6 +14,7 @@ import {
   writeBatch
 } from 'firebase/firestore';
 import { db } from './config';
+import { normalizeIsraeliPhone } from '../utils/phone';
 import { sendBalanceMatchNotification } from './telegram';
 import { isUserBlocked, createUserFromRegistration } from './users';
 import { getActiveParties as getActivePartiesFromDataAccess, getBalanceMatches as getBalanceMatchesFromDataAccess, getPartyById as getPartyByIdFromDataAccess, getUserByPhone, invalidateCache } from './dataAccess';
@@ -228,8 +229,9 @@ export const registerToPartyNew = async (partyId, registrationData) => {
     
     const partyRef = doc(db, PARTIES_COLLECTION, partyId);
 
+    const normalizedIncomingPhone = normalizeIsraeliPhone(registrationData.phoneNumber) || registrationData.phoneNumber;
     const existingRegistration = partyData.registrations?.find(
-      reg => reg.phoneNumber === registrationData.phoneNumber || (userId && reg.userId === userId)
+      reg => normalizeIsraeliPhone(reg.phoneNumber) === normalizedIncomingPhone || (userId && reg.userId === userId)
     );
     
     if (existingRegistration) {
@@ -255,10 +257,14 @@ export const registerToPartyNew = async (partyId, registrationData) => {
     const finalTelegram = userData?.telegramUsername || registrationData.telegramUsername || '';
 
     const registration = {
-      userId: userId || null, 
+      userId: userId || null,
       userName: finalName,
       fullName: finalName,
-      phoneNumber: registrationData.phoneNumber,
+      // Store the local 05xxxxxxxx form, not whatever format the caller
+      // sent (e.g. a +972-prefixed number from a Telegram contact share) —
+      // every downstream lookup (usersInTable, balance matching) compares
+      // this field directly against user.phoneNumber, which is always local.
+      phoneNumber: normalizeIsraeliPhone(registrationData.phoneNumber) || registrationData.phoneNumber,
       telegramUsername: finalTelegram,
       registrationType: registrationData.registrationType,
       partyDays: registrationData.partyDays || [],
@@ -266,10 +272,10 @@ export const registerToPartyNew = async (partyId, registrationData) => {
       selfArrival: registrationData.selfArrival || false,
       gender: finalGender,
       registeredAt: Timestamp.now(),
-      
-      coupleId: registrationData.coupleId || null, 
+
+      coupleId: registrationData.coupleId || null,
       partnerName: registrationData.partnerName || null,
-      partnerPhone: registrationData.partnerPhone || null
+      partnerPhone: normalizeIsraeliPhone(registrationData.partnerPhone) || registrationData.partnerPhone || null
     };
     
     await updateDoc(partyRef, {
@@ -309,7 +315,7 @@ export const COUPLE_SAME_PHONE_ERROR = 'COUPLE_SAME_PHONE';
  * - Neither registered → adds both as couple.
  */
 export const registerCoupleToParty = async (partyId, maleRegistrationData, femaleRegistrationData) => {
-  const normalizePhone = (p) => (p || '').replace(/\D/g, '').trim();
+  const normalizePhone = (p) => normalizeIsraeliPhone(p) || (p || '').replace(/\D/g, '').trim();
   const malePhone = normalizePhone(maleRegistrationData.phoneNumber);
   const femalePhone = normalizePhone(femaleRegistrationData.phoneNumber);
 
@@ -345,7 +351,9 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
   const coupleId = `couple_${timestamp}_${randomStr}_${phonesHash}`;
 
   const buildRegistration = async (data, gender, partnerName, partnerPhone) => {
-    const blockedCheck = await isUserBlocked(data.phoneNumber, data.telegramUsername);
+    const normalizedDataPhone = normalizeIsraeliPhone(data.phoneNumber) || data.phoneNumber;
+    const normalizedPartnerPhone = normalizeIsraeliPhone(partnerPhone) || partnerPhone;
+    const blockedCheck = await isUserBlocked(normalizedDataPhone, data.telegramUsername);
     if (blockedCheck.blocked) {
       throw new Error('User is blocked and cannot register to parties');
     }
@@ -354,9 +362,9 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
     if (blockedCheck.user && blockedCheck.user.level !== 'blocked') {
       userId = blockedCheck.user.id;
       userData = blockedCheck.user;
-    } else if (data.phoneNumber) {
+    } else if (normalizedDataPhone) {
       try {
-        const existingUser = await getUserByPhone(data.phoneNumber);
+        const existingUser = await getUserByPhone(normalizedDataPhone);
         if (existingUser && existingUser.level !== 'blocked') {
           userId = existingUser.id;
           userData = existingUser;
@@ -372,7 +380,7 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
       userId: userId || null,
       userName: finalName,
       fullName: finalName,
-      phoneNumber: data.phoneNumber,
+      phoneNumber: normalizedDataPhone,
       telegramUsername: finalTelegram,
       registrationType: 'couple',
       partyDays: data.partyDays || [],
@@ -382,7 +390,7 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
       registeredAt: Timestamp.now(),
       coupleId,
       partnerName: partnerName || null,
-      partnerPhone: partnerPhone || null
+      partnerPhone: normalizedPartnerPhone || null
     };
   };
 
@@ -392,13 +400,13 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
       registrationType: 'couple',
       coupleId,
       partnerName: femaleRegistrationData.fullName,
-      partnerPhone: femaleRegistrationData.phoneNumber
+      partnerPhone: femalePhone
     };
     const femaleReg = await buildRegistration(
       femaleRegistrationData,
       'female',
       maleRegistrationData.fullName,
-      maleRegistrationData.phoneNumber
+      malePhone
     );
     const maleMatch = (r) =>
       normalizePhone(r.phoneNumber) === malePhone || (r.userId && String(r.userId) === malePhone);
@@ -418,13 +426,13 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
       registrationType: 'couple',
       coupleId,
       partnerName: maleRegistrationData.fullName,
-      partnerPhone: maleRegistrationData.phoneNumber
+      partnerPhone: malePhone
     };
     const maleReg = await buildRegistration(
       maleRegistrationData,
       'male',
       femaleRegistrationData.fullName,
-      femaleRegistrationData.phoneNumber
+      femalePhone
     );
     const femaleMatch = (r) =>
       normalizePhone(r.phoneNumber) === femalePhone || (r.userId && String(r.userId) === femalePhone);
