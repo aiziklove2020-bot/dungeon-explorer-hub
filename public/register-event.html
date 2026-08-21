@@ -57,13 +57,13 @@
       </label>
       <div class="form-row">
         <label>שם מלא<input required name="fullName" autocomplete="name"></label>
-        <label>טלפון<input required name="phoneNumber" type="tel" placeholder="050-0000000" autocomplete="tel"></label>
+        <label>טלפון<input required name="phoneNumber" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel"></label>
       </div>
       <label>טלגרם (אופציונלי)<input name="telegramUsername" placeholder="@username"></label>
       <div id="partnerFields" style="display:none">
         <div class="form-row">
           <label>שם בן/בת הזוג<input name="partnerName"></label>
-          <label>טלפון בן/בת הזוג<input name="partnerPhone" type="tel"></label>
+          <label>טלפון בן/בת הזוג<input name="partnerPhone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10"></label>
         </div>
       </div>
       <label><span><input required type="checkbox" style="width:auto"> אני מעל גיל 18 ומאשר/ת את תנאי ההשתתפות</span></label>
@@ -157,20 +157,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     partnerFields.style.display = typeSelect.value === "couple" ? "" : "none";
   });
 
+  const ISRAELI_PHONE_RE = /^05\d{8}$/;
+  const phoneInputs = [form.phoneNumber, form.partnerPhone].filter(Boolean);
+  phoneInputs.forEach(input => {
+    input.addEventListener("input", () => {
+      input.value = input.value.replace(/\D/g, "").slice(0, 10);
+    });
+  });
+
   form.addEventListener("submit", async e => {
     e.preventDefault();
     if (!selectedParty) return;
     const f = new FormData(form);
+    const phoneNumber = String(f.get("phoneNumber") || "").replace(/\D/g, "");
+    if (!ISRAELI_PHONE_RE.test(phoneNumber)) {
+      toast("נא להזין מספר טלפון תקין (10 ספרות, מתחיל ב-05)", "error");
+      form.phoneNumber.focus();
+      return;
+    }
+    const partnerPhoneRaw = String(f.get("partnerPhone") || "").replace(/\D/g, "");
+    if (typeSelect.value === "couple" && !ISRAELI_PHONE_RE.test(partnerPhoneRaw)) {
+      toast("נא להזין מספר טלפון תקין לבן/בת הזוג (10 ספרות, מתחיל ב-05)", "error");
+      form.partnerPhone.focus();
+      return;
+    }
     const btn = form.querySelector("button[type=submit]");
     btn.disabled = true;
     try {
       await window.LPData.registerForParty(selectedParty.id, {
         fullName: f.get("fullName"),
-        phoneNumber: f.get("phoneNumber"),
+        phoneNumber,
         telegramUsername: f.get("telegramUsername"),
         registrationType: f.get("registrationType"),
         partnerName: f.get("partnerName"),
-        partnerPhone: f.get("partnerPhone"),
+        partnerPhone: typeSelect.value === "couple" ? partnerPhoneRaw : f.get("partnerPhone"),
       });
       step2.style.display = "none";
       document.getElementById("regSuccess").style.display = "";
