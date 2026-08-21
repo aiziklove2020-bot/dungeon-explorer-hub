@@ -115,24 +115,33 @@ async function renderCouplesForEvent(eventId, targetEl) {
     if (confirmed.length === 0) return;
 
     const box = document.createElement("div");
-    box.style.cssText = "margin-top:10px;padding:10px 12px;border:1px solid #7c1828;border-radius:12px;background:rgba(255,23,57,.06)";
+    box.style.cssText = "margin-top:14px;padding:14px 16px;border:1px solid #7c1828;border-radius:14px;background:rgba(255,23,57,.08)";
     const title = document.createElement("p");
-    title.style.cssText = "margin:0 0 8px;font-size:12px;font-weight:700;color:#ff1739";
+    title.style.cssText = "margin:0 0 12px;font-size:16px;font-weight:800;color:#ff1739";
     title.textContent = `זוגות רשומים (${confirmed.length})`;
     box.appendChild(title);
 
-    confirmed.forEach(([male, female]) => {
+    function personRow(person) {
       const row = document.createElement("div");
-      row.style.cssText = "display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:13px;border-top:1px solid rgba(255,255,255,.06)";
+      row.style.cssText = "display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:4px 0;flex-wrap:wrap";
       const name = document.createElement("span");
-      name.style.fontWeight = "700";
-      name.textContent = `${male.fullName || male.userName || ""} ו${female.fullName || female.userName || ""}`;
-      const phones = document.createElement("span");
-      phones.style.cssText = "color:#8f8f98;direction:ltr";
-      phones.textContent = `${male.phoneNumber} · ${female.phoneNumber}`;
+      name.style.cssText = "font-weight:800;font-size:17px;color:#fff";
+      name.textContent = person.fullName || person.userName || "-";
+      const phone = document.createElement("a");
+      phone.href = `tel:${person.phoneNumber}`;
+      phone.style.cssText = "color:#ffb0b8;direction:ltr;font-size:16px;font-weight:700;text-decoration:none";
+      phone.textContent = person.phoneNumber || "";
       row.appendChild(name);
-      row.appendChild(phones);
-      box.appendChild(row);
+      row.appendChild(phone);
+      return row;
+    }
+
+    confirmed.forEach(([male, female], idx) => {
+      const pairBox = document.createElement("div");
+      pairBox.style.cssText = idx > 0 ? "margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12)" : "";
+      pairBox.appendChild(personRow(male));
+      pairBox.appendChild(personRow(female));
+      box.appendChild(pairBox);
     });
 
     targetEl.appendChild(box);
