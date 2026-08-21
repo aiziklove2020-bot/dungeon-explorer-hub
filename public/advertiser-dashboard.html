@@ -44,7 +44,11 @@
 </nav>
 
 <script src="assets/app.js?v=202608191620"></script>
-<script type="module">import "./assets/site-data.js?v=202608191620";</script><script>
+<script type="module">
+import "./assets/site-data.js?v=202608191620";
+import { renderAdvertiserCouples } from "./assets/advertiser-couples.js?v=202608191620";
+window.__renderAdvertiserCouples = renderAdvertiserCouples;
+</script><script>
 document.addEventListener("DOMContentLoaded", async () => {
   const u = LP.current();
   if (!u || u.role !== "advertiser") { location = "/advertiser-login"; return; }
@@ -61,6 +65,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     list.innerHTML = events.length
       ? events.map(e => `<article class="card"><div class="event-cover" style="background-image:url('${e.img}')">${e.time ? `<span class="loc">◷ ${e.time}</span>` : ""}</div><div class="card-body"><h3>${e.title}</h3><p>${e.dj ? "DJ " + e.dj : ""}</p>${(e.day || e.date) ? `<div class="meta"><span>📅 ${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span></div>` : ""}<a class="btn card-cta" href="/event?id=${e.id}">צפייה באתר 🎟</a></div></article>`).join("")
       : "<p style=\"color:#aaa\">עדיין לא פרסמת אירועים.</p>";
+    if (events.length && window.__renderAdvertiserCouples) {
+      window.__renderAdvertiserCouples(events, list).catch(() => {});
+    }
   } catch (err) {
     document.getElementById("advEventCount").textContent = "0";
     list.innerHTML = "<p style=\"color:#aaa\">לא הצלחנו לטעון את האירועים כרגע.</p>";
