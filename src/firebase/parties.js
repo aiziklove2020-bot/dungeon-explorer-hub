@@ -15,7 +15,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './config';
 import { sendBalanceMatchNotification } from './telegram';
-import { isUserBlocked } from './users';
+import { isUserBlocked, createUserFromRegistration } from './users';
 import { getActiveParties as getActivePartiesFromDataAccess, getBalanceMatches as getBalanceMatchesFromDataAccess, getPartyById as getPartyByIdFromDataAccess, getUserByPhone, invalidateCache } from './dataAccess';
 import {
   DEFAULT_PARTY_RETENTION_HOURS,
@@ -280,6 +280,14 @@ export const registerToPartyNew = async (partyId, registrationData) => {
     await invalidateCache(`party_${partyId}`); // Clear partyById cache
     await invalidateCache('activeParties'); // Clear all parties cache
 
+    // Women get free full access automatically (see getSubscription's
+    // gender bypass) — provision the account right here instead of making
+    // an admin click "צור משתמש" for every single female registrant.
+    // Best-effort: a failure here shouldn't fail the registration itself.
+    if (finalGender === 'female' && !userId) {
+      createUserFromRegistration(registration, 'registered', 'year').catch(() => {});
+    }
+
     // Registration notifications are sent only from RegistrationForm to the
     // registration channel (getRegistrationSettings). Matching channel is not used here.
     return registration;
@@ -398,6 +406,9 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
     await updateDoc(partyRef, { registrations: [...updated, femaleReg] });
     await invalidateCache(`party_${partyId}`);
     await invalidateCache('activeParties');
+    // Women get free full access automatically — provision the account
+    // here instead of requiring a manual admin click. Best-effort.
+    createUserFromRegistration(femaleReg, 'registered', 'year').catch(() => {});
     return { male: updatedMale, female: femaleReg };
   }
 
@@ -421,6 +432,7 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
     await updateDoc(partyRef, { registrations: [...updated, maleReg] });
     await invalidateCache(`party_${partyId}`);
     await invalidateCache('activeParties');
+    createUserFromRegistration(updatedFemale, 'registered', 'year').catch(() => {});
     return { male: maleReg, female: updatedFemale };
   }
 
@@ -441,6 +453,7 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
   });
   await invalidateCache(`party_${partyId}`);
   await invalidateCache('activeParties');
+  createUserFromRegistration(femaleReg, 'registered', 'year').catch(() => {});
   return { male: maleReg, female: femaleReg };
 };
 
