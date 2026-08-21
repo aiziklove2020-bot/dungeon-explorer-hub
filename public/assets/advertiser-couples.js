@@ -57,12 +57,38 @@ function pairsFromRegistrations(registrations) {
   return pairs;
 }
 
+// Manual gender-balance matches ("צור איזון" in the admin) live in a
+// separate `balanceMatches` array on the party doc, not on the individual
+// registration records — algorithm matches write `balancedWith` on the
+// registration itself, but a manual match never does.
+function pairsFromBalanceMatches(balanceMatches) {
+  return (balanceMatches || [])
+    .filter((m) => m?.isMatched && !m?.isCouple && m?.malePhone && m?.femalePhone)
+    .map((m) => [
+      { fullName: m.maleName, phoneNumber: m.malePhone },
+      { fullName: m.femaleName, phoneNumber: m.femalePhone },
+    ]);
+}
+
 async function renderCouplesForEvent(eventId, targetEl) {
   try {
     const partySnap = await getDoc(doc(db, "parties", eventId));
     if (!partySnap.exists()) return;
-    const registrations = partySnap.data()?.registrations || [];
-    const pairs = pairsFromRegistrations(registrations);
+    const data = partySnap.data() || {};
+    const registrations = data.registrations || [];
+    const regPairs = pairsFromRegistrations(registrations);
+    const manualPairs = pairsFromBalanceMatches(data.balanceMatches);
+
+    // Dedupe: an algorithm match can show up both via balancedWith on the
+    // registration and (once saved) in balanceMatches.
+    const seenPairKey = new Set();
+    const pairs = [];
+    [...regPairs, ...manualPairs].forEach(([male, female]) => {
+      const key = [male.phoneNumber, female.phoneNumber].sort().join("|");
+      if (seenPairKey.has(key)) return;
+      seenPairKey.add(key);
+      pairs.push([male, female]);
+    });
     if (pairs.length === 0) return;
 
     const confirmed = [];
