@@ -156,7 +156,7 @@ const BalanceTables = ({
   const isClient = (reg) => {
     if (!reg) return true;
     
-    if (reg.registrationType === 'couple' || reg.gender === 'couple') {
+    if (reg.registrationType === 'couple' || reg.gender === 'couple' || reg.coupleId) {
       return false;
     }
     
