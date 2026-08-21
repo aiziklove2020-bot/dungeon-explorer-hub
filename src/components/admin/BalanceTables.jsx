@@ -92,10 +92,26 @@ const BalanceTables = ({
     checkUsersInTable();
   }, [party.registrations, allUsersMap]);
   
-  const couples = party.registrations?.filter(reg => 
+  // The public registration form's "couple" option registers each partner
+  // as their own single-type record (needed to get correct gender and
+  // real database entries — see register-event.html), linked purely by
+  // each pointing at the other's phone in partnerPhone — there's no
+  // coupleId on that path. Synthesize one here (from the sorted phone
+  // pair) so this component's existing coupleId-keyed grouping picks
+  // them up as a couple instead of two unrelated singles.
+  const phoneToReg = new Map();
+  (party.registrations || []).forEach(reg => { if (reg.phoneNumber) phoneToReg.set(reg.phoneNumber, reg); });
+  const registrations = (party.registrations || []).map(reg => {
+    if (reg.coupleId || !reg.partnerPhone || !reg.phoneNumber) return reg;
+    const partner = phoneToReg.get(reg.partnerPhone);
+    if (!partner || partner.partnerPhone !== reg.phoneNumber) return reg;
+    return { ...reg, coupleId: [reg.phoneNumber, reg.partnerPhone].sort().join('_') };
+  });
+
+  const couples = registrations?.filter(reg =>
     reg.registrationType === 'couple' || reg.gender === 'couple' || reg.coupleId
   ) || [];
-  
+
   const couplesByCoupleId = {};
   couples.forEach(couple => {
     if (couple.coupleId) {
@@ -105,16 +121,16 @@ const BalanceTables = ({
       couplesByCoupleId[couple.coupleId].push(couple);
     }
   });
-  
-  const registeredMen = party.registrations?.filter(reg => 
+
+  const registeredMen = registrations?.filter(reg =>
     genderFromRegistration(reg) === 'male' &&
     reg.phoneNumber &&
     usersInTable.get(reg.phoneNumber) === true &&
     genderFromRegistration(reg) !== 'couple' &&
     !reg.coupleId
   ) || [];
-  
-  const registeredWomen = party.registrations?.filter(reg => 
+
+  const registeredWomen = registrations?.filter(reg =>
     genderFromRegistration(reg) === 'female' &&
     reg.phoneNumber &&
     usersInTable.get(reg.phoneNumber) === true &&
@@ -122,7 +138,7 @@ const BalanceTables = ({
     !reg.coupleId
   ) || [];
 
-  const clients = party.registrations?.filter(reg => 
+  const clients = registrations?.filter(reg =>
     (!reg.phoneNumber || usersInTable.get(reg.phoneNumber) !== true) &&
     genderFromRegistration(reg) !== 'couple' &&
     !reg.coupleId
