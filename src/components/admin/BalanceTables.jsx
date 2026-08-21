@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Link as LinkIcon, Trash2, UserPlus, RefreshCw } from 'lucide-react';
+import { X, Link as LinkIcon, Trash2, UserPlus, RefreshCw, CalendarCheck, Star } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getUserByPhone } from '../../firebase/users';
 import { genderFromRegistration } from '../../firebase/telegram';
@@ -391,18 +391,24 @@ const BalanceTables = ({
                         {pair.male.phoneNumber && usersInTable.get(pair.male.phoneNumber) === true ? (
                           <span className="person-card__registered-badge">✓</span>
                         ) : pair.male.phoneNumber && onConvertToUser && (
-                          <button
-                            onClick={() => onConvertToUser({ 
-                              ...pair.male, 
-                              gender: 'male',
-                              fullName: pair.male.fullName || pair.male.userName 
-                            })}
-                            disabled={registeringClient === pair.male.phoneNumber}
-                            className="person-card__make-user-btn"
-                            title={t('admin.balanceTables.makeUser') || 'הפוך למשתמש'}
-                          >
-                            {registeringClient === pair.male.phoneNumber ? '...' : '+'}
-                          </button>
+                          <span style={{ display: 'inline-flex', gap: 4 }}>
+                            <button
+                              onClick={() => onConvertToUser({ ...pair.male, gender: 'male', fullName: pair.male.fullName || pair.male.userName }, 'day')}
+                              disabled={registeringClient === pair.male.phoneNumber}
+                              className="person-card__make-user-btn"
+                              title="אישור חד פעמי למסיבה זו בלבד"
+                            >
+                              {registeringClient === pair.male.phoneNumber ? '...' : <CalendarCheck size={12} />}
+                            </button>
+                            <button
+                              onClick={() => onConvertToUser({ ...pair.male, gender: 'male', fullName: pair.male.fullName || pair.male.userName }, 'year')}
+                              disabled={registeringClient === pair.male.phoneNumber}
+                              className="person-card__make-user-btn"
+                              title="מנוי מלא לשנה"
+                            >
+                              {registeringClient === pair.male.phoneNumber ? '...' : <Star size={12} />}
+                            </button>
+                          </span>
                         )}
                         {!pair.match?.isCouple && unmatchedWomen.length > 0 && onSwapPartner && (
                           <button
@@ -457,18 +463,24 @@ const BalanceTables = ({
                         {pair.female.phoneNumber && usersInTable.get(pair.female.phoneNumber) === true ? (
                           <span className="person-card__registered-badge">✓</span>
                         ) : pair.female.phoneNumber && onConvertToUser && (
-                          <button
-                            onClick={() => onConvertToUser({ 
-                              ...pair.female, 
-                              gender: 'female',
-                              fullName: pair.female.fullName || pair.female.userName 
-                            })}
-                            disabled={registeringClient === pair.female.phoneNumber}
-                            className="person-card__make-user-btn"
-                            title={t('admin.balanceTables.makeUser') || 'הפוך למשתמש'}
-                          >
-                            {registeringClient === pair.female.phoneNumber ? '...' : '+'}
-                          </button>
+                          <span style={{ display: 'inline-flex', gap: 4 }}>
+                            <button
+                              onClick={() => onConvertToUser({ ...pair.female, gender: 'female', fullName: pair.female.fullName || pair.female.userName }, 'day')}
+                              disabled={registeringClient === pair.female.phoneNumber}
+                              className="person-card__make-user-btn"
+                              title="אישור חד פעמי למסיבה זו בלבד"
+                            >
+                              {registeringClient === pair.female.phoneNumber ? '...' : <CalendarCheck size={12} />}
+                            </button>
+                            <button
+                              onClick={() => onConvertToUser({ ...pair.female, gender: 'female', fullName: pair.female.fullName || pair.female.userName }, 'year')}
+                              disabled={registeringClient === pair.female.phoneNumber}
+                              className="person-card__make-user-btn"
+                              title="מנוי מלא לשנה"
+                            >
+                              {registeringClient === pair.female.phoneNumber ? '...' : <Star size={12} />}
+                            </button>
+                          </span>
                         )}
                         {!pair.match?.isCouple && unmatchedMen.length > 0 && onSwapPartner && (
                           <button
@@ -718,22 +730,29 @@ const BalanceTables = ({
                   </p>
                 </div>
                 <div className="not-registered-card__actions">
-                  {onConvertToUser && (
-                    <button
-                      onClick={() => onConvertToUser(client)}
-                      disabled={registeringClient === client.phoneNumber}
-                      className="not-registered-card__register-btn"
-                      title={t('admin.balanceTables.registerClientTitle')}
-                    >
-                      {registeringClient === client.phoneNumber ? (
-                        <>
-                          <Loader size="small" />
-                          <span>{t('admin.balanceTables.registering')}</span>
-                        </>
-                      ) : (
-                        t('admin.balanceTables.registerClient')
-                      )}
+                  {onConvertToUser && registeringClient === client.phoneNumber && (
+                    <button disabled className="not-registered-card__register-btn">
+                      <Loader size="small" />
+                      <span>{t('admin.balanceTables.registering')}</span>
                     </button>
+                  )}
+                  {onConvertToUser && registeringClient !== client.phoneNumber && (
+                    <>
+                      <button
+                        onClick={() => onConvertToUser(client, 'day')}
+                        className="not-registered-card__register-btn"
+                        title="אישור חד פעמי למסיבה זו בלבד"
+                      >
+                        <CalendarCheck size={14} /> יום
+                      </button>
+                      <button
+                        onClick={() => onConvertToUser(client, 'year')}
+                        className="not-registered-card__register-btn"
+                        title="מנוי מלא לשנה"
+                      >
+                        <Star size={14} /> שנה
+                      </button>
+                    </>
                   )}
                   {onDeleteClient && (
                     <button
