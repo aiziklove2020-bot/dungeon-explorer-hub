@@ -273,14 +273,20 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
   // so a misclick doesn't silently hand out a free year of access.
   const handleConvertClientToUser = async (registration, tier = 'year') => {
     const name = registration.fullName || registration.userName || registration.phoneNumber || t('admin.user');
-    const message = tier === 'year'
-      ? (() => {
-          const expiry = new Date();
-          expiry.setFullYear(expiry.getFullYear() + 1);
-          const expiryStr = expiry.toLocaleDateString('he-IL');
-          return `לתת ל${name} מנוי מלא לכל האתר עד ${expiryStr} (שנה מהיום)?\n\nלאישור חד פעמי למסיבה הזו בלבד, השתמש בכפתור הנפרד.`;
-        })()
-      : `לאשר איזון מגדרי ל${name} — למסיבה הזו בלבד? זה לא הופך אותו למנוי קבוע.`;
+    // Women get free full access automatically (see getSubscription's
+    // gender bypass) — the tier/expiry stored here doesn't actually gate
+    // anything for them, so the confirmation should say so, not quote a
+    // paid-subscription expiry date that's misleading for this case.
+    const message = registration.gender === 'female'
+      ? `ליצור למשתמשת ${name} חשבון באתר? היא תקבל גישה מלאה וחינמית אוטומטית (איזון מגדרי).`
+      : tier === 'year'
+        ? (() => {
+            const expiry = new Date();
+            expiry.setFullYear(expiry.getFullYear() + 1);
+            const expiryStr = expiry.toLocaleDateString('he-IL');
+            return `לתת ל${name} מנוי מלא לכל האתר עד ${expiryStr} (שנה מהיום)?\n\nלאישור חד פעמי למסיבה הזו בלבד, השתמש בכפתור הנפרד.`;
+          })()
+        : `לאשר איזון מגדרי ל${name} — למסיבה הזו בלבד? זה לא הופך אותו למנוי קבוע.`;
     if (!window.confirm(message)) return;
 
     try {

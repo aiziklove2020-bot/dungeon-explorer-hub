@@ -463,24 +463,17 @@ const BalanceTables = ({
                         {pair.female.phoneNumber && usersInTable.get(pair.female.phoneNumber) === true ? (
                           <span className="person-card__registered-badge">✓</span>
                         ) : pair.female.phoneNumber && onConvertToUser && (
-                          <span style={{ display: 'inline-flex', gap: 4 }}>
-                            <button
-                              onClick={() => onConvertToUser({ ...pair.female, gender: 'female', fullName: pair.female.fullName || pair.female.userName }, 'day')}
-                              disabled={registeringClient === pair.female.phoneNumber}
-                              className="person-card__make-user-btn"
-                              title="אישור חד פעמי למסיבה זו בלבד"
-                            >
-                              {registeringClient === pair.female.phoneNumber ? '...' : <CalendarCheck size={12} />}
-                            </button>
-                            <button
-                              onClick={() => onConvertToUser({ ...pair.female, gender: 'female', fullName: pair.female.fullName || pair.female.userName }, 'year')}
-                              disabled={registeringClient === pair.female.phoneNumber}
-                              className="person-card__make-user-btn"
-                              title="מנוי מלא לשנה"
-                            >
-                              {registeringClient === pair.female.phoneNumber ? '...' : <Star size={12} />}
-                            </button>
-                          </span>
+                          // Women get free full access automatically (see
+                          // getSubscription's gender bypass) — day/year is
+                          // meaningless here, this just creates the account.
+                          <button
+                            onClick={() => onConvertToUser({ ...pair.female, gender: 'female', fullName: pair.female.fullName || pair.female.userName }, 'year')}
+                            disabled={registeringClient === pair.female.phoneNumber}
+                            className="person-card__make-user-btn"
+                            title="צור משתמש (גישה חינם לנשים)"
+                          >
+                            {registeringClient === pair.female.phoneNumber ? '...' : <UserPlus size={12} />}
+                          </button>
                         )}
                         {!pair.match?.isCouple && unmatchedMen.length > 0 && onSwapPartner && (
                           <button
@@ -737,22 +730,34 @@ const BalanceTables = ({
                     </button>
                   )}
                   {onConvertToUser && registeringClient !== client.phoneNumber && (
-                    <>
-                      <button
-                        onClick={() => onConvertToUser(client, 'day')}
-                        className="not-registered-card__register-btn"
-                        title="אישור חד פעמי למסיבה זו בלבד"
-                      >
-                        <CalendarCheck size={14} /> יום
-                      </button>
+                    client.gender === 'female' ? (
+                      // Women get free full access automatically — day/year
+                      // is meaningless here, this just creates the account.
                       <button
                         onClick={() => onConvertToUser(client, 'year')}
                         className="not-registered-card__register-btn"
-                        title="מנוי מלא לשנה"
+                        title="צור משתמש (גישה חינם לנשים)"
                       >
-                        <Star size={14} /> שנה
+                        <UserPlus size={14} /> צור משתמש
                       </button>
-                    </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => onConvertToUser(client, 'day')}
+                          className="not-registered-card__register-btn"
+                          title="אישור חד פעמי למסיבה זו בלבד"
+                        >
+                          <CalendarCheck size={14} /> יום
+                        </button>
+                        <button
+                          onClick={() => onConvertToUser(client, 'year')}
+                          className="not-registered-card__register-btn"
+                          title="מנוי מלא לשנה"
+                        >
+                          <Star size={14} /> שנה
+                        </button>
+                      </>
+                    )
                   )}
                   {onDeleteClient && (
                     <button
