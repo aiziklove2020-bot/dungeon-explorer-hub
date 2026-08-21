@@ -55,15 +55,23 @@
           <option value="couple">זוג המעוניין להירשם</option>
         </select>
       </label>
-      <div class="form-row">
-        <label>שם מלא<input required name="fullName" autocomplete="name"></label>
-        <label>טלפון<input required name="phoneNumber" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel"></label>
-      </div>
-      <label>טלגרם (אופציונלי)<input name="telegramUsername" placeholder="@username"></label>
-      <div id="partnerFields" style="display:none">
+      <div id="singleFields">
         <div class="form-row">
-          <label>שם בן/בת הזוג<input name="partnerName"></label>
-          <label>טלפון בן/בת הזוג<input name="partnerPhone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10"></label>
+          <label>שם מלא<input name="fullName" autocomplete="name"></label>
+          <label>טלפון<input name="phoneNumber" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel"></label>
+        </div>
+        <label>טלגרם (אופציונלי)<input name="telegramUsername" placeholder="@username"></label>
+      </div>
+      <div id="coupleFields" style="display:none">
+        <p style="color:#aaa;font-size:13px;margin:0 0 8px">פרטי הגבר</p>
+        <div class="form-row">
+          <label>שם מלא<input name="maleFullName" autocomplete="name"></label>
+          <label>טלפון<input name="malePhone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel"></label>
+        </div>
+        <p style="color:#aaa;font-size:13px;margin:14px 0 8px">פרטי האישה</p>
+        <div class="form-row">
+          <label>שם מלא<input name="femaleFullName" autocomplete="name"></label>
+          <label>טלפון<input name="femalePhone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel"></label>
         </div>
       </div>
       <label><span><input required type="checkbox" style="width:auto"> אני מעל גיל 18 ומאשר/ת את תנאי ההשתתפות</span></label>
@@ -99,7 +107,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const step2 = document.getElementById("regStep2");
   const form = document.getElementById("regForm");
   const typeSelect = document.getElementById("typeSelect");
-  const partnerFields = document.getElementById("partnerFields");
+  const singleFields = document.getElementById("singleFields");
+  const coupleFields = document.getElementById("coupleFields");
   const whatsappOnly = document.getElementById("whatsappOnly");
   const whatsappLink = document.getElementById("whatsappLink");
 
@@ -154,11 +163,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   typeSelect.addEventListener("change", () => {
-    partnerFields.style.display = typeSelect.value === "couple" ? "" : "none";
+    const isCouple = typeSelect.value === "couple";
+    coupleFields.style.display = isCouple ? "" : "none";
+    singleFields.style.display = isCouple ? "none" : "";
   });
 
   const ISRAELI_PHONE_RE = /^05\d{8}$/;
-  const phoneInputs = [form.phoneNumber, form.partnerPhone].filter(Boolean);
+  const phoneInputs = [form.phoneNumber, form.malePhone, form.femalePhone].filter(Boolean);
   phoneInputs.forEach(input => {
     input.addEventListener("input", () => {
       input.value = input.value.replace(/\D/g, "").slice(0, 10);
@@ -169,28 +180,82 @@ document.addEventListener("DOMContentLoaded", async () => {
     e.preventDefault();
     if (!selectedParty) return;
     const f = new FormData(form);
-    const phoneNumber = String(f.get("phoneNumber") || "").replace(/\D/g, "");
-    if (!ISRAELI_PHONE_RE.test(phoneNumber)) {
-      toast("נא להזין מספר טלפון תקין (10 ספרות, מתחיל ב-05)", "error");
-      form.phoneNumber.focus();
-      return;
-    }
-    const partnerPhoneRaw = String(f.get("partnerPhone") || "").replace(/\D/g, "");
-    if (typeSelect.value === "couple" && !ISRAELI_PHONE_RE.test(partnerPhoneRaw)) {
-      toast("נא להזין מספר טלפון תקין לבן/בת הזוג (10 ספרות, מתחיל ב-05)", "error");
-      form.partnerPhone.focus();
-      return;
-    }
+    const isCouple = typeSelect.value === "couple";
     const btn = form.querySelector("button[type=submit]");
+
+    if (!isCouple) {
+      const phoneNumber = String(f.get("phoneNumber") || "").replace(/\D/g, "");
+      if (!ISRAELI_PHONE_RE.test(phoneNumber)) {
+        toast("נא להזין מספר טלפון תקין (10 ספרות, מתחיל ב-05)", "error");
+        form.phoneNumber.focus();
+        return;
+      }
+      btn.disabled = true;
+      try {
+        await window.LPData.registerForParty(selectedParty.id, {
+          fullName: f.get("fullName"),
+          phoneNumber,
+          telegramUsername: f.get("telegramUsername"),
+          registrationType: f.get("registrationType"),
+        });
+        step2.style.display = "none";
+        document.getElementById("regSuccess").style.display = "";
+      } catch (err) {
+        toast(err.message || "שגיאה בהרשמה, נסו שוב", "error");
+      } finally {
+        btn.disabled = false;
+      }
+      return;
+    }
+
+    // Couple: the site's shared registration function forces a single
+    // combined record with gender="couple" when registrationType is
+    // literally "couple" — the partner never gets their own registration,
+    // and the Telegram notification ends up showing the same partner
+    // details twice instead of both people's real info. Registering each
+    // partner as their own single-type call (sharing a coupleId) reuses
+    // the already-correct single-registration path for both the database
+    // record and the notification, once per person.
+    const maleFullName = f.get("maleFullName");
+    const malePhone = String(f.get("malePhone") || "").replace(/\D/g, "");
+    const femaleFullName = f.get("femaleFullName");
+    const femalePhone = String(f.get("femalePhone") || "").replace(/\D/g, "");
+    if (!maleFullName || !ISRAELI_PHONE_RE.test(malePhone)) {
+      toast("נא להזין שם וטלפון תקין לגבר (10 ספרות, מתחיל ב-05)", "error");
+      form.malePhone.focus();
+      return;
+    }
+    if (!femaleFullName || !ISRAELI_PHONE_RE.test(femalePhone)) {
+      toast("נא להזין שם וטלפון תקין לאישה (10 ספרות, מתחיל ב-05)", "error");
+      form.femalePhone.focus();
+      return;
+    }
+    if (malePhone === femalePhone) {
+      toast("הגבר והאישה חייבים להזין שני מספרי טלפון שונים", "error");
+      return;
+    }
+
     btn.disabled = true;
+    // registrationType drives gender assignment server-side: anything not
+    // exactly "couple" and not starting with "single-female" defaults to
+    // male, so "single-male-couple" / "single-female-couple" get the
+    // right gender while staying distinct from the plain single-balance
+    // types. There is no coupleId field on this write path — the two
+    // records are linked purely by each other's partnerPhone.
     try {
       await window.LPData.registerForParty(selectedParty.id, {
-        fullName: f.get("fullName"),
-        phoneNumber,
-        telegramUsername: f.get("telegramUsername"),
-        registrationType: f.get("registrationType"),
-        partnerName: f.get("partnerName"),
-        partnerPhone: typeSelect.value === "couple" ? partnerPhoneRaw : f.get("partnerPhone"),
+        fullName: maleFullName,
+        phoneNumber: malePhone,
+        registrationType: "single-male-couple",
+        partnerName: femaleFullName,
+        partnerPhone: femalePhone,
+      });
+      await window.LPData.registerForParty(selectedParty.id, {
+        fullName: femaleFullName,
+        phoneNumber: femalePhone,
+        registrationType: "single-female-couple",
+        partnerName: maleFullName,
+        partnerPhone: malePhone,
       });
       step2.style.display = "none";
       document.getElementById("regSuccess").style.display = "";

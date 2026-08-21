@@ -54,6 +54,22 @@ function pairsFromRegistrations(registrations) {
       pairs.push([male, female]);
     });
 
+  // The public registration form's "couple" option registers each partner
+  // as their own record (registrationType single-male-couple /
+  // single-female-couple) linked purely by each pointing at the other's
+  // phone in partnerPhone — there's no coupleId on this path.
+  registrations
+    .filter((r) => r.partnerPhone && r.phoneNumber && !seen.has(r.phoneNumber))
+    .forEach((r) => {
+      const partner = byPhone.get(r.partnerPhone);
+      if (!partner || partner.partnerPhone !== r.phoneNumber) return;
+      seen.add(r.phoneNumber);
+      seen.add(partner.phoneNumber);
+      const male = r.gender === "male" ? r : partner;
+      const female = r.gender === "female" ? r : partner;
+      pairs.push([male, female]);
+    });
+
   return pairs;
 }
 
