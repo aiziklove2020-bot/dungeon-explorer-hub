@@ -6,6 +6,7 @@ import { LanguageProvider } from "../../i18n/LanguageContext";
 import { authenticateAdvertiser } from "@/firebase/advertisers";
 import { getPartiesByAdvertiser } from "@/firebase/parties";
 import { createParty, updateParty, deleteParty } from "@/firebase/parties";
+import { getUserByPhone } from "@/firebase/users";
 import PartyEditor from "@/components/admin/PartyEditor";
 
 export const Route = createFileRoute("/advertiser/")({
@@ -243,35 +244,107 @@ function AdvertiserPanel({
               {parties.map((party) => (
                 <div
                   key={party.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5"
                 >
-                  <div>
-                    <h3 className="text-lg font-bold">{party.title || party.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {party.date instanceof Date ? party.date.toLocaleDateString("he-IL") : ""}
-                      {party.dj ? ` · ${party.dj}` : ""}
-                    </p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold">{party.title || party.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {party.date instanceof Date ? party.date.toLocaleDateString("he-IL") : ""}
+                        {party.dj ? ` · ${party.dj}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setEditingParty(party)}
+                        className="rounded-full border border-primary px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                      >
+                        עריכה
+                      </button>
+                      <button
+                        onClick={() => handleDelete(party.id, party.title || party.name)}
+                        className="flex items-center gap-1 rounded-full border border-destructive px-4 py-2 text-sm font-bold text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        <Trash2 size={14} /> מחיקה
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setEditingParty(party)}
-                      className="rounded-full border border-primary px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-                    >
-                      עריכה
-                    </button>
-                    <button
-                      onClick={() => handleDelete(party.id, party.title || party.name)}
-                      className="flex items-center gap-1 rounded-full border border-destructive px-4 py-2 text-sm font-bold text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
-                    >
-                      <Trash2 size={14} /> מחיקה
-                    </button>
-                  </div>
+                  <RegisteredCouples party={party} />
                 </div>
               ))}
             </div>
           )}
         </>
       )}
+    </div>
+  );
+}
+
+/**
+ * Couple registrants for one party, shown to the advertiser once the site
+ * team has actually processed them (both partners converted to real users)
+ * — not raw pending registrations, which the advertiser shouldn't see mid
+ * gender-balance review.
+ */
+function RegisteredCouples({ party }: { party: any }) {
+  const [couples, setCouples] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const registrations = (party.registrations || []).filter((r: any) => r.registrationType === "couple");
+      const byCoupleId = new Map<string, any[]>();
+      registrations.forEach((r: any) => {
+        if (!r.coupleId) return;
+        if (!byCoupleId.has(r.coupleId)) byCoupleId.set(r.coupleId, []);
+        byCoupleId.get(r.coupleId)!.push(r);
+      });
+
+      const confirmed: any[] = [];
+      for (const pair of byCoupleId.values()) {
+        const male = pair.find((r) => r.gender === "male") || pair[0];
+        const female = pair.find((r) => r.gender === "female") || pair[1];
+        if (!male?.phoneNumber || !female?.phoneNumber) continue;
+        try {
+          const [maleUser, femaleUser] = await Promise.all([
+            getUserByPhone(male.phoneNumber),
+            getUserByPhone(female.phoneNumber),
+          ]);
+          if (maleUser && maleUser.level !== "blocked" && femaleUser && femaleUser.level !== "blocked") {
+            confirmed.push({ male, female });
+          }
+        } catch {
+          // best-effort lookup; skip this pair on failure
+        }
+      }
+      if (!cancelled) setCouples(confirmed);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [party.id, party.registrations]);
+
+  if (couples === null) return null;
+  if (couples.length === 0) return null;
+
+  return (
+    <div className="border-t border-border pt-3">
+      <p className="mb-2 text-xs font-bold text-muted-foreground">זוגות רשומים ({couples.length})</p>
+      <div className="flex flex-col gap-2">
+        {couples.map(({ male, female }, idx) => (
+          <div
+            key={idx}
+            className="flex flex-col gap-1 rounded-xl bg-secondary/30 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span className="font-bold">
+              {male.fullName || male.userName} ו{female.fullName || female.userName}
+            </span>
+            <span className="text-xs text-muted-foreground" dir="ltr">
+              {male.phoneNumber} · {female.phoneNumber}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
