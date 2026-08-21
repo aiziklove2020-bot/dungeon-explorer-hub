@@ -267,8 +267,22 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
     }
   };
 
-  // Convert client to user with 1 year subscription
+  // Convert client to user. `day` only approves gender balance for this
+  // specific party; `year` grants a real full-site subscription — the
+  // confirm() spells out exactly what's about to happen and until when,
+  // so a misclick doesn't silently hand out a free year of access.
   const handleConvertClientToUser = async (registration, tier = 'year') => {
+    const name = registration.fullName || registration.userName || registration.phoneNumber || t('admin.user');
+    const message = tier === 'year'
+      ? (() => {
+          const expiry = new Date();
+          expiry.setFullYear(expiry.getFullYear() + 1);
+          const expiryStr = expiry.toLocaleDateString('he-IL');
+          return `לתת ל${name} מנוי מלא לכל האתר עד ${expiryStr} (שנה מהיום)?\n\nלאישור חד פעמי למסיבה הזו בלבד, השתמש בכפתור הנפרד.`;
+        })()
+      : `לאשר איזון מגדרי ל${name} — למסיבה הזו בלבד? זה לא הופך אותו למנוי קבוע.`;
+    if (!window.confirm(message)) return;
+
     try {
       await createUserFromRegistration(registration, 'registered', tier);
       loadActiveParties();

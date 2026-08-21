@@ -289,10 +289,21 @@ const MatchesSection = ({ showSaved }) => {
     return party.registrations?.filter(reg => genderFromRegistration(reg) === gender).length || 0;
   };
 
-  const handleConvertClientToUser = async (registration) => {
+  const handleConvertClientToUser = async (registration, tier = 'year') => {
+    const name = registration.fullName || registration.userName || registration.phoneNumber || t('admin.user');
+    const message = tier === 'year'
+      ? (() => {
+          const expiry = new Date();
+          expiry.setFullYear(expiry.getFullYear() + 1);
+          const expiryStr = expiry.toLocaleDateString('he-IL');
+          return `לתת ל${name} מנוי מלא לכל האתר עד ${expiryStr} (שנה מהיום)?\n\nלאישור חד פעמי למסיבה הזו בלבד, השתמש בכפתור הנפרד.`;
+        })()
+      : `לאשר איזון מגדרי ל${name} — למסיבה הזו בלבד? זה לא הופך אותו למנוי קבוע.`;
+    if (!window.confirm(message)) return;
+
     try {
       setRegisteringClient(registration.phoneNumber);
-      await createUserFromRegistration(registration, 'registered');
+      await createUserFromRegistration(registration, 'registered', tier);
       loadActiveParties();
       showSaved();
     } catch (error) {

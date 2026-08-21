@@ -144,16 +144,16 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
               <button
                 onClick={() => onConvertToUser(registration, 'day')}
                 className="bg-sky-700 hover:bg-sky-600 text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap"
-                title="אישור איזון מגדרי ליום אחד בלבד"
+                title="אישור איזון חד פעמי — לא הופך אותו למנוי לטווח ארוך"
               >
-                ✅ רשום ליום
+                ✅ אישור למסיבה זו בלבד
               </button>
               <button
                 onClick={() => onConvertToUser(registration, 'year')}
-                className="bg-green-600 hover:bg-green-500 text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap"
-                title="מנוי לשנה שלמה"
+                className="bg-amber-600 hover:bg-amber-500 text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap"
+                title="מעניק גישה מלאה לכל האתר לשנה שלמה"
               >
-                ✅ רשום לשנה
+                ⭐ מנוי מלא לשנה
               </button>
             </>
           )}
