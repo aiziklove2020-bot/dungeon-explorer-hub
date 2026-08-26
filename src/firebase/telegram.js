@@ -971,6 +971,70 @@ export const sendNewWorkshopRegistrationTelegram = async (workshop, registration
  * partyUrl: the registration/info URL for the external party (registrationLink field).
  * If party has imageURL (public HTTPS), sends the image via sendPhoto with caption; otherwise text only.
  */
+/** Matches the admin's "אני מאשר את המסיבות שלי" checkbox in TelegramSection.jsx —
+ *  not a real advertiser doc, just an explicit opt-in for admin-added (no advertiser) parties. */
+const ADMIN_PSEUDO_ADVERTISER_ID = '__admin__';
+
+/**
+ * Same allow/deny rule the automatic broadcast (api/telegram-webhook.js:
+ * partyAllowedFor) uses, kept in sync here so a manual publish can never
+ * reach a channel the party wouldn't otherwise be allowed into.
+ */
+function isPartyAllowedForChannel(party, allowedAdvertiserIds) {
+  if (!allowedAdvertiserIds) return true;
+  if (party.createdBy) return allowedAdvertiserIds.includes(party.createdBy);
+  return allowedAdvertiserIds.includes(ADMIN_PSEUDO_ADVERTISER_ID);
+}
+
+/**
+ * Lets an advertiser publish their own party to Telegram immediately, instead
+ * of waiting for the scheduled broadcast (Sun/Wed/Fri). Sends only to
+ * channels the party is actually allowed into — reuses the exact same
+ * channels/allowedAdvertiserIds config and rule as the automatic broadcast,
+ * so a manual publish can never leak into another advertiser's restricted
+ * channel. Skips destinations that opted out (broadcastEnabled === false).
+ */
+export const sendManualPartyAnnouncement = async (party, language = 'he') => {
+  const config = await getTelegramSettings();
+  if (!config?.enabled) throw new Error('הפרסום לטלגרם מושבת כרגע במערכת');
+
+  const bot = (config.bots || []).find((b) => b.id === 'legacy') || (config.bots || [])[0];
+  const botToken = bot?.token || config.botToken;
+  if (!botToken) throw new Error('לא הוגדר בוט טלגרם במערכת');
+
+  const destinations = (config.channels || [])
+    .filter((c) => c.broadcastEnabled !== false)
+    .filter((c) => isPartyAllowedForChannel(party, Array.isArray(c.allowedAdvertiserIds) ? c.allowedAdvertiserIds : null));
+
+  if (destinations.length === 0) {
+    throw new Error('אין ערוץ שהמסיבה הזו מורשית להתפרסם בו');
+  }
+
+  const isExternal = party?.partyType === 'external';
+  const partyForTemplate = { ...party, date: formatDateOnly(party?.date, language) };
+  const imageUrl = party?.imageURL && String(party.imageURL).trim().startsWith('http') ? String(party.imageURL).trim() : null;
+  const partyForCaption = imageUrl ? { ...partyForTemplate, imageURL: '' } : partyForTemplate;
+  const text = isExternal
+    ? formatNewExternalPartyNotification(partyForCaption, party?.registrationLink || '', language)
+    : formatNewPartyNotification(partyForCaption, language);
+
+  let sentCount = 0;
+  const failures = [];
+  for (const dest of destinations) {
+    let ok = false;
+    if (imageUrl) {
+      ok = await sendTelegramPhoto(botToken, dest.chatId, imageUrl, text, 'HTML');
+      if (!ok) ok = await sendTelegramNotification(text, botToken, dest.chatId, 'HTML');
+    } else {
+      ok = await sendTelegramNotification(text, botToken, dest.chatId, 'HTML');
+    }
+    if (ok) sentCount++;
+    else failures.push(dest.name || dest.chatId);
+  }
+
+  return { sentCount, totalDestinations: destinations.length, failures };
+};
+
 export const sendNewExternalPartyTelegram = async (party, language = 'he') => {
   try {
     const config = await getTelegramConfigForMessage(MESSAGE_KEYS.NEW_EXTERNAL_PARTY);

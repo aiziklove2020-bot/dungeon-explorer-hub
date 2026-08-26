@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Trash2, LogOut } from "lucide-react";
+import { Plus, Trash2, LogOut, Send } from "lucide-react";
 import { PageLayout } from "@/components/PageLayout";
 import { LanguageProvider } from "../../i18n/LanguageContext";
 import { authenticateAdvertiser } from "@/firebase/advertisers";
 import { getPartiesByAdvertiser } from "@/firebase/parties";
 import { createParty, updateParty, deleteParty } from "@/firebase/parties";
 import { getUserByPhone } from "@/firebase/users";
+import { sendManualPartyAnnouncement } from "@/firebase/telegram";
 import PartyEditor from "@/components/admin/PartyEditor";
 
 export const Route = createFileRoute("/advertiser/")({
@@ -128,6 +129,7 @@ function AdvertiserPanel({
 }) {
   const [parties, setParties] = useState<any[] | null>(null);
   const [editingParty, setEditingParty] = useState<any | null>(null);
+  const [publishingId, setPublishingId] = useState<string | null>(null);
 
   const loadParties = () => {
     getPartiesByAdvertiser(advertiserId)
@@ -168,6 +170,29 @@ function AdvertiserPanel({
       loadParties();
     } catch (err: any) {
       alert(`שגיאה בשמירת המסיבה: ${err?.message || err}`);
+    }
+  }
+
+  async function handlePublishNow(party: any) {
+    const already = party.manualTelegramPublishedAt;
+    const confirmMsg = already
+      ? `כבר פרסמת את "${party.title || party.name}" בעבר (${new Date(already).toLocaleString("he-IL")}). לפרסם שוב?`
+      : `לפרסם את "${party.title || party.name}" עכשיו לערוצי הטלגרם הרלוונטיים?`;
+    if (!window.confirm(confirmMsg)) return;
+    setPublishingId(party.id);
+    try {
+      const result = await sendManualPartyAnnouncement(party);
+      await updateParty(party.id, { manualTelegramPublishedAt: new Date().toISOString() });
+      loadParties();
+      if (result.failures.length) {
+        alert(`פורסם ל-${result.sentCount}/${result.totalDestinations} ערוצים. נכשל: ${result.failures.join(", ")}`);
+      } else {
+        alert(`המסיבה פורסמה בהצלחה ל-${result.sentCount} ערוץ/ים בטלגרם!`);
+      }
+    } catch (err: any) {
+      alert(`שגיאה בפרסום: ${err?.message || err}`);
+    } finally {
+      setPublishingId(null);
     }
   }
 
@@ -216,8 +241,9 @@ function AdvertiserPanel({
           <p className="mb-1 font-bold text-primary">מתי היא מתפרסמת בקבוצות הטלגרם?</p>
           <p>
             פרסום המסיבות לקבוצות הטלגרם נעשה <strong>אוטומטית</strong>, לפי לוח זמנים קבוע:
-            <strong> ימי ראשון, רביעי ושישי בשעה 12:00</strong> (שעון ישראל). אין צורך (ואין
-            אפשרות) לפרסם את המסיבה בעצמכם — היא תעלה לבד בזמן הקרוב ביותר.
+            <strong> ימי ראשון, רביעי ושישי בשעה 12:00</strong> (שעון ישראל). אין צורך לחכות —
+            אפשר גם ללחוץ על <strong>"פרסם עכשיו לטלגרם"</strong> ליד כל מסיבה כדי לפרסם אותה
+            מיידית, בכל זמן שנוח לכם.
           </p>
         </div>
       )}
@@ -254,7 +280,24 @@ function AdvertiserPanel({
                         {party.dj ? ` · ${party.dj}` : ""}
                       </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handlePublishNow(party)}
+                        disabled={publishingId === party.id}
+                        title={
+                          party.manualTelegramPublishedAt
+                            ? `פורסם לאחרונה ב-${new Date(party.manualTelegramPublishedAt).toLocaleString("he-IL")}`
+                            : undefined
+                        }
+                        className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition-transform hover:scale-105 disabled:opacity-50"
+                      >
+                        <Send size={14} />
+                        {publishingId === party.id
+                          ? "שולח..."
+                          : party.manualTelegramPublishedAt
+                            ? "פרסם שוב לטלגרם"
+                            : "פרסם עכשיו לטלגרם"}
+                      </button>
                       <button
                         onClick={() => setEditingParty(party)}
                         className="rounded-full border border-primary px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
