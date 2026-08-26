@@ -29,7 +29,7 @@
 </aside><div class="scrim"></div>
 <main>
 <div class="dashboard"><aside class="sidebar"><h3>מפרסמים</h3><a href="/advertiser-dashboard">▦ דשבורד</a><a class="active" href="/create-event">＋ פרסום אירוע חדש</a><a href="/">⌂ חזרה לאתר</a></aside>
-<section class="dash-content"><div class="section-title"><h1>פרסום אירוע חדש</h1></div>
+<section class="dash-content"><div class="section-title"><h1 id="pageTitle">פרסום אירוע חדש</h1></div>
 
 <div class="panel" style="border-color:#7c1828;margin-bottom:20px">
   <h2 style="margin:0 0 12px">📋 איך לפרסם נכון</h2>
@@ -78,7 +78,7 @@
 <label id="linkWrap" style="display:none">🔗 לינק לרכישת כרטיסים
   <input name="ticketLink" type="url" placeholder="https://..." dir="ltr">
   <small style="color:#8f8f98;display:block;margin-top:6px">הקישור למכירת הכרטיסים שלכם — גולשים יועברו אליו ישירות.</small>
-</label><label><span><input type="checkbox" required style="width:auto"> אני מאשר/ת שכל המידע נכון ועומד בתנאי הפרסום</span></label><button class="btn primary">פרסום האירוע</button></form></div></section></div></main>
+</label><label><span><input type="checkbox" required style="width:auto"> אני מאשר/ת שכל המידע נכון ועומד בתנאי הפרסום</span></label><button class="btn primary" id="submitBtn">פרסום האירוע</button></form></div></section></div></main>
 <footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
 
 <nav class="mobile-bottom">
@@ -88,10 +88,16 @@
 
 <script src="assets/app.js?v=202608191620"></script>
 <script type="module">
-import "./assets/site-data.js?v=202608262027";
-document.addEventListener("DOMContentLoaded", () => {
+import "./assets/site-data.js?v=202608262056";
+document.addEventListener("DOMContentLoaded", async () => {
   const u = LP.current();
   if (!u || u.role !== "advertiser") { location = "/advertiser-login"; return; }
+
+  const editId = new URLSearchParams(location.search).get("id");
+  if (editId) {
+    document.getElementById("pageTitle").textContent = "עריכת אירוע";
+    document.getElementById("submitBtn").textContent = "שמירת שינויים";
+  }
 
   // Upload as soon as a file is picked, so the party can be published the
   // moment the form is submitted. Works from a desktop file picker and from
@@ -149,6 +155,44 @@ document.addEventListener("DOMContentLoaded", () => {
   regMode.addEventListener("change", syncRegMode);
   syncRegMode();
 
+  const form = document.getElementById("createEvent");
+  if (editId) {
+    try {
+      const p = await window.LPData.getAdvertiserParty(u.id, editId);
+      form.title.value = p.title || "";
+      form.dj.value = p.dj || "";
+      form.date.value = p.dateISO || "";
+      form.time.value = p.time || "";
+      form.city.value = p.city || "";
+      form.desc.value = p.desc || "";
+      const knownCats = ["חילופי זוגות", "בדסמ", "מאנץ'", "פסטיבל"];
+      if (p.category && !knownCats.includes(p.category)) {
+        catSelect.value = "__other__";
+        catOtherWrap.style.display = "";
+        catOther.value = p.category;
+      } else {
+        catSelect.value = p.category || "";
+      }
+      if (p.img) {
+        urlEl.value = p.img;
+        previewEl.src = p.img;
+        previewEl.style.display = "";
+      }
+      if (p.whatsappNumber) {
+        regMode.value = "whatsapp";
+        form.whatsapp.value = p.whatsappNumber;
+      } else if (p.registrationLink) {
+        regMode.value = "link";
+        form.ticketLink.value = p.registrationLink;
+      }
+      syncRegMode();
+    } catch (err) {
+      toast(err.message || "שגיאה בטעינת האירוע לעריכה", "error");
+      setTimeout(() => location = "/advertiser-dashboard", 900);
+      return;
+    }
+  }
+
   document.getElementById("createEvent").addEventListener("submit", async e => {
     e.preventDefault();
     if (uploading) { toast("רגע, התמונה עדיין נטענת...", "error"); return; }
@@ -178,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btn = e.target.querySelector("button");
     btn.disabled = true;
     try {
-      await window.LPData.createAdvertiserParty(u.id, {
+      const payload = {
         title: f.get("title"),
         dj: f.get("dj"),
         date: f.get("date"),
@@ -189,11 +233,17 @@ document.addEventListener("DOMContentLoaded", () => {
         city: f.get("city"),
         whatsappNumber: mode === "whatsapp" ? f.get("whatsapp") : "",
         registrationLink: mode === "link" ? f.get("ticketLink") : "",
-      });
-      toast("האירוע פורסם באתר");
+      };
+      if (editId) {
+        await window.LPData.updateAdvertiserParty(u.id, editId, payload);
+        toast("השינויים נשמרו");
+      } else {
+        await window.LPData.createAdvertiserParty(u.id, payload);
+        toast("האירוע פורסם באתר");
+      }
       setTimeout(() => location = "/advertiser-dashboard", 900);
     } catch (err) {
-      toast(err.message || "שגיאה בפרסום האירוע", "error");
+      toast(err.message || "שגיאה בשמירת האירוע", "error");
     } finally {
       btn.disabled = false;
     }

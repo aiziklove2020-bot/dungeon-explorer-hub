@@ -35108,13 +35108,42 @@ async function FU(e, t) {
 async function IU(e) {
 	return (await rM() || []).filter((t) => t.createdBy === e).sort((e, t) => yU(t) - yU(e)).map(vU);
 }
-async function LU(e) {
+async function LU(e, t) {
+	let n = await vM(t);
+	if (!n || n.createdBy !== e) throw Error("המסיבה לא נמצאה");
+	return vU({
+		...n,
+		id: t
+	});
+}
+async function RU(e, t, n) {
+	let r = await vM(t);
+	if (!r || r.createdBy !== e) throw Error("המסיבה לא נמצאה");
+	return await yM(t, {
+		title: n.title,
+		name: n.title,
+		date: n.date,
+		time: n.time || "",
+		dj: n.dj || "",
+		imageURL: n.imageURL || "",
+		description: n.description,
+		partyType: n.registrationLink ? "external" : "internal",
+		registrationLink: n.registrationLink || "",
+		whatsappNumber: n.whatsappNumber || ""
+	}), !0;
+}
+async function zU(e, t) {
+	let n = await vM(t);
+	if (!n || n.createdBy !== e) throw Error("המסיבה לא נמצאה");
+	return await bM(t), !0;
+}
+async function BU(e) {
 	let t = await vM(e);
 	if (!t) throw Error("המסיבה לא נמצאה");
 	let n = await lA(t);
 	return await yM(e, { manualTelegramPublishedAt: (/* @__PURE__ */ new Date()).toISOString() }), n;
 }
-async function RU(e) {
+async function VU(e) {
 	let t = await hN(e);
 	return {
 		id: t.id,
@@ -35123,7 +35152,7 @@ async function RU(e) {
 		role: "advertiser"
 	};
 }
-async function zU(e, t) {
+async function HU(e, t) {
 	let n = await gN(e, t);
 	if (!n.authenticated) throw Error(n.error || "פרטי התחברות שגויים");
 	let r = n.advertiser;
@@ -35134,21 +35163,21 @@ async function zU(e, t) {
 		role: "advertiser"
 	};
 }
-async function BU() {
+async function UU() {
 	return (await bk().catch(() => []) || []).filter((e) => e?.enabled !== !1 && e?.text).map((e) => e.text);
 }
 window.LPData = {
 	loadEvents: bU,
 	loadSocialLinks: wU,
-	loadNewsFeed: BU,
+	loadNewsFeed: UU,
 	loadAbout: xU,
 	loadContact: SU,
 	supportChat: CU,
 	loadStore: jU,
 	createStoreOrder: MU,
 	communityChat: NU,
-	registerAdvertiserAccount: RU,
-	loginAdvertiser: zU,
+	registerAdvertiserAccount: VU,
+	loginAdvertiser: HU,
 	register: EU,
 	login: DU,
 	getMembershipStatus: kU,
@@ -35156,10 +35185,13 @@ window.LPData = {
 	uploadImage: PU,
 	createAdvertiserParty: FU,
 	loadAdvertiserParties: IU,
-	publishPartyToTelegram: LU,
+	getAdvertiserParty: LU,
+	updateAdvertiserParty: RU,
+	deleteAdvertiserParty: zU,
+	publishPartyToTelegram: BU,
 	registerForParty: AU
 };
-function VU() {
+function WU() {
 	if (document.getElementById("lpSupportChat")) return;
 	let e = document.createElement("div");
 	e.id = "lpSupportChat", e.innerHTML = "\n    <button id=\"lpSupportChatToggle\" aria-label=\"תמיכה\" style=\"position:fixed;left:16px;bottom:86px;z-index:300;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#ff1739,#cf0026);border:0;color:#fff;font-size:22px;box-shadow:0 10px 25px rgba(0,0,0,.4);cursor:pointer\">💬</button>\n    <div id=\"lpSupportChatPanel\" style=\"display:none;position:fixed;left:16px;bottom:148px;z-index:300;width:min(340px,calc(100vw - 32px));max-height:65vh;background:#0c0c0f;border:1px solid #33333a;border-radius:20px;box-shadow:0 18px 45px rgba(0,0,0,.5);overflow:hidden;flex-direction:column\">\n      <div style=\"padding:14px 16px;background:linear-gradient(135deg,#ff1739,#cf0026);display:flex;justify-content:space-between;align-items:center\">\n        <div style=\"display:flex;gap:8px;align-items:center\">\n          <button id=\"lpSupportChatClose\" title=\"סגירה\" style=\"background:rgba(255,255,255,.18);border:0;color:#fff;font-size:15px;width:26px;height:26px;border-radius:8px;cursor:pointer\">✕</button>\n          <button id=\"lpSupportChatMin\" title=\"מזעור\" style=\"background:rgba(255,255,255,.18);border:0;color:#fff;font-size:15px;width:26px;height:26px;border-radius:8px;cursor:pointer\">–</button>\n        </div>\n        <div style=\"display:flex;gap:10px;align-items:center\">\n          <div style=\"text-align:center\">\n            <b style=\"font-size:15px;display:block\">צ'אט תמיכה</b>\n            <small style=\"font-size:11px;color:rgba(255,255,255,.85)\">מגיב בהקדם</small>\n          </div>\n          <div style=\"width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:16px\">💬</div>\n        </div>\n      </div>\n\n      <div id=\"lpSupportChatGate\" style=\"padding:22px 18px;text-align:center\">\n        <p style=\"margin:0 0 14px;font-size:14px\">הזן את שמך כדי להתחיל את הצ'אט</p>\n        <input id=\"lpSupportChatName\" class=\"input\" placeholder=\"שם\" style=\"width:100%;box-sizing:border-box;text-align:center;margin-bottom:14px\">\n        <button id=\"lpSupportChatStart\" class=\"btn primary full\">התחל צ'אט</button>\n      </div>\n\n      <div id=\"lpSupportChatBody\" style=\"display:none;flex-direction:column;flex:1;min-height:0\">\n        <div id=\"lpSupportChatMsgs\" class=\"chat-window\" style=\"flex:1;overflow-y:auto;padding:12px;min-height:160px\"></div>\n        <div class=\"form-row\" style=\"padding:10px 12px;margin:0\">\n          <input id=\"lpSupportChatInput\" class=\"input\" placeholder=\"כתבו הודעה...\" style=\"flex:1\">\n          <button id=\"lpSupportChatSend\" class=\"btn primary\">שליחה</button>\n        </div>\n      </div>\n    </div>\n  ", document.body.appendChild(e);
@@ -35207,5 +35239,5 @@ function VU() {
 		e.key === "Enter" && re();
 	});
 }
-typeof document < "u" && (document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", VU) : VU());
+typeof document < "u" && (document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", WU) : WU());
 //#endregion

@@ -6,7 +6,7 @@
 // Exposes window.LPData — real data only. window.LP (assets/app.js) still
 // owns local UI state (current logged-in user session, favorites list) until
 // auth is migrated too.
-import { getActiveParties, registerToPartyNew, createParty, getAllParties, getPartyById, updateParty } from "./firebase/parties";
+import { getActiveParties, registerToPartyNew, createParty, getAllParties, getPartyById, updateParty, deleteParty } from "./firebase/parties";
 import { collection, query, where, getDocsFromServer } from "firebase/firestore";
 import { db } from "./firebase/config";
 import { sendRegistrationTelegram, sendManualPartyAnnouncement } from "./firebase/telegram";
@@ -418,6 +418,46 @@ async function loadAdvertiserParties(advertiserId: string) {
     .map(toEventShape);
 }
 
+/** Fetches one of an advertiser's own parties (for the edit form), refusing anything not theirs. */
+async function getAdvertiserParty(advertiserId: string, partyId: string) {
+  const party: any = await getPartyById(partyId);
+  if (!party || party.createdBy !== advertiserId) throw new Error("המסיבה לא נמצאה");
+  return toEventShape({ ...party, id: partyId });
+}
+
+/**
+ * Lets an advertiser edit their own party. Re-checks `createdBy` against the
+ * live doc (not just what the caller claims) so an advertiser can never
+ * overwrite someone else's party by guessing/reusing an id.
+ */
+async function updateAdvertiserParty(advertiserId: string, partyId: string, data: {
+  title: string; date: string; time: string; dj?: string; imageURL?: string; description: string; whatsappNumber?: string; registrationLink?: string;
+}) {
+  const existing: any = await getPartyById(partyId);
+  if (!existing || existing.createdBy !== advertiserId) throw new Error("המסיבה לא נמצאה");
+  await updateParty(partyId, {
+    title: data.title,
+    name: data.title,
+    date: data.date,
+    time: data.time || "",
+    dj: data.dj || "",
+    imageURL: data.imageURL || "",
+    description: data.description,
+    partyType: data.registrationLink ? "external" : "internal",
+    registrationLink: data.registrationLink || "",
+    whatsappNumber: data.whatsappNumber || "",
+  });
+  return true;
+}
+
+/** Lets an advertiser delete their own party — same ownership check as above. */
+async function deleteAdvertiserParty(advertiserId: string, partyId: string) {
+  const existing: any = await getPartyById(partyId);
+  if (!existing || existing.createdBy !== advertiserId) throw new Error("המסיבה לא נמצאה");
+  await deleteParty(partyId);
+  return true;
+}
+
 /**
  * Lets an advertiser publish one of their own parties to Telegram right now,
  * instead of waiting for the scheduled broadcast. Looks the raw party doc up
@@ -474,6 +514,9 @@ async function loadNewsFeed() {
   uploadImage,
   createAdvertiserParty,
   loadAdvertiserParties,
+  getAdvertiserParty,
+  updateAdvertiserParty,
+  deleteAdvertiserParty,
   publishPartyToTelegram,
   registerForParty,
 };
