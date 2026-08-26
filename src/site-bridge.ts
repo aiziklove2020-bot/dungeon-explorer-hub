@@ -6,10 +6,10 @@
 // Exposes window.LPData — real data only. window.LP (assets/app.js) still
 // owns local UI state (current logged-in user session, favorites list) until
 // auth is migrated too.
-import { getActiveParties, registerToPartyNew, createParty, getAllParties, getPartyById } from "./firebase/parties";
+import { getActiveParties, registerToPartyNew, createParty, getAllParties, getPartyById, updateParty } from "./firebase/parties";
 import { collection, query, where, getDocsFromServer } from "firebase/firestore";
 import { db } from "./firebase/config";
-import { sendRegistrationTelegram } from "./firebase/telegram";
+import { sendRegistrationTelegram, sendManualPartyAnnouncement } from "./firebase/telegram";
 import { getSocialLinks, getRssFeeds, getContent } from "./firebase/settings";
 import { registerForumUser, loginForumUser, getForumUserByEmail, updateForumUser, getForumUserById } from "./firebase/forumUsers";
 import {
@@ -398,7 +398,14 @@ async function createAdvertiserParty(advertiserId: string, data: {
     description: data.description,
     category: data.category || "",
     partyType: data.registrationLink ? "external" : "internal",
-    createdByAdvertiserId: advertiserId,
+    // Must be `createdBy` — this is the exact field the Telegram broadcast
+    // filter (api/telegram-webhook.js: partyAllowedFor) and the admin's
+    // per-advertiser party lookup (firebase/parties.js: query('createdBy'))
+    // both key off. A different field name here means the filter can never
+    // identify the real advertiser and silently falls back to its "admin-only"
+    // branch — which caused parties from any advertiser to leak into any
+    // restricted channel whose allowlist happened to include "__admin__".
+    createdBy: advertiserId,
   });
 }
 
@@ -406,9 +413,25 @@ async function createAdvertiserParty(advertiserId: string, data: {
 async function loadAdvertiserParties(advertiserId: string) {
   const all = await getAllParties();
   return (all || [])
-    .filter((p: any) => p.createdByAdvertiserId === advertiserId)
+    .filter((p: any) => p.createdBy === advertiserId)
     .sort((a: any, b: any) => partyDateMs(b) - partyDateMs(a))
     .map(toEventShape);
+}
+
+/**
+ * Lets an advertiser publish one of their own parties to Telegram right now,
+ * instead of waiting for the scheduled broadcast. Looks the raw party doc up
+ * by id (event.html-shaped objects from loadAdvertiserParties don't carry the
+ * raw `createdBy`/`imageURL` fields the Telegram formatter needs) so the same
+ * advertiser-allowlist filter in sendManualPartyAnnouncement sees the real
+ * `createdBy`, and can never reach a channel that advertiser isn't allowed into.
+ */
+async function publishPartyToTelegram(partyId: string) {
+  const party = await getPartyById(partyId);
+  if (!party) throw new Error("המסיבה לא נמצאה");
+  const result = await sendManualPartyAnnouncement(party);
+  await updateParty(partyId, { manualTelegramPublishedAt: new Date().toISOString() });
+  return result;
 }
 
 /** Real advertiser signup — creates a pending account awaiting admin approval. */
@@ -451,6 +474,7 @@ async function loadNewsFeed() {
   uploadImage,
   createAdvertiserParty,
   loadAdvertiserParties,
+  publishPartyToTelegram,
   registerForParty,
 };
 
