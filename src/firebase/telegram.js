@@ -85,7 +85,15 @@ const REGISTRATION_TYPE_TO_TEMPLATE_KEY = {
   'single-male-balance': REGISTRATION_TYPE_KEYS.SINGLE_MALE_BALANCE,
   'single-female-balance': REGISTRATION_TYPE_KEYS.SINGLE_FEMALE_BALANCE,
   'single-female-discount': REGISTRATION_TYPE_KEYS.SINGLE_FEMALE_DISCOUNT,
-  couple: REGISTRATION_TYPE_KEYS.COUPLE
+  couple: REGISTRATION_TYPE_KEYS.COUPLE,
+  // register-event.html registers each half of a couple as its own record
+  // (registrationType "single-male-couple"/"single-female-couple") so the
+  // database and per-person notification path can stay on the plain single
+  // path — see that file's comment. Without these two entries here, that
+  // registrationType matched nothing above and silently fell back to the
+  // generic single template, so the admin's couple template never fired.
+  'single-male-couple': REGISTRATION_TYPE_KEYS.COUPLE,
+  'single-female-couple': REGISTRATION_TYPE_KEYS.COUPLE
 };
 
 /**
@@ -180,6 +188,14 @@ export const replacePlaceholders = (template, payload) => {
     }
     return value != null ? String(value) : '';
   });
+};
+
+/** Derives the Hebrew weekday from a raw date — used as a fallback when a party doc has no `day` field. */
+const hebrewDayFromDate = (date) => {
+  if (date == null) return '';
+  const d = date instanceof Date ? date : (date?.toDate ? date.toDate() : new Date(date));
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('he-IL', { weekday: 'long' });
 };
 
 /** Format date as day month year only (no time), e.g. "5 בפברואר 2026" or "5 February 2026". */
@@ -569,6 +585,7 @@ export const formatRegistrationNotification = (registration, party, language = '
     : (party.date?.toDate ? party.date.toDate() : new Date(party.date));
   
   const formattedDate = date.toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', {
+    weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -576,7 +593,7 @@ export const formatRegistrationNotification = (registration, party, language = '
     minute: '2-digit'
   });
 
-  const isCouple = registration.registrationType === 'couple' || (registration.partnerName && registration.partnerPhone);
+  const isCouple = registration.registrationType === 'couple' || registration.registrationType === 'single-male-couple' || registration.registrationType === 'single-female-couple' || (registration.partnerName && registration.partnerPhone);
   
   const message = language === 'he' 
     ? isCouple
@@ -696,13 +713,34 @@ export const sendRegistrationTelegram = async (registration, party, botToken, ch
     const regType = registration.registrationType || (registration.partnerName && registration.partnerPhone ? 'couple' : 'single-male-balance');
     const templateKey = REGISTRATION_TYPE_TO_TEMPLATE_KEY[regType];
     const template = (templateKey && config?.[templateKey]?.trim()) ? config[templateKey] : config?.template;
-    const partyForTemplate = { ...party, date: formatDateOnly(party?.date, language) };
+    const weekday = party?.day || hebrewDayFromDate(party?.date);
+    const partyForTemplate = {
+      ...party,
+      date: weekday && language === 'he' ? `יום ${weekday}, ${formatDateOnly(party?.date, language)}` : formatDateOnly(party?.date, language),
+      day: weekday
+    };
     const ensureAt = (v) => (v && String(v).trim() ? (String(v).trim().startsWith('@') ? String(v).trim() : '@' + String(v).trim()) : v);
+    // register-event.html registers each half of a couple as its own single-type
+    // record, linked only by partnerName/partnerPhone (see that file's comment) —
+    // neither record carries the womanFullName/womanPhoneNumber fields the couple
+    // template expects, so build them here from whichever half is "self" vs "partner".
+    const isFemaleHalf = regType === 'single-female-couple';
+    const coupleFields = (regType === 'single-male-couple' || isFemaleHalf) && registration.partnerName && registration.partnerPhone
+      ? {
+          fullName: isFemaleHalf ? registration.partnerName : (registration.fullName || registration.userName),
+          phoneNumber: isFemaleHalf ? registration.partnerPhone : registration.phoneNumber,
+          womanFullName: isFemaleHalf ? (registration.fullName || registration.userName) : registration.partnerName,
+          womanPhoneNumber: isFemaleHalf ? registration.phoneNumber : registration.partnerPhone,
+          womanTelegramUsername: isFemaleHalf ? registration.telegramUsername : registration.womanTelegramUsername,
+          telegramUsername: isFemaleHalf ? registration.womanTelegramUsername : registration.telegramUsername
+        }
+      : {};
     const registrationForTemplate = {
       ...registration,
+      ...coupleFields,
       partyDays: formatPartyDaysHebrew(registration?.partyDays, language),
-      telegramUsername: registration.telegramUsername != null ? ensureAt(registration.telegramUsername) : registration.telegramUsername,
-      womanTelegramUsername: registration.womanTelegramUsername != null ? ensureAt(registration.womanTelegramUsername) : registration.womanTelegramUsername
+      telegramUsername: coupleFields.telegramUsername != null ? ensureAt(coupleFields.telegramUsername) : registration.telegramUsername != null ? ensureAt(registration.telegramUsername) : registration.telegramUsername,
+      womanTelegramUsername: coupleFields.womanTelegramUsername != null ? ensureAt(coupleFields.womanTelegramUsername) : registration.womanTelegramUsername != null ? ensureAt(registration.womanTelegramUsername) : registration.womanTelegramUsername
     };
     const text = template?.trim()
       ? replacePlaceholders(template, { registration: registrationForTemplate, party: partyForTemplate })
