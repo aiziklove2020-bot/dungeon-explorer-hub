@@ -713,10 +713,13 @@ export const sendRegistrationTelegram = async (registration, party, botToken, ch
     const regType = registration.registrationType || (registration.partnerName && registration.partnerPhone ? 'couple' : 'single-male-balance');
     const templateKey = REGISTRATION_TYPE_TO_TEMPLATE_KEY[regType];
     const template = (templateKey && config?.[templateKey]?.trim()) ? config[templateKey] : config?.template;
+    // `weekday: 'long'` in the he-IL locale already returns "יום שישי" (with
+    // the "יום" prefix baked in) — same format PartyEditor.jsx stores in
+    // party.day, so this must NOT prepend its own "יום " on top of it.
     const weekday = party?.day || hebrewDayFromDate(party?.date);
     const partyForTemplate = {
       ...party,
-      date: weekday && language === 'he' ? `יום ${weekday}, ${formatDateOnly(party?.date, language)}` : formatDateOnly(party?.date, language),
+      date: weekday && language === 'he' ? `${weekday}, ${formatDateOnly(party?.date, language)}` : formatDateOnly(party?.date, language),
       day: weekday
     };
     const ensureAt = (v) => (v && String(v).trim() ? (String(v).trim().startsWith('@') ? String(v).trim() : '@' + String(v).trim()) : v);

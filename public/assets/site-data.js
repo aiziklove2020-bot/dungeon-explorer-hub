@@ -21544,7 +21544,7 @@ ${e.telegramUsername ? `<b>${i("telegram.telegram")}:</b> @${e.telegramUsername}
 			if (!o || !s.length) return !1;
 			let c = e.registrationType || (e.partnerName && e.partnerPhone ? "couple" : "single-male-balance"), l = jk[c], u = l && a?.[l]?.trim() ? a[l] : a?.template, d = t?.day || Fk(t?.date), f = {
 				...t,
-				date: d && i === "he" ? `יום ${d}, ${Ik(t?.date, i)}` : Ik(t?.date, i),
+				date: d && i === "he" ? `${d}, ${Ik(t?.date, i)}` : Ik(t?.date, i),
 				day: d
 			}, p = (e) => e && String(e).trim() ? String(e).trim().startsWith("@") ? String(e).trim() : "@" + String(e).trim() : e, m = c === "single-female-couple", h = (c === "single-male-couple" || m) && e.partnerName && e.partnerPhone ? {
 				fullName: m ? e.partnerName : e.fullName || e.userName,
