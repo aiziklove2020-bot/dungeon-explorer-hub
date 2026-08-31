@@ -19,7 +19,7 @@ const formatDateOnly = (date, language = 'he') => {
   });
 };
 
-const SITE_URL = 'https://libralparty.net';
+const SITE_URL = 'https://www.libralparty.net';
 
 const buildPartyPayload = (party, language, partyUrl) => ({
   name: party?.name || party?.title || '',
