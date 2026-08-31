@@ -2,6 +2,9 @@ import { getTranslation } from '../i18n/translations';
 import { relayTelegramApi } from '../utils/telegramRelay';
 import { getTelegramSettings } from './settings';
 
+/** Canonical public site URL used as the fallback link in channel broadcasts. */
+const SITE_URL = 'https://www.libralparty.net';
+
 /** Built-in message keys */
 export const MESSAGE_KEYS = {
   REGISTRATION: 'registration',
@@ -771,7 +774,7 @@ export const sendBalancePublishToChannels = async (partiesWithBalance, siteUrl =
   const config = await getTelegramConfigForMessage(MESSAGE_KEYS.BALANCE_PUBLISH);
   if (!config?.enabled || !config.botToken || !config.chatIds?.length) return { sent: 0, failed: 0 };
   const chatIds = [...new Set(config.chatIds)];
-  const url = siteUrl || config.siteUrl || (typeof window !== 'undefined' ? window.location?.origin : '');
+  const url = siteUrl || config.siteUrl || SITE_URL;
   let sent = 0;
   let failed = 0;
   const language = 'he';
@@ -854,7 +857,7 @@ export const sendNewPartyTelegram = async (party, language = 'he') => {
   try {
     const config = await getTelegramConfigForMessage(MESSAGE_KEYS.NEW_PARTY);
     if (!config?.enabled || !config.botToken || !config.chatIds?.length) return false;
-    const siteUrl = config.siteUrl || (typeof window !== 'undefined' ? window.location?.origin || '' : '');
+    const siteUrl = config.siteUrl || SITE_URL;
     const partyForTemplate = { ...party, date: formatDateOnly(party?.date, language) };
     const imageUrl = party?.imageURL && String(party.imageURL).trim().startsWith('http') ? String(party.imageURL).trim() : null;
     // Build caption without imageURL so the link never appears (template may contain {{party.imageURL}}).
@@ -953,7 +956,7 @@ export const sendNewWorkshopTelegram = async (workshop, language = 'he') => {
   try {
     const config = await getTelegramConfigForMessage(MESSAGE_KEYS.NEW_WORKSHOP);
     if (!config?.enabled || !config.botToken || !config.chatIds?.length) return false;
-    const siteUrl = config.siteUrl || (typeof window !== 'undefined' ? window.location?.origin || '' : '');
+    const siteUrl = config.siteUrl || SITE_URL;
     const workshopForTemplate = { ...workshop, date: formatDateOnly(workshop?.date, language) };
     const imageUrl = workshop?.imageUrl && String(workshop.imageUrl).trim().startsWith('http') ? String(workshop.imageUrl).trim() : null;
     const workshopForCaption = imageUrl ? { ...workshopForTemplate, imageUrl: '' } : workshopForTemplate;
@@ -1080,7 +1083,7 @@ export const sendNewExternalPartyTelegram = async (party, language = 'he') => {
   try {
     const config = await getTelegramConfigForMessage(MESSAGE_KEYS.NEW_EXTERNAL_PARTY);
     if (!config?.enabled || !config.botToken || !config.chatIds?.length) return false;
-    const siteUrl = config.siteUrl || (typeof window !== 'undefined' ? window.location?.origin || '' : '');
+    const siteUrl = config.siteUrl || SITE_URL;
     const partyUrl = party?.registrationLink || '';
     const partyForTemplate = { ...party, date: formatDateOnly(party?.date, language) };
     const imageUrl = party?.imageURL && String(party.imageURL).trim().startsWith('http') ? String(party.imageURL).trim() : null;
