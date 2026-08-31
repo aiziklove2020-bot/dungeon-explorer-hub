@@ -276,6 +276,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             <option value="הרצליה">הרצליה</option>
             <option value="כפר סבא">כפר סבא</option>
             <option value="רעננה">רעננה</option>
+            <option value="הוד השרון">הוד השרון</option>
             <option value="מודיעין">מודיעין</option>
             <option value="נהריה">נהריה</option>
             <option value="אילת">אילת</option>
