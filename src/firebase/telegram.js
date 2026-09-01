@@ -119,7 +119,7 @@ export const VARIABLES_REFERENCE = {
     registerForBalance: ['party.name', 'party.time', 'siteUrl']
   },
   [MESSAGE_KEYS.MATCH_NOTIFICATION]: ['party.name', 'party.date', 'party.time', 'matchedPerson.fullName', 'matchedPerson.userName', 'matchedPerson.phoneNumber', 'matchedPerson.telegramUsername', 'matchedPerson.registrationType'],
-  [MESSAGE_KEYS.NEW_PARTY]: ['party.name', 'party.title', 'party.date', 'party.time', 'party.day', 'party.dj', 'party.maleLimit', 'party.femaleLimit', 'party.description', 'party.imageURL', 'siteUrl'],
+  [MESSAGE_KEYS.NEW_PARTY]: ['party.name', 'party.title', 'party.date', 'party.time', 'party.day', 'party.dj', 'party.maleLimit', 'party.femaleLimit', 'party.description', 'party.imageURL', 'siteUrl', 'registerUrl'],
   [MESSAGE_KEYS.NEW_STORE_ITEM]: ['item.name', 'item.description', 'item.price', 'item.id', 'item.stock', 'item.imageURL'],
   [MESSAGE_KEYS.NEW_STORE_ORDER]: ['order.id', 'order.customerName', 'order.customerPhone', 'order.customerTelegram', 'order.finalPrice', 'order.itemsSummary', 'order.userType'],
   [MESSAGE_KEYS.NEW_WORKSHOP]: ['workshop.title', 'workshop.description', 'workshop.instructor', 'workshop.price', 'workshop.date', 'workshop.duration', 'workshop.maxParticipants', 'workshop.imageUrl', 'siteUrl'],
@@ -329,11 +329,12 @@ const SAMPLE_PAYLOADS = {
 };
 
 /** Default format when no template for new party notification */
-const formatNewPartyNotification = (party, language = 'he') => {
+const formatNewPartyNotification = (party, language = 'he', siteUrl = SITE_URL) => {
   const t = (key) => getTranslation(key, language);
   const dateStr = formatDateOnly(party?.date, language);
   const name = party?.name || party?.title || t('telegram.party');
-  return `🆕 <b>${t('telegram.newParty') || 'מסיבה חדשה'}</b>\n\n<b>${t('telegram.party')}:</b> ${name}${party?.day ? `\n<b>יום:</b> ${party.day}` : ''}\n<b>${t('telegram.date')}:</b> ${dateStr}${party?.time ? `\n<b>${t('telegram.time')}:</b> ${party.time}` : ''}${party?.dj ? `\n<b>${t('telegram.dj')}:</b> ${party.dj}` : ''}${party?.maleLimit != null ? `\n<b>${t('telegram.maleLimit')}:</b> ${party.maleLimit}` : ''}${party?.femaleLimit != null ? `\n<b>${t('telegram.femaleLimit')}:</b> ${party.femaleLimit}` : ''}${party?.description ? `\n${party.description}` : ''}`;
+  const linkLine = siteUrl ? `\n\n<b>${t('telegram.registerUrl') || 'הרשמה'}:</b> ${siteUrl}/register` : '';
+  return `🆕 <b>${t('telegram.newParty') || 'מסיבה חדשה'}</b>\n\n<b>${t('telegram.party')}:</b> ${name}${party?.day ? `\n<b>יום:</b> ${party.day}` : ''}\n<b>${t('telegram.date')}:</b> ${dateStr}${party?.time ? `\n<b>${t('telegram.time')}:</b> ${party.time}` : ''}${party?.dj ? `\n<b>${t('telegram.dj')}:</b> ${party.dj}` : ''}${party?.maleLimit != null ? `\n<b>${t('telegram.maleLimit')}:</b> ${party.maleLimit}` : ''}${party?.femaleLimit != null ? `\n<b>${t('telegram.femaleLimit')}:</b> ${party.femaleLimit}` : ''}${party?.description ? `\n${party.description}` : ''}${linkLine}`;
 };
 
 /** Default format when no template for new external party notification */
@@ -435,9 +436,10 @@ export const buildMessagePreview = (messageKey, template, siteUrl = '', language
     const sampleData = SAMPLE_PAYLOADS[MESSAGE_KEYS.NEW_PARTY]();
     if (tpl && String(tpl).trim()) {
       const partyForTemplate = { ...sampleData.party, date: formatDateOnly(sampleData.party?.date, language) };
-      return replacePlaceholders(tpl, { party: partyForTemplate, siteUrl: siteUrl || 'https://example.com' });
+      const previewSiteUrl = siteUrl || 'https://example.com';
+      return replacePlaceholders(tpl, { party: partyForTemplate, siteUrl: previewSiteUrl, registerUrl: `${previewSiteUrl}/register` });
     }
-    return formatNewPartyNotification(sampleData.party, language);
+    return formatNewPartyNotification(sampleData.party, language, siteUrl || SITE_URL);
   }
   if (messageKey === MESSAGE_KEYS.NEW_STORE_ITEM) {
     const sampleData = SAMPLE_PAYLOADS[MESSAGE_KEYS.NEW_STORE_ITEM]();
@@ -863,8 +865,8 @@ export const sendNewPartyTelegram = async (party, language = 'he') => {
     // Build caption without imageURL so the link never appears (template may contain {{party.imageURL}}).
     const partyForCaption = imageUrl ? { ...partyForTemplate, imageURL: '' } : partyForTemplate;
     let text = config.template?.trim()
-      ? replacePlaceholders(config.template, { party: partyForCaption, siteUrl })
-      : formatNewPartyNotification(party, language);
+      ? replacePlaceholders(config.template, { party: partyForCaption, siteUrl, registerUrl: `${siteUrl}/register` })
+      : formatNewPartyNotification(party, language, siteUrl);
     text = (text || '').replace(/\n{3,}/g, '\n\n').trim();
     const parseMode = config.parseMode || 'HTML';
     let ok = true;

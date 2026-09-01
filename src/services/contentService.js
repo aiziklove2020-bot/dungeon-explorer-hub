@@ -472,7 +472,20 @@ export const publishContent = async (commitMessage) => {
       throw err;
     }
 
-    const result = await response.json();
+    let result;
+    try {
+      result = await response.json();
+    } catch {
+      // A 2xx status doesn't guarantee a JSON body — a serverless crash/
+      // timeout after headers were already sent can still return 200 with
+      // an HTML error page, which used to surface as a raw
+      // "Unexpected token 'A'..." JSON.parse crash instead of a real message.
+      const bodyPreview = await response.text().catch(() => '');
+      const err = new Error('הפרסום נכשל: השרת החזיר תגובה לא תקינה (יתכן timeout/שגיאת שרת). נסו שוב, ואם זה חוזר — בדקו את ה-Runtime Logs של publish-content ב-Vercel.');
+      err.status = response.status;
+      err.details = { bodyPreview: bodyPreview.slice(0, 300) };
+      throw err;
+    }
     contentCache.clearMode('public');
 
     // No Telegram notification here on purpose — this used to fire a "new
