@@ -333,7 +333,7 @@ const formatNewPartyNotification = (party, language = 'he', siteUrl = SITE_URL) 
   const t = (key) => getTranslation(key, language);
   const dateStr = formatDateOnly(party?.date, language);
   const name = party?.name || party?.title || t('telegram.party');
-  const linkLine = siteUrl ? `\n\n<b>${t('telegram.registerUrl') || 'הרשמה'}:</b> ${siteUrl}/register` : '';
+  const linkLine = siteUrl ? `\n\n<b>${t('telegram.registerUrl') || 'הרשמה'}:</b> ${siteUrl}` : '';
   return `🆕 <b>${t('telegram.newParty') || 'מסיבה חדשה'}</b>\n\n<b>${t('telegram.party')}:</b> ${name}${party?.day ? `\n<b>יום:</b> ${party.day}` : ''}\n<b>${t('telegram.date')}:</b> ${dateStr}${party?.time ? `\n<b>${t('telegram.time')}:</b> ${party.time}` : ''}${party?.dj ? `\n<b>${t('telegram.dj')}:</b> ${party.dj}` : ''}${party?.maleLimit != null ? `\n<b>${t('telegram.maleLimit')}:</b> ${party.maleLimit}` : ''}${party?.femaleLimit != null ? `\n<b>${t('telegram.femaleLimit')}:</b> ${party.femaleLimit}` : ''}${party?.description ? `\n${party.description}` : ''}${linkLine}`;
 };
 
@@ -437,7 +437,7 @@ export const buildMessagePreview = (messageKey, template, siteUrl = '', language
     if (tpl && String(tpl).trim()) {
       const partyForTemplate = { ...sampleData.party, date: formatDateOnly(sampleData.party?.date, language) };
       const previewSiteUrl = siteUrl || 'https://example.com';
-      return replacePlaceholders(tpl, { party: partyForTemplate, siteUrl: previewSiteUrl, registerUrl: `${previewSiteUrl}/register` });
+      return replacePlaceholders(tpl, { party: partyForTemplate, siteUrl: previewSiteUrl, registerUrl: previewSiteUrl });
     }
     return formatNewPartyNotification(sampleData.party, language, siteUrl || SITE_URL);
   }
@@ -865,7 +865,7 @@ export const sendNewPartyTelegram = async (party, language = 'he') => {
     // Build caption without imageURL so the link never appears (template may contain {{party.imageURL}}).
     const partyForCaption = imageUrl ? { ...partyForTemplate, imageURL: '' } : partyForTemplate;
     let text = config.template?.trim()
-      ? replacePlaceholders(config.template, { party: partyForCaption, siteUrl, registerUrl: `${siteUrl}/register` })
+      ? replacePlaceholders(config.template, { party: partyForCaption, siteUrl, registerUrl: siteUrl })
       : formatNewPartyNotification(party, language, siteUrl);
     text = (text || '').replace(/\n{3,}/g, '\n\n').trim();
     const parseMode = config.parseMode || 'HTML';

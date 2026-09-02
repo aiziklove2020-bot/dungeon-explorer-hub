@@ -21290,7 +21290,7 @@ var Tk, J, Ek, Dk, Ok, kk, Ak, jk, Mk, Nk, Pk, Fk, Ik, Lk, Rk, zk, Bk, Vk, Hk, U
 			partyUrl: "https://example.com/register"
 		})
 	}, Hk = (e, t = "he", n = Tk) => {
-		let r = (e) => VD(e, t), i = Lk(e?.date, t), a = e?.name || e?.title || r("telegram.party"), o = n ? `\n\n<b>${r("telegram.registerUrl") || "הרשמה"}:</b> ${n}/register` : "";
+		let r = (e) => VD(e, t), i = Lk(e?.date, t), a = e?.name || e?.title || r("telegram.party"), o = n ? `\n\n<b>${r("telegram.registerUrl") || "הרשמה"}:</b> ${n}` : "";
 		return `🆕 <b>${r("telegram.newParty") || "מסיבה חדשה"}</b>\n\n<b>${r("telegram.party")}:</b> ${a}${e?.day ? `\n<b>יום:</b> ${e.day}` : ""}\n<b>${r("telegram.date")}:</b> ${i}${e?.time ? `\n<b>${r("telegram.time")}:</b> ${e.time}` : ""}${e?.dj ? `\n<b>${r("telegram.dj")}:</b> ${e.dj}` : ""}${e?.maleLimit == null ? "" : `\n<b>${r("telegram.maleLimit")}:</b> ${e.maleLimit}`}${e?.femaleLimit == null ? "" : `\n<b>${r("telegram.femaleLimit")}:</b> ${e.femaleLimit}`}${e?.description ? `\n${e.description}` : ""}${o}`;
 	}, Uk = (e, t, n = "he") => {
 		let r = (e) => VD(e, n), i = Lk(e?.date, n), a = e?.name || e?.title || r("telegram.party"), o = `🌐 <b>${r("telegram.newExternalParty") || "אירוע חיצוני חדש"}</b>\n\n<b>${r("telegram.party")}:</b> ${a}`;
@@ -21364,7 +21364,7 @@ var Tk, J, Ek, Dk, Ok, kk, Ak, jk, Mk, Nk, Pk, Fk, Ik, Lk, Rk, zk, Bk, Vk, Hk, U
 				return Fk(s, {
 					party: t,
 					siteUrl: i,
-					registerUrl: `${i}/register`
+					registerUrl: i
 				});
 			}
 			return Hk(e.party, r, n || Tk);
@@ -21660,7 +21660,7 @@ ${e.telegramUsername ? `<b>${i("telegram.telegram")}:</b> @${e.telegramUsername}
 			} : i, s = n.template?.trim() ? Fk(n.template, {
 				party: o,
 				siteUrl: r,
-				registerUrl: `${r}/register`
+				registerUrl: r
 			}) : Hk(e, t, r);
 			s = (s || "").replace(/\n{3,}/g, "\n\n").trim();
 			let c = n.parseMode || "HTML", l = !0;
