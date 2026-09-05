@@ -132,14 +132,14 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
     <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-4">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold">{t('admin.editParty')}</h3>
-        <button onClick={onCancel} className="text-zinc-500 hover:text-white">
+        <button onClick={onCancel} className="text-[#94A3B8] hover:text-white">
           <X size={20} />
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.partyName')} *</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.partyName')} *</label>
           <input
             type="text"
             value={formData.name}
@@ -149,7 +149,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           />
         </div>
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.title')}</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.title')}</label>
           <input
             type="text"
             value={formData.title}
@@ -158,7 +158,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           />
         </div>
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.date')} *</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.date')} *</label>
           <input
             type="date"
             value={formData.date}
@@ -168,7 +168,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           />
         </div>
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.dayHebrew')}</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.dayHebrew')}</label>
           <input
             type="text"
             value={formData.day}
@@ -177,7 +177,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           />
         </div>
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.time')}</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.time')}</label>
           <input
             type="text"
             value={formData.time}
@@ -187,7 +187,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           />
         </div>
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">DJ</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">DJ</label>
           <input
             type="text"
             value={formData.dj}
@@ -198,7 +198,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
         {!formData.whatsappNumber?.trim() && (
           <>
             <div className="space-y-1 text-right">
-              <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.maleLimit')}</label>
+              <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.maleLimit')}</label>
               <input
                 type="number"
                 value={formData.maleLimit}
@@ -208,7 +208,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
               />
             </div>
             <div className="space-y-1 text-right">
-              <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.femaleLimit')}</label>
+              <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.femaleLimit')}</label>
               <input
                 type="number"
                 value={formData.femaleLimit}
@@ -220,7 +220,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           </>
         )}
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.partyType')} *</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.partyType')} *</label>
           <select
             value={formData.partyType}
             onChange={e => setFormData(prev => ({...prev, partyType: e.target.value}))}
@@ -231,12 +231,12 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             <option value="exchange">{t('admin.exchange')}</option>
             <option value="external">{t('admin.external')}</option>
           </select>
-          <p className="text-zinc-500 text-xs mt-1">
+          <p className="text-[#94A3B8] text-xs mt-1">
             {t('admin.partyTypeDescription')}
           </p>
         </div>
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">קטגוריה (לסינון באתר)</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">קטגוריה (לסינון באתר)</label>
           <select
             value={formData.category}
             onChange={e => setFormData(prev => ({...prev, category: e.target.value}))}
@@ -248,12 +248,12 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             <option value="מאנץ'">מאנץ'</option>
             <option value="פסטיבל">פסטיבל</option>
           </select>
-          <p className="text-zinc-500 text-xs mt-1">
+          <p className="text-[#94A3B8] text-xs mt-1">
             קובע איך המסיבה תסונן בדף "מסיבות". אם לא נבחר — המערכת תנסה לזהות לפי הכותרת/תיאור.
           </p>
         </div>
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">אזור/עיר (לסינון באתר)</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">אזור/עיר (לסינון באתר)</label>
           <select
             value={formData.city}
             onChange={e => setFormData(prev => ({...prev, city: e.target.value}))}
@@ -349,25 +349,25 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
         />
         <span>
           כלול באינסטגרם (talking_b_d_s_m)
-          <span className="block text-zinc-500 text-xs mt-0.5">
+          <span className="block text-[#94A3B8] text-xs mt-0.5">
             רק מסיבות מסומנות כאן ייכללו בכפתור "פרסם מסיבות לאינסטגרם" — כדי לא להציף/לחשוף לחסימה חשבונות שלא רלוונטיים.
           </span>
         </span>
       </label>
       <div className="space-y-1 text-right">
-        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.description')}</label>
+        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.description')}</label>
         <textarea
           value={formData.description}
           onChange={e => setFormData(prev => ({...prev, description: e.target.value}))}
           rows={3}
           className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
         />
-        <p className="text-zinc-500 text-xs mt-1">
+        <p className="text-[#94A3B8] text-xs mt-1">
           לא להזין מספר טלפון בתיאור — יש שדה וואטסאפ ייעודי למטה.
         </p>
       </div>
       <div className="space-y-1 text-right">
-        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.imageUrl')}</label>
+        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.imageUrl')}</label>
         <ImageUpload
           value={formData.imageURL}
           onChange={(value) => setFormData(prev => ({...prev, imageURL: value}))}
@@ -375,7 +375,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
       </div>
       {formData.partyType === 'external' && (
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.partyPageUrl')} *</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.partyPageUrl')} *</label>
           <input
             type="text"
             value={formData.registrationLink}
@@ -384,13 +384,13 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             placeholder="https://..."
             required={formData.partyType === 'external'}
           />
-          <p className="text-zinc-500 text-xs mt-1">
+          <p className="text-[#94A3B8] text-xs mt-1">
             {t('admin.externalPartyUrlRequired')}
           </p>
         </div>
       )}
       <div className="space-y-1 text-right">
-        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.whatsappNumber') || 'מספר וואטסאפ ליצירת קשר'}</label>
+        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.whatsappNumber') || 'מספר וואטסאפ ליצירת קשר'}</label>
         <input
           type="tel"
           value={formData.whatsappNumber}
@@ -399,7 +399,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           placeholder="050-1234567"
           dir="ltr"
         />
-        <p className="text-zinc-500 text-xs mt-1">
+        <p className="text-[#94A3B8] text-xs mt-1">
           {t('admin.whatsappNumberHint') || 'הזינו רק מספר טלפון - הקישור לוואטסאפ ייווצר אוטומטית'}
         </p>
       </div>
@@ -421,7 +421,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
         <button
           onClick={onCancel}
           disabled={isSaving}
-          className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 md:px-6 py-2 rounded-xl font-bold text-sm md:text-base w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-4 md:px-6 py-2 rounded-xl font-bold text-sm md:text-base w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {t('admin.cancel')}
         </button>

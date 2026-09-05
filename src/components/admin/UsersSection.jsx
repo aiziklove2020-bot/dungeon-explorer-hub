@@ -271,7 +271,7 @@ const UsersSection = ({ showSaved }) => {
         <div>
           <h2 className="text-xl md:text-2xl font-bold">{t('userManagement') || 'ניהול משתמשים'}</h2>
           {!loadingUsers && (
-            <p className="text-sm text-zinc-400 mt-1 flex flex-wrap gap-x-4 gap-y-0">
+            <p className="text-sm text-[#a9a9b2] mt-1 flex flex-wrap gap-x-4 gap-y-0">
               <span>{t('admin.totalCount') || 'כמות כוללת'}: <span className="text-white font-medium">{users.length}</span></span>
               <span>{t('admin.females') || 'נשים'}: <span className="text-white font-medium">{users.filter(u => u.gender === 'female').length}</span></span>
               <span>{t('admin.males') || 'גברים'}: <span className="text-white font-medium">{users.filter(u => u.gender === 'male').length}</span></span>
@@ -288,14 +288,14 @@ const UsersSection = ({ showSaved }) => {
           <button
             onClick={handleExportUsers}
             disabled={users.length === 0}
-            className="bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-700 disabled:opacity-50 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold flex items-center gap-2 text-xs md:text-sm"
+            className="bg-purple-600 hover:bg-purple-500 disabled:bg-[#2a292e] disabled:opacity-50 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold flex items-center gap-2 text-xs md:text-sm"
           >
             <Download size={14} className="md:w-4 md:h-4" /> {t('admin.exportJson') || 'ייצא JSON'}
           </button>
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={importing}
-            className="bg-green-600 hover:bg-green-500 disabled:bg-zinc-700 disabled:opacity-50 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold flex items-center gap-2 text-xs md:text-sm"
+            className="bg-green-600 hover:bg-green-500 disabled:bg-[#2a292e] disabled:opacity-50 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold flex items-center gap-2 text-xs md:text-sm"
           >
             {importing ? <Loader size="small" /> : <Upload size={14} className="md:w-4 md:h-4" />}
             {t('admin.importJson') || 'ייבא JSON'}
@@ -305,7 +305,7 @@ const UsersSection = ({ showSaved }) => {
       </div>
 
       <div className="relative">
-        <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-400" />
+        <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#a9a9b2]" />
         <input
           type="text"
           value={searchQuery}
@@ -314,59 +314,59 @@ const UsersSection = ({ showSaved }) => {
           className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
         />
         {searchQuery && (
-          <button onClick={() => setSearchQuery('')} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-white">
+          <button onClick={() => setSearchQuery('')} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#a9a9b2] hover:text-white">
             ✕
           </button>
         )}
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-zinc-500 text-sm font-bold">{t('admin.filterByType') || 'סינון לפי סוג'}:</span>
-        <button type="button" onClick={() => setTypeFilter('')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${typeFilter === '' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <span className="text-[#94A3B8] text-sm font-bold">{t('admin.filterByType') || 'סינון לפי סוג'}:</span>
+        <button type="button" onClick={() => setTypeFilter('')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${typeFilter === '' ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.filterAll') || 'הכל'}
         </button>
-        <button type="button" onClick={() => setTypeFilter('male')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${typeFilter === 'male' ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <button type="button" onClick={() => setTypeFilter('male')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${typeFilter === 'male' ? 'bg-blue-600 text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.males') || 'גברים'}
         </button>
-        <button type="button" onClick={() => setTypeFilter('female')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${typeFilter === 'female' ? 'bg-pink-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <button type="button" onClick={() => setTypeFilter('female')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${typeFilter === 'female' ? 'bg-pink-600 text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.females') || 'נשים'}
         </button>
-        <button type="button" onClick={() => setTypeFilter('blocked')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${typeFilter === 'blocked' ? 'bg-red-900 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <button type="button" onClick={() => setTypeFilter('blocked')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${typeFilter === 'blocked' ? 'bg-[#93000a] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.filterBlocked') || 'חסומים'}
         </button>
-        <button type="button" onClick={() => setTypeFilter('admin')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${typeFilter === 'admin' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <button type="button" onClick={() => setTypeFilter('admin')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${typeFilter === 'admin' ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.filterAdmins') || 'מנהלים'}
         </button>
       </div>
 
 
       <div className="flex flex-wrap gap-2 items-center">
-        <span className="text-zinc-500 text-sm font-bold">{t('admin.filterBySub') || 'סינון לפי מנוי'}:</span>
-        <button type="button" onClick={() => setSubFilter('')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === '' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <span className="text-[#94A3B8] text-sm font-bold">{t('admin.filterBySub') || 'סינון לפי מנוי'}:</span>
+        <button type="button" onClick={() => setSubFilter('')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === '' ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.filterAll') || 'הכל'}
         </button>
-        <button type="button" onClick={() => setSubFilter('parties')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'parties' ? 'bg-blue-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <button type="button" onClick={() => setSubFilter('parties')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'parties' ? 'bg-blue-600 text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.subscriptionsParties') || 'מסיבות'}
         </button>
-        <button type="button" onClick={() => setSubFilter('exchange')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'exchange' ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <button type="button" onClick={() => setSubFilter('exchange')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'exchange' ? 'bg-purple-600 text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.subscriptionsExchange') || 'חילופים'}
         </button>
-        <button type="button" onClick={() => setSubFilter('expired')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'expired' ? 'bg-red-900 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <button type="button" onClick={() => setSubFilter('expired')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'expired' ? 'bg-[#93000a] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.filterExpired') || 'פג תוקף'}
         </button>
-        <button type="button" onClick={() => setSubFilter('expiring1')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'expiring1' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <button type="button" onClick={() => setSubFilter('expiring1')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'expiring1' ? 'bg-orange-600 text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.filterExpiring1') || 'יפוג בחודש'}
         </button>
-        <button type="button" onClick={() => setSubFilter('expiring2')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'expiring2' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <button type="button" onClick={() => setSubFilter('expiring2')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'expiring2' ? 'bg-orange-600 text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.filterExpiring2') || 'יפוג בחודשיים'}
         </button>
-        <button type="button" onClick={() => setSubFilter('expiring3')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'expiring3' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}>
+        <button type="button" onClick={() => setSubFilter('expiring3')} className={`px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${subFilter === 'expiring3' ? 'bg-orange-600 text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}>
           {t('admin.filterExpiring3') || 'יפוג ב-3 חודשים'}
         </button>
       </div>
 
       {(searchQuery || typeFilter || subFilter) && (
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-[#a9a9b2]">
           {t('admin.showingResults') || 'מציג'} {filteredUsers.length} {t('admin.outOf') || 'מתוך'} {users.length} {t('admin.users') || 'משתמשים'}
         </p>
       )}
@@ -374,11 +374,11 @@ const UsersSection = ({ showSaved }) => {
       {loadingUsers ? (
         <AdminLoader />
       ) : users.length === 0 ? (
-        <div className="text-center py-12 text-zinc-500">
+        <div className="text-center py-12 text-[#94A3B8]">
           <p>{t('noUsersFound') || 'אין משתמשים'}</p>
         </div>
       ) : filteredUsers.length === 0 ? (
-        <div className="text-center py-12 text-zinc-500">
+        <div className="text-center py-12 text-[#94A3B8]">
           <p>{t('admin.noSearchResults') || 'לא נמצאו תוצאות לחיפוש'}</p>
         </div>
       ) : (
@@ -390,15 +390,15 @@ const UsersSection = ({ showSaved }) => {
                   <form onSubmit={handleSaveUser} className="space-y-3 md:space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div>
-                        <label className="text-xs uppercase font-bold text-zinc-500">{t('fullName') || 'שם מלא'} *</label>
+                        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('fullName') || 'שם מלא'} *</label>
                         <input type="text" value={editUserForm.name} onChange={(e) => setEditUserForm({ ...editUserForm, name: e.target.value })} className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right" required />
                       </div>
                       <div>
-                        <label className="text-xs uppercase font-bold text-zinc-500">{t('phoneNumber') || 'מספר טלפון'} *</label>
+                        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('phoneNumber') || 'מספר טלפון'} *</label>
                         <input type="tel" value={editUserForm.phoneNumber} onChange={handlePhoneChange} placeholder="05XXXXXXXX" maxLength="10" className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right" required />
                       </div>
                       <div>
-                        <label className="text-xs uppercase font-bold text-zinc-500">{t('gender') || 'מין'} *</label>
+                        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('gender') || 'מין'} *</label>
                         <select value={editUserForm.gender} onChange={(e) => setEditUserForm({ ...editUserForm, gender: e.target.value })} className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right" required>
                           <option value="">{t('selectGender') || 'בחר מין'}</option>
                           <option value="male">{t('male') || 'זכר'}</option>
@@ -407,17 +407,17 @@ const UsersSection = ({ showSaved }) => {
                         </select>
                       </div>
                       <div>
-                        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.telegramUsername')}</label>
+                        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.telegramUsername')}</label>
                         <input type="text" value={editUserForm.telegramUsername || ''} onChange={(e) => { let value = e.target.value.replace(/^@+/g, ''); setEditUserForm({ ...editUserForm, telegramUsername: value }); }} placeholder="username (ללא @)" className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right" />
                       </div>
                       <div>
-                        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.subscriptionEndDate')}</label>
+                        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.subscriptionEndDate')}</label>
                         <input type="date" value={editUserForm.subscriptionEndDate || ''} onChange={(e) => setEditUserForm({ ...editUserForm, subscriptionEndDate: e.target.value })} className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right" />
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <button type="submit" className="bg-[#e11d48] hover:bg-[#be0037] text-white px-6 py-2 rounded-xl font-bold">{t('save') || 'שמור'}</button>
-                      <button type="button" onClick={handleCancelEdit} className="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2 rounded-xl font-bold">{t('cancel') || 'ביטול'}</button>
+                      <button type="button" onClick={handleCancelEdit} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-6 py-2 rounded-xl font-bold">{t('cancel') || 'ביטול'}</button>
                     </div>
                   </form>
                 ) : (
@@ -426,16 +426,16 @@ const UsersSection = ({ showSaved }) => {
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <strong className="text-lg">{u.name}</strong>
-                          <span className={`px-2 py-1 rounded text-xs font-bold ${u.level === 'admin' ? 'bg-red-600' : u.level === 'gold' ? 'bg-yellow-600' : u.level === 'registered' ? 'bg-green-600' : u.level === 'blocked' ? 'bg-red-900' : 'bg-zinc-600'}`}>
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${u.level === 'admin' ? 'bg-[#e11d48]' : u.level === 'gold' ? 'bg-yellow-600' : u.level === 'registered' ? 'bg-green-600' : u.level === 'blocked' ? 'bg-[#93000a]' : 'bg-[#353439]'}`}>
                             {u.level}
                           </span>
-                          <span className={`px-2 py-1 rounded text-xs font-bold ${u.gender === 'male' ? 'bg-blue-600' : u.gender === 'female' ? 'bg-pink-600' : 'bg-zinc-600'}`}>
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${u.gender === 'male' ? 'bg-blue-600' : u.gender === 'female' ? 'bg-pink-600' : 'bg-[#353439]'}`}>
                             {u.gender === 'male' ? t('male') || 'זכר' : u.gender === 'female' ? t('female') || 'נקבה' : t('admin.balanceTables.notDefined') || 'לא מוגדר'}
                           </span>
                         </div>
-                        <p className="text-zinc-400 text-sm">{t('phoneNumber') || 'מספר טלפון'}: <PhoneLink phone={u.phoneNumber}>{u.phoneNumber}</PhoneLink></p>
+                        <p className="text-[#a9a9b2] text-sm">{t('phoneNumber') || 'מספר טלפון'}: <PhoneLink phone={u.phoneNumber}>{u.phoneNumber}</PhoneLink></p>
                         {u.telegramUsername && (
-                          <p className="text-zinc-400 text-sm">Telegram: @{u.telegramUsername}</p>
+                          <p className="text-[#a9a9b2] text-sm">Telegram: @{u.telegramUsername}</p>
                         )}
                         <div className="flex flex-col gap-1.5 mt-2">
                           <SubscriptionBadge user={u} kind="parties" />
@@ -458,11 +458,11 @@ const UsersSection = ({ showSaved }) => {
                             {t('unblock') || 'בטל חסימה'}
                           </button>
                         ) : (
-                          <button onClick={() => handleUpdateUserLevel(u.id, 'blocked')} className="bg-red-900 hover:bg-red-800 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm">
+                          <button onClick={() => handleUpdateUserLevel(u.id, 'blocked')} className="bg-[#93000a] hover:bg-[#be0037] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm">
                             {t('block') || 'חסום'}
                           </button>
                         )}
-                        <button onClick={() => handleDeleteUser(u.id, u.name)} className="bg-red-900 hover:bg-red-800 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm">
+                        <button onClick={() => handleDeleteUser(u.id, u.name)} className="bg-[#93000a] hover:bg-[#be0037] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm">
                           🗑️ {t('admin.delete')}
                         </button>
                       </div>

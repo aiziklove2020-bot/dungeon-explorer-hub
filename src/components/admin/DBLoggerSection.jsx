@@ -144,13 +144,13 @@ const DBLoggerSection = () => {
             {enabled ? <Power size={16} /> : <PowerOff size={16} />}
             {enabled ? 'מופעל' : 'כבוי'}
           </button>
-          <div className="flex gap-1 bg-zinc-800 rounded-lg p-1">
+          <div className="flex gap-1 bg-[#1f1f23] rounded-lg p-1">
             <button
               onClick={() => setViewMode('local')}
               className={`px-3 py-1 rounded text-xs font-bold ${
                 viewMode === 'local' 
-                  ? 'bg-zinc-700 text-white' 
-                  : 'text-zinc-400 hover:text-white'
+                  ? 'bg-[#2a292e] text-white' 
+                  : 'text-[#a9a9b2] hover:text-white'
               }`}
             >
               מקומי
@@ -159,8 +159,8 @@ const DBLoggerSection = () => {
               onClick={() => setViewMode('firestore')}
               className={`px-3 py-1 rounded text-xs font-bold flex items-center gap-1 ${
                 viewMode === 'firestore' 
-                  ? 'bg-zinc-700 text-white' 
-                  : 'text-zinc-400 hover:text-white'
+                  ? 'bg-[#2a292e] text-white' 
+                  : 'text-[#a9a9b2] hover:text-white'
               }`}
             >
               <Database size={14} />
@@ -169,7 +169,7 @@ const DBLoggerSection = () => {
           </div>
           <button
             onClick={refreshStats}
-            className="bg-zinc-700 hover:bg-zinc-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+            className="bg-[#2a292e] hover:bg-[#353439] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
           >
             <RefreshCw size={16} />
             רענן
@@ -213,21 +213,21 @@ const DBLoggerSection = () => {
       )}
 
       {loading && (
-        <div className="text-center py-4 text-zinc-400">
+        <div className="text-center py-4 text-[#a9a9b2]">
           טוען לוגים...
         </div>
       )}
 
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-zinc-800/50 p-4 rounded-lg">
+          <div className="bg-[#1f1f23]/50 p-4 rounded-lg">
             <h3 className="text-lg font-bold mb-3">היום</h3>
             <div className="space-y-2">
               <p><strong>סה"כ קריאות:</strong> {stats.today.totalReads.toLocaleString()}</p>
               <p><strong>סה"כ קריאות לפונקציות:</strong> {stats.today.totalCalls.toLocaleString()}</p>
             </div>
           </div>
-          <div className="bg-zinc-800/50 p-4 rounded-lg">
+          <div className="bg-[#1f1f23]/50 p-4 rounded-lg">
             <h3 className="text-lg font-bold mb-3">כל הזמנים</h3>
             <div className="space-y-2">
               <p><strong>סה"כ קריאות:</strong> {stats.allTime.totalReads.toLocaleString()}</p>
@@ -238,7 +238,7 @@ const DBLoggerSection = () => {
       )}
 
       {stats && stats.today.byFunction.length > 0 && (
-        <div className="bg-zinc-800/50 p-4 rounded-lg">
+        <div className="bg-[#1f1f23]/50 p-4 rounded-lg">
           <h3 className="text-lg font-bold mb-3">קריאות לפי פונקציה (היום)</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {stats.today.byFunction.map((item, index) => (
@@ -251,14 +251,14 @@ const DBLoggerSection = () => {
         </div>
       )}
 
-      <div className="bg-zinc-800/50 p-4 rounded-lg">
+      <div className="bg-[#1f1f23]/50 p-4 rounded-lg">
         <h3 className="text-lg font-bold mb-3">לוג אחרון (100 קריאות אחרונות)</h3>
         <div className="space-y-1 max-h-96 overflow-y-auto">
           {logs.map((log, index) => (
             <div
               key={index}
               className={`p-2 rounded text-xs font-mono ${
-                log.success ? 'bg-[#121218]' : 'bg-red-900/30'
+                log.success ? 'bg-[#121218]' : 'bg-[#93000a]/30'
               }`}
             >
               <div className="flex justify-between items-start gap-2">
@@ -277,7 +277,7 @@ const DBLoggerSection = () => {
                     )}
                   </div>
                   {(log.caller || log.reason) && (
-                    <div className="mt-1 text-[10px] text-zinc-400">
+                    <div className="mt-1 text-[10px] text-[#a9a9b2]">
                       {log.caller && log.caller !== 'unknown' && (
                         <span className="text-purple-400">📍 {log.caller}</span>
                       )}
@@ -287,13 +287,13 @@ const DBLoggerSection = () => {
                     </div>
                   )}
                   {/* Additional details */}
-                  <div className="mt-1 text-[10px] text-zinc-500 space-y-0.5">
+                  <div className="mt-1 text-[10px] text-[#94A3B8] space-y-0.5">
                     {log.resultType && log.resultType !== 'null' && (
                       <div>
-                        <span className="text-zinc-500">Type: </span>
+                        <span className="text-[#94A3B8]">Type: </span>
                         <span className="text-orange-400">{log.resultType}</span>
                         {log.resultSize > 0 && (
-                          <span className="ml-2 text-zinc-500">Size: </span>
+                          <span className="ml-2 text-[#94A3B8]">Size: </span>
                         )}
                         {log.resultSize > 0 && (
                           <span className="text-orange-400">{log.resultSize}</span>
@@ -301,7 +301,7 @@ const DBLoggerSection = () => {
                       </div>
                     )}
                     {log.resultDetails && typeof log.resultDetails === 'object' && (
-                      <div className="text-zinc-600">
+                      <div className="text-[#64748B]">
                         {log.resultDetails.length !== undefined && (
                           <span>Length: {log.resultDetails.length} </span>
                         )}
@@ -314,8 +314,8 @@ const DBLoggerSection = () => {
                       </div>
                     )}
                     {log.params && Object.keys(log.params).length > 0 && (
-                      <div className="text-zinc-600">
-                        <span className="text-zinc-500">Params: </span>
+                      <div className="text-[#64748B]">
+                        <span className="text-[#94A3B8]">Params: </span>
                         <span>{Object.keys(log.params).slice(0, 3).join(', ')}</span>
                         {Object.keys(log.params).length > 3 && <span>...</span>}
                       </div>
@@ -323,7 +323,7 @@ const DBLoggerSection = () => {
                   </div>
                 </div>
                 {!log.success && (
-                  <span className="text-red-400 text-[10px]">{log.error}</span>
+                  <span className="text-[#ffb4ab] text-[10px]">{log.error}</span>
                 )}
               </div>
             </div>

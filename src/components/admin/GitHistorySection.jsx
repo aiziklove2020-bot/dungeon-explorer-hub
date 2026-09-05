@@ -66,14 +66,14 @@ const GitHistorySection = () => {
           <GitCommit size={24} />
           היסטוריית Git
           {branch && (
-            <span className="text-sm font-normal text-zinc-500">({branch})</span>
+            <span className="text-sm font-normal text-[#94A3B8]">({branch})</span>
           )}
         </h2>
         <button
           type="button"
           onClick={fetchHistory}
           disabled={loading}
-          className="bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+          className="bg-[#2a292e] hover:bg-[#353439] disabled:opacity-50 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
         >
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
           רענן
@@ -81,17 +81,17 @@ const GitHistorySection = () => {
       </div>
 
       {error && (
-        <div className="bg-red-900/30 border border-red-600/30 p-3 rounded-lg text-red-400 text-sm">
+        <div className="bg-[#93000a]/30 border border-[#e11d48]/30 p-3 rounded-lg text-[#ffb4ab] text-sm">
           {error}
         </div>
       )}
 
       {loading && !commits.length && (
-        <div className="text-center py-8 text-zinc-400">טוען היסטוריה...</div>
+        <div className="text-center py-8 text-[#a9a9b2]">טוען היסטוריה...</div>
       )}
 
       {!loading && !error && commits.length === 0 && (
-        <div className="text-center py-8 text-zinc-500">אין commits להצגה.</div>
+        <div className="text-center py-8 text-[#94A3B8]">אין commits להצגה.</div>
       )}
 
       {!loading && commits.length > 0 && (
@@ -99,7 +99,7 @@ const GitHistorySection = () => {
           {commits.map((c) => (
             <li
               key={c.sha}
-              className="bg-zinc-800/50 border border-white/5 rounded-lg overflow-hidden"
+              className="bg-[#1f1f23]/50 border border-white/5 rounded-lg overflow-hidden"
             >
               <div className="p-3 md:p-4">
                 <div className="flex flex-wrap items-start justify-between gap-2">
@@ -115,7 +115,7 @@ const GitHistorySection = () => {
                       <p className="font-bold text-white truncate">
                         {c.author?.name ?? 'Unknown'}
                       </p>
-                      <p className="text-zinc-500 text-sm">
+                      <p className="text-[#94A3B8] text-sm">
                         {formatDate(c.date)} · {c.sha?.slice(0, 7)}
                       </p>
                     </div>
@@ -132,14 +132,14 @@ const GitHistorySection = () => {
                     </a>
                   )}
                 </div>
-                <p className="mt-2 text-zinc-300 text-sm whitespace-pre-wrap break-words">
+                <p className="mt-2 text-[#e4e1e7] text-sm whitespace-pre-wrap break-words">
                   {c.message || '—'}
                 </p>
                 {Array.isArray(c.files) && c.files.length > 0 && (
                   <button
                     type="button"
                     onClick={() => toggleExpand(c.sha)}
-                    className="mt-3 flex items-center gap-2 text-zinc-400 hover:text-white text-sm"
+                    className="mt-3 flex items-center gap-2 text-[#a9a9b2] hover:text-white text-sm"
                   >
                     {expandedSha === c.sha ? (
                       <ChevronDown size={16} />
@@ -157,14 +157,14 @@ const GitHistorySection = () => {
                     {c.files.map((f, idx) => (
                       <li
                         key={idx}
-                        className="flex flex-wrap items-center gap-2 text-zinc-400"
+                        className="flex flex-wrap items-center gap-2 text-[#a9a9b2]"
                       >
                         <span
                           className={
                             f.status === 'added'
                               ? 'text-green-400'
                               : f.status === 'removed'
-                                ? 'text-red-400'
+                                ? 'text-[#ffb4ab]'
                                 : 'text-amber-400'
                           }
                         >
@@ -174,7 +174,7 @@ const GitHistorySection = () => {
                           {f.filename}
                         </span>
                         {(f.additions > 0 || f.deletions > 0) && (
-                          <span className="text-zinc-500 text-xs">
+                          <span className="text-[#94A3B8] text-xs">
                             +{f.additions} / −{f.deletions}
                           </span>
                         )}

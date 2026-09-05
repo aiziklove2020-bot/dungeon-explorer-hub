@@ -218,7 +218,7 @@ const ForumUsersSection = ({ showSaved }) => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div>
           <h2 className="text-xl md:text-2xl font-bold">משתמשי פורום</h2>
-          <p className="text-xs text-zinc-500 mt-1">
+          <p className="text-xs text-[#94A3B8] mt-1">
             חשבונות פורום (כינוי + סיסמה) — מערכת נפרדת לגמרי ממשתמשי האתר/מנויים ב"ניהול משתמשים". קישור לחשבון אתר מוצג כאן רק לצורך התמצאות.
           </p>
         </div>
@@ -226,7 +226,7 @@ const ForumUsersSection = ({ showSaved }) => {
           <button onClick={load} className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
             <RotateCcw size={14} /> רענן
           </button>
-          <button onClick={handleBackfill} disabled={backfilling} className="bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 text-white px-3 py-1.5 rounded-xl font-bold text-sm">
+          <button onClick={handleBackfill} disabled={backfilling} className="bg-[#2a292e] hover:bg-[#353439] disabled:opacity-50 text-white px-3 py-1.5 rounded-xl font-bold text-sm">
             {backfilling ? 'מריץ...' : 'Backfill nicknameLower'}
           </button>
         </div>
@@ -234,7 +234,7 @@ const ForumUsersSection = ({ showSaved }) => {
 
       {/* Link new account tool */}
       <div className="bg-black/20 border border-[rgba(255,255,255,0.08)] rounded-xl p-3 space-y-2">
-        <label className="text-xs uppercase font-bold text-zinc-500 flex items-center gap-1.5">
+        <label className="text-xs uppercase font-bold text-[#94A3B8] flex items-center gap-1.5">
           <Link2 size={14} /> צור חשבון פורום חדש ושייך למשתמש אתר קיים
         </label>
         <div className="flex gap-2">
@@ -246,7 +246,7 @@ const ForumUsersSection = ({ showSaved }) => {
             placeholder="חפש לפי שם או טלפון..."
             className="flex-1 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-xl focus:border-[#e11d48] outline-none text-white text-right text-sm"
           />
-          <button onClick={runLinkSearch} className="bg-zinc-700 hover:bg-zinc-600 text-white px-4 rounded-xl font-bold text-sm">
+          <button onClick={runLinkSearch} className="bg-[#2a292e] hover:bg-[#353439] text-white px-4 rounded-xl font-bold text-sm">
             <Search size={16} />
           </button>
         </div>
@@ -267,7 +267,7 @@ const ForumUsersSection = ({ showSaved }) => {
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="relative">
-          <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-400" />
+          <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#a9a9b2]" />
           <input
             type="text"
             value={searchQuery}
@@ -277,12 +277,12 @@ const ForumUsersSection = ({ showSaved }) => {
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-zinc-500 text-sm font-bold">סינון:</span>
+          <span className="text-[#94A3B8] text-sm font-bold">סינון:</span>
           {[{ id: '', label: 'הכל' }, { id: 'forumAdmin', label: 'מנהלי פורום' }, { id: 'unlinked', label: 'לא מקושר לאתר' }].map((f) => (
             <button
               key={f.id}
               onClick={() => setRoleFilter(f.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${roleFilter === f.id ? 'bg-purple-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${roleFilter === f.id ? 'bg-purple-600 text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}
             >
               {f.label}
             </button>
@@ -293,7 +293,7 @@ const ForumUsersSection = ({ showSaved }) => {
       {loading ? (
         <AdminLoader />
       ) : filteredForumUsers.length === 0 ? (
-        <div className="text-center py-12 text-zinc-500">
+        <div className="text-center py-12 text-[#94A3B8]">
           <p>לא נמצאו משתמשי פורום.</p>
         </div>
       ) : (
@@ -304,19 +304,19 @@ const ForumUsersSection = ({ showSaved }) => {
               <div key={fu.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                   <strong className="text-lg text-white">{fu.nickname}</strong>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${fu.role === 'forumAdmin' ? 'bg-purple-600' : 'bg-zinc-700'}`}>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${fu.role === 'forumAdmin' ? 'bg-purple-600' : 'bg-[#2a292e]'}`}>
                     {fu.role === 'forumAdmin' ? 'מנהל פורום' : 'משתמש'}
                   </span>
                   {fu.isBlocked && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-900">חסום</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#93000a]">חסום</span>
                   )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
-                  <Mail size={12} className="text-zinc-500" />
+                  <Mail size={12} className="text-[#94A3B8]" />
                   {fu.email ? (
                     <>
-                      <span className="text-zinc-300 font-mono ltr:text-left rtl:text-right" dir="ltr">{fu.email}</span>
+                      <span className="text-[#e4e1e7] font-mono ltr:text-left rtl:text-right" dir="ltr">{fu.email}</span>
                       {fu.emailVerified ? (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-700 text-white">מאומת</span>
                       ) : (
@@ -324,13 +324,13 @@ const ForumUsersSection = ({ showSaved }) => {
                       )}
                     </>
                   ) : (
-                    <span className="text-zinc-500 italic">אין אימייל</span>
+                    <span className="text-[#94A3B8] italic">אין אימייל</span>
                   )}
                 </div>
 
-                <p className="text-xs text-zinc-500 mb-3">
+                <p className="text-xs text-[#94A3B8] mb-3">
                   {linkedUser
-                    ? <>מקושר למשתמש אתר: <span className="text-zinc-300">{linkedUser.name}</span> — <PhoneLink phone={linkedUser.phoneNumber}>{linkedUser.phoneNumber}</PhoneLink></>
+                    ? <>מקושר למשתמש אתר: <span className="text-[#e4e1e7]">{linkedUser.name}</span> — <PhoneLink phone={linkedUser.phoneNumber}>{linkedUser.phoneNumber}</PhoneLink></>
                     : 'לא מקושר לחשבון אתר'}
                   {fu.gender && <span> · מגדר: {fu.gender === 'female' ? 'אישה' : 'גבר'}</span>}
                 </p>
@@ -345,7 +345,7 @@ const ForumUsersSection = ({ showSaved }) => {
                     {fu.subscriptionExpiry && new Date(fu.subscriptionExpiry).getTime() > Date.now() ? (
                       <span className="text-emerald-400 font-bold">מאושר עד {new Date(fu.subscriptionExpiry).toLocaleDateString('he-IL')}</span>
                     ) : (
-                      <span className="text-zinc-500">לא מאושר</span>
+                      <span className="text-[#94A3B8]">לא מאושר</span>
                     )}
                   </div>
                 )}
@@ -360,7 +360,7 @@ const ForumUsersSection = ({ showSaved }) => {
                         <Scale size={11} /> אשר איזון לשנה
                       </button>
                       {fu.subscriptionExpiry && (
-                        <button onClick={() => handleRevokeBalance(fu)} className="flex items-center gap-1 bg-red-900/60 hover:bg-red-800 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
+                        <button onClick={() => handleRevokeBalance(fu)} className="flex items-center gap-1 bg-[#93000a]/60 hover:bg-[#be0037] text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
                           <XCircle size={11} /> בטל אישור
                         </button>
                       )}
@@ -371,22 +371,22 @@ const ForumUsersSection = ({ showSaved }) => {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleToggleRole(fu)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors ${fu.role === 'forumAdmin' ? 'bg-zinc-700 hover:bg-zinc-600 text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'}`}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors ${fu.role === 'forumAdmin' ? 'bg-[#2a292e] hover:bg-[#353439] text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'}`}
                   >
                     {fu.role === 'forumAdmin' ? <ShieldOff size={11} /> : <Shield size={11} />}
                     {fu.role === 'forumAdmin' ? 'הסר מנהל' : 'הפוך למנהל'}
                   </button>
                   <button
                     onClick={() => handleToggleBlock(fu)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors ${fu.isBlocked ? 'bg-green-700 hover:bg-green-600 text-white' : 'bg-red-900 hover:bg-red-800 text-white'}`}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors ${fu.isBlocked ? 'bg-green-700 hover:bg-green-600 text-white' : 'bg-[#93000a] hover:bg-[#be0037] text-white'}`}
                   >
                     {fu.isBlocked ? <CheckCircle size={11} /> : <Ban size={11} />}
                     {fu.isBlocked ? 'בטל חסימה בפורום' : 'חסום בפורום'}
                   </button>
-                  <button onClick={() => handleResetPassword(fu)} className="flex items-center gap-1 bg-zinc-700 hover:bg-zinc-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
+                  <button onClick={() => handleResetPassword(fu)} className="flex items-center gap-1 bg-[#2a292e] hover:bg-[#353439] text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
                     <KeyRound size={11} /> אפס סיסמה
                   </button>
-                  <button onClick={() => handleSetEmail(fu)} className="flex items-center gap-1 bg-zinc-700 hover:bg-zinc-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]" title={fu.email || ''}>
+                  <button onClick={() => handleSetEmail(fu)} className="flex items-center gap-1 bg-[#2a292e] hover:bg-[#353439] text-white px-2.5 py-1 rounded-lg font-bold text-[11px]" title={fu.email || ''}>
                     <Mail size={11} /> {fu.email ? `ערוך אימייל${fu.emailVerified ? ' ✓' : ''}` : 'הוסף אימייל'}
                   </button>
                   {fu.email && !fu.emailVerified && (
@@ -401,7 +401,7 @@ const ForumUsersSection = ({ showSaved }) => {
                   >
                     <MessageSquareOff size={11} /> הוצא מהצ'אט
                   </button>
-                  <button onClick={() => handleDelete(fu)} className="flex items-center gap-1 bg-red-900/60 hover:bg-red-800 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
+                  <button onClick={() => handleDelete(fu)} className="flex items-center gap-1 bg-[#93000a]/60 hover:bg-[#be0037] text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
                     <Trash2 size={11} /> מחק חשבון פורום
                   </button>
                 </div>

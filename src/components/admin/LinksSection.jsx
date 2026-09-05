@@ -214,7 +214,7 @@ const LinksSection = ({ showSaved }) => {
           <h3 className="text-xl font-bold">{t('whatsappGroups')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1 text-right">
-              <label className="text-xs uppercase font-bold text-zinc-500">{t('menGroupLink')}</label>
+              <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('menGroupLink')}</label>
               <input
                 type="url"
                 value={whatsappGroupsData.men || ''}
@@ -224,7 +224,7 @@ const LinksSection = ({ showSaved }) => {
               />
             </div>
             <div className="space-y-1 text-right">
-              <label className="text-xs uppercase font-bold text-zinc-500">{t('womenGroupLink')}</label>
+              <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('womenGroupLink')}</label>
               <input
                 type="url"
                 value={whatsappGroupsData.women || ''}
@@ -241,7 +241,7 @@ const LinksSection = ({ showSaved }) => {
           {Array.isArray(socialLinksData) && socialLinksData.map((link, index) => (
             <div key={index} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-4 rounded-xl space-y-3">
               <div className="space-y-1 text-right">
-                <label className="text-xs uppercase font-bold text-zinc-500">{t('label')}</label>
+                <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('label')}</label>
                 <input
                   type="text"
                   value={link.label || ''}
@@ -250,12 +250,12 @@ const LinksSection = ({ showSaved }) => {
                     newLinks[index] = { ...link, label: e.target.value };
                     setSocialLinksData(newLinks);
                   }}
-                  className="w-full bg-zinc-900 border border-zinc-700 p-3 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
+                  className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-3 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
                   placeholder="Instagram, Facebook, etc."
                 />
               </div>
               <div className="space-y-1 text-right">
-                <label className="text-xs uppercase font-bold text-zinc-500">{t('urlLink')}</label>
+                <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('urlLink')}</label>
                 <input
                   type="text"
                   value={link.url}
@@ -264,7 +264,7 @@ const LinksSection = ({ showSaved }) => {
                     newLinks[index] = { ...link, url: e.target.value };
                     setSocialLinksData(newLinks);
                   }}
-                  className="w-full bg-zinc-900 border border-zinc-700 p-3 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
+                  className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-3 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
                   placeholder="https://..."
                 />
               </div>
@@ -303,7 +303,7 @@ const LinksSection = ({ showSaved }) => {
           {showTelegramForm && (
             <form onSubmit={handleSaveTelegramSettings} className="space-y-4">
               <div>
-                <label className="text-xs uppercase font-bold text-zinc-500">Bot Token</label>
+                <label className="text-xs uppercase font-bold text-[#94A3B8]">Bot Token</label>
                 <input
                   type="text"
                   value={telegramSettings.botToken || ''}
@@ -326,7 +326,7 @@ const LinksSection = ({ showSaved }) => {
                 )}
               </div>
               <div>
-                <label className="text-xs uppercase font-bold text-zinc-500">Chat ID</label>
+                <label className="text-xs uppercase font-bold text-[#94A3B8]">Chat ID</label>
                 <input
                   type="text"
                   value={telegramSettings.chatId || ''}
@@ -334,7 +334,7 @@ const LinksSection = ({ showSaved }) => {
                   className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
                   placeholder="Enter Chat ID (number or @username)"
                 />
-                <p className="text-zinc-500 text-xs mt-1">
+                <p className="text-[#94A3B8] text-xs mt-1">
                   הזן את ה-Chat ID של הצ'אט שבו תרצה לקבל התראות (למשל: -1001234567890 או @username)
                 </p>
               </div>

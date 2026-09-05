@@ -85,18 +85,18 @@ const SiteDesignSection = ({ showSaved }) => {
     showSaved?.();
   };
 
-  if (loading) return <div className="text-zinc-400">טוען...</div>;
+  if (loading) return <div className="text-[#a9a9b2]">טוען...</div>;
 
   return (
     <div className="space-y-8">
       {/* Hero banner */}
       <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-4">
         <h3 className="text-xl font-bold">תמונת הבאנר הראשי (דף הבית)</h3>
-        <p className="text-xs text-zinc-500">זו התמונה הגדולה בראש דף הבית (עם הכותרת "מסיבות ליברליות בישראל").</p>
+        <p className="text-xs text-[#94A3B8]">זו התמונה הגדולה בראש דף הבית (עם הכותרת "מסיבות ליברליות בישראל").</p>
         {heroImageUrl && (
           <img src={heroImageUrl} alt="באנר ראשי" className="w-full max-w-md rounded-xl object-cover bg-[#1f1f23]" />
         )}
-        <label className="inline-block cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl text-sm">
+        <label className="inline-block cursor-pointer bg-[#e11d48] hover:bg-[#be0037] text-white font-bold px-4 py-2 rounded-xl text-sm">
           {uploadingHero ? 'מעלה...' : 'העלה תמונת באנר חדשה'}
           <input
             type="file"
@@ -111,12 +111,12 @@ const SiteDesignSection = ({ showSaved }) => {
       {/* Small header logo */}
       <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-4">
         <h3 className="text-xl font-bold">לוגו קטן (ליד שם האתר, בכותרת העליונה)</h3>
-        <p className="text-xs text-zinc-500">זה הלב הקטן שמופיע למעלה ליד שם האתר בכל עמוד — לא תמונת הבאנר הראשי.</p>
+        <p className="text-xs text-[#94A3B8]">זה הלב הקטן שמופיע למעלה ליד שם האתר בכל עמוד — לא תמונת הבאנר הראשי.</p>
         <div className="flex items-center gap-4">
           {logoUrl && (
             <img src={logoUrl} alt="לוגו" className="h-16 w-auto object-contain rounded bg-[#1f1f23] p-2" />
           )}
-          <label className="cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl text-sm">
+          <label className="cursor-pointer bg-[#e11d48] hover:bg-[#be0037] text-white font-bold px-4 py-2 rounded-xl text-sm">
             {uploadingLogo ? 'מעלה...' : 'העלה לוגו קטן חדש'}
             <input
               type="file"
@@ -136,12 +136,12 @@ const SiteDesignSection = ({ showSaved }) => {
           <button
             type="button"
             onClick={() => saveBanners([...banners, emptyBanner()])}
-            className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-2 rounded-xl text-sm"
+            className="flex items-center gap-1 bg-[#e11d48] hover:bg-[#be0037] text-white font-bold px-3 py-2 rounded-xl text-sm"
           >
             <Plus size={16} /> הוסף באנר
           </button>
         </div>
-        <p className="text-xs text-zinc-500">הבאנרים מוצגים ברצועה בתחתית כל עמוד באתר.</p>
+        <p className="text-xs text-[#94A3B8]">הבאנרים מוצגים ברצועה בתחתית כל עמוד באתר.</p>
         <div className="space-y-4">
           {banners.map((b) => (
             <div key={b.id} className="border border-[rgba(255,255,255,0.08)] rounded-xl p-4 space-y-3">
@@ -149,7 +149,7 @@ const SiteDesignSection = ({ showSaved }) => {
                 {b.imageUrl && (
                   <img src={b.imageUrl} alt="באנר" className="h-14 w-28 object-cover rounded bg-[#1f1f23]" />
                 )}
-                <label className="cursor-pointer bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-3 py-2 rounded-xl text-xs">
+                <label className="cursor-pointer bg-[#1f1f23] hover:bg-[#2a292e] text-white font-bold px-3 py-2 rounded-xl text-xs">
                   {uploadingBannerId === b.id ? 'מעלה...' : b.imageUrl ? 'החלף תמונה' : 'העלה תמונה'}
                   <input
                     type="file"
@@ -162,7 +162,7 @@ const SiteDesignSection = ({ showSaved }) => {
                 <button
                   type="button"
                   onClick={() => saveBanners(banners.filter((x) => x.id !== b.id))}
-                  className="text-zinc-500 hover:text-red-500 mr-auto"
+                  className="text-[#94A3B8] hover:text-[#ffb4ab] mr-auto"
                   aria-label="מחק באנר"
                 >
                   <Trash2 size={18} />
@@ -176,7 +176,7 @@ const SiteDesignSection = ({ showSaved }) => {
                 onBlur={() => saveBanners(banners)}
                 className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2 rounded-xl outline-none text-white text-sm text-right"
               />
-              <label className="flex items-center gap-2 text-sm text-zinc-400">
+              <label className="flex items-center gap-2 text-sm text-[#a9a9b2]">
                 <input
                   type="checkbox"
                   checked={b.enabled !== false}
@@ -186,7 +186,7 @@ const SiteDesignSection = ({ showSaved }) => {
               </label>
             </div>
           ))}
-          {banners.length === 0 && <p className="text-zinc-500 text-sm">אין באנרים עדיין.</p>}
+          {banners.length === 0 && <p className="text-[#94A3B8] text-sm">אין באנרים עדיין.</p>}
         </div>
       </div>
 
@@ -194,7 +194,7 @@ const SiteDesignSection = ({ showSaved }) => {
       <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-bold">פופ-אפ / תזכורת</h3>
-          <label className="flex items-center gap-2 text-sm text-zinc-400">
+          <label className="flex items-center gap-2 text-sm text-[#a9a9b2]">
             <input
               type="checkbox"
               checked={popup.enabled}
@@ -223,7 +223,7 @@ const SiteDesignSection = ({ showSaved }) => {
           {popup.imageUrl && (
             <img src={popup.imageUrl} alt="פופ-אפ" className="h-16 w-auto object-contain rounded bg-[#1f1f23] p-2" />
           )}
-          <label className="cursor-pointer bg-zinc-800 hover:bg-zinc-700 text-white font-bold px-3 py-2 rounded-xl text-xs">
+          <label className="cursor-pointer bg-[#1f1f23] hover:bg-[#2a292e] text-white font-bold px-3 py-2 rounded-xl text-xs">
             {popup.imageUrl ? 'החלף תמונה' : 'העלה תמונה (אופציונלי)'}
             <input
               type="file"
@@ -242,7 +242,7 @@ const SiteDesignSection = ({ showSaved }) => {
             <button
               type="button"
               onClick={() => savePopup({ ...popup, imageUrl: '' })}
-              className="text-zinc-500 hover:text-red-500"
+              className="text-[#94A3B8] hover:text-[#ffb4ab]"
               aria-label="הסר תמונה"
             >
               <X size={18} />
@@ -267,7 +267,7 @@ const SiteDesignSection = ({ showSaved }) => {
             className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl outline-none text-white text-right"
           />
         </div>
-        <p className="text-xs text-zinc-500">הפופ-אפ מוצג פעם אחת לכל מבקר (לפי דפדפן), בכניסה לאתר.</p>
+        <p className="text-xs text-[#94A3B8]">הפופ-אפ מוצג פעם אחת לכל מבקר (לפי דפדפן), בכניסה לאתר.</p>
       </div>
     </div>
   );

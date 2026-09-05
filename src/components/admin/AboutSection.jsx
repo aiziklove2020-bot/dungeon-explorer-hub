@@ -41,7 +41,7 @@ const AboutSection = ({ showSaved }) => {
       
       <div className="space-y-4">
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.roleTitle')}</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.roleTitle')}</label>
           <input
             type="text"
             value={aboutData.roleTitle}
@@ -50,7 +50,7 @@ const AboutSection = ({ showSaved }) => {
           />
         </div>
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.roleText')}</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.roleText')}</label>
           <textarea
             value={aboutData.roleText}
             onChange={e => setAboutData({...aboutData, roleText: e.target.value})}
@@ -59,7 +59,7 @@ const AboutSection = ({ showSaved }) => {
           />
         </div>
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.secondaryText')}</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.secondaryText')}</label>
           <textarea
             value={aboutData.roleSubtext}
             onChange={e => setAboutData({...aboutData, roleSubtext: e.target.value})}
@@ -81,7 +81,7 @@ const AboutSection = ({ showSaved }) => {
                 newCards[index] = { ...card, title: e.target.value };
                 setAboutData({...aboutData, infoCards: newCards});
               }}
-              className="w-full bg-zinc-900 border border-zinc-700 p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right font-bold"
+              className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right font-bold"
               placeholder={t('admin.title')}
             />
             <textarea
@@ -92,7 +92,7 @@ const AboutSection = ({ showSaved }) => {
                 setAboutData({...aboutData, infoCards: newCards});
               }}
               rows={3}
-              className="w-full bg-zinc-900 border border-zinc-700 p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
+              className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
               placeholder={t('admin.text')}
             />
           </div>
@@ -112,7 +112,7 @@ const AboutSection = ({ showSaved }) => {
                   newSteps[index] = { ...step, n: parseInt(e.target.value) };
                   setAboutData({...aboutData, steps: newSteps});
                 }}
-                className="w-16 bg-zinc-900 border border-zinc-700 p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-center font-bold"
+                className="w-16 bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-center font-bold"
               />
               <input
                 type="text"
@@ -122,7 +122,7 @@ const AboutSection = ({ showSaved }) => {
                   newSteps[index] = { ...step, t: e.target.value };
                   setAboutData({...aboutData, steps: newSteps});
                 }}
-                className="flex-1 bg-zinc-900 border border-zinc-700 p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right font-bold"
+                className="flex-1 bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right font-bold"
                 placeholder={t('admin.title')}
               />
             </div>
@@ -134,13 +134,13 @@ const AboutSection = ({ showSaved }) => {
                 setAboutData({...aboutData, steps: newSteps});
               }}
               rows={2}
-              className="w-full bg-zinc-900 border border-zinc-700 p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
+              className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
               placeholder={t('admin.description')}
             />
           </div>
         ))}
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.entryNote')}</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.entryNote')}</label>
           <input
             type="text"
             value={aboutData.entryNote}

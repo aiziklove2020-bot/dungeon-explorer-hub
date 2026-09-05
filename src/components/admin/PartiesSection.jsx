@@ -370,10 +370,10 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
           <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-start gap-3 text-right">
-                <Clock size={20} className="text-zinc-400 mt-1 shrink-0" aria-hidden="true" />
+                <Clock size={20} className="text-[#a9a9b2] mt-1 shrink-0" aria-hidden="true" />
                 <div>
                   <h4 className="font-bold text-base">{t('admin.partyRetention.title')}</h4>
-                  <p className="text-zinc-400 text-xs mt-1">{t('admin.partyRetention.description')}</p>
+                  <p className="text-[#a9a9b2] text-xs mt-1">{t('admin.partyRetention.description')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -390,7 +390,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                 </select>
               </div>
             </div>
-            <p className="text-zinc-500 text-xs mt-3 text-right">{t('admin.partyRetention.publishHint')}</p>
+            <p className="text-[#94A3B8] text-xs mt-3 text-right">{t('admin.partyRetention.publishHint')}</p>
           </div>
           {retentionPublishNotice && (
             <div
@@ -437,7 +437,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
           {loading ? (
             <AdminLoader />
           ) : activeParties.length === 0 ? (
-            <div className="text-center py-12 text-zinc-500">
+            <div className="text-center py-12 text-[#94A3B8]">
               <p>{t('admin.noActiveParties')}</p>
             </div>
           ) : (
@@ -451,7 +451,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                         <span className={`px-2 py-1 rounded text-xs font-bold ${
                           party.partyType === 'exchange' ? 'bg-purple-600'
                             : party.partyType === 'external' ? 'bg-blue-600'
-                            : 'bg-red-600'
+                            : 'bg-[#e11d48]'
                         }`}>
                           {party.partyType === 'exchange' ? t('admin.exchangeParty')
                             : party.partyType === 'external' ? t('admin.externalParty')
@@ -463,7 +463,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                           </span>
                         )}
                         {isPartyExpiredByDate(party.date, retentionHours) && (
-                          <span className="px-2 py-1 rounded text-xs font-bold bg-zinc-700 text-zinc-300">
+                          <span className="px-2 py-1 rounded text-xs font-bold bg-[#2a292e] text-[#e4e1e7]">
                             פג תוקף
                           </span>
                         )}

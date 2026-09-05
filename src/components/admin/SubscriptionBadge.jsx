@@ -13,9 +13,9 @@ const SubscriptionBadge = ({ user, kind }) => {
 
   if (!info.exists) {
     return (
-      <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-800/50 border border-zinc-700/50">
-        <span className="text-zinc-500 font-bold text-[10px] md:text-xs">{label}:</span>
-        <span className="text-zinc-500 text-[10px] md:text-xs">ללא</span>
+      <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#1f1f23]/50 border border-[rgba(255,255,255,0.08)]/50">
+        <span className="text-[#94A3B8] font-bold text-[10px] md:text-xs">{label}:</span>
+        <span className="text-[#94A3B8] text-[10px] md:text-xs">ללא</span>
       </div>
     );
   }
@@ -31,9 +31,9 @@ const SubscriptionBadge = ({ user, kind }) => {
 
   if (info.isExpired) {
     return (
-      <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-red-900/30 border border-red-700/50">
-        <span className="text-red-400 font-bold text-[10px] md:text-xs">{label}:</span>
-        <span className="text-red-400 font-bold text-[10px] md:text-xs">
+      <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#93000a]/30 border border-[#e11d48]/50">
+        <span className="text-[#ffb4ab] font-bold text-[10px] md:text-xs">{label}:</span>
+        <span className="text-[#ffb4ab] font-bold text-[10px] md:text-xs">
           {tierLabel && `${tierLabel} · `}פג תוקף ({Math.abs(info.daysRemaining)} ימים)
         </span>
       </div>

@@ -32,7 +32,7 @@ const HeroSection = ({ showSaved }) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.hebrewTitlePart1')}</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.hebrewTitlePart1')}</label>
           <input
             type="text"
             value={heroData.titleHebrew}
@@ -41,7 +41,7 @@ const HeroSection = ({ showSaved }) => {
           />
         </div>
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.hebrewTitlePart2')}</label>
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.hebrewTitlePart2')}</label>
           <input
             type="text"
             value={heroData.titleEnglish}
@@ -51,7 +51,7 @@ const HeroSection = ({ showSaved }) => {
         </div>
       </div>
       <div className="space-y-1 text-right">
-        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.subtitleEnglish')}</label>
+        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.subtitleEnglish')}</label>
         <input
           type="text"
           value={heroData.subtitle}
@@ -60,7 +60,7 @@ const HeroSection = ({ showSaved }) => {
         />
       </div>
       <div className="space-y-1 text-right">
-        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.slogan')}</label>
+        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.slogan')}</label>
         <input
           type="text"
           value={heroData.tagline}

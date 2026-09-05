@@ -71,7 +71,7 @@ const RssSection = ({ showSaved }) => {
 
       <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-4 rounded-xl">
         <h3 className="text-lg font-bold mb-2">{t('admin.rssTickerSpeed')}</h3>
-        <p className="text-zinc-400 text-sm mb-3">{t('admin.rssTickerSpeedDescription')}</p>
+        <p className="text-[#a9a9b2] text-sm mb-3">{t('admin.rssTickerSpeedDescription')}</p>
         <div className="flex flex-wrap items-center gap-3">
           <input
             type="number"
@@ -81,7 +81,7 @@ const RssSection = ({ showSaved }) => {
             onChange={e => setTickerSpeed(parseInt(e.target.value, 10) || 60)}
             className="w-24 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
           />
-          <span className="text-zinc-500 text-sm">{t('admin.rssSpeedSeconds')}</span>
+          <span className="text-[#94A3B8] text-sm">{t('admin.rssSpeedSeconds')}</span>
           <button
             onClick={saveTickerSpeed}
             disabled={tickerSpeedSaving}
@@ -99,7 +99,7 @@ const RssSection = ({ showSaved }) => {
           </h3>
           <div className="space-y-4">
             <div className="space-y-1 text-right">
-              <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.text')} *</label>
+              <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.text')} *</label>
               <textarea
                 value={rssFeedForm.text}
                 onChange={e => setRssFeedForm({ ...rssFeedForm, text: e.target.value })}
@@ -111,7 +111,7 @@ const RssSection = ({ showSaved }) => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1 text-right">
-                <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.order')}</label>
+                <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.order')}</label>
                 <input
                   type="number"
                   value={rssFeedForm.order}
@@ -160,7 +160,7 @@ const RssSection = ({ showSaved }) => {
                   setEditingRssFeed(null);
                   setRssFeedForm({ text: '', enabled: true, order: 0 });
                 }}
-                className="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2 rounded-xl font-bold"
+                className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-6 py-2 rounded-xl font-bold"
               >
                 {t('admin.cancel')}
               </button>
@@ -172,7 +172,7 @@ const RssSection = ({ showSaved }) => {
       {loading ? (
         <AdminLoader />
       ) : feeds.length === 0 ? (
-        <div className="text-center py-12 text-zinc-500">
+        <div className="text-center py-12 text-[#94A3B8]">
           <p>{t('admin.noRssFeeds')}</p>
         </div>
       ) : (
@@ -182,10 +182,10 @@ const RssSection = ({ showSaved }) => {
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${feed.enabled ? 'bg-green-600' : 'bg-zinc-600'}`}>
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${feed.enabled ? 'bg-green-600' : 'bg-[#353439]'}`}>
                       {feed.enabled ? t('admin.enabled') : t('admin.disabled')}
                     </span>
-                    <span className="text-zinc-400 text-xs">{t('admin.order')}: {feed.order || 0}</span>
+                    <span className="text-[#a9a9b2] text-xs">{t('admin.order')}: {feed.order || 0}</span>
                   </div>
                   <p className="text-white">{feed.text}</p>
                 </div>

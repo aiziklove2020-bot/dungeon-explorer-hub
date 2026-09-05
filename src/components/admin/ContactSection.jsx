@@ -27,7 +27,7 @@ const ContactSection = ({ showSaved }) => {
         </button>
       </div>
       <div className="space-y-1 text-right">
-        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.whatsappLink')}</label>
+        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.whatsappLink')}</label>
         <input
           type="text"
           value={contactData.whatsappLink}
@@ -36,7 +36,7 @@ const ContactSection = ({ showSaved }) => {
         />
       </div>
       <div className="space-y-1 text-right">
-        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.alertText')}</label>
+        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.alertText')}</label>
         <input
           type="text"
           value={contactData.alertText}
@@ -45,7 +45,7 @@ const ContactSection = ({ showSaved }) => {
         />
       </div>
       <div className="space-y-1 text-right">
-        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.description')}</label>
+        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.description')}</label>
         <textarea
           value={contactData.description}
           onChange={e => setContactData({...contactData, description: e.target.value})}
@@ -54,7 +54,7 @@ const ContactSection = ({ showSaved }) => {
         />
       </div>
       <div className="space-y-1 text-right">
-        <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.importantNote')}</label>
+        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.importantNote')}</label>
         <textarea
           value={contactData.importantNote}
           onChange={e => setContactData({...contactData, importantNote: e.target.value})}

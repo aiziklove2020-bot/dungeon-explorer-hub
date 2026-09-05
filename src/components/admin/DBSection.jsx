@@ -116,54 +116,54 @@ const DBSection = () => {
           type="button"
           onClick={loadSummary}
           disabled={loadingSummary}
-          className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 disabled:opacity-50"
+          className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 disabled:opacity-50"
         >
           <RefreshCw size={16} className={loadingSummary ? 'animate-spin' : ''} />
           רענן
         </button>
       </div>
 
-      <p className="text-zinc-400 text-sm">
+      <p className="text-[#a9a9b2] text-sm">
         ייצוא: בחר אילו אוספים לכלול בגיבוי (כולל UID). שחזור: merge — merges את הגיבוי ל-DB בלי למחוק; מסמך שכבר זהה לא נכתב שוב.
       </p>
 
       {error && (
-        <div className="bg-red-900/30 border border-red-800 text-red-200 px-4 py-3 rounded-xl flex items-center gap-2">
+        <div className="bg-[#93000a]/30 border border-[#920028] text-[#ffdada] px-4 py-3 rounded-xl flex items-center gap-2">
           <AlertTriangle size={20} />
           <span>{error}</span>
         </div>
       )}
 
       {(progress || downloading || uploading) && (
-        <div className="bg-zinc-800/50 border border-zinc-700 px-4 py-3 rounded-xl flex items-center gap-3">
+        <div className="bg-[#1f1f23]/50 border border-[rgba(255,255,255,0.08)] px-4 py-3 rounded-xl flex items-center gap-3">
           {(downloading || uploading) && <Loader size="small" />}
-          <span className="text-zinc-300">{progress || (downloading ? 'מוריד...' : 'מעלה...')}</span>
+          <span className="text-[#e4e1e7]">{progress || (downloading ? 'מוריד...' : 'מעלה...')}</span>
         </div>
       )}
 
       <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
-        <h3 className="text-sm font-bold text-zinc-500 uppercase mb-2">בחר אוספים לגיבוי</h3>
+        <h3 className="text-sm font-bold text-[#94A3B8] uppercase mb-2">בחר אוספים לגיבוי</h3>
         <div className="flex flex-wrap gap-x-4 gap-y-1 mb-2">
-          <button type="button" onClick={() => setAllSelected(true)} className="text-zinc-400 hover:text-white text-sm">
+          <button type="button" onClick={() => setAllSelected(true)} className="text-[#a9a9b2] hover:text-white text-sm">
             בחר הכל
           </button>
-          <span className="text-zinc-600">|</span>
-          <button type="button" onClick={() => setAllSelected(false)} className="text-zinc-400 hover:text-white text-sm">
+          <span className="text-[#64748B]">|</span>
+          <button type="button" onClick={() => setAllSelected(false)} className="text-[#a9a9b2] hover:text-white text-sm">
             נקה הכל
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
           {EXPORTABLE_COLLECTION_KEYS.map((key) => (
-            <label key={key} className="flex items-center gap-2 bg-zinc-900/60 rounded-lg px-3 py-1.5 cursor-pointer">
+            <label key={key} className="flex items-center gap-2 bg-[#121218]/60 rounded-lg px-3 py-1.5 cursor-pointer">
               <input
                 type="checkbox"
                 checked={!!selectedCollections[key]}
                 onChange={() => setSelectedCollections((prev) => ({ ...prev, [key]: !prev[key] }))}
-                className="rounded border-zinc-600"
+                className="rounded border-[rgba(255,255,255,0.12)]"
               />
               <span className="text-sm text-white">{key}</span>
               {summary?.collections?.[key] != null && (
-                <span className="text-zinc-500 text-xs">({typeof summary.collections[key] === 'number' ? summary.collections[key] : summary.collections[key]})</span>
+                <span className="text-[#94A3B8] text-xs">({typeof summary.collections[key] === 'number' ? summary.collections[key] : summary.collections[key]})</span>
               )}
             </label>
           ))}
@@ -194,7 +194,7 @@ const DBSection = () => {
       </div>
 
       {loadingSummary && !summary && (
-        <div className="flex items-center gap-2 text-zinc-500">
+        <div className="flex items-center gap-2 text-[#94A3B8]">
           <Loader size="small" />
           <span>טוען סיכום DB...</span>
         </div>
@@ -202,17 +202,17 @@ const DBSection = () => {
 
       {summary && summary.collections && (
         <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
-          <h3 className="text-sm font-bold text-zinc-500 uppercase mb-3">מצב Firebase כרגע</h3>
+          <h3 className="text-sm font-bold text-[#94A3B8] uppercase mb-3">מצב Firebase כרגע</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-sm">
             {Object.entries(summary.collections).map(([name, count]) => (
-              <div key={name} className="bg-zinc-900/60 rounded-lg px-3 py-2">
-                <span className="text-zinc-400 block truncate" title={name}>{name}</span>
+              <div key={name} className="bg-[#121218]/60 rounded-lg px-3 py-2">
+                <span className="text-[#a9a9b2] block truncate" title={name}>{name}</span>
                 <span className="text-white font-medium">{typeof count === 'number' ? count : String(count)}</span>
               </div>
             ))}
           </div>
           {typeof summary.totalDocs === 'number' && (
-            <p className="text-zinc-500 text-xs mt-2">סה״כ מסמכים (כולל תת-אוספים): ~{summary.totalDocs}</p>
+            <p className="text-[#94A3B8] text-xs mt-2">סה״כ מסמכים (כולל תת-אוספים): ~{summary.totalDocs}</p>
           )}
         </div>
       )}

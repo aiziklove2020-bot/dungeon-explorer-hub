@@ -624,7 +624,7 @@ const MatchesSection = ({ showSaved }) => {
         {loading ? (
           <AdminLoader />
         ) : activeParties.length === 0 ? (
-          <div className="text-center py-12 text-zinc-500">
+          <div className="text-center py-12 text-[#94A3B8]">
             <p>{t('admin.noActiveParties')}</p>
           </div>
         ) : (
@@ -640,7 +640,7 @@ const MatchesSection = ({ showSaved }) => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h4 className="text-lg font-bold">{party.name}</h4>
-                      <span className="px-2 py-1 rounded text-xs font-bold bg-red-600">
+                      <span className="px-2 py-1 rounded text-xs font-bold bg-[#e11d48]">
                         {t('admin.internalParty')}
                       </span>
                       {partyBalance.length > 0 && (
@@ -649,14 +649,14 @@ const MatchesSection = ({ showSaved }) => {
                         </span>
                       )}
                     </div>
-                    <p className="text-zinc-400 text-sm">{formatDate(party.date, party.time)}</p>
-                    <p className="text-zinc-400 text-sm">
+                    <p className="text-[#a9a9b2] text-sm">{formatDate(party.date, party.time)}</p>
+                    <p className="text-[#a9a9b2] text-sm">
                       {t('admin.males')}: {getGenderCount(party, 'male')}/{party.maleLimit} | 
                       {t('admin.females')}: {getGenderCount(party, 'female')}/{party.femaleLimit} | 
                       {t('admin.total')}: {party.registrations?.length || 0}
                     </p>
                     {partyBalance.length > 0 && (
-                      <p className="text-zinc-400 text-sm mt-1">
+                      <p className="text-[#a9a9b2] text-sm mt-1">
                         {t('admin.balanceTables.partyBalance')}: {matchedCount} {t('admin.balanceTables.matched')}, {unmatchedCount} {t('admin.balanceTables.unmatched')}
                       </p>
                     )}
@@ -665,7 +665,7 @@ const MatchesSection = ({ showSaved }) => {
                     <button
                       onClick={() => handleCreateBalance(party)}
                       disabled={creatingBalance === party.id || !party.registrations || party.registrations.length === 0}
-                      className="bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-700 disabled:opacity-50 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
+                      className="bg-blue-600 hover:bg-blue-500 disabled:bg-[#2a292e] disabled:opacity-50 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
                     >
                       {creatingBalance === party.id ? (
                         <Loader size="small" />
@@ -696,7 +696,7 @@ const MatchesSection = ({ showSaved }) => {
                       type="button"
                       onClick={() => handlePublishPartyToTelegram(party)}
                       disabled={publishingToTelegramPartyId === party.id || publishingToTelegramPartyId !== null}
-                      className="bg-green-600 hover:bg-green-500 disabled:bg-zinc-700 disabled:opacity-50 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
+                      className="bg-green-600 hover:bg-green-500 disabled:bg-[#2a292e] disabled:opacity-50 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
                     >
                       {publishingToTelegramPartyId === party.id ? (
                         <Loader size="small" />
@@ -753,12 +753,12 @@ const MatchesSection = ({ showSaved }) => {
       {whatsappPickerParty && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={closeWhatsappPicker}>
           <div
-            className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-md space-y-4"
+            className="bg-[#121218] border border-white/10 rounded-2xl p-6 w-full max-w-md space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-bold">שליחת אקסל בוואטסאפ — {whatsappPickerParty.name}</h3>
-              <button onClick={closeWhatsappPicker} className="text-zinc-500 hover:text-white">
+              <button onClick={closeWhatsappPicker} className="text-[#94A3B8] hover:text-white">
                 <X size={20} />
               </button>
             </div>
@@ -769,7 +769,7 @@ const MatchesSection = ({ showSaved }) => {
 
             {whatsappRecipients.length > 0 && (
               <div className="space-y-1">
-                <label className="text-xs uppercase font-bold text-zinc-500">אנשי קשר שמורים</label>
+                <label className="text-xs uppercase font-bold text-[#94A3B8]">אנשי קשר שמורים</label>
                 <div className="space-y-1">
                   {whatsappRecipients.map((r) => (
                     <label key={r.phone} className="flex items-center gap-2 text-sm bg-black/30 p-2 rounded-lg cursor-pointer">
@@ -788,7 +788,7 @@ const MatchesSection = ({ showSaved }) => {
 
             {whatsappGroups.length > 0 && (
               <div className="space-y-1">
-                <label className="text-xs uppercase font-bold text-zinc-500">קבוצות</label>
+                <label className="text-xs uppercase font-bold text-[#94A3B8]">קבוצות</label>
                 <div className="space-y-1 max-h-40 overflow-y-auto">
                   {whatsappGroups.map((g) => (
                     <label key={g.id} className="flex items-center gap-2 text-sm bg-black/30 p-2 rounded-lg cursor-pointer">
@@ -806,7 +806,7 @@ const MatchesSection = ({ showSaved }) => {
             )}
 
             <div className="space-y-1">
-              <label className="text-xs uppercase font-bold text-zinc-500">או מספר טלפון (בינלאומי, למשל 972501234567)</label>
+              <label className="text-xs uppercase font-bold text-[#94A3B8]">או מספר טלפון (בינלאומי, למשל 972501234567)</label>
               <input
                 type="text"
                 value={whatsappManualPhone}
@@ -823,7 +823,7 @@ const MatchesSection = ({ showSaved }) => {
               <button
                 type="button"
                 onClick={closeWhatsappPicker}
-                className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-xl font-bold"
+                className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-4 py-2 rounded-xl font-bold"
               >
                 ביטול
               </button>

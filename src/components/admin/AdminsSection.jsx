@@ -147,7 +147,7 @@ const AdminsSection = ({ showSaved }) => {
           <h3 className="text-lg font-bold mb-4">{t('admin.admins.addAdminTitle')}</h3>
           <form onSubmit={handleAddAdmin} className="space-y-4">
             <div>
-              <label className="text-xs uppercase font-bold text-zinc-500 block mb-2">{t('admin.admins.selectUserLabel')}</label>
+              <label className="text-xs uppercase font-bold text-[#94A3B8] block mb-2">{t('admin.admins.selectUserLabel')}</label>
               <select
                 value={selectedUserId}
                 onChange={(e) => handleUserSelection(e.target.value)}
@@ -167,13 +167,13 @@ const AdminsSection = ({ showSaved }) => {
                 </p>
               )}
               {selectedUser && !selectedUser.telegramUsername && (
-                <p className="text-red-400 text-sm mt-2">
+                <p className="text-[#ffb4ab] text-sm mt-2">
                   ⚠️ {t('admin.admins.telegramNoUser')}
                 </p>
               )}
             </div>
             <div>
-              <label className="text-xs uppercase font-bold text-zinc-500 block mb-2">{t('admin.admins.passwordLabel')}</label>
+              <label className="text-xs uppercase font-bold text-[#94A3B8] block mb-2">{t('admin.admins.passwordLabel')}</label>
               <input
                 type="password"
                 value={adminPassword}
@@ -187,12 +187,12 @@ const AdminsSection = ({ showSaved }) => {
                 minLength={4}
                 required
               />
-              <p className="text-zinc-500 text-xs mt-1">
+              <p className="text-[#94A3B8] text-xs mt-1">
                 {t('admin.admins.usernameFrom')} {selectedUser && selectedUser.telegramUsername ? `@${selectedUser.telegramUsername.replace(/^@+/, '')}` : t('admin.admins.noUserSelected')}
               </p>
             </div>
             {addAdminError && (
-              <p className="text-red-500 text-sm text-right">{addAdminError}</p>
+              <p className="text-[#ffb4ab] text-sm text-right">{addAdminError}</p>
             )}
             <div className="flex gap-2">
               <button
@@ -211,7 +211,7 @@ const AdminsSection = ({ showSaved }) => {
                   setAdminPassword('');
                   setAddAdminError('');
                 }}
-                className="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2 rounded-xl font-bold"
+                className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-6 py-2 rounded-xl font-bold"
               >
                 {t('admin.admins.cancel')}
               </button>
@@ -223,7 +223,7 @@ const AdminsSection = ({ showSaved }) => {
       {loadingAdmins ? (
         <AdminLoader />
       ) : admins.length === 0 ? (
-        <div className="text-center py-12 text-zinc-500">
+        <div className="text-center py-12 text-[#94A3B8]">
           <p>{t('admin.admins.noAdmins')}</p>
         </div>
       ) : (
@@ -242,22 +242,22 @@ const AdminsSection = ({ showSaved }) => {
                     <span className={`px-2 py-1 rounded text-xs font-bold ${
                       admin.isActive 
                         ? 'bg-green-600' 
-                        : 'bg-red-900'
+                        : 'bg-[#93000a]'
                     }`}>
                       {admin.isActive ? t('admin.admins.active') : t('admin.admins.inactive')}
                     </span>
                   </div>
                   {admin.name && (
-                    <p className="text-zinc-400 text-sm">{t('admin.admins.nameLabel')} {admin.name}</p>
+                    <p className="text-[#a9a9b2] text-sm">{t('admin.admins.nameLabel')} {admin.name}</p>
                   )}
                   {admin.phoneNumber && (
-                    <p className="text-zinc-400 text-sm">{t('admin.admins.phoneLabel')} <PhoneLink phone={admin.phoneNumber}>{admin.phoneNumber}</PhoneLink></p>
+                    <p className="text-[#a9a9b2] text-sm">{t('admin.admins.phoneLabel')} <PhoneLink phone={admin.phoneNumber}>{admin.phoneNumber}</PhoneLink></p>
                   )}
                   {admin.adminUsername && (
                     <p className="text-blue-400 text-sm font-bold">{t('admin.admins.telegramUsernameDisplay')} @{admin.adminUsername}</p>
                   )}
                   {admin.telegramUsername && admin.telegramUsername !== admin.adminUsername && (
-                    <p className="text-zinc-400 text-sm">{t('admin.admins.telegramLabel')} @{admin.telegramUsername.replace(/^@+/, '')}</p>
+                    <p className="text-[#a9a9b2] text-sm">{t('admin.admins.telegramLabel')} @{admin.telegramUsername.replace(/^@+/, '')}</p>
                   )}
                   {admin.isDefaultAdmin && (
                     <p className="text-yellow-400 text-sm mt-2">
@@ -288,7 +288,7 @@ const AdminsSection = ({ showSaved }) => {
                       </button>
                       <button
                         onClick={() => handleRemoveAdmin(admin.id, admin.adminUsername || admin.name)}
-                        className="bg-red-900 hover:bg-red-800 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+                        className="bg-[#93000a] hover:bg-[#be0037] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
                       >
                         <Trash2 size={14} /> {t('admin.admins.removeAdmin')}
                       </button>

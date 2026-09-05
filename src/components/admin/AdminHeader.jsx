@@ -156,11 +156,11 @@ const AdminHeader = ({
 
       {publishMessage && (
         <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <p className={`text-sm ${publishMessage.startsWith('פורסם') ? 'text-green-400' : 'text-red-400'}`}>
+          <p className={`text-sm ${publishMessage.startsWith('פורסם') ? 'text-green-400' : 'text-[#ffb4ab]'}`}>
             {publishMessage}
           </p>
           {publishedCommitSha && (publishMessage.startsWith('פורסם') || publishMessage.includes('Commit:')) && (
-            <span className="text-sm text-zinc-400 flex items-center gap-2">
+            <span className="text-sm text-[#a9a9b2] flex items-center gap-2">
               {deployStatusLoading && (
                 <>
                   <Loader2 size={16} className="animate-spin shrink-0" />
@@ -178,7 +178,7 @@ const AdminHeader = ({
         </div>
       )}
       {importMessage && (
-        <p className={`mb-4 text-sm ${importMessage.includes('הצלחה') ? 'text-green-400' : 'text-red-400'}`}>
+        <p className={`mb-4 text-sm ${importMessage.includes('הצלחה') ? 'text-green-400' : 'text-[#ffb4ab]'}`}>
           {importMessage}
         </p>
       )}

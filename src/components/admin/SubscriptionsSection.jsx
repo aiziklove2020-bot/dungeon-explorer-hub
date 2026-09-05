@@ -240,14 +240,14 @@ const SubscriptionsSection = ({ showSaved }) => {
         <div>
           <h2 className="text-xl md:text-2xl font-bold">{t('admin.subscriptions') || 'ניהול מנויים'}</h2>
           {!loading && (
-            <p className="text-sm text-zinc-400 mt-1 flex flex-wrap gap-x-4 gap-y-0">
+            <p className="text-sm text-[#a9a9b2] mt-1 flex flex-wrap gap-x-4 gap-y-0">
               <span>סה"כ רשומות: <span className="text-white font-medium">{stats.total}</span></span>
               <span>פעילים: <span className="text-green-400 font-medium">{stats.active}</span></span>
               <span>זהב: <span className="text-yellow-400 font-medium">{stats.gold}</span></span>
-              <span>פגים: <span className="text-red-400 font-medium">{stats.expired}</span></span>
+              <span>פגים: <span className="text-[#ffb4ab] font-medium">{stats.expired}</span></span>
             </p>
           )}
-          <p className="text-xs text-zinc-500 mt-1">
+          <p className="text-xs text-[#94A3B8] mt-1">
             כאן מוצגים רק משתמשים עם מנוי בתשלום (מסיבות / מסיבות חילופים), מקובצים לפי סוג המנוי. משתמש שרק רשום לאתר בלי מנוי — זה עניין נפרד, ומופיע ב"ניהול משתמשים" ולא כאן.
           </p>
         </div>
@@ -265,19 +265,19 @@ const SubscriptionsSection = ({ showSaved }) => {
       <div className="flex gap-2 border-b border-[rgba(255,255,255,0.08)] pb-4">
         <button
           onClick={() => setActiveTab('all')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'all' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'all' ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
         >
           כל המנויים
         </button>
         <button
           onClick={() => setActiveTab('parties')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'parties' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'parties' ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
         >
           מנויי מסיבות
         </button>
         <button
           onClick={() => setActiveTab('exchangeParties')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'exchangeParties' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'exchangeParties' ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
         >
           מנויי מסיבות חילופים
         </button>
@@ -286,7 +286,7 @@ const SubscriptionsSection = ({ showSaved }) => {
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="relative">
-          <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-400" />
+          <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#a9a9b2]" />
           <input
             type="text"
             value={searchQuery}
@@ -296,17 +296,17 @@ const SubscriptionsSection = ({ showSaved }) => {
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-zinc-500 text-sm font-bold">סטטוס:</span>
-          {[{ id: 'all', label: 'הכל', color: 'bg-zinc-600' },
+          <span className="text-[#94A3B8] text-sm font-bold">סטטוס:</span>
+          {[{ id: 'all', label: 'הכל', color: 'bg-[#353439]' },
             { id: 'active', label: 'פעיל', color: 'bg-green-600' },
             { id: 'gold', label: 'זהב', color: 'bg-yellow-600' },
             { id: 'expiringSoon', label: 'עומד לפוג', color: 'bg-orange-600' },
-            { id: 'expired', label: 'פג תוקף', color: 'bg-red-900' }
+            { id: 'expired', label: 'פג תוקף', color: 'bg-[#93000a]' }
           ].map(f => (
             <button
               key={f.id}
               onClick={() => setFilterStatus(f.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${filterStatus === f.id ? f.color + ' text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${filterStatus === f.id ? f.color + ' text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}
             >
               {f.label}
             </button>
@@ -318,16 +318,16 @@ const SubscriptionsSection = ({ showSaved }) => {
       {loading ? (
         <AdminLoader />
       ) : processedUsers.length === 0 ? (
-        <div className="text-center py-12 text-zinc-500">
+        <div className="text-center py-12 text-[#94A3B8]">
           <p>לא נמצאו מנויים התואמים לסינון.</p>
         </div>
       ) : (
         <div className="space-y-6">
           {groupedUsers.map(group => (
             <div key={group.id}>
-              <h3 className="text-sm font-bold text-zinc-400 mb-2 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-[#a9a9b2] mb-2 flex items-center gap-2">
                 {group.label}
-                <span className="text-xs font-normal text-zinc-600">({group.users.length})</span>
+                <span className="text-xs font-normal text-[#64748B]">({group.users.length})</span>
               </h3>
               <div className="space-y-3">
                 {group.users.map(u => (
@@ -335,10 +335,10 @@ const SubscriptionsSection = ({ showSaved }) => {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <strong className="text-lg text-white">{u.name}</strong>
-                        {u.level === 'admin' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-600">Admin</span>}
-                        {u.level === 'blocked' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-red-900">Blocked</span>}
+                        {u.level === 'admin' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#e11d48]">Admin</span>}
+                        {u.level === 'blocked' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#93000a]">Blocked</span>}
                       </div>
-                      <div className="text-sm text-zinc-400 flex gap-3">
+                      <div className="text-sm text-[#a9a9b2] flex gap-3">
                         <span><PhoneLink phone={u.phoneNumber}>{u.phoneNumber}</PhoneLink></span>
                         {u.telegramUsername && <span>@{u.telegramUsername}</span>}
                       </div>

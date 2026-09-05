@@ -87,7 +87,7 @@ const ChatReportsSection = ({ showSaved }) => {
 
   if (loading && !rows.length) {
     return (
-      <div className="flex items-center gap-2 text-zinc-500 py-8">
+      <div className="flex items-center gap-2 text-[#94A3B8] py-8">
         <Loader className="animate-spin" size={20} />
         {t('admin.liveChat.loading')}
       </div>
@@ -105,20 +105,20 @@ const ChatReportsSection = ({ showSaved }) => {
           type="button"
           onClick={() => load()}
           disabled={loading}
-          className="inline-flex items-center gap-2 text-sm bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-2 rounded-lg disabled:opacity-50"
+          className="inline-flex items-center gap-2 text-sm bg-[#1f1f23] hover:bg-[#2a292e] text-white px-3 py-2 rounded-lg disabled:opacity-50"
         >
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
           {t('admin.chatReports.refresh')}
         </button>
       </div>
 
-      <p className="text-zinc-400 text-sm">{t('admin.chatReports.intro')}</p>
+      <p className="text-[#a9a9b2] text-sm">{t('admin.chatReports.intro')}</p>
 
-      {err && <p className="text-red-400 text-sm">{err}</p>}
+      {err && <p className="text-[#ffb4ab] text-sm">{err}</p>}
 
       <div className="md:hidden space-y-3">
         {rows.length === 0 && (
-          <p className="text-zinc-500 text-sm py-6 text-center border border-[rgba(255,255,255,0.08)] rounded-lg">
+          <p className="text-[#94A3B8] text-sm py-6 text-center border border-[rgba(255,255,255,0.08)] rounded-lg">
             {t('admin.chatReports.empty')}
           </p>
         )}
@@ -128,21 +128,21 @@ const ChatReportsSection = ({ showSaved }) => {
             className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-[#121218] p-4 space-y-3 text-sm"
           >
             <div className="flex flex-wrap items-start justify-between gap-2">
-              <span className="text-zinc-500 text-xs">{formatReportTime(r.createdAt)}</span>
+              <span className="text-[#94A3B8] text-xs">{formatReportTime(r.createdAt)}</span>
               <span
                 className={
                   r.status === 'open'
                     ? 'text-amber-400 text-xs font-bold'
                     : r.status === 'actioned'
                       ? 'text-green-400 text-xs'
-                      : 'text-zinc-500 text-xs'
+                      : 'text-[#94A3B8] text-xs'
                 }
               >
                 {r.status || '—'}
               </span>
             </div>
             <div>
-              <div className="text-xs text-zinc-500 mb-1">{t('admin.chatReports.room')}</div>
+              <div className="text-xs text-[#94A3B8] mb-1">{t('admin.chatReports.room')}</div>
               <a
                 href={`/chat/${encodeURIComponent(r.roomId)}?m=${encodeURIComponent(r.messageId)}`}
                 className="text-amber-400 hover:underline break-all text-sm"
@@ -153,22 +153,22 @@ const ChatReportsSection = ({ showSaved }) => {
               </a>
             </div>
             <div>
-              <div className="text-xs text-zinc-500 mb-1">{t('admin.chatReports.reporter')}</div>
-              <span className="font-mono text-xs text-zinc-300">{r.reporterId}</span>
+              <div className="text-xs text-[#94A3B8] mb-1">{t('admin.chatReports.reporter')}</div>
+              <span className="font-mono text-xs text-[#e4e1e7]">{r.reporterId}</span>
               {r.reporterNickname ? (
-                <span className="block text-xs text-zinc-500">{r.reporterNickname}</span>
+                <span className="block text-xs text-[#94A3B8]">{r.reporterNickname}</span>
               ) : null}
             </div>
             <div>
-              <div className="text-xs text-zinc-500 mb-1">{t('admin.chatReports.reason')}</div>
-              <p className="text-zinc-200 text-sm whitespace-pre-wrap break-words">{r.reason || '—'}</p>
+              <div className="text-xs text-[#94A3B8] mb-1">{t('admin.chatReports.reason')}</div>
+              <p className="text-[#e4e1e7] text-sm whitespace-pre-wrap break-words">{r.reason || '—'}</p>
             </div>
             {r.status === 'open' && (
               <div className="flex flex-col gap-2 pt-1">
                 <button
                   type="button"
                   disabled={busyId === r.id}
-                  className="w-full text-sm bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-2.5 rounded-lg disabled:opacity-50 touch-manipulation"
+                  className="w-full text-sm bg-[#1f1f23] hover:bg-[#2a292e] text-white px-3 py-2.5 rounded-lg disabled:opacity-50 touch-manipulation"
                   onClick={() => setStatus(r.id, 'dismissed')}
                 >
                   {t('admin.chatReports.dismiss')}
@@ -189,7 +189,7 @@ const ChatReportsSection = ({ showSaved }) => {
 
       <div className="hidden md:block overflow-x-auto border border-[rgba(255,255,255,0.08)] rounded-lg touch-pan-x">
         <table className="w-full text-sm text-right min-w-[640px]">
-          <thead className="bg-zinc-900 text-zinc-400">
+          <thead className="bg-[#121218] text-[#a9a9b2]">
             <tr>
               <th className="p-2 font-medium">{t('admin.chatReports.when')}</th>
               <th className="p-2 font-medium">{t('admin.chatReports.room')}</th>
@@ -202,14 +202,14 @@ const ChatReportsSection = ({ showSaved }) => {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-6 text-center text-zinc-500">
+                <td colSpan={6} className="p-6 text-center text-[#94A3B8]">
                   {t('admin.chatReports.empty')}
                 </td>
               </tr>
             )}
             {rows.map((r) => (
               <tr key={r.id} className="border-t border-[rgba(255,255,255,0.08)] hover:bg-[#121218]">
-                <td className="p-2 text-zinc-300 whitespace-nowrap align-top">
+                <td className="p-2 text-[#e4e1e7] whitespace-nowrap align-top">
                   {formatReportTime(r.createdAt)}
                 </td>
                 <td className="p-2 align-top">
@@ -222,13 +222,13 @@ const ChatReportsSection = ({ showSaved }) => {
                     {r.roomId}
                   </a>
                 </td>
-                <td className="p-2 text-zinc-300 align-top">
+                <td className="p-2 text-[#e4e1e7] align-top">
                   <span className="font-mono text-xs">{r.reporterId}</span>
                   {r.reporterNickname ? (
-                    <span className="block text-xs text-zinc-500">{r.reporterNickname}</span>
+                    <span className="block text-xs text-[#94A3B8]">{r.reporterNickname}</span>
                   ) : null}
                 </td>
-                <td className="p-2 text-zinc-200 max-w-xs align-top">
+                <td className="p-2 text-[#e4e1e7] max-w-xs align-top">
                   <span className="line-clamp-3">{r.reason || '—'}</span>
                 </td>
                 <td className="p-2 align-top">
@@ -238,7 +238,7 @@ const ChatReportsSection = ({ showSaved }) => {
                         ? 'text-amber-400'
                         : r.status === 'actioned'
                           ? 'text-green-400'
-                          : 'text-zinc-500'
+                          : 'text-[#94A3B8]'
                     }
                   >
                     {r.status || '—'}
@@ -250,7 +250,7 @@ const ChatReportsSection = ({ showSaved }) => {
                       <button
                         type="button"
                         disabled={busyId === r.id}
-                        className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-2 py-1 rounded disabled:opacity-50"
+                        className="text-xs bg-[#1f1f23] hover:bg-[#2a292e] text-white px-2 py-1 rounded disabled:opacity-50"
                         onClick={() => setStatus(r.id, 'dismissed')}
                       >
                         {t('admin.chatReports.dismiss')}
@@ -265,7 +265,7 @@ const ChatReportsSection = ({ showSaved }) => {
                       </button>
                     </div>
                   ) : (
-                    <span className="text-xs text-zinc-600">—</span>
+                    <span className="text-xs text-[#64748B]">—</span>
                   )}
                 </td>
               </tr>

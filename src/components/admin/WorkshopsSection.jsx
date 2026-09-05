@@ -238,7 +238,7 @@ const WorkshopsSection = ({ showSaved }) => {
       ) : (
         <>
           {workshops.length === 0 && !isAdding && (
-            <p className="text-zinc-500">{t('workshops.none')}</p>
+            <p className="text-[#94A3B8]">{t('workshops.none')}</p>
           )}
 
           {(isAdding || editingId) && (
@@ -246,17 +246,17 @@ const WorkshopsSection = ({ showSaved }) => {
               <h3 className="font-bold">{editingId ? t('workshops.edit') : t('workshops.add')}</h3>
               <div className="grid gap-4">
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">{t('workshops.fieldTitle')}</label>
+                  <label className="block text-xs text-[#94A3B8] mb-1">{t('workshops.fieldTitle')}</label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-white text-right"
                     placeholder="נושא הסדנא"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">{t('workshops.fieldImage')}</label>
+                  <label className="block text-xs text-[#94A3B8] mb-1">{t('workshops.fieldImage')}</label>
                   <ImageUpload
                     value={formData.imageUrl}
                     onChange={v => setFormData(prev => ({ ...prev, imageUrl: v }))}
@@ -264,63 +264,63 @@ const WorkshopsSection = ({ showSaved }) => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">תיאור</label>
+                  <label className="block text-xs text-[#94A3B8] mb-1">תיאור</label>
                   <textarea
                     value={formData.description}
                     onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-white text-right"
                     placeholder="תיאור קצר של הסדנא..."
                     rows={3}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">{t('workshops.fieldInstructor')}</label>
+                  <label className="block text-xs text-[#94A3B8] mb-1">{t('workshops.fieldInstructor')}</label>
                   <input
                     type="text"
                     value={formData.instructor}
                     onChange={e => setFormData(prev => ({ ...prev, instructor: e.target.value }))}
-                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-white text-right"
                     placeholder="שם המדריך"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">{t('workshops.fieldPrice')}</label>
+                  <label className="block text-xs text-[#94A3B8] mb-1">{t('workshops.fieldPrice')}</label>
                   <input
                     type="number"
                     min="0"
                     value={formData.price}
                     onChange={e => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-white text-right"
                     placeholder="0"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">{t('workshops.fieldDate')}</label>
+                  <label className="block text-xs text-[#94A3B8] mb-1">{t('workshops.fieldDate')}</label>
                   <input
                     type="date"
                     value={formData.date}
                     onChange={e => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-white text-right"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">{t('workshops.fieldDuration')}</label>
+                  <label className="block text-xs text-[#94A3B8] mb-1">{t('workshops.fieldDuration')}</label>
                   <input
                     type="text"
                     value={formData.duration}
                     onChange={e => setFormData(prev => ({ ...prev, duration: e.target.value }))}
-                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-white text-right"
                     placeholder="למשל: 3 שעות, 90 דקות"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">{t('workshops.fieldMaxParticipants')}</label>
+                  <label className="block text-xs text-[#94A3B8] mb-1">{t('workshops.fieldMaxParticipants')}</label>
                   <input
                     type="number"
                     min="0"
                     value={formData.maxParticipants}
                     onChange={e => setFormData(prev => ({ ...prev, maxParticipants: e.target.value }))}
-                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-white text-right"
                     placeholder="ריק = ללא הגבלה"
                   />
                 </div>
@@ -347,7 +347,7 @@ const WorkshopsSection = ({ showSaved }) => {
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="bg-zinc-700 hover:bg-zinc-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-1"
+                  className="bg-[#2a292e] hover:bg-[#353439] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-1"
                 >
                   <X size={16} />
                   {t('cancel')}
@@ -373,7 +373,7 @@ const WorkshopsSection = ({ showSaved }) => {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="font-bold">{w.title}</div>
-                      <div className="text-sm text-zinc-500">
+                      <div className="text-sm text-[#94A3B8]">
                         {t('workshops.fieldInstructor')}: {w.instructor || '–'} | {t('workshops.fieldPrice')}: {w.price != null ? `₪${w.price}` : '–'} | {t('workshops.registeredLabel')}: {max != null ? `${count} / ${max}` : count}
                       </div>
                     </div>
@@ -381,7 +381,7 @@ const WorkshopsSection = ({ showSaved }) => {
                       <button
                         type="button"
                         onClick={() => toggleExpanded(w.id)}
-                        className="p-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white text-xs font-bold flex items-center gap-1"
+                        className="p-2 rounded-lg bg-[#2a292e] hover:bg-[#353439] text-white text-xs font-bold flex items-center gap-1"
                         title={isExpanded ? t('workshops.hideRegistrations') : t('workshops.showRegistrations')}
                       >
                         {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -390,7 +390,7 @@ const WorkshopsSection = ({ showSaved }) => {
                       <button
                         type="button"
                         onClick={() => openEdit(w)}
-                        className="p-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white"
+                        className="p-2 rounded-lg bg-[#2a292e] hover:bg-[#353439] text-white"
                         title={t('edit')}
                       >
                         <Edit2 size={18} />
@@ -409,23 +409,23 @@ const WorkshopsSection = ({ showSaved }) => {
                     <div className="border-t border-white/5 p-4 bg-black/20 space-y-3">
                       <div className="flex flex-wrap items-end gap-2">
                         <div>
-                          <label className="block text-xs text-zinc-500 mb-1">{t('workshops.addRegistrantPhone')}</label>
+                          <label className="block text-xs text-[#94A3B8] mb-1">{t('workshops.addRegistrantPhone')}</label>
                           <input
                             type="tel"
                             value={addRegPhone[w.id] || ''}
                             onChange={e => setAddRegPhone(prev => ({ ...prev, [w.id]: e.target.value }))}
                             placeholder="0500000000"
-                            className="w-32 bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right text-sm"
+                            className="w-32 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-white text-right text-sm"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-zinc-500 mb-1">{t('workshops.addRegistrantName')}</label>
+                          <label className="block text-xs text-[#94A3B8] mb-1">{t('workshops.addRegistrantName')}</label>
                           <input
                             type="text"
                             value={addRegName[w.id] || ''}
                             onChange={e => setAddRegName(prev => ({ ...prev, [w.id]: e.target.value }))}
                             placeholder="שם"
-                            className="w-32 bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right text-sm"
+                            className="w-32 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-white text-right text-sm"
                           />
                         </div>
                         <button
@@ -438,13 +438,13 @@ const WorkshopsSection = ({ showSaved }) => {
                           {t('workshops.addRegistrant')}
                         </button>
                       </div>
-                      <div className="text-sm font-bold text-zinc-400">{t('workshops.registrationsList')}</div>
+                      <div className="text-sm font-bold text-[#a9a9b2]">{t('workshops.registrationsList')}</div>
                       {regs.length === 0 ? (
-                        <p className="text-zinc-500 text-sm">{t('workshops.noRegistrations')}</p>
+                        <p className="text-[#94A3B8] text-sm">{t('workshops.noRegistrations')}</p>
                       ) : (
                         <ul className="space-y-2">
                           {regs.map(reg => (
-                            <li key={reg.id} className="flex items-center justify-between gap-2 py-1.5 px-2 rounded-lg bg-zinc-800/50 flex-wrap">
+                            <li key={reg.id} className="flex items-center justify-between gap-2 py-1.5 px-2 rounded-lg bg-[#1f1f23]/50 flex-wrap">
                               <span className="text-sm">
                                 {reg.userName || '–'} | {reg.phoneNumber || '–'}
                                 {reg.isGuest && (

@@ -58,7 +58,7 @@ const LiveChatSection = ({ showSaved }) => {
 
   if (loading) {
     return (
-      <div className="text-zinc-500 text-sm py-8">
+      <div className="text-[#94A3B8] text-sm py-8">
         {t('admin.liveChat.loading') || 'טוען…'}
       </div>
     );
@@ -67,17 +67,17 @@ const LiveChatSection = ({ showSaved }) => {
   return (
     <div className="space-y-6 max-w-xl">
       <div className="flex items-center gap-2 text-white font-bold text-lg">
-        <MessageCircle size={22} className="text-red-500" />
+        <MessageCircle size={22} className="text-[#ffb4ab]" />
         {t('admin.liveChat.title') || 'צ׳אט (פורום)'}
       </div>
 
-      <p className="text-zinc-400 text-sm leading-relaxed">
+      <p className="text-[#a9a9b2] text-sm leading-relaxed">
         {t('admin.liveChat.intro') ||
           'שמירת הודעות לפי ימים (TTL), והשתקת הצ׳אט הכללי. שינוי ימים חל על הודעות חדשות בלבד.'}
       </p>
 
       <label className="block space-y-2">
-        <span className="text-zinc-300 text-sm font-bold">
+        <span className="text-[#e4e1e7] text-sm font-bold">
           {t('admin.liveChat.retentionDays') || 'ימי שמירת הודעות'}
         </span>
         <input
@@ -86,7 +86,7 @@ const LiveChatSection = ({ showSaved }) => {
           max={365}
           value={retentionDays}
           onChange={(e) => setRetentionDays(Number(e.target.value))}
-          className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-white"
+          className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-lg px-3 py-2 text-white"
         />
       </label>
 
@@ -95,9 +95,9 @@ const LiveChatSection = ({ showSaved }) => {
           type="checkbox"
           checked={globalChatMuted}
           onChange={(e) => setGlobalChatMuted(e.target.checked)}
-          className="w-4 h-4 rounded border-zinc-600"
+          className="w-4 h-4 rounded border-[rgba(255,255,255,0.12)]"
         />
-        <span className="text-zinc-200 text-sm">
+        <span className="text-[#e4e1e7] text-sm">
           {t('admin.liveChat.globalMuted') || 'השתק את הצ׳אט הכללי למשתמשים רגילים'}
         </span>
       </label>
@@ -114,7 +114,7 @@ const LiveChatSection = ({ showSaved }) => {
         href="/chat"
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-bold"
+        className="inline-flex items-center gap-2 text-[#ffb4ab] hover:text-[#ffdada] text-sm font-bold"
       >
         <ExternalLink size={16} />
         {t('admin.liveChat.openChat') || 'פתח צ׳אט במסך חדש'}
@@ -124,23 +124,23 @@ const LiveChatSection = ({ showSaved }) => {
         <div className="text-white font-bold">
           ניקוי הודעות
         </div>
-        <p className="text-zinc-400 text-sm leading-relaxed">
+        <p className="text-[#a9a9b2] text-sm leading-relaxed">
           {t('admin.liveChat.clearRoomsIntro') ||
             'מוחק את כל ההודעות בחדר כדי לפנות מקום במסד הנתונים. החדר עצמו נשאר פעיל וריק — לא נמחק.'}
         </p>
-        {clearError && <p className="text-red-400 text-sm">{clearError}</p>}
+        {clearError && <p className="text-[#ffb4ab] text-sm">{clearError}</p>}
         <div className="space-y-2">
           {CHAT_ROOMS.map((room) => (
             <div
               key={room.id}
-              className="flex items-center justify-between bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3"
+              className="flex items-center justify-between bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-lg px-4 py-3"
             >
-              <span className="text-zinc-200 text-sm font-bold">{room.label}</span>
+              <span className="text-[#e4e1e7] text-sm font-bold">{room.label}</span>
               <button
                 type="button"
                 onClick={() => handleClearRoom(room.id, room.label)}
                 disabled={clearingRoomId === room.id}
-                className="flex items-center gap-2 text-red-400 hover:text-red-300 disabled:opacity-50 text-sm font-bold"
+                className="flex items-center gap-2 text-[#ffb4ab] hover:text-[#ffdada] disabled:opacity-50 text-sm font-bold"
               >
                 <Trash2 size={16} />
                 {clearingRoomId === room.id ? 'מוחק…' : 'מחק הודעות'}

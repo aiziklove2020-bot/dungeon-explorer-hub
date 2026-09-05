@@ -32,12 +32,12 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-600">✓</span>
             )}
           </div>
-          <p className="text-zinc-400 text-[10px] md:text-xs">
+          <p className="text-[#a9a9b2] text-[10px] md:text-xs">
             <PhoneLink phone={maleReg?.phoneNumber}>{maleReg?.phoneNumber || '-'}</PhoneLink>
             {maleReg?.telegramUsername && ` • @${maleReg.telegramUsername}`}
           </p>
           {maleRegInfo && (
-            <p className={`text-[10px] ${maleRegInfo.isExpired ? 'text-red-400' : 'text-green-400'}`}>
+            <p className={`text-[10px] ${maleRegInfo.isExpired ? 'text-[#ffb4ab]' : 'text-green-400'}`}>
               {maleRegInfo.isGold ? '⭐' : maleRegInfo.isExpired ? '⚠️' : '✅'}
             </p>
           )}
@@ -79,12 +79,12 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-600">✓</span>
             )}
           </div>
-          <p className="text-zinc-400 text-[10px] md:text-xs">
+          <p className="text-[#a9a9b2] text-[10px] md:text-xs">
             <PhoneLink phone={femaleReg?.phoneNumber}>{femaleReg?.phoneNumber || '-'}</PhoneLink>
             {femaleReg?.telegramUsername && ` • @${femaleReg.telegramUsername}`}
           </p>
           {femaleRegInfo && (
-            <p className={`text-[10px] ${femaleRegInfo.isExpired ? 'text-red-400' : 'text-green-400'}`}>
+            <p className={`text-[10px] ${femaleRegInfo.isExpired ? 'text-[#ffb4ab]' : 'text-green-400'}`}>
               {femaleRegInfo.isGold ? '⭐' : femaleRegInfo.isExpired ? '⚠️' : '✅'}
             </p>
           )}

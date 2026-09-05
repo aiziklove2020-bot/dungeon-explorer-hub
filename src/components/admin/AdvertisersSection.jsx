@@ -13,7 +13,7 @@ const STATUS_LABEL = {
 const STATUS_BADGE_CLASS = {
   pending: 'bg-amber-600',
   approved: 'bg-green-600',
-  rejected: 'bg-red-900',
+  rejected: 'bg-[#93000a]',
 };
 
 const AdvertisersSection = ({ showSaved }) => {
@@ -72,7 +72,7 @@ const AdvertisersSection = ({ showSaved }) => {
       {loading ? (
         <AdminLoader />
       ) : advertisers.length === 0 ? (
-        <div className="text-center py-12 text-zinc-500">
+        <div className="text-center py-12 text-[#94A3B8]">
           <p>אין בקשות הרשמה של מפרסמים</p>
         </div>
       ) : (
@@ -84,13 +84,13 @@ const AdvertisersSection = ({ showSaved }) => {
                   <div className="flex items-center gap-2 mb-2">
                     <strong className="text-lg">{adv.businessName || 'ללא שם עסק'}</strong>
                     <span className="px-2 py-1 rounded text-xs font-bold bg-indigo-600">מפרסם</span>
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${STATUS_BADGE_CLASS[adv.status] || 'bg-zinc-700'}`}>
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${STATUS_BADGE_CLASS[adv.status] || 'bg-[#2a292e]'}`}>
                       {STATUS_LABEL[adv.status] || adv.status}
                     </span>
                   </div>
-                  {adv.contactName && <p className="text-zinc-400 text-sm">איש קשר: {adv.contactName}</p>}
+                  {adv.contactName && <p className="text-[#a9a9b2] text-sm">איש קשר: {adv.contactName}</p>}
                   {adv.phoneNumber && (
-                    <p className="text-zinc-400 text-sm">
+                    <p className="text-[#a9a9b2] text-sm">
                       טלפון: <PhoneLink phone={adv.phoneNumber}>{adv.phoneNumber}</PhoneLink>
                     </p>
                   )}
@@ -107,7 +107,7 @@ const AdvertisersSection = ({ showSaved }) => {
                   {adv.status !== 'rejected' && (
                     <button
                       onClick={() => handleSetStatus(adv.id, 'rejected')}
-                      className="bg-red-900 hover:bg-red-800 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+                      className="bg-[#93000a] hover:bg-[#be0037] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
                     >
                       <X size={14} /> דחייה
                     </button>
@@ -115,20 +115,20 @@ const AdvertisersSection = ({ showSaved }) => {
                   {adv.status !== 'pending' && (
                     <button
                       onClick={() => handleSetStatus(adv.id, 'pending')}
-                      className="bg-zinc-700 hover:bg-zinc-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+                      className="bg-[#2a292e] hover:bg-[#353439] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
                     >
                       <RotateCw size={14} /> איפוס לממתין
                     </button>
                   )}
                   <button
                     onClick={() => handleResetPassword(adv.id, adv.businessName)}
-                    className="bg-zinc-700 hover:bg-zinc-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+                    className="bg-[#2a292e] hover:bg-[#353439] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
                   >
                     <KeyRound size={14} /> אפס סיסמה
                   </button>
                   <button
                     onClick={() => handleDelete(adv.id, adv.businessName)}
-                    className="bg-zinc-800 hover:bg-red-900 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+                    className="bg-[#1f1f23] hover:bg-[#93000a] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
                   >
                     <Trash2 size={14} /> מחיקה
                   </button>

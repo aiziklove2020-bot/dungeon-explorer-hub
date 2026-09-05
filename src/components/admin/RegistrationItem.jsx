@@ -56,7 +56,7 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
   if (loading) {
     return (
       <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] p-3 rounded-lg">
-        <p className="text-zinc-400 text-sm">{t('registrationItem.loading')}</p>
+        <p className="text-[#a9a9b2] text-sm">{t('registrationItem.loading')}</p>
       </div>
     );
   }
@@ -96,7 +96,7 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
                 )}
               </>
             ) : (
-              <span className="px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-bold bg-zinc-600">
+              <span className="px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-bold bg-[#353439]">
                 ❌ {t('registrationItem.client')}
               </span>
             )}
@@ -105,21 +105,21 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
                 ⚖️ {t('registrationItem.matched')}
               </span>
             ) : (
-              <span className="px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-bold bg-zinc-700">
+              <span className="px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-bold bg-[#2a292e]">
                 ❌ {t('registrationItem.notMatched')}
               </span>
             )}
           </div>
-          <p className="text-zinc-400 text-[10px] md:text-xs">{t('registrationItem.phone')}: <PhoneLink phone={registration.phoneNumber}>{registration.phoneNumber || '-'}</PhoneLink></p>
+          <p className="text-[#a9a9b2] text-[10px] md:text-xs">{t('registrationItem.phone')}: <PhoneLink phone={registration.phoneNumber}>{registration.phoneNumber || '-'}</PhoneLink></p>
           {registration.telegramUsername && (
-            <p className="text-zinc-400 text-[10px] md:text-xs">{t('registrationItem.telegram')}: @{registration.telegramUsername}</p>
+            <p className="text-[#a9a9b2] text-[10px] md:text-xs">{t('registrationItem.telegram')}: @{registration.telegramUsername}</p>
           )}
           {regInfo && (
-            <div className="mt-2 p-1.5 md:p-2 rounded bg-zinc-800/50">
+            <div className="mt-2 p-1.5 md:p-2 rounded bg-[#1f1f23]/50">
               {regInfo.isGold ? (
                 <p className="text-yellow-400 text-[10px] md:text-xs font-bold">⭐ {t('registrationItem.goldUserNeverExpires')}</p>
               ) : (
-                <p className={`text-[10px] md:text-xs ${regInfo.isExpired ? 'text-red-400' : regInfo.isExpiringSoon ? 'text-orange-400' : 'text-green-400'}`}>
+                <p className={`text-[10px] md:text-xs ${regInfo.isExpired ? 'text-[#ffb4ab]' : regInfo.isExpiringSoon ? 'text-orange-400' : 'text-green-400'}`}>
                   {regInfo.isExpired 
                     ? `⚠️ ${t('registrationItem.expiredDaysAgo')} ${Math.abs(regInfo.daysRemaining)} ${t('registration.daysAgo')}`
                     : `✅ ${t('registrationItem.daysRemaining')} ${regInfo.daysRemaining} ${t('registration.daysUntilExpiry')}`}

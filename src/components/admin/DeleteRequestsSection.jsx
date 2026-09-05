@@ -31,7 +31,7 @@ async function patchStatus(requestId, status) {
 }
 
 const STATUS_LABEL = { pending: 'ממתין', done: 'טופל', dismissed: 'נדחה' };
-const STATUS_CLASS = { pending: 'text-amber-400', done: 'text-green-400', dismissed: 'text-zinc-500' };
+const STATUS_CLASS = { pending: 'text-amber-400', done: 'text-green-400', dismissed: 'text-[#94A3B8]' };
 
 const DeleteRequestsSection = ({ showSaved }) => {
   const [rows, setRows] = useState([]);
@@ -72,7 +72,7 @@ const DeleteRequestsSection = ({ showSaved }) => {
 
   if (loading && !rows.length) {
     return (
-      <div className="flex items-center gap-2 text-zinc-500 py-8">
+      <div className="flex items-center gap-2 text-[#94A3B8] py-8">
         <Loader className="animate-spin" size={20} />
         טוען...
       </div>
@@ -83,7 +83,7 @@ const DeleteRequestsSection = ({ showSaved }) => {
     <div className="space-y-4 max-w-4xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-white font-bold text-lg">
-          <Trash2 size={22} className="text-red-500" />
+          <Trash2 size={22} className="text-[#ffb4ab]" />
           בקשות מחיקת חשבון
           {pendingCount > 0 && (
             <span className="text-xs bg-amber-900/60 text-amber-300 px-2 py-1 rounded-full font-bold">
@@ -95,29 +95,29 @@ const DeleteRequestsSection = ({ showSaved }) => {
           type="button"
           onClick={() => load()}
           disabled={loading}
-          className="inline-flex items-center gap-2 text-sm bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-2 rounded-lg disabled:opacity-50"
+          className="inline-flex items-center gap-2 text-sm bg-[#1f1f23] hover:bg-[#2a292e] text-white px-3 py-2 rounded-lg disabled:opacity-50"
         >
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
           רענן
         </button>
       </div>
 
-      <p className="text-zinc-400 text-sm">
+      <p className="text-[#a9a9b2] text-sm">
         משתמשים ששלחו בקשה למחוק את החשבון שלהם (מספר טלפון) מהאתר. אישור "טופל" כאן
         רק מסמן שהטיפול הושלם — המחיקה בפועל של הנתונים (משתמש, הרשמות, פורום וכו')
         היא פעולה נפרדת שצריך לבצע ידנית.
       </p>
 
-      {err && <p className="text-red-400 text-sm">{err}</p>}
+      {err && <p className="text-[#ffb4ab] text-sm">{err}</p>}
 
       {rows.length === 0 ? (
-        <p className="text-zinc-500 text-sm py-6 text-center border border-[rgba(255,255,255,0.08)] rounded-lg">
+        <p className="text-[#94A3B8] text-sm py-6 text-center border border-[rgba(255,255,255,0.08)] rounded-lg">
           אין בקשות מחיקה
         </p>
       ) : (
         <div className="overflow-x-auto border border-[rgba(255,255,255,0.08)] rounded-lg">
           <table className="w-full text-sm text-right min-w-[480px]">
-            <thead className="bg-zinc-900 text-zinc-400">
+            <thead className="bg-[#121218] text-[#a9a9b2]">
               <tr>
                 <th className="p-2 font-medium">מתי</th>
                 <th className="p-2 font-medium">טלפון</th>
@@ -130,7 +130,7 @@ const DeleteRequestsSection = ({ showSaved }) => {
                 const status = r.status || 'pending';
                 return (
                   <tr key={r.id} className="border-t border-[rgba(255,255,255,0.08)] hover:bg-[#121218]">
-                    <td className="p-2 text-zinc-300 whitespace-nowrap align-top">{formatTime(r.createdAt)}</td>
+                    <td className="p-2 text-[#e4e1e7] whitespace-nowrap align-top">{formatTime(r.createdAt)}</td>
                     <td className="p-2 align-top">
                       <span dir="ltr" className="font-mono">{r.phoneNumber}</span>
                     </td>
@@ -151,14 +151,14 @@ const DeleteRequestsSection = ({ showSaved }) => {
                           <button
                             type="button"
                             disabled={busyId === r.id}
-                            className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-2 py-1 rounded disabled:opacity-50"
+                            className="text-xs bg-[#1f1f23] hover:bg-[#2a292e] text-white px-2 py-1 rounded disabled:opacity-50"
                             onClick={() => setStatus(r.id, 'dismissed')}
                           >
                             דחה
                           </button>
                         </div>
                       ) : (
-                        <span className="text-xs text-zinc-600">—</span>
+                        <span className="text-xs text-[#64748B]">—</span>
                       )}
                     </td>
                   </tr>

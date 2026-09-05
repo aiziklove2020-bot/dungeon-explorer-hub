@@ -649,7 +649,7 @@ const BalanceTables = ({
                             isManClient ? 'unmatched-card__details--client' : ''
                           }`}><PhoneLink phone={man.phoneNumber}>{man.phoneNumber || '-'}</PhoneLink>{man.telegramUsername && ` • @${man.telegramUsername}`}</p>
                           {isManCouple && (man.partnerName || man.partnerPhone) && (
-                            <p className="unmatched-card__details text-zinc-500 text-xs mt-1">
+                            <p className="unmatched-card__details text-[#94A3B8] text-xs mt-1">
                               {t('admin.balanceTables.partner') || 'בן/בת זוג'}: {man.partnerName || '-'}
                               {man.partnerPhone && (
                                 <><br /><PhoneLink phone={man.partnerPhone}>{man.partnerPhone}</PhoneLink></>
@@ -718,7 +718,7 @@ const BalanceTables = ({
                             isWomanClient ? 'unmatched-card__details--client' : ''
                           }`}><PhoneLink phone={woman.phoneNumber}>{woman.phoneNumber || '-'}</PhoneLink>{woman.telegramUsername && ` • @${woman.telegramUsername}`}</p>
                           {isWomanCouple && (woman.partnerName || woman.partnerPhone) && (
-                            <p className="unmatched-card__details text-zinc-500 text-xs mt-1">
+                            <p className="unmatched-card__details text-[#94A3B8] text-xs mt-1">
                               {t('admin.balanceTables.partner') || 'בן/בת זוג'}: {woman.partnerName || '-'}
                               {woman.partnerPhone && (
                                 <><br /><PhoneLink phone={woman.partnerPhone}>{woman.partnerPhone}</PhoneLink></>
