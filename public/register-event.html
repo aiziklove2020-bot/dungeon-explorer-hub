@@ -98,7 +98,7 @@
 
 <script src="assets/app.js?v=202608191620"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609050902";
+import "./assets/site-data.js?v=202609050912";
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const isCouple = typeSelect.value === "couple";
     coupleFields.style.display = isCouple ? "" : "none";
     singleFields.style.display = isCouple ? "none" : "";
-    pickupWrap.style.display = typeSelect.value === "single-female-discount" ? "" : "none";
+    pickupWrap.style.display = (typeSelect.value === "single-female-discount" || typeSelect.value === "single-female-balance") ? "" : "none";
   });
 
   const ISRAELI_PHONE_RE = /^05\d{8}$/;
@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           phoneNumber,
           telegramUsername: f.get("telegramUsername"),
           registrationType: f.get("registrationType"),
-          pickupAddress: f.get("registrationType") === "single-female-discount" ? (f.get("pickupAddress") || "") : "",
+          pickupAddress: (f.get("registrationType") === "single-female-discount" || f.get("registrationType") === "single-female-balance") ? (f.get("pickupAddress") || "") : "",
         });
         step2.style.display = "none";
         document.getElementById("regSuccess").style.display = "";
