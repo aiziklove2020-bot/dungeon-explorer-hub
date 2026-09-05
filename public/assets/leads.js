@@ -1,7 +1,7 @@
 // טופס לידים עצמאי לעמוד "מנוי איזון מגדרי" — פועל בנפרד מ-site-data.js
 // כדי לא לגעת בבאנדל הגדול, מתחבר ישירות ל-Firestore עם אותו פרויקט Firebase.
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAJv0APn-Qmv59H2Behu3PhskObCaPHW_A",
@@ -42,44 +42,16 @@ async function submitLead({ name, phone, track, message, source = "membership_pa
     createdAt: new Date().toISOString(),
   };
   await setDoc(newRef, payload);
-  notifyTelegram(payload).catch(() => {});
-  return { id: newRef.id, ...payload };
-}
 
-const TRACK_LABELS = {
-  parties: "מסיבות בדסם",
-  exchange: "חילופי זוגות",
-  combo: "מסלול משולב",
-};
-
-// Best-effort admin notification, sent directly from the browser via the
-// same-origin Telegram relay (no server-side Firebase Admin credentials
-// needed — settings/telegram is publicly readable, same as every other
-// public page that sends a Telegram notification). Never blocks the lead
-// submission itself if this fails.
-async function notifyTelegram(lead) {
-  const settingsSnap = await getDoc(doc(db, "settings", "telegram"));
-  if (!settingsSnap.exists()) return;
-  const data = settingsSnap.data();
-
-  let botToken = data.botToken;
-  let chatId = data.chatId;
-  if (Array.isArray(data.bots) && data.bots.length > 0) botToken = data.bots[0]?.token;
-  if (Array.isArray(data.channels) && data.channels.length > 0) chatId = data.channels[0]?.chatId;
-  if (!botToken || !chatId) return;
-
-  const trackLabel = TRACK_LABELS[lead.track] || lead.track || "—";
-  const text = `⚖️ בקשת מנוי חדשה — איזון מגדרי\n\nשם: ${lead.name}\nטלפון: ${lead.phone}\nמסלול: ${trackLabel}${lead.message ? `\nהודעה: ${lead.message}` : ""}`;
-
-  await fetch("/api/telegram-relay", {
+  // Best-effort admin notification via the same Telegram relay used for
+  // advertiser-signup alerts — never blocks the lead submission itself.
+  fetch("/api/support-chat-send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      telegramMethod: "sendMessage",
-      botToken,
-      payload: { chat_id: chatId, text },
-    }),
-  });
+    body: JSON.stringify({ job: "membership-lead", name: trimmedName, phone: cleanedPhone, track, message: payload.message }),
+  }).catch(() => {});
+
+  return { id: newRef.id, ...payload };
 }
 
 window.LPLeads = { submitLead };
