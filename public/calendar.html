@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const dayKey = (d) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
   const renderCards = (events) => {
-    box.innerHTML = events.length ? events.map(e => `<article class="card"><div class="event-cover" style="background-image:url('${e.img}')"></div><div class="card-body"><h3>${e.title}</h3><p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p>${(e.day || e.date) ? `<div class="meta"><span>📅 ${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span></div>` : ""}<a class="btn card-cta" href="/event?id=${e.id}">לפרטים וכרטיסים 🎟</a></div></article>`).join("") : "<p style=\"color:#aaa\">אין כרגע אירועים.</p>";
+    box.innerHTML = events.length ? events.map(e => `<article class="card"><div class="event-cover" style="background-image:url('${e.img}')"></div><div class="card-body">${e.category ? `<span class="chip" style="align-self:center;margin-bottom:6px;font-size:12px;padding:4px 10px;color:#ffb4ab;border-color:#5c3f40">${e.category}</span>` : ""}<h3>${e.title}</h3><p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p>${(e.day || e.date) ? `<div class="meta"><span>📅 ${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span></div>` : ""}<a class="btn card-cta" href="/event?id=${e.id}">לפרטים וכרטיסים 🎟</a></div></article>`).join("") : "<p style=\"color:#aaa\">אין כרגע אירועים.</p>";
   };
 
   const applyFilter = () => {

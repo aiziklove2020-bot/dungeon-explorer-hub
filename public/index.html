@@ -270,11 +270,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="w-full bg-black">
           <img class="w-full h-auto max-h-[45vh] object-contain mx-auto" src="${e.img}" alt="" onerror="this.closest('div').style.display='none'">
         </div>
-        <div class="p-4 flex flex-col gap-3">
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            <h3 class="text-text-primary text-headline-sm font-headline-sm tracking-wide">${e.title}</h3>
-            ${(e.day || e.date) ? `<span class="text-label-sm font-label-sm text-text-muted flex items-center gap-1 flex-shrink-0"><span class="material-symbols-outlined text-[14px]">event</span>${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span>` : ""}
+        <div class="p-4 flex flex-col gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            ${e.category ? `<span class="max-w-full px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary font-medium truncate">${e.category}</span>` : ""}
+            ${(e.day || e.date) ? `<span class="text-label-sm font-label-sm text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">event</span>${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span>` : ""}
           </div>
+          <h3 class="text-text-primary text-headline-sm font-headline-sm tracking-wide">${e.title}</h3>
           <p class="text-text-secondary text-body-sm font-body-sm">${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 60)}</p>
           <a class="flex-1 py-2.5 px-3 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-transform" href="/event?id=${e.id}">
             <span class="material-symbols-outlined text-[18px]">confirmation_number</span>
