@@ -3,7 +3,7 @@
 <link rel="icon" type="image/png" href="assets/logo-new.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/styles.css?v=202609052123">
+<link rel="stylesheet" href="assets/styles.css?v=202609052136">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -29,7 +29,7 @@
       </a>
     </div>
     <div class="flex items-center gap-1">
-      <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary">
+      <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="login-link w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
         <span class="material-symbols-outlined text-[22px]">person</span>
       </a>
     </div>
@@ -47,16 +47,39 @@
   <a href="/store"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">storefront</span></span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/contact"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">call</span></span><span class="dr-tx">צור קשר</span></a>
  </nav>
 </aside><div class="scrim"></div>
-<main>
-<div class="dashboard"><aside class="sidebar"><h3>מפרסמים</h3><a class="active" href="/advertiser-dashboard">▦ דשבורד</a><a href="/create-event">＋ פרסום אירוע חדש</a><a href="/advertiser-dashboard#events">🎟 האירועים שלי</a><a href="/profile">⚙ הגדרות חשבון</a><a href="/">⌂ חזרה לאתר</a></aside>
-<section class="dash-content"><div class="section-title"><h1>דשבורד מפרסם</h1><a class="btn primary" href="/create-event">＋ אירוע חדש</a></div>
-<div class="panel" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-  <div>מחובר/ת בתור <b id="advAccountName" style="color:#e11d48">…</b></div>
-  <button class="btn" id="advLogoutBtn">יציאה</button>
-</div>
-<div class="stats"><div class="stat"><div class="num" id="advEventCount">…</div><div class="lab">אירועים שפרסמתי</div></div></div>
-<div class="panel" id="events"><div class="section-title"><h2>האירועים שלי</h2></div><div id="advEventsList" class="cards"><p style="color:#aaa">טוען...</p></div></div></section></div></main>
-<footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-new.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
+<main class="max-w-xl mx-auto px-4" style="display:none">
+  <div class="flex items-center justify-between mb-5">
+    <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-text-primary">דשבורד מפרסם</h1>
+    <a href="/create-event" class="flex items-center gap-1.5 rounded-xl bg-gradient-to-l from-[#e11d48] to-[#be0037] text-white font-bold text-sm py-2.5 px-4 shadow-[0_4px_20px_rgba(225,29,72,0.35)]">
+      <span class="material-symbols-outlined text-[18px]">add</span>אירוע חדש
+    </a>
+  </div>
+
+  <div class="bg-surface-card border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-3 mb-4">
+    <div class="min-w-0">
+      <p class="text-text-muted text-xs">מחובר/ת בתור</p>
+      <p id="advAccountName" class="text-primary font-bold truncate">…</p>
+    </div>
+    <button id="advLogoutBtn" class="flex-shrink-0 flex items-center gap-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-text-primary text-sm font-bold px-4 py-2">
+      <span class="material-symbols-outlined text-[18px]">logout</span>יציאה
+    </button>
+  </div>
+
+  <div class="bg-surface-card border border-white/5 rounded-2xl p-5 flex items-center gap-4 mb-6">
+    <div class="w-12 h-12 rounded-xl bg-primary-container/15 flex items-center justify-center flex-shrink-0">
+      <span class="material-symbols-outlined text-[24px] text-primary">confirmation_number</span>
+    </div>
+    <div>
+      <p id="advEventCount" class="text-3xl font-bold text-text-primary leading-none">…</p>
+      <p class="text-text-secondary text-sm mt-1">אירועים שפרסמתי</p>
+    </div>
+  </div>
+
+  <h2 class="font-headline-md text-headline-md text-text-primary mb-3" id="events">האירועים שלי</h2>
+  <div id="advEventsList" class="space-y-4">
+    <p class="text-text-secondary text-center py-8">טוען...</p>
+  </div>
+</main>
 
 <nav class="fixed bottom-0 inset-x-0 z-50 bg-surface-dim/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.6)]">
 <div class="flex items-center justify-around h-16 px-1">
@@ -72,12 +95,13 @@
 <script src="assets/app.js?v=202608191620"></script>
 <script type="module">
 import "./assets/site-data.js?v=202608262055";
-import { renderAdvertiserCouples } from "./assets/advertiser-couples.js?v=202608211215";
+import { renderAdvertiserCouples } from "./assets/advertiser-couples.js?v=202609052133";
 window.__renderAdvertiserCouples = renderAdvertiserCouples;
 </script><script>
 document.addEventListener("DOMContentLoaded", async () => {
   const u = LP.current();
   if (!u || u.role !== "advertiser") { location = "/advertiser-login"; return; }
+  document.querySelector("main").style.display = "";
   document.getElementById("advAccountName").textContent = u.businessName || u.name || "";
   document.getElementById("advLogoutBtn").onclick = () => {
     localStorage.removeItem("lp_current");
@@ -89,8 +113,37 @@ document.addEventListener("DOMContentLoaded", async () => {
     const events = await window.LPData.loadAdvertiserParties(u.id);
     document.getElementById("advEventCount").textContent = events.length;
     list.innerHTML = events.length
-      ? events.map(e => `<article class="card"><button type="button" class="btn primary" style="width:100%;border-radius:0;height:54px;font-size:16px;box-shadow:0 0 18px rgba(255,23,57,.5)" data-publish="${e.id}" data-title="${e.title.replace(/"/g, '&quot;')}">📣 פרסם עכשיו לטלגרם</button><div class="event-cover" style="background-image:url('${e.img}')">${e.time ? `<span class="loc">◷ ${e.time}</span>` : ""}</div><div class="card-body"><h3>${e.title}</h3><p>${e.dj ? "DJ " + e.dj : ""}</p>${(e.day || e.date) ? `<div class="meta"><span>📅 ${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span></div>` : ""}<div style="display:flex;gap:8px;margin-top:8px"><a class="btn" style="flex:1" href="/create-event?id=${e.id}">✏️ ערוך</a><button type="button" class="btn" style="flex:1;color:#ff5a72" data-delete="${e.id}" data-title="${e.title.replace(/"/g, '&quot;')}">🗑 מחק</button></div><a class="btn card-cta" href="/event?id=${e.id}">צפייה באתר 🎟</a></div></article>`).join("")
-      : "<p style=\"color:#aaa\">עדיין לא פרסמת אירועים.</p>";
+      ? events.map(e => `<article data-card class="bg-surface-card border border-white/5 rounded-2xl overflow-hidden">
+          <div class="relative h-40 w-full bg-surface-container-low">
+            <img class="w-full h-full object-cover" src="${e.img}" alt="" onerror="this.style.display='none'">
+            <div class="absolute inset-0 bg-gradient-to-t from-surface-card via-transparent to-transparent"></div>
+            ${e.time ? `<span class="absolute top-3 left-3 bg-surface-glass backdrop-blur-md rounded-lg px-2.5 py-1 text-xs font-bold text-text-primary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>${e.time}</span>` : ""}
+          </div>
+          <div data-card-body class="p-4 space-y-3">
+            <div>
+              <h3 class="font-headline-sm font-bold text-text-primary">${e.title}</h3>
+              ${e.dj ? `<p class="text-text-secondary text-sm">DJ ${e.dj}</p>` : ""}
+              ${(e.day || e.date) ? `<div class="flex items-center gap-1 text-text-muted text-xs mt-1"><span class="material-symbols-outlined text-[14px]">calendar_month</span>${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</div>` : ""}
+            </div>
+            <button type="button" data-publish="${e.id}" data-title="${e.title.replace(/"/g, '&quot;')}" class="w-full rounded-xl bg-gradient-to-l from-[#e11d48] to-[#be0037] text-white font-bold py-3 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(225,29,72,0.3)]">
+              <span class="material-symbols-outlined text-[18px]">campaign</span>פרסם עכשיו לטלגרם
+            </button>
+            <div class="flex gap-2">
+              <a href="/create-event?id=${e.id}" class="flex-1 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-text-primary font-bold text-sm py-2.5 flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px]">edit</span>ערוך
+              </a>
+              <button type="button" data-delete="${e.id}" data-title="${e.title.replace(/"/g, '&quot;')}" class="flex-1 rounded-xl bg-surface-container-high hover:bg-[#93000a]/60 text-[#ffb4ab] font-bold text-sm py-2.5 flex items-center justify-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px]">delete</span>מחק
+              </button>
+            </div>
+            <a href="/event?id=${e.id}" class="block text-center text-primary text-sm font-bold py-1">צפייה באתר</a>
+          </div>
+        </article>`).join("")
+      : `<div class="text-center py-10 text-text-secondary">
+          <span class="material-symbols-outlined text-[40px] text-text-muted">confirmation_number</span>
+          <p class="mt-2">עדיין לא פרסמת אירועים.</p>
+          <a href="/create-event" class="inline-block mt-3 rounded-xl bg-gradient-to-l from-[#e11d48] to-[#be0037] text-white font-bold text-sm py-2.5 px-5">פרסום אירוע ראשון</a>
+        </div>`;
     if (events.length && window.__renderAdvertiserCouples) {
       window.__renderAdvertiserCouples(events, list).catch(() => {});
     }
@@ -125,8 +178,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         btn.disabled = true;
         try {
           await window.LPData.deleteAdvertiserParty(u.id, id);
-          btn.closest("article.card").remove();
-          const count = document.querySelectorAll("#advEventsList article.card").length;
+          btn.closest("article[data-card]").remove();
+          const count = document.querySelectorAll("#advEventsList article[data-card]").length;
           document.getElementById("advEventCount").textContent = count;
         } catch (err) {
           alert(`שגיאה במחיקה: ${err.message || err}`);

@@ -151,10 +151,10 @@ async function renderCouplesForEvent(eventId, targetEl) {
 }
 
 export async function renderAdvertiserCouples(events, listEl) {
-  const cards = listEl.querySelectorAll("article.card");
+  const cards = listEl.querySelectorAll("article[data-card]");
   events.forEach((ev, i) => {
     const card = cards[i];
-    const body = card?.querySelector(".card-body");
+    const body = card?.querySelector("[data-card-body]");
     if (body && ev.id) renderCouplesForEvent(ev.id, body);
   });
 }
