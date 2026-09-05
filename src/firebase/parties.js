@@ -1186,6 +1186,18 @@ export const updateParty = async (partyId, partyData) => {
       updateData.publishToInstagram = partyData.publishToInstagram === true;
     }
 
+    // Quick-control toggles + assigned safety team, set from the admin's
+    // "שליטה מהירה" panel (PartiesSection) rather than the full party editor.
+    if (partyData.soloMenSalesLocked !== undefined) {
+      updateData.soloMenSalesLocked = partyData.soloMenSalesLocked === true;
+    }
+    if (partyData.autoApproveVerifiedCouples !== undefined) {
+      updateData.autoApproveVerifiedCouples = partyData.autoApproveVerifiedCouples === true;
+    }
+    if (partyData.guardians !== undefined) {
+      updateData.guardians = Array.isArray(partyData.guardians) ? partyData.guardians : [];
+    }
+
     if (partyData.imageURL !== undefined) {
       updateData.imageURL = partyData.imageURL;
       if (partyData.imageDeleteUrl) {

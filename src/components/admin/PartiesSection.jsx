@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RotateCcw, Plus, Trash2, Clock, AlertTriangle } from 'lucide-react';
+import { RotateCcw, Plus, Trash2, Clock, AlertTriangle, X } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminLoader from './AdminLoader';
 import { getAllParties, createParty, updateParty, deleteParty, adminRemoveUserFromParty, recomputeAllPartiesExpiration } from '../../firebase/parties';
@@ -329,6 +329,47 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
     }
   };
 
+  // Quick-control toggles (lock solo-men sales / auto-approve verified
+  // couples) — optimistic local update + real Firestore write, no full
+  // party-editor round trip.
+  const handleToggleQuickControl = async (partyId, field, nextValue) => {
+    setActiveParties(prev => prev.map(p => (p.id === partyId ? { ...p, [field]: nextValue } : p)));
+    try {
+      await updateParty(partyId, { [field]: nextValue });
+      showSaved();
+    } catch (error) {
+      // Roll back on failure so the toggle doesn't lie about saved state.
+      setActiveParties(prev => prev.map(p => (p.id === partyId ? { ...p, [field]: !nextValue } : p)));
+      alert(`שגיאה בשמירת ההגדרה: ${error.message}`);
+    }
+  };
+
+  // Assigned safety-team roster (real per-party field, admin-managed).
+  const handleAddGuardian = async (party, name, role) => {
+    if (!name.trim()) return;
+    const guardians = [...(party.guardians || []), { name: name.trim(), role: (role || '').trim() }];
+    setActiveParties(prev => prev.map(p => (p.id === party.id ? { ...p, guardians } : p)));
+    try {
+      await updateParty(party.id, { guardians });
+      showSaved();
+    } catch (error) {
+      alert(`שגיאה בהוספת נאמן: ${error.message}`);
+      loadActiveParties();
+    }
+  };
+
+  const handleRemoveGuardian = async (party, index) => {
+    const guardians = (party.guardians || []).filter((_, i) => i !== index);
+    setActiveParties(prev => prev.map(p => (p.id === party.id ? { ...p, guardians } : p)));
+    try {
+      await updateParty(party.id, { guardians });
+      showSaved();
+    } catch (error) {
+      alert(`שגיאה בהסרת נאמן: ${error.message}`);
+      loadActiveParties();
+    }
+  };
+
   // Handle add new party
   const handleAddNewParty = () => {
     const newParty = {
@@ -621,6 +662,43 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                       </div>
                     );
                   })()}
+                  {!party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal') && (
+                    <div className="mb-3 rounded-xl bg-[#1f1f23] p-3 flex flex-col gap-3">
+                      <span className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">שליטה מהירה</span>
+                      <label className="flex items-center justify-between gap-2 cursor-pointer">
+                        <span className="text-sm">נעילת מכירה לגברים סולו</span>
+                        <input
+                          type="checkbox"
+                          checked={!!party.soloMenSalesLocked}
+                          onChange={(e) => handleToggleQuickControl(party.id, 'soloMenSalesLocked', e.target.checked)}
+                          className="w-5 h-5 accent-[#e11d48] cursor-pointer"
+                        />
+                      </label>
+                      <label className="flex items-center justify-between gap-2 cursor-pointer">
+                        <span className="text-sm">אישור אוטומטי לזוגות מאומתים</span>
+                        <input
+                          type="checkbox"
+                          checked={!!party.autoApproveVerifiedCouples}
+                          onChange={(e) => handleToggleQuickControl(party.id, 'autoApproveVerifiedCouples', e.target.checked)}
+                          className="w-5 h-5 accent-[#10B981] cursor-pointer"
+                        />
+                      </label>
+                      <div className="pt-2 border-t border-[rgba(255,255,255,0.08)]">
+                        <span className="text-xs font-bold text-[#94A3B8]">נאמני מרחב משובצים ({(party.guardians || []).length})</span>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {(party.guardians || []).map((g, i) => (
+                            <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#2a292e] text-sm">
+                              {g.name}{g.role ? ` · ${g.role}` : ''}
+                              <button type="button" onClick={() => handleRemoveGuardian(party, i)} className="text-[#94A3B8] hover:text-[#ffb4ab]" aria-label={`הסר ${g.name}`}>
+                                <X size={12} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                        <GuardianAddForm onAdd={(name, role) => handleAddGuardian(party, name, role)} />
+                      </div>
+                    </div>
+                  )}
                   {party.registrationLink && (party.partyType || 'internal') === 'external' && (
                     <p className="mb-3">
                       <strong>{t('admin.externalRegistrationLink')}:</strong>{' '}
@@ -680,6 +758,40 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
         </div>
       )}
     </div>
+  );
+};
+
+/** Small inline "add guardian" form used inside each party card's quick-control panel. */
+const GuardianAddForm = ({ onAdd }) => {
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');
+  const submit = (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    onAdd(name, role);
+    setName('');
+    setRole('');
+  };
+  return (
+    <form onSubmit={submit} className="flex flex-wrap gap-2 mt-2">
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="שם הנאמן/ה"
+        className="flex-1 min-w-[120px] bg-[#121218] rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-[#e11d48]"
+      />
+      <input
+        type="text"
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        placeholder="תפקיד (לא חובה)"
+        className="flex-1 min-w-[100px] bg-[#121218] rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-[#e11d48]"
+      />
+      <button type="submit" className="px-3 py-1.5 rounded-lg bg-[#e11d48] hover:bg-[#be0037] text-white text-sm font-bold">
+        הוספה
+      </button>
+    </form>
   );
 };
 
