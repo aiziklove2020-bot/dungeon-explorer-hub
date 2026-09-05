@@ -21511,6 +21511,7 @@ ${e.telegramUsername ? `<b>${r("telegram.telegram")}:</b> @${e.telegramUsername}
 <b>${r("telegram.registrationType")}:</b> ${i[e.registrationType] || e.registrationType}
 ${o ? `<b>${r("telegram.partyDays")}:</b> ${o}` : ""}
 <b>${r("telegram.gender")}:</b> ${e.gender === "male" ? r("telegram.male") : e.gender === "female" ? r("telegram.female") : r("telegram.couple")}
+${e.pickupAddress ? `<b>${r("telegram.pickupAddress") || "כתובת לאיסוף"}:</b> ${e.pickupAddress}` : ""}
 
 <b>${r("telegram.totalRegistered")}:</b> ${t.registrations?.length || 0}
 <b>${r("telegram.males")}:</b> ${t.registrations?.filter((e) => e.gender === "male").length || 0}/${t.maleLimit}
@@ -35040,11 +35041,12 @@ async function MU(e, t) {
 		gender: r,
 		registrationType: n,
 		partnerName: t.partnerName || null,
-		partnerPhone: t.partnerPhone || null
-	});
+		partnerPhone: t.partnerPhone || null,
+		pickupAddress: t.pickupAddress || ""
+	}), a = n === "single-female-couple";
 	try {
 		let i = await bM(e);
-		i && await nA({
+		i && !a && await nA({
 			...t,
 			registrationType: n,
 			gender: r

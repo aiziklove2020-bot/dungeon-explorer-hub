@@ -632,6 +632,7 @@ ${registration.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${registra
 <b>${t('telegram.registrationType')}:</b> ${registrationTypeMap[registration.registrationType] || registration.registrationType}
 ${partyDaysText ? `<b>${t('telegram.partyDays')}:</b> ${partyDaysText}` : ''}
 <b>${t('telegram.gender')}:</b> ${registration.gender === 'male' ? t('telegram.male') : registration.gender === 'female' ? t('telegram.female') : t('telegram.couple')}
+${registration.pickupAddress ? `<b>${t('telegram.pickupAddress') || 'כתובת לאיסוף'}:</b> ${registration.pickupAddress}` : ''}
 
 <b>${t('telegram.totalRegistered')}:</b> ${party.registrations?.length || 0}
 <b>${t('telegram.males')}:</b> ${party.registrations?.filter(r => r.gender === 'male').length || 0}/${party.maleLimit}
@@ -646,6 +647,7 @@ ${registration.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${registra
 <b>${t('telegram.registrationType')}:</b> ${registrationTypeMap[registration.registrationType] || registration.registrationType}
 ${partyDaysText ? `<b>${t('telegram.partyDays')}:</b> ${partyDaysText}` : ''}
 <b>${t('telegram.gender')}:</b> ${registration.gender === 'male' ? t('telegram.male') : registration.gender === 'female' ? t('telegram.female') : t('telegram.couple')}
+${registration.pickupAddress ? `<b>${t('telegram.pickupAddress') || 'כתובת לאיסוף'}:</b> ${registration.pickupAddress}` : ''}
 
 <b>${t('telegram.totalRegistered')}:</b> ${party.registrations?.length || 0}
 <b>${t('telegram.males')}:</b> ${party.registrations?.filter(r => r.gender === 'male').length || 0}/${party.maleLimit}

@@ -261,9 +261,10 @@ async function registerForParty(partyId: string, data: {
   fullName: string;
   phoneNumber: string;
   telegramUsername?: string;
-  registrationType: "single-male-balance" | "single-female-balance" | "single-female-discount" | "couple";
+  registrationType: "single-male-balance" | "single-female-balance" | "single-female-discount" | "single-male-couple" | "single-female-couple" | "couple";
   partnerName?: string;
   partnerPhone?: string;
+  pickupAddress?: string;
 }) {
   const registrationType = data.registrationType;
   const gender = registrationType === "couple" ? "couple" : registrationType.startsWith("single-female") ? "female" : "male";
@@ -275,14 +276,22 @@ async function registerForParty(partyId: string, data: {
     registrationType,
     partnerName: data.partnerName || null,
     partnerPhone: data.partnerPhone || null,
+    pickupAddress: data.pickupAddress || "",
   });
 
   // Same client-side Telegram alert the old site's registration form sent —
   // pure Firestore-config + direct Telegram API call, no server credential
   // needed. Never blocks/fails the registration itself if it errors.
+  //
+  // A couple registers as two separate calls, one per half (see
+  // register-event.html) — but that's one registration *event*, not two, so
+  // only the male half's call sends the (now correctly full-couple-info)
+  // notification. Without this, both halves each auto-sent their own
+  // couple-formatted message — two duplicates of the same registration.
+  const skipAutoSend = registrationType === "single-female-couple";
   try {
     const party = await getPartyById(partyId);
-    if (party) {
+    if (party && !skipAutoSend) {
       await sendRegistrationTelegram(
         { ...data, registrationType, gender },
         party,
