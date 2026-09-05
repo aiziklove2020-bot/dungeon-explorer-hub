@@ -226,7 +226,7 @@ const WorkshopsSection = ({ showSaved }) => {
         <button
           type="button"
           onClick={openAdd}
-          className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2"
+          className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2"
         >
           <Plus size={18} />
           {t('workshops.add')}
@@ -242,7 +242,7 @@ const WorkshopsSection = ({ showSaved }) => {
           )}
 
           {(isAdding || editingId) && (
-            <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-2xl space-y-4">
+            <div className="bg-[#121218] border border-white/5 p-6 rounded-2xl space-y-4">
               <h3 className="font-bold">{editingId ? t('workshops.edit') : t('workshops.add')}</h3>
               <div className="grid gap-4">
                 <div>
@@ -251,7 +251,7 @@ const WorkshopsSection = ({ showSaved }) => {
                     type="text"
                     value={formData.title}
                     onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full bg-black/40 border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
                     placeholder="נושא הסדנא"
                   />
                 </div>
@@ -268,7 +268,7 @@ const WorkshopsSection = ({ showSaved }) => {
                   <textarea
                     value={formData.description}
                     onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full bg-black/40 border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
                     placeholder="תיאור קצר של הסדנא..."
                     rows={3}
                   />
@@ -279,7 +279,7 @@ const WorkshopsSection = ({ showSaved }) => {
                     type="text"
                     value={formData.instructor}
                     onChange={e => setFormData(prev => ({ ...prev, instructor: e.target.value }))}
-                    className="w-full bg-black/40 border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
                     placeholder="שם המדריך"
                   />
                 </div>
@@ -290,7 +290,7 @@ const WorkshopsSection = ({ showSaved }) => {
                     min="0"
                     value={formData.price}
                     onChange={e => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                    className="w-full bg-black/40 border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
                     placeholder="0"
                   />
                 </div>
@@ -300,7 +300,7 @@ const WorkshopsSection = ({ showSaved }) => {
                     type="date"
                     value={formData.date}
                     onChange={e => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                    className="w-full bg-black/40 border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
                   />
                 </div>
                 <div>
@@ -309,7 +309,7 @@ const WorkshopsSection = ({ showSaved }) => {
                     type="text"
                     value={formData.duration}
                     onChange={e => setFormData(prev => ({ ...prev, duration: e.target.value }))}
-                    className="w-full bg-black/40 border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
                     placeholder="למשל: 3 שעות, 90 דקות"
                   />
                 </div>
@@ -320,7 +320,7 @@ const WorkshopsSection = ({ showSaved }) => {
                     min="0"
                     value={formData.maxParticipants}
                     onChange={e => setFormData(prev => ({ ...prev, maxParticipants: e.target.value }))}
-                    className="w-full bg-black/40 border border-zinc-700 rounded-lg p-2 text-white text-right"
+                    className="w-full bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right"
                     placeholder="ריק = ללא הגבלה"
                   />
                 </div>
@@ -340,7 +340,7 @@ const WorkshopsSection = ({ showSaved }) => {
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold disabled:opacity-50"
+                  className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold disabled:opacity-50"
                 >
                   {saving ? t('uploading') : t('save')}
                 </button>
@@ -365,7 +365,7 @@ const WorkshopsSection = ({ showSaved }) => {
               return (
                 <div
                   key={w.id}
-                  className="bg-zinc-900/50 border border-white/5 rounded-xl overflow-hidden"
+                  className="bg-[#121218] border border-white/5 rounded-xl overflow-hidden"
                 >
                   <div className="p-4 flex flex-wrap items-center gap-4">
                     {w.imageUrl && (
@@ -398,7 +398,7 @@ const WorkshopsSection = ({ showSaved }) => {
                       <button
                         type="button"
                         onClick={() => handleDelete(w.id)}
-                        className="p-2 rounded-lg bg-red-900/50 hover:bg-red-900 text-white"
+                        className="p-2 rounded-lg bg-[#93000a]/60 hover:bg-[#93000a] text-white"
                         title={t('delete')}
                       >
                         <Trash2 size={18} />
@@ -415,7 +415,7 @@ const WorkshopsSection = ({ showSaved }) => {
                             value={addRegPhone[w.id] || ''}
                             onChange={e => setAddRegPhone(prev => ({ ...prev, [w.id]: e.target.value }))}
                             placeholder="0500000000"
-                            className="w-32 bg-black/40 border border-zinc-700 rounded-lg p-2 text-white text-right text-sm"
+                            className="w-32 bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right text-sm"
                           />
                         </div>
                         <div>
@@ -425,7 +425,7 @@ const WorkshopsSection = ({ showSaved }) => {
                             value={addRegName[w.id] || ''}
                             onChange={e => setAddRegName(prev => ({ ...prev, [w.id]: e.target.value }))}
                             placeholder="שם"
-                            className="w-32 bg-black/40 border border-zinc-700 rounded-lg p-2 text-white text-right text-sm"
+                            className="w-32 bg-[#1f1f23] border border-zinc-700 rounded-lg p-2 text-white text-right text-sm"
                           />
                         </div>
                         <button
@@ -469,7 +469,7 @@ const WorkshopsSection = ({ showSaved }) => {
                                   type="button"
                                   onClick={() => handleRemoveRegistrant(w.id, reg.userId)}
                                   disabled={removingRegId === reg.userId}
-                                  className="p-1.5 rounded bg-red-900/50 hover:bg-red-900 text-white disabled:opacity-50"
+                                  className="p-1.5 rounded bg-[#93000a]/60 hover:bg-[#93000a] text-white disabled:opacity-50"
                                   title={t('workshops.removeRegistrant')}
                                 >
                                   <Trash2 size={14} />

@@ -1,39 +1,63 @@
 <!doctype html><html lang="he" dir="rtl"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#050506"><title>אודות | LIBRAL PARTY</title>
-<link rel="icon" type="image/png" href="assets/logo-symbol.png">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#131317"><title>אודות | LIBRAL PARTY</title>
+<link rel="icon" type="image/png" href="assets/logo-new.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/styles.css?v=202608191620"></head><body>
+<link rel="stylesheet" href="assets/styles.css?v=202608191620">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-low": "#1b1b1f", "surface-dim": "#131317", "tertiary": "#ffb2b8", "surface-container-high": "#2a292e", "on-primary-container": "#fffaf9", "surface-card": "#121218", "surface-container-lowest": "#0e0e12", "outline": "#ac8889", "text-muted": "#64748B", "surface-container-highest": "#353439", "primary-fixed": "#ffdada", "surface-container": "#1f1f23", "on-surface": "#e4e1e7", "secondary-container": "#e10111", "surface-elevated": "#1A1A24", "surface-variant": "#353439", "secondary": "#ffb4aa", "status-balanced": "#10B981", "text-secondary": "#94A3B8", "on-primary": "#68001a", "surface": "#131317", "primary": "#ffb3b6", "primary-container": "#e11d48", "background": "#131317", "surface-glass": "rgba(18, 18, 24, 0.75)", "on-secondary-container": "#fff1ef", "on-surface-variant": "#e5bdbe", "surface-base": "#0B0B0F", "on-tertiary-container": "#fffaf9", "tertiary-container": "#d82f53", "on-background": "#e4e1e7", "glow-crimson": "rgba(225, 29, 72, 0.45)", "text-primary": "#F8FAFC" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-sm": "0.75rem", "space-2xl": "3rem", "space-3xl": "4.5rem", "space-lg": "1.5rem", "gutter-mobile": "1rem", "space-2xs": "0.25rem", "container-max": "72rem", "space-xs": "0.5rem", "gutter-desktop": "2rem", "space-xl": "2rem", "space-md": "1rem" }, "fontFamily": { "headline-sm": ["Inter"], "body-sm": ["Inter"], "headline-lg": ["Inter"], "label-md": ["Inter"], "headline-lg-mobile": ["Inter"], "display-hero-mobile": ["Inter"], "headline-md": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], "label-lg": ["Inter"], "display-hero": ["Inter"], "label-sm": ["Inter"] }, "fontSize": { "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-lg": ["30px", { "lineHeight": "38px", "fontWeight": "700" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-lg-mobile": ["22px", { "lineHeight": "30px", "fontWeight": "700" }], "display-hero-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "800" }], "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "display-hero": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500" }] } } } }</script>
+<style>
+  @layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;background:#131317}}
+  .stitch-page::-webkit-scrollbar{display:none}
+</style>
+</head><body class="stitch-page bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
 
-<header class="topbar">
-  <a class="logo-wrap" href="/"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></a>
-  <div class="topbar-menu-group">
-    <a data-dashboard-link href="/login" title="כניסה / הרשמה" class="login-link"><span>👤</span><small>כניסה / רישום</small></a>
-    <button class="icon-btn" data-menu aria-label="תפריט"><div class="menu-bars"><span></span><span></span><span></span></div></button>
+<header class="fixed top-0 inset-x-0 z-50 bg-surface-dim/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+  <div class="h-16 px-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <button data-menu aria-label="תפריט" class="w-9 h-9 -ml-1 flex items-center justify-center text-on-surface-variant hover:text-text-primary">
+        <span class="material-symbols-outlined text-[24px]">menu</span>
+      </button>
+      <a href="/" class="flex items-center gap-2">
+        <img alt="Logo" class="h-8 w-auto object-contain" src="assets/logo-new.png">
+        <span class="font-headline-sm text-headline-sm text-text-primary tracking-wider uppercase font-bold">LIBRAL PARTY</span>
+      </a>
+    </div>
+    <div class="flex items-center gap-1">
+      <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary">
+        <span class="material-symbols-outlined text-[22px]">person</span>
+      </a>
+    </div>
   </div>
 </header>
-<nav class="navbar">
-  <a href="/">בית</a><a href="/events">מסיבות</a><a href="/community">קהילה</a>
-  <a href="/gallery">גלריה</a><a href="/news">חדשות</a><a href="/about">אודות</a>
-</nav>
-
 
 <aside class="drawer">
- <div class="drawer-head"><span class="logo-wrap"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>מסיבות ליברליות בישראל</small></span></span><button data-close>✕</button></div>
+ <div class="drawer-head"><span class="logo-wrap"><img src="assets/logo-new.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>מסיבות ליברליות בישראל</small></span></span><button data-close>✕</button></div>
  <nav>
   <a href="/"><span class="dr-ic">⌂</span><span class="dr-tx">בית</span></a><a href="/about"><span class="dr-ic">ⓘ</span><span class="dr-tx">אודות</span></a><a href="/calendar"><span class="dr-ic">▣</span><span class="dr-tx">לוח אירועים</span></a>
   <a href="/favorites"><span class="dr-ic">♡</span><span class="dr-tx">המועדפים שלי</span></a><a href="/news"><span class="dr-ic">📣</span><span class="dr-tx">חדשות ועדכונים</span></a><a href="/advertiser-login"><span class="dr-ic">🎟</span><span class="dr-tx">כניסת מפרסמים</span></a><a href="/community"><span class="dr-ic">♧</span><span class="dr-tx">קהילה / צ׳אט</span></a>
-  <a href="/store"><span class="dr-ic">🛍</span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic">👤</span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/contact"><span class="dr-ic">☎</span><span class="dr-tx">צור קשר</span></a>
+  <a href="/store"><span class="dr-ic">🛍</span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic">👤</span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/gallery"><span class="dr-ic">🖼</span><span class="dr-tx">גלריה</span></a><a href="/contact"><span class="dr-ic">☎</span><span class="dr-tx">צור קשר</span></a>
  </nav>
 </aside><div class="scrim"></div>
-<main>
-<div class="container section"><div class="section-title"><h1>אודות LIBRAL PARTY</h1></div><div id="aboutBox"><p style="color:#aaa">טוען...</p></div></div></main>
-<footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
 
-<nav class="mobile-bottom">
- <a href="/">⌂<small>בית</small></a><a href="/about">ⓘ<small>אודות</small></a>
- <a class="fab" href="/register-event">🎫</a><a href="/community">◌<small>קהילה</small></a><a href="/contact">☎<small>יצירת קשר</small></a>
+<main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface">
+<div class="flex flex-col w-full px-4 py-5 gap-4">
+  <h1 class="text-text-primary text-headline-lg-mobile font-headline-lg-mobile font-bold">אודות LIBRAL PARTY</h1>
+  <div id="aboutBox" class="flex flex-col gap-4"><p class="text-text-muted text-body-sm">טוען...</p></div>
+</div>
+</main>
+
+<nav class="fixed bottom-0 inset-x-0 z-50 bg-surface-dim/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.6)]">
+<div class="flex items-center justify-around h-16 px-1">
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-sm text-label-sm">בית</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/events"><span class="material-symbols-outlined text-[22px]">confirmation_number</span><span class="font-label-sm text-label-sm">מסיבות</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/membership"><span class="material-symbols-outlined text-[22px]">balance</span><span class="font-label-sm text-label-sm">איזון ומנוי</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/community"><span class="material-symbols-outlined text-[22px]">forum</span><span class="font-label-sm text-label-sm">קהילה</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/profile"><span class="material-symbols-outlined text-[22px]">account_circle</span><span class="font-label-sm text-label-sm">פרופיל</span></a>
+</div>
 </nav>
 
 <script src="assets/app.js?v=202608191620"></script>
@@ -41,35 +65,37 @@
 import "./assets/site-data.js?v=202608262027";
 document.addEventListener("DOMContentLoaded", async () => {
   const box = document.getElementById("aboutBox");
-  // Markdown-style **bold** from the admin's rich-text editor was rendering
-  // as literal asterisks on this plain page — clean it up, then bold the two
-  // names ("חן" / "איציק") specifically wherever they appear, per request.
   const renderText = (s) => String(s || "")
     .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
-    .replace(/(חן|איציק)/g, '<b style="color:#ff1739">$1</b>');
+    .replace(/(חן|איציק)/g, '<b class="text-primary">$1</b>');
 
   try {
     const a = await window.LPData.loadAbout();
-    const cards = (a.infoCards || []).map(c => `<div class="panel" style="text-align:center"><h2>${c.title || ""}</h2><p style="color:#aaa;line-height:1.8">${renderText(c.text)}</p></div>`).join("");
+    const cards = (a.infoCards || []).map(c => `<div class="rounded-xl bg-surface-card p-5 shadow-md text-center"><h2 class="text-text-primary text-headline-sm font-headline-sm mb-2">${c.title || ""}</h2><p class="text-text-secondary text-body-sm font-body-sm leading-relaxed">${renderText(c.text)}</p></div>`).join("");
     const stepsArr = a.steps || [];
     const steps = stepsArr.map((s) => {
-      const desc = renderText(s.d).replace(/דרך/g, "<b>דרך</b>");
-      return `<div class="panel" style="text-align:center"><div style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:999px;color:#ffabb6;background:rgba(87,0,20,.72);border:1px solid #ff1739;font-size:13px;font-weight:700;margin-bottom:8px">${s.n}</div><h3 style="margin:0 0 6px">${s.t || ""}</h3><p style="color:#aaa;font-size:14px">${desc}</p></div>`;
+      const desc = renderText(s.d);
+      return `<div class="rounded-xl bg-surface-card p-5 shadow-md text-center flex flex-col items-center gap-2">
+        <div class="w-8 h-8 rounded-full bg-primary-container/20 text-primary flex items-center justify-center text-label-sm font-label-sm font-bold border border-primary-container/40">${s.n}</div>
+        <h3 class="text-text-primary text-headline-sm font-headline-sm">${s.t || ""}</h3>
+        <p class="text-text-secondary text-body-sm font-body-sm">${desc}</p>
+      </div>`;
     }).join("");
     const entryNote = a.entryNote ? `
-      <div class="panel" style="text-align:center;margin-top:20px;border:2px solid #ff1739;background:rgba(255,23,57,.08)">
-        <p style="color:#ff8a8a;font-size:13px;margin:0 0 12px;font-weight:600">⚠️ חובה לומר בדיוק את המשפט הבא בכניסה</p>
-        <div style="display:inline-block;color:#ffabb6;background:rgba(87,0,20,.72);border:1px solid #ff1739;font-size:18px;font-weight:700;padding:12px 22px;border-radius:20px;white-space:normal;line-height:1.4">${renderText(a.entryNote)}</div>
-        <p style="color:#ff8a8a;font-size:14px;margin-top:12px">בלי המשפט הזה בדיוק — לא תקבלו את ההנחה בכניסה!</p>
+      <div class="rounded-xl bg-primary-container/10 border border-primary-container/40 p-5 text-center flex flex-col gap-3">
+        <p class="text-primary text-body-sm font-body-sm font-semibold flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[18px]">warning</span>חובה לומר בדיוק את המשפט הבא בכניסה</p>
+        <div class="inline-block mx-auto bg-primary-container/20 border border-primary-container/50 text-primary-fixed text-headline-sm font-headline-sm rounded-full px-5 py-3">${renderText(a.entryNote)}</div>
+        <p class="text-primary text-body-sm font-body-sm">בלי המשפט הזה בדיוק — לא תקבלו את ההנחה בכניסה!</p>
       </div>` : "";
     box.innerHTML = `
-      <div class="panel" style="text-align:center"><h2>${a.roleTitle || "החזון שלנו"}</h2><p style="color:#aaa;line-height:1.9">${renderText(a.roleText)}</p>${a.roleSubtext ? `<p style="color:#aaa;line-height:1.9;margin-top:10px">${renderText(a.roleSubtext)}</p>` : ""}</div>
-      ${cards ? `<div class="grid-2" style="margin-top:20px">${cards}</div>` : ""}
-      ${steps ? `<div class="cards" style="margin-top:20px">${steps}</div>` : ""}
+      <div class="rounded-xl bg-surface-card p-5 shadow-md text-center"><h2 class="text-text-primary text-headline-md font-headline-md mb-2">${a.roleTitle || "החזון שלנו"}</h2><p class="text-text-secondary text-body-md font-body-md leading-relaxed">${renderText(a.roleText)}</p>${a.roleSubtext ? `<p class="text-text-secondary text-body-md font-body-md leading-relaxed mt-2">${renderText(a.roleSubtext)}</p>` : ""}</div>
+      ${cards ? `<div class="grid grid-cols-1 gap-4">${cards}</div>` : ""}
+      ${steps ? `<div class="grid grid-cols-1 gap-4">${steps}</div>` : ""}
       ${entryNote}
     `;
   } catch (err) {
-    box.innerHTML = "<p style=\"color:#aaa\">לא הצלחנו לטעון את תוכן העמוד כרגע.</p>";
+    box.innerHTML = `<p class="text-text-muted text-body-sm">לא הצלחנו לטעון את תוכן העמוד כרגע.</p>`;
   }
 });
-</script></body></html>
+</script>
+</body></html>

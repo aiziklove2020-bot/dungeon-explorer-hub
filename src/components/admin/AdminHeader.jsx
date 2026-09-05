@@ -37,10 +37,10 @@ const AdminHeader = ({
     <>
       <div className="mb-8 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <img src="/assets/logo-symbol.png" alt="" style={{ width: 44, height: 44 }} />
+          <img src="/assets/logo-new.png" alt="" style={{ width: 44, height: 44 }} />
           <div>
-            <h1 style={{ fontFamily: 'Georgia,"Times New Roman",serif', fontWeight: 700, fontSize: 26 }}>
-              LIBRAL PARTY <span style={{ color: '#ff1739' }}>ניהול</span>
+            <h1 style={{ fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 700, fontSize: 26 }}>
+              LIBRAL PARTY <span style={{ color: '#e11d48' }}>ניהול</span>
             </h1>
             <p style={{ color: '#a9a9b2', fontSize: 13 }}>{t('admin.panelSubtitle')}</p>
           </div>
@@ -48,7 +48,7 @@ const AdminHeader = ({
         <button
           onClick={onLogout}
           className="text-white text-sm font-bold flex items-center gap-2"
-          style={{ background: 'transparent', border: '1px solid #ff1739', borderRadius: 15, padding: '10px 16px' }}
+          style={{ background: 'transparent', border: '1px solid #e11d48', borderRadius: 15, padding: '10px 16px' }}
         >
           <X size={16} /> {t('admin.logout')}
         </button>
@@ -84,7 +84,7 @@ const AdminHeader = ({
                 disabled={publishing}
                 title={t('admin.publishTitle')}
                 className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
-                style={{ background: 'linear-gradient(135deg,#ff1739,#cf0026)', borderRadius: 15, padding: '10px 16px' }}
+                style={{ background: 'linear-gradient(135deg,#e11d48,#be0037)', borderRadius: 15, padding: '10px 16px' }}
               >
                 {publishing ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Upload size={16} />}
                 {publishing ? t('admin.publishing') : t('admin.publish')}

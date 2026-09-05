@@ -1,93 +1,261 @@
 <!doctype html><html lang="he" dir="rtl"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#050506"><title>בית | LIBRAL PARTY</title>
-<link rel="icon" type="image/png" href="assets/logo-symbol.png">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#131317"><title>בית | LIBRAL PARTY</title>
+<link rel="icon" type="image/png" href="assets/logo-new.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/styles.css?v=202608191620"></head><body>
+<link rel="stylesheet" href="assets/styles.css?v=202608191620">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-low": "#1b1b1f", "surface-dim": "#131317", "tertiary": "#ffb2b8", "surface-container-high": "#2a292e", "on-primary-container": "#fffaf9", "surface-card": "#121218", "surface-container-lowest": "#0e0e12", "outline": "#ac8889", "text-muted": "#64748B", "surface-container-highest": "#353439", "primary-fixed": "#ffdada", "surface-container": "#1f1f23", "on-surface": "#e4e1e7", "secondary-container": "#e10111", "surface-elevated": "#1A1A24", "surface-variant": "#353439", "secondary": "#ffb4aa", "status-balanced": "#10B981", "text-secondary": "#94A3B8", "on-primary": "#68001a", "surface": "#131317", "primary": "#ffb3b6", "primary-container": "#e11d48", "background": "#131317", "surface-glass": "rgba(18, 18, 24, 0.75)", "on-secondary-container": "#fff1ef", "on-surface-variant": "#e5bdbe", "surface-base": "#0B0B0F", "on-tertiary-container": "#fffaf9", "tertiary-container": "#d82f53", "on-background": "#e4e1e7", "glow-crimson": "rgba(225, 29, 72, 0.45)", "text-primary": "#F8FAFC" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-sm": "0.75rem", "space-2xl": "3rem", "space-3xl": "4.5rem", "space-lg": "1.5rem", "gutter-mobile": "1rem", "space-2xs": "0.25rem", "container-max": "72rem", "space-xs": "0.5rem", "gutter-desktop": "2rem", "space-xl": "2rem", "space-md": "1rem" }, "fontFamily": { "headline-sm": ["Inter"], "body-sm": ["Inter"], "headline-lg": ["Inter"], "label-md": ["Inter"], "headline-lg-mobile": ["Inter"], "display-hero-mobile": ["Inter"], "headline-md": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], "label-lg": ["Inter"], "display-hero": ["Inter"], "label-sm": ["Inter"] }, "fontSize": { "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-lg": ["30px", { "lineHeight": "38px", "fontWeight": "700" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-lg-mobile": ["22px", { "lineHeight": "30px", "fontWeight": "700" }], "display-hero-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "800" }], "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "display-hero": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500" }] } } } }</script>
+<style>
+  @layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;background:#131317}}
+  .stitch-page::-webkit-scrollbar{display:none}
+</style>
+</head><body class="stitch-page bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
 
-<header class="topbar">
-  <a class="logo-wrap" href="/"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></a>
-  <div class="topbar-menu-group">
-    <a data-dashboard-link href="/login" title="כניסה / הרשמה" class="login-link"><span>👤</span><small>כניסה / רישום</small></a>
-    <button class="icon-btn" data-menu aria-label="תפריט"><div class="menu-bars"><span></span><span></span><span></span></div></button>
+<header class="fixed top-0 inset-x-0 z-50 bg-surface-dim/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+  <div class="h-16 px-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <button data-menu aria-label="תפריט" class="w-9 h-9 -ml-1 flex items-center justify-center text-on-surface-variant hover:text-text-primary">
+        <span class="material-symbols-outlined text-[24px]">menu</span>
+      </button>
+      <a href="/" class="flex items-center gap-2">
+        <img alt="Logo" class="h-8 w-auto object-contain" src="assets/logo-new.png">
+        <span class="font-headline-sm text-headline-sm text-text-primary tracking-wider uppercase font-bold">LIBRAL PARTY</span>
+      </a>
+    </div>
+    <div class="flex items-center gap-1">
+      <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary">
+        <span class="material-symbols-outlined text-[22px]">person</span>
+      </a>
+    </div>
   </div>
 </header>
-<nav class="navbar">
-  <a href="/">בית</a><a href="/events">מסיבות</a><a href="/community">קהילה</a>
-  <a href="/gallery">גלריה</a><a href="/news">חדשות</a><a href="/about">אודות</a>
-</nav>
-
 
 <aside class="drawer">
- <div class="drawer-head"><span class="logo-wrap"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>מסיבות ליברליות בישראל</small></span></span><button data-close>✕</button></div>
+ <div class="drawer-head"><span class="logo-wrap"><img src="assets/logo-new.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>מסיבות ליברליות בישראל</small></span></span><button data-close>✕</button></div>
  <nav>
   <a href="/"><span class="dr-ic">⌂</span><span class="dr-tx">בית</span></a><a href="/about"><span class="dr-ic">ⓘ</span><span class="dr-tx">אודות</span></a><a href="/calendar"><span class="dr-ic">▣</span><span class="dr-tx">לוח אירועים</span></a>
   <a href="/favorites"><span class="dr-ic">♡</span><span class="dr-tx">המועדפים שלי</span></a><a href="/news"><span class="dr-ic">📣</span><span class="dr-tx">חדשות ועדכונים</span></a><a href="/advertiser-login"><span class="dr-ic">🎟</span><span class="dr-tx">כניסת מפרסמים</span></a><a href="/community"><span class="dr-ic">♧</span><span class="dr-tx">קהילה / צ׳אט</span></a>
-  <a href="/store"><span class="dr-ic">🛍</span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic">👤</span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/contact"><span class="dr-ic">☎</span><span class="dr-tx">צור קשר</span></a>
+  <a href="/store"><span class="dr-ic">🛍</span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic">👤</span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/gallery"><span class="dr-ic">🖼</span><span class="dr-tx">גלריה</span></a><a href="/contact"><span class="dr-ic">☎</span><span class="dr-tx">צור קשר</span></a>
  </nav>
 </aside><div class="scrim"></div>
-<main>
-<section class="hero"><div class="hero-img" style="background-image:url('assets/hero.jpg')"></div>
-<div class="hero-content"><div class="hero-kicker">ברוכים הבאים לעולם של</div><h1>תשוקה, חופש וחיבור אמיתי</h1><p>הפורטל המוביל למסיבות ליברליות בישראל • קהילה פתוחה, בטוחה ומכילה • בואו לגלות את עצמכם מחדש</p>
-<div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn primary" href="/events">לכל המסיבות</a><a class="btn" href="/register">הרשמה מהירה 📣</a></div></div></section>
-<div class="container"><div class="filters"><a class="filter" href="/events">כל הסוגים ▽</a><a class="filter" href="/events">כל האזורים ⌖</a><a class="filter" href="/calendar">תאריך 📅</a><a class="filter" href="/events">סינון מתקדם ☷</a></div>
-<section class="section"><div class="section-title"><h2>🔥 מסיבות קרובות</h2><a href="/events">לכל המסיבות ←</a></div>
-<div class="slider-wrap">
-  <button type="button" class="slider-arrow prev" id="sliderPrev" aria-label="הקודם">›</button>
-  <div class="cards cards-slider" id="eventCards"><p style="color:#aaa">טוען אירועים...</p></div>
-  <button type="button" class="slider-arrow next" id="sliderNext" aria-label="הבא">‹</button>
-</div>
-<div class="slider-dots" id="sliderDots"></div>
-</section>
-<section class="section"><div class="banner banner-photo" style="background-image:url('assets/hero.jpg')">
-  <div><h2>⚖️ רוצה להיות מנוי?</h2><p>לקבלת איזון מגדרי לחצו כאן</p></div>
-  <a class="btn primary" href="/membership">לחץ כאן ←</a>
-</div></section></div>
-<section class="feature-strip"><div class="feature"><span class="ico">♢</span><b>חוויה בלתי נשכחת</b></div><div class="feature"><span class="ico">◉</span><b>אווירה בטוחה ודיסקרטית</b></div><div class="feature"><span class="ico">♡</span><b>מסיבות בכל הארץ</b></div><div class="feature"><span class="ico">♧</span><b>קהילה תומכת ומכילה</b></div></section>
-<div class="container section"><div class="banner banner-photo" style="background-image:url('assets/community.jpg')"><div><h2>רוצים להיות חלק מהאתר שלנו?</h2><p>הצטרפו אלינו ועקבו אחרי כל המסיבות, החידושים והעדכונים.</p></div><a class="btn primary" href="/register">הצטרפות לאתר שלנו</a></div></div>
 
-<div class="container section">
-  <div class="banner app-banner">
-    <img src="assets/logo-symbol.png" alt="" class="app-banner-icon">
-    <div class="app-banner-text">
-      <h2>📱 התקינו את האפליקציה</h2>
-      <p>גישה מהירה לכל המסיבות ישירות ממסך הבית — בלי חנות אפליקציות, בלי הורדות</p>
-    </div>
-    <div class="app-banner-actions">
-      <button type="button" class="btn primary" id="appInstallBtn">התקנה עכשיו ↓</button>
-      <a class="btn" href="TBDSM.apk" download>🤖 קובץ התקנה לאנדרואיד</a>
-      <button type="button" class="btn" id="appHowBtn">איך מתקינים?</button>
-    </div>
-  </div>
-  <div class="panel" id="appHowPanel" style="display:none;margin-top:14px">
-    <h3 style="margin:0 0 12px">התקנה ידנית — 3 שניות</h3>
-    <div class="grid-2">
-      <div>
-        <p style="color:#fff;font-weight:700;margin:0 0 6px">🍎 אייפון (Safari)</p>
-        <ol style="color:#a9a9b2;line-height:1.9;margin:0;padding-inline-start:20px">
-          <li>לחצו על כפתור השיתוף בתחתית המסך</li>
-          <li>גללו ובחרו <b>"הוסף למסך הבית"</b></li>
-          <li>לחצו <b>"הוסף"</b></li>
-        </ol>
-      </div>
-      <div>
-        <p style="color:#fff;font-weight:700;margin:0 0 6px">🤖 אנדרואיד (Chrome)</p>
-        <ol style="color:#a9a9b2;line-height:1.9;margin:0;padding-inline-start:20px">
-          <li>לחצו על תפריט <b>⋮</b> בפינה העליונה</li>
-          <li>בחרו <b>"התקן אפליקציה"</b></li>
-          <li>אשרו את ההתקנה</li>
-        </ol>
-      </div>
-    </div>
-  </div>
+<main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface">
+<div class="flex flex-col w-full">
+<div class="relative w-full overflow-hidden">
+<div class="absolute -top-12 -right-16 w-80 h-80 rounded-full bg-primary-container/20 blur-[90px] pointer-events-none"></div>
+<div class="absolute top-96 -left-20 w-72 h-72 rounded-full bg-secondary-container/15 blur-[100px] pointer-events-none"></div>
+
+<!-- Hero -->
+<section class="relative w-full px-4 pt-4 pb-8 flex flex-col gap-6">
+<div class="relative w-full rounded-xl overflow-hidden shadow-xl bg-surface-container-lowest">
+<div class="relative w-full h-[400px]">
+<img alt="זוג אלגנטי במועדון לאונג' יוקרתי ומסתורי באווירת תאורה אדומה חמימה" class="w-full h-full object-cover object-center" src="assets/hero-new.png">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/60 to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-surface-dim/70 via-transparent to-surface-dim/40"></div>
+<div class="absolute top-3 right-3 left-3 flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-glass backdrop-blur-md text-text-primary text-label-sm font-label-sm shadow-md">
+<span class="w-2 h-2 rounded-full bg-status-balanced animate-pulse"></span>
+קהילה פתוחה ובטוחה
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-dim/80 backdrop-blur-md text-tertiary text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[14px]">verified_user</span>
+100% דיסקרטי
+</span>
+</div>
+<div class="absolute bottom-0 inset-x-0 p-5 flex flex-col gap-2">
+<span class="text-primary text-label-md font-label-md tracking-wider">ברוכים הבאים לעולם של</span>
+<h1 class="text-text-primary text-display-hero-mobile font-display-hero-mobile font-extrabold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+תשוקה, חופש <span class="text-transparent bg-clip-text bg-gradient-to-l from-primary via-primary-fixed to-on-primary-container">וחיבור אמיתי</span>
+</h1>
+<p class="text-text-secondary text-body-sm font-body-sm max-w-xs leading-relaxed">
+הפורטל המוביל למסיבות ליברליות בישראל • קהילה פתוחה, בטוחה ומכילה • גלו את עצמכם מחדש
+</p>
+</div>
+</div>
+<div class="p-4 bg-surface-card flex items-center gap-3">
+<a class="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-lg text-label-lg shadow-lg active:scale-95 transition-all" href="/events">
+<span>לכל המסיבות</span>
+<span class="material-symbols-outlined text-[18px]">arrow_left_alt</span>
+</a>
+<a class="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-surface-container-high hover:bg-surface-bright text-text-primary font-label-lg text-label-lg transition-all active:scale-95" href="/register">
+<span class="material-symbols-outlined text-primary text-[18px]">electric_bolt</span>
+<span>הרשמה מהירה</span>
+</a>
+</div>
+</div>
+</section>
+
+<!-- Quick filters -->
+<section class="w-full px-4 -mt-2 mb-6">
+<div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-nowrap">
+<a href="/events" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-primary-container text-on-primary-container text-label-sm font-label-sm shadow-md">
+<span>כל הסוגים</span><span class="material-symbols-outlined text-[16px]">expand_more</span>
+</a>
+<a href="/events" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container text-text-secondary text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[15px] text-outline">near_me</span><span>כל האזורים</span>
+</a>
+<a href="/calendar" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container text-text-secondary text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[15px] text-outline">calendar_month</span><span>תאריך</span>
+</a>
+<a href="/events" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container text-text-secondary text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[15px] text-outline">tune</span><span>סינון מתקדם</span>
+</a>
+</div>
+</section>
+
+<!-- Hot events (real data) -->
+<section class="w-full px-4 flex flex-col gap-3 mb-8" id="events">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="flex h-7 w-7 items-center justify-center rounded-full bg-secondary-container/20 text-primary-container">
+<span class="material-symbols-outlined text-[18px]">local_fire_department</span>
+</span>
+<h2 class="text-text-primary text-headline-md font-headline-md">מסיבות קרובות</h2>
+</div>
+<a class="flex items-center gap-1 text-primary text-label-sm font-label-sm" href="/events">
+<span>לכל המסיבות</span><span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</a>
+</div>
+<div id="eventCards" class="flex flex-col gap-4"><p class="text-text-muted text-body-sm">טוען אירועים...</p></div>
+</section>
+
+<!-- VIP / balance banner -->
+<section class="w-full px-4 mb-8">
+<div class="relative w-full rounded-xl overflow-hidden bg-gradient-to-r from-surface-elevated via-surface-card to-surface-container p-5 shadow-xl">
+<div class="absolute top-0 -left-10 w-44 h-44 rounded-full bg-primary-container/25 blur-3xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<span class="text-2xl">⚖️</span>
+<span class="text-primary font-label-md text-label-md uppercase tracking-wider">שמירה על האיזון המקודש</span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-text-primary text-headline-md font-headline-md">רוצה להיות מנוי?</h3>
+<p class="text-text-secondary text-body-sm font-body-sm leading-relaxed">לקבלת איזון מגדרי לחצו כאן</p>
+</div>
+<div class="pt-2">
+<a class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-md text-label-md shadow-md active:scale-95 transition-all" href="/membership">
+<span>לחץ כאן</span><span class="material-symbols-outlined text-[18px]">arrow_left_alt</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+
+<!-- 4 pillars -->
+<section class="w-full px-4 mb-8 flex flex-col gap-4">
+<div class="grid grid-cols-2 gap-3">
+<div class="rounded-xl p-4 bg-surface-card flex flex-col gap-2 shadow-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary-container text-xl shadow-inner">♢</div>
+<h4 class="text-text-primary text-headline-sm font-headline-sm">חוויה בלתי נשכחת</h4>
+</div>
+<div class="rounded-xl p-4 bg-surface-card flex flex-col gap-2 shadow-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary text-xl shadow-inner">◉</div>
+<h4 class="text-text-primary text-headline-sm font-headline-sm">אווירה בטוחה ודיסקרטית</h4>
+</div>
+<div class="rounded-xl p-4 bg-surface-card flex flex-col gap-2 shadow-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary text-xl shadow-inner">♡</div>
+<h4 class="text-text-primary text-headline-sm font-headline-sm">מסיבות בכל הארץ</h4>
+</div>
+<div class="rounded-xl p-4 bg-surface-card flex flex-col gap-2 shadow-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-tertiary text-xl shadow-inner">♧</div>
+<h4 class="text-text-primary text-headline-sm font-headline-sm">קהילה תומכת ומכילה</h4>
+</div>
+</div>
+</section>
+
+<!-- Join CTA -->
+<section class="w-full px-4 mb-8" id="register">
+<div class="rounded-xl p-5 bg-surface-container-high flex flex-col items-center text-center gap-3 shadow-lg">
+<span class="w-12 h-12 rounded-full bg-primary-container/20 text-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">groups</span>
+</span>
+<div class="flex flex-col gap-1">
+<h3 class="text-text-primary text-headline-md font-headline-md">רוצים להיות חלק מהאתר שלנו?</h3>
+<p class="text-text-secondary text-body-sm font-body-sm max-w-xs">הצטרפו אלינו ועקבו אחרי כל המסיבות, החידושים והעדכונים.</p>
+</div>
+<a href="/register" class="w-full py-3 px-4 rounded-lg bg-primary-container text-on-primary-container font-label-lg text-label-lg shadow-md active:scale-95 transition-all flex items-center justify-center gap-2">
+<span>הצטרפות לאתר שלנו</span><span class="material-symbols-outlined text-[18px]">arrow_left_alt</span>
+</a>
+</div>
+</section>
+
+<!-- PWA install (real logic via app.js — keep .app-banner + ids) -->
+<section class="w-full px-4 mb-8">
+<div class="app-banner w-full rounded-xl overflow-hidden bg-surface-card shadow-xl flex flex-col">
+<div class="p-4 bg-surface-container-high flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-xl">📱</span>
+<h3 class="text-text-primary text-headline-sm font-headline-sm">התקינו את האפליקציה</h3>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-4">
+<p class="text-text-secondary text-body-sm font-body-sm leading-relaxed">
+גישה מהירה לכל המסיבות ישירות ממסך הבית — בלי חנות אפליקציות, בלי הורדות
+</p>
+<div class="flex flex-col sm:flex-row gap-2">
+<button type="button" id="appInstallBtn" class="flex-1 py-3 px-4 rounded-lg bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 shadow-md active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>התקנה עכשיו ↓</span>
+</button>
+<a href="TBDSM.apk" download class="flex-1 py-3 px-4 rounded-lg bg-surface-container hover:bg-surface-bright text-text-primary font-label-md text-label-md flex items-center justify-center gap-2 transition-colors">
+<span>🤖</span><span>קובץ התקנה לאנדרואיד</span>
+</a>
+<button type="button" id="appHowBtn" class="flex-1 py-3 px-4 rounded-lg bg-surface-container hover:bg-surface-bright text-text-primary font-label-md text-label-md flex items-center justify-center gap-2 transition-colors">
+<span>איך מתקינים?</span>
+</button>
+</div>
+<div id="appHowPanel" style="display:none" class="pt-2 flex flex-col gap-2">
+<span class="text-text-muted text-label-sm font-label-sm uppercase tracking-wider">התקנה ידנית — 3 שניות:</span>
+<div class="grid grid-cols-1 gap-2">
+<div class="p-3 rounded-lg bg-surface-container-low flex flex-col gap-1.5">
+<div class="flex items-center gap-1.5 text-text-primary font-label-md text-label-md"><span>🍎</span><span>אייפון (Safari)</span></div>
+<ol class="text-text-secondary text-body-sm font-body-sm list-decimal list-inside space-y-0.5 pr-1">
+<li>לחצו על כפתור השיתוף בתחתית המסך</li>
+<li>גללו ובחרו <strong>"הוסף למסך הבית"</strong></li>
+<li>לחצו <strong>"הוסף"</strong></li>
+</ol>
+</div>
+<div class="p-3 rounded-lg bg-surface-container-low flex flex-col gap-1.5">
+<div class="flex items-center gap-1.5 text-text-primary font-label-md text-label-md"><span>🤖</span><span>אנדרואיד (Chrome)</span></div>
+<ol class="text-text-secondary text-body-sm font-body-sm list-decimal list-inside space-y-0.5 pr-1">
+<li>לחצו על תפריט <strong>⋮</strong> בפינה העליונה</li>
+<li>בחרו <strong>"התקן אפליקציה"</strong></li>
+<li>אשרו את ההתקנה</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<footer class="w-full px-4 pt-2 pb-6 flex flex-col items-center text-center gap-3 text-text-muted">
+<div class="w-8 h-0.5 bg-surface-variant rounded-full mb-1"></div>
+<p class="text-label-sm font-label-sm text-text-secondary">LIBRAL PARTY · קהילת אירועים ליברלית, דיסקרטית ומכילה</p>
+<div class="flex items-center gap-4 text-label-sm font-label-sm">
+<a class="hover:text-primary transition-colors" href="/privacy">מדיניות פרטיות</a><span>·</span>
+<a class="hover:text-primary transition-colors" href="/terms">תקנון האתר</a><span>·</span>
+<a class="hover:text-primary transition-colors" href="/contact">יצירת קשר דיסקרטית</a>
+</div>
+<p class="text-[10px] text-text-muted">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל</p>
+</footer>
+
+</div>
 </div>
 </main>
-<footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
 
-<nav class="mobile-bottom">
- <a href="/">⌂<small>בית</small></a><a href="/about">ⓘ<small>אודות</small></a>
- <a class="fab" href="/register-event">🎫</a><a href="/community">◌<small>קהילה</small></a><a href="/contact">☎<small>יצירת קשר</small></a>
+<nav class="fixed bottom-0 inset-x-0 z-50 bg-surface-dim/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.6)]">
+<div class="flex items-center justify-around h-16 px-1">
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-primary-container drop-shadow-[0_0_10px_rgba(225,29,72,0.85)]" href="/"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-sm text-label-sm">בית</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/events"><span class="material-symbols-outlined text-[22px]">confirmation_number</span><span class="font-label-sm text-label-sm">מסיבות</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/membership"><span class="material-symbols-outlined text-[22px]">balance</span><span class="font-label-sm text-label-sm">איזון ומנוי</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/community"><span class="material-symbols-outlined text-[22px]">forum</span><span class="font-label-sm text-label-sm">קהילה</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/profile"><span class="material-symbols-outlined text-[22px]">account_circle</span><span class="font-label-sm text-label-sm">פרופיל</span></a>
+</div>
 </nav>
 
 <script src="assets/app.js?v=202608191620"></script>
@@ -97,48 +265,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   const box = document.getElementById("eventCards");
   try {
     const events = await window.LPData.loadEvents();
-    box.innerHTML = events.length ? events.map(e => `<article class="card"><div class="event-cover" style="background-image:url('${e.img}')"></div><div class="card-body"><h3>${e.title}</h3><p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p>${(e.day || e.date) ? `<div class="meta"><span>📅 ${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span></div>` : ""}<a class="btn card-cta" href="/event?id=${e.id}">לפרטים וכרטיסים 🎟</a></div></article>`).join("") : "<p style=\"color:#aaa\">אין כרגע מסיבות פעילות.</p>";
+    box.innerHTML = events.length ? events.slice(0, 4).map(e => `
+      <article class="w-full rounded-xl overflow-hidden bg-surface-card shadow-lg flex flex-col">
+        <div class="relative w-full h-48 bg-surface-container-low">
+          <img class="w-full h-full object-cover object-center" src="${e.img}" alt="">
+          <div class="absolute inset-0 bg-gradient-to-t from-surface-card via-surface-card/40 to-transparent"></div>
+          ${(e.day || e.date) ? `<div class="absolute top-3 right-3 bg-surface-glass backdrop-blur-md rounded-lg px-3 py-1.5 text-center shadow-lg">
+            <span class="block text-primary-fixed font-label-sm text-label-sm">${e.day || ""}</span>
+            <span class="block text-on-surface-variant text-[10px]">${e.date || ""}</span>
+          </div>` : ""}
+        </div>
+        <div class="p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-text-primary text-headline-sm font-headline-sm tracking-wide">${e.title}</h3>
+          </div>
+          <p class="text-text-secondary text-body-sm font-body-sm">${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 60)}</p>
+          <a class="flex-1 py-2.5 px-3 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-transform" href="/event?id=${e.id}">
+            <span class="material-symbols-outlined text-[18px]">confirmation_number</span>
+            <span>פרטים וכרטיסים</span>
+          </a>
+        </div>
+      </article>
+    `).join("") : `<p class="text-text-muted text-body-sm">אין כרגע מסיבות פעילות.</p>`;
   } catch (err) {
-    box.innerHTML = "<p style=\"color:#aaa\">לא הצלחנו לטעון אירועים כרגע.</p>";
+    box.innerHTML = `<p class="text-text-muted text-body-sm">לא הצלחנו לטעון אירועים כרגע.</p>`;
   }
-
-  const step = () => (box.querySelector(".card")?.getBoundingClientRect().width || 260) + 14;
-  document.getElementById("sliderPrev")?.addEventListener("click", () => box.scrollBy({ left: step(), behavior: "smooth" }));
-  document.getElementById("sliderNext")?.addEventListener("click", () => box.scrollBy({ left: -step(), behavior: "smooth" }));
-
-  // Slide indicator dots
-  const dotsBox = document.getElementById("sliderDots");
-  const cards = [...box.querySelectorAll(".card")];
-  if (dotsBox && cards.length > 1) {
-    dotsBox.innerHTML = cards.map((_, i) => `<span data-i="${i}"></span>`).join("");
-    const dots = [...dotsBox.querySelectorAll("span")];
-    dots[0].classList.add("active");
-    dots.forEach(d => d.addEventListener("click", () => {
-      cards[+d.dataset.i].scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
-    }));
-    const updateActiveDot = () => {
-      let closest = 0, closestDist = Infinity;
-      cards.forEach((c, i) => {
-        const dist = Math.abs(c.getBoundingClientRect().left - box.getBoundingClientRect().left);
-        if (dist < closestDist) { closestDist = dist; closest = i; }
-      });
-      dots.forEach((d, i) => d.classList.toggle("active", i === closest));
-    };
-    let scrollTimer;
-    box.addEventListener("scroll", () => { clearTimeout(scrollTimer); scrollTimer = setTimeout(updateActiveDot, 100); });
-  }
-
-  // Auto-advance the party cards right-to-left, looping back to the start.
-  const advance = () => {
-    const atEnd = box.scrollLeft <= -(box.scrollWidth - box.clientWidth - 5);
-    if (atEnd) box.scrollTo({ left: 0, behavior: "smooth" });
-    else box.scrollBy({ left: -step(), behavior: "smooth" });
-  };
-  let autoplay = setInterval(advance, 3200);
-  const pauseAutoplay = () => clearInterval(autoplay);
-  const resumeAutoplay = () => { clearInterval(autoplay); autoplay = setInterval(advance, 3200); };
-  ["pointerdown", "mouseenter"].forEach(ev => box.addEventListener(ev, pauseAutoplay));
-  ["mouseleave", "pointerup"].forEach(ev => box.addEventListener(ev, resumeAutoplay));
 });
 </script>
 </body></html>

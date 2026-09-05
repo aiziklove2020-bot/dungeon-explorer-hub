@@ -233,7 +233,7 @@ const SubscriptionsSection = ({ showSaved }) => {
   };
 
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       
       {/* Header & Main Tabs */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
@@ -262,7 +262,7 @@ const SubscriptionsSection = ({ showSaved }) => {
       </div>
 
       {/* Sub Tabs */}
-      <div className="flex gap-2 border-b border-zinc-800 pb-4">
+      <div className="flex gap-2 border-b border-[rgba(255,255,255,0.08)] pb-4">
         <button
           onClick={() => setActiveTab('all')}
           className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'all' ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}
@@ -292,7 +292,7 @@ const SubscriptionsSection = ({ showSaved }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="חיפוש לפי שם או טלפון..."
-            className="w-full bg-black/40 border border-zinc-800 p-3 pr-10 rounded-xl focus:border-red-600 outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
@@ -331,7 +331,7 @@ const SubscriptionsSection = ({ showSaved }) => {
               </h3>
               <div className="space-y-3">
                 {group.users.map(u => (
-                  <div key={u.id} className="bg-black/40 border border-zinc-800 p-3 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div key={u.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <strong className="text-lg text-white">{u.name}</strong>

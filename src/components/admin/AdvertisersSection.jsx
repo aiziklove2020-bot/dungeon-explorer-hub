@@ -58,7 +58,7 @@ const AdvertisersSection = ({ showSaved }) => {
   };
 
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <h2 className="text-xl md:text-2xl font-bold">ניהול מפרסמים</h2>
         <button
@@ -78,7 +78,7 @@ const AdvertisersSection = ({ showSaved }) => {
       ) : (
         <div className="space-y-4">
           {advertisers.map((adv) => (
-            <div key={adv.id} className="bg-black/40 border border-zinc-800 p-3 md:p-4 rounded-xl">
+            <div key={adv.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
               <div className="flex justify-between items-start gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">

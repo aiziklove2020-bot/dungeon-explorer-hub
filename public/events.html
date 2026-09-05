@@ -1,58 +1,201 @@
 <!doctype html><html lang="he" dir="rtl"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#050506"><title>מסיבות | LIBRAL PARTY</title>
-<link rel="icon" type="image/png" href="assets/logo-symbol.png">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#131317"><title>מסיבות | LIBRAL PARTY</title>
+<link rel="icon" type="image/png" href="assets/logo-new.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/styles.css?v=202608191620"></head><body>
+<link rel="stylesheet" href="assets/styles.css?v=202608191620">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-low": "#1b1b1f", "surface-dim": "#131317", "tertiary": "#ffb2b8", "surface-container-high": "#2a292e", "on-primary-container": "#fffaf9", "surface-card": "#121218", "surface-container-lowest": "#0e0e12", "outline": "#ac8889", "text-muted": "#64748B", "surface-container-highest": "#353439", "primary-fixed": "#ffdada", "surface-container": "#1f1f23", "on-surface": "#e4e1e7", "secondary-container": "#e10111", "surface-elevated": "#1A1A24", "surface-variant": "#353439", "secondary": "#ffb4aa", "status-balanced": "#10B981", "text-secondary": "#94A3B8", "on-primary": "#68001a", "surface": "#131317", "primary": "#ffb3b6", "primary-container": "#e11d48", "background": "#131317", "surface-glass": "rgba(18, 18, 24, 0.75)", "on-secondary-container": "#fff1ef", "on-surface-variant": "#e5bdbe", "surface-base": "#0B0B0F", "on-tertiary-container": "#fffaf9", "tertiary-container": "#d82f53", "on-background": "#e4e1e7", "glow-crimson": "rgba(225, 29, 72, 0.45)", "text-primary": "#F8FAFC" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-sm": "0.75rem", "space-2xl": "3rem", "space-3xl": "4.5rem", "space-lg": "1.5rem", "gutter-mobile": "1rem", "space-2xs": "0.25rem", "container-max": "72rem", "space-xs": "0.5rem", "gutter-desktop": "2rem", "space-xl": "2rem", "space-md": "1rem" }, "fontFamily": { "headline-sm": ["Inter"], "body-sm": ["Inter"], "headline-lg": ["Inter"], "label-md": ["Inter"], "headline-lg-mobile": ["Inter"], "display-hero-mobile": ["Inter"], "headline-md": ["Inter"], "body-lg": ["Inter"], "body-md": ["Inter"], "label-lg": ["Inter"], "display-hero": ["Inter"], "label-sm": ["Inter"] }, "fontSize": { "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-lg": ["30px", { "lineHeight": "38px", "fontWeight": "700" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-lg-mobile": ["22px", { "lineHeight": "30px", "fontWeight": "700" }], "display-hero-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "800" }], "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "display-hero": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500" }] } } } }</script>
+<style>
+  @layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;background:#131317}}
+  .stitch-page::-webkit-scrollbar{display:none}
+</style>
+</head><body class="stitch-page bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
 
-<header class="topbar">
-  <a class="logo-wrap" href="/"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></a>
-  <div class="topbar-menu-group">
-    <a data-dashboard-link href="/login" title="כניסה / הרשמה" class="login-link"><span>👤</span><small>כניסה / רישום</small></a>
-    <button class="icon-btn" data-menu aria-label="תפריט"><div class="menu-bars"><span></span><span></span><span></span></div></button>
+<header class="fixed top-0 inset-x-0 z-50 bg-surface-dim/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+  <div class="h-16 px-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <button data-menu aria-label="תפריט" class="w-9 h-9 -ml-1 flex items-center justify-center text-on-surface-variant hover:text-text-primary">
+        <span class="material-symbols-outlined text-[24px]">menu</span>
+      </button>
+      <a href="/" class="flex items-center gap-2">
+        <img alt="Logo" class="h-8 w-auto object-contain" src="assets/logo-new.png">
+        <span class="font-headline-sm text-headline-sm text-text-primary tracking-wider uppercase font-bold">LIBRAL PARTY</span>
+      </a>
+    </div>
+    <div class="flex items-center gap-1">
+      <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary">
+        <span class="material-symbols-outlined text-[22px]">person</span>
+      </a>
+    </div>
   </div>
 </header>
-<nav class="navbar">
-  <a href="/">בית</a><a href="/events">מסיבות</a><a href="/community">קהילה</a>
-  <a href="/gallery">גלריה</a><a href="/news">חדשות</a><a href="/about">אודות</a>
-</nav>
-
 
 <aside class="drawer">
- <div class="drawer-head"><span class="logo-wrap"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>מסיבות ליברליות בישראל</small></span></span><button data-close>✕</button></div>
+ <div class="drawer-head"><span class="logo-wrap"><img src="assets/logo-new.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>מסיבות ליברליות בישראל</small></span></span><button data-close>✕</button></div>
  <nav>
   <a href="/"><span class="dr-ic">⌂</span><span class="dr-tx">בית</span></a><a href="/about"><span class="dr-ic">ⓘ</span><span class="dr-tx">אודות</span></a><a href="/calendar"><span class="dr-ic">▣</span><span class="dr-tx">לוח אירועים</span></a>
   <a href="/favorites"><span class="dr-ic">♡</span><span class="dr-tx">המועדפים שלי</span></a><a href="/news"><span class="dr-ic">📣</span><span class="dr-tx">חדשות ועדכונים</span></a><a href="/advertiser-login"><span class="dr-ic">🎟</span><span class="dr-tx">כניסת מפרסמים</span></a><a href="/community"><span class="dr-ic">♧</span><span class="dr-tx">קהילה / צ׳אט</span></a>
-  <a href="/store"><span class="dr-ic">🛍</span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic">👤</span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/contact"><span class="dr-ic">☎</span><span class="dr-tx">צור קשר</span></a>
+  <a href="/store"><span class="dr-ic">🛍</span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic">👤</span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/gallery"><span class="dr-ic">🖼</span><span class="dr-tx">גלריה</span></a><a href="/contact"><span class="dr-ic">☎</span><span class="dr-tx">צור קשר</span></a>
  </nav>
 </aside><div class="scrim"></div>
-<main>
-<div class="container section"><div class="section-title"><h1>מסיבות ואירועים</h1></div>
-<div class="filters" id="eventFilters"><input class="filter" id="search" placeholder="חיפוש לפי שם..." /><select class="filter" id="type"><option value="">כל הסוגים</option><option>חילופי זוגות</option><option>בדסמ</option><option>מאנץ'</option><option>פסטיבל</option></select><select class="filter" id="city"><option value="">כל האזורים</option><option>אום אל-פחם</option><option>אופקים</option><option>אור יהודה</option><option>אור עקיבא</option><option>אילת</option><option>אלעד</option><option>אריאל</option><option>אשדוד</option><option>אשקלון</option><option>באקה אל-גרבייה</option><option>באר יעקב</option><option>באר שבע</option><option>בית שאן</option><option>בית שמש</option><option>ביתר עילית</option><option>בני ברק</option><option>בת ים</option><option>גבעת שמואל</option><option>גבעתיים</option><option>דימונה</option><option>הוד השרון</option><option>הרצליה</option><option>חדרה</option><option>חולון</option><option>חיפה</option><option>טבריה</option><option>טייבה</option><option>טירה</option><option>טירת כרמל</option><option>טמרה</option><option>יבנה</option><option>יהוד-מונוסון</option><option>ירושלים</option><option>כפר יונה</option><option>כפר סבא</option><option>כפר קאסם</option><option>כרמיאל</option><option>לוד</option><option>מגדל העמק</option><option>מודיעין-מכבים-רעות</option><option>מודיעין עילית</option><option>מעלה אדומים</option><option>מעלות-תרשיחא</option><option>נהריה</option><option>נוף הגליל</option><option>נס ציונה</option><option>נצרת</option><option>נשר</option><option>נתיבות</option><option>נתניה</option><option>סח'נין</option><option>עכו</option><option>עפולה</option><option>ערד</option><option>עראבה</option><option>פתח תקווה</option><option>צפת</option><option>קלנסווה</option><option>קריית אונו</option><option>קריית אתא</option><option>קריית ביאליק</option><option>קריית גת</option><option>קריית ים</option><option>קריית מוצקין</option><option>קריית מלאכי</option><option>קריית שמונה</option><option>ראש העין</option><option>ראשון לציון</option><option>רהט</option><option>רחובות</option><option>רמלה</option><option>רמת גן</option><option>רמת השרון</option><option>רעננה</option><option>שדרות</option><option>שפרעם</option><option>תל אביב-יפו</option></select><label class="filter" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">📅 תאריך<input type="date" id="date" style="background:transparent;border:0;color:inherit;font:inherit;padding:0;width:auto" /></label><button class="filter" id="reset">איפוס סינון</button></div>
-<div class="cards" id="dynamicEvents"></div></div></main>
-<footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-symbol.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
 
-<nav class="mobile-bottom">
- <a href="/">⌂<small>בית</small></a><a href="/about">ⓘ<small>אודות</small></a>
- <a class="fab" href="/register-event">🎫</a><a href="/community">◌<small>קהילה</small></a><a href="/contact">☎<small>יצירת קשר</small></a>
+<main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface">
+<div class="flex flex-col w-full">
+
+<section class="px-4 pt-2 pb-3 flex flex-col gap-3">
+  <div class="relative w-full">
+    <div class="flex items-center w-full h-12 rounded-xl bg-surface-card px-3 shadow-md transition-all focus-within:ring-1 focus-within:ring-primary-container">
+      <span class="material-symbols-outlined text-text-muted text-[20px] select-none ml-2">search</span>
+      <input class="w-full bg-transparent text-text-primary placeholder:text-text-muted text-body-md font-body-md outline-none text-right" id="search" placeholder="חיפוש לפי שם אירוע..." type="search">
+    </div>
+  </div>
+  <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-nowrap" id="typePills">
+    <button type="button" data-type="" class="type-pill whitespace-nowrap px-3.5 py-1.5 rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md shadow-md transition-all">הכל</button>
+    <button type="button" data-type="חילופי זוגות" class="type-pill whitespace-nowrap px-3.5 py-1.5 rounded-full bg-surface-container-high text-text-secondary font-label-md text-label-md transition-all">חילופי זוגות</button>
+    <button type="button" data-type="בדסמ" class="type-pill whitespace-nowrap px-3.5 py-1.5 rounded-full bg-surface-container-high text-text-secondary font-label-md text-label-md transition-all">בדסמ</button>
+    <button type="button" data-type="מאנץ'" class="type-pill whitespace-nowrap px-3.5 py-1.5 rounded-full bg-surface-container-high text-text-secondary font-label-md text-label-md transition-all">מאנץ'</button>
+    <button type="button" data-type="פסטיבל" class="type-pill whitespace-nowrap px-3.5 py-1.5 rounded-full bg-surface-container-high text-text-secondary font-label-md text-label-md transition-all">פסטיבל</button>
+  </div>
+  <div class="flex items-center gap-2">
+    <select id="city" class="flex-1 bg-surface-container text-text-primary font-label-md text-label-md rounded-xl px-3 py-2 outline-none">
+      <option value="">כל האזורים</option>
+      <option>אום אל-פחם</option><option>אופקים</option><option>אור יהודה</option><option>אור עקיבא</option><option>אילת</option><option>אלעד</option><option>אריאל</option><option>אשדוד</option><option>אשקלון</option><option>באקה אל-גרבייה</option><option>באר יעקב</option><option>באר שבע</option><option>בית שאן</option><option>בית שמש</option><option>ביתר עילית</option><option>בני ברק</option><option>בת ים</option><option>גבעת שמואל</option><option>גבעתיים</option><option>דימונה</option><option>הוד השרון</option><option>הרצליה</option><option>חדרה</option><option>חולון</option><option>חיפה</option><option>טבריה</option><option>טייבה</option><option>טירה</option><option>טירת כרמל</option><option>טמרה</option><option>יבנה</option><option>יהוד-מונוסון</option><option>ירושלים</option><option>כפר יונה</option><option>כפר סבא</option><option>כפר קאסם</option><option>כרמיאל</option><option>לוד</option><option>מגדל העמק</option><option>מודיעין-מכבים-רעות</option><option>מודיעין עילית</option><option>מעלה אדומים</option><option>מעלות-תרשיחא</option><option>נהריה</option><option>נוף הגליל</option><option>נס ציונה</option><option>נצרת</option><option>נשר</option><option>נתיבות</option><option>נתניה</option><option>סח'נין</option><option>עכו</option><option>עפולה</option><option>ערד</option><option>עראבה</option><option>פתח תקווה</option><option>צפת</option><option>קלנסווה</option><option>קריית אונו</option><option>קריית אתא</option><option>קריית ביאליק</option><option>קריית גת</option><option>קריית ים</option><option>קריית מוצקין</option><option>קריית מלאכי</option><option>קריית שמונה</option><option>ראש העין</option><option>ראשון לציון</option><option>רהט</option><option>רחובות</option><option>רמלה</option><option>רמת גן</option><option>רמת השרון</option><option>רעננה</option><option>שדרות</option><option>שפרעם</option><option>תל אביב-יפו</option>
+    </select>
+    <input type="date" id="date" class="bg-surface-container text-text-primary font-label-md text-label-md rounded-xl px-3 py-2 outline-none">
+    <button type="button" id="reset" class="px-3 py-2 rounded-xl bg-surface-container-high text-text-secondary font-label-md text-label-md">איפוס</button>
+  </div>
+  <div class="flex items-center gap-2">
+    <span class="w-2 h-2 rounded-full bg-status-balanced animate-pulse"></span>
+    <p class="text-label-md font-label-md text-text-primary">נמצאו <span class="font-bold text-primary" id="eventCount">0</span> מסיבות</p>
+  </div>
+</section>
+
+<section class="px-4 flex flex-col gap-3" id="dynamicEvents">
+  <p class="text-text-muted text-body-sm">טוען אירועים...</p>
+</section>
+
+</div>
+</main>
+
+<nav class="fixed bottom-0 inset-x-0 z-50 bg-surface-dim/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.6)]">
+<div class="flex items-center justify-around h-16 px-1">
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-sm text-label-sm">בית</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-primary-container drop-shadow-[0_0_10px_rgba(225,29,72,0.85)]" href="/events"><span class="material-symbols-outlined text-[22px]">confirmation_number</span><span class="font-label-sm text-label-sm">מסיבות</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/membership"><span class="material-symbols-outlined text-[22px]">balance</span><span class="font-label-sm text-label-sm">איזון ומנוי</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/community"><span class="material-symbols-outlined text-[22px]">forum</span><span class="font-label-sm text-label-sm">קהילה</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/profile"><span class="material-symbols-outlined text-[22px]">account_circle</span><span class="font-label-sm text-label-sm">פרופיל</span></a>
+</div>
 </nav>
 
 <script src="assets/app.js?v=202608191620"></script>
 <script type="module">
 import "./assets/site-data.js?v=202608262027";
 document.addEventListener("DOMContentLoaded", async () => {
- const box=document.getElementById("dynamicEvents"), s=document.getElementById("search"), t=document.getElementById("type"), c=document.getElementById("city"), d=document.getElementById("date");
- let allEvents = [];
- function render(){
-  let q=s.value.trim().toLowerCase(), data=allEvents.filter(e=>(!q||e.title.toLowerCase().includes(q))&&(!t.value||e.category===t.value)&&(!c.value||e.city===c.value)&&(!d.value||e.dateISO===d.value));
-  box.innerHTML=data.map(e=>`<article class="card"><div class="event-cover" style="background-image:url('${e.img}')"></div><div class="card-body"><h3>${e.title}</h3><p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p>${(e.day || e.date) ? `<div class="meta"><span>📅 ${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span></div>` : ""}<a class="btn card-cta" href="/event?id=${e.id}">לפרטים וכרטיסים 🎟</a></div></article>`).join("")||"<p>לא נמצאו אירועים.</p>";
- }
- try {
-   allEvents = await window.LPData.loadEvents();
- } catch (err) {
-   box.innerHTML = "<p>לא הצלחנו לטעון אירועים כרגע.</p>";
- }
- [s,t,c,d].forEach(x=>x.addEventListener("input",render)); document.getElementById("reset").onclick=()=>{s.value="";t.value="";c.value="";d.value="";render()};render();
+  const box = document.getElementById("dynamicEvents");
+  const search = document.getElementById("search");
+  const city = document.getElementById("city");
+  const date = document.getElementById("date");
+  const reset = document.getElementById("reset");
+  const countEl = document.getElementById("eventCount");
+  const pills = [...document.querySelectorAll(".type-pill")];
+  let allEvents = [];
+  let activeType = "";
+
+  function cardHtml(e, featured) {
+    if (featured) {
+      return `<article class="relative w-full rounded-2xl overflow-hidden bg-surface-card shadow-2xl">
+        <div class="relative h-64 w-full overflow-hidden">
+          <img class="w-full h-full object-cover object-center" src="${e.img}" alt="">
+          <div class="absolute inset-0 bg-gradient-to-t from-surface-card via-surface-card/40 to-transparent"></div>
+          ${(e.day || e.date) ? `<div class="absolute top-3 right-3 bg-surface-glass backdrop-blur-md rounded-lg px-3 py-1.5 text-center shadow-lg">
+            <span class="block text-primary-fixed font-label-sm text-label-sm">${e.day || ""}</span>
+            <span class="block text-on-surface-variant text-[10px]">${e.date || ""}</span>
+          </div>` : ""}
+        </div>
+        <div class="p-4 flex flex-col gap-2">
+          <div class="flex items-center gap-2">
+            ${e.category ? `<span class="text-label-sm font-label-sm text-primary px-2 py-0.5 rounded bg-primary-container/15 font-semibold">${e.category}</span>` : ""}
+            ${e.city ? `<span class="text-label-sm font-label-sm text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_on</span>${e.city}</span>` : ""}
+          </div>
+          <h2 class="text-headline-md font-headline-md text-text-primary tracking-tight">${e.title}</h2>
+          <p class="text-body-sm font-body-sm text-text-secondary">${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 90)}</p>
+          <a class="mt-2 h-11 px-4 rounded-xl bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-lg text-label-lg shadow-md flex items-center justify-center gap-2" href="/event?id=${e.id}">
+            <span>פרטים וכרטיסים</span><span class="material-symbols-outlined text-[18px]">confirmation_number</span>
+          </a>
+        </div>
+      </article>`;
+    }
+    return `<article class="p-4 rounded-xl bg-surface-card shadow-md flex flex-col gap-2">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex flex-col">
+          ${e.category ? `<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary font-medium w-max mb-1">${e.category}</span>` : ""}
+          <h4 class="text-headline-sm font-headline-sm text-text-primary">${e.title}</h4>
+        </div>
+        <div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-container-lowest">
+          <img class="w-full h-full object-cover" src="${e.img}" alt="">
+        </div>
+      </div>
+      <p class="text-body-sm font-body-sm text-text-secondary">${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 70)}</p>
+      <div class="mt-1 pt-1 flex items-center justify-between">
+        <div class="flex items-center gap-1 text-label-sm font-label-sm text-text-muted">
+          <span class="material-symbols-outlined text-[15px]">event</span>
+          <span>${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span>
+        </div>
+        <a class="px-4 py-1.5 rounded-lg bg-surface-container-high text-text-primary text-label-md font-label-md flex items-center gap-1" href="/event?id=${e.id}">
+          <span>פרטים והרשמה</span><span class="material-symbols-outlined text-[15px]">chevron_left</span>
+        </a>
+      </div>
+    </article>`;
+  }
+
+  function render() {
+    const q = search.value.trim().toLowerCase();
+    const data = allEvents.filter(e =>
+      (!q || e.title.toLowerCase().includes(q)) &&
+      (!activeType || e.category === activeType) &&
+      (!city.value || e.city === city.value) &&
+      (!date.value || e.dateISO === date.value)
+    );
+    countEl.textContent = data.length;
+    box.innerHTML = data.length
+      ? data.map((e, i) => cardHtml(e, i === 0)).join("")
+      : `<p class="text-text-muted text-body-sm">לא נמצאו אירועים.</p>`;
+  }
+
+  try {
+    allEvents = await window.LPData.loadEvents();
+  } catch (err) {
+    box.innerHTML = `<p class="text-text-muted text-body-sm">לא הצלחנו לטעון אירועים כרגע.</p>`;
+  }
+
+  pills.forEach(p => p.addEventListener("click", () => {
+    pills.forEach(x => {
+      x.classList.remove("bg-primary-container", "text-on-primary-container", "shadow-md");
+      x.classList.add("bg-surface-container-high", "text-text-secondary");
+    });
+    p.classList.remove("bg-surface-container-high", "text-text-secondary");
+    p.classList.add("bg-primary-container", "text-on-primary-container", "shadow-md");
+    activeType = p.dataset.type;
+    render();
+  }));
+
+  [search, city, date].forEach(x => x.addEventListener("input", render));
+  reset.addEventListener("click", () => {
+    search.value = ""; city.value = ""; date.value = ""; activeType = "";
+    pills.forEach(x => {
+      x.classList.remove("bg-primary-container", "text-on-primary-container", "shadow-md");
+      x.classList.add("bg-surface-container-high", "text-text-secondary");
+    });
+    pills[0].classList.remove("bg-surface-container-high", "text-text-secondary");
+    pills[0].classList.add("bg-primary-container", "text-on-primary-container", "shadow-md");
+    render();
+  });
+
+  render();
 });
-</script></body></html>
+</script>
+</body></html>

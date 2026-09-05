@@ -214,7 +214,7 @@ const ForumUsersSection = ({ showSaved }) => {
   });
 
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div>
           <h2 className="text-xl md:text-2xl font-bold">משתמשי פורום</h2>
@@ -233,7 +233,7 @@ const ForumUsersSection = ({ showSaved }) => {
       </div>
 
       {/* Link new account tool */}
-      <div className="bg-black/20 border border-zinc-800 rounded-xl p-3 space-y-2">
+      <div className="bg-black/20 border border-[rgba(255,255,255,0.08)] rounded-xl p-3 space-y-2">
         <label className="text-xs uppercase font-bold text-zinc-500 flex items-center gap-1.5">
           <Link2 size={14} /> צור חשבון פורום חדש ושייך למשתמש אתר קיים
         </label>
@@ -244,7 +244,7 @@ const ForumUsersSection = ({ showSaved }) => {
             onChange={(e) => setLinkSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && runLinkSearch()}
             placeholder="חפש לפי שם או טלפון..."
-            className="flex-1 bg-black/40 border border-zinc-800 p-2.5 rounded-xl focus:border-red-600 outline-none text-white text-right text-sm"
+            className="flex-1 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-xl focus:border-[#e11d48] outline-none text-white text-right text-sm"
           />
           <button onClick={runLinkSearch} className="bg-zinc-700 hover:bg-zinc-600 text-white px-4 rounded-xl font-bold text-sm">
             <Search size={16} />
@@ -253,7 +253,7 @@ const ForumUsersSection = ({ showSaved }) => {
         {linkResults.length > 0 && (
           <div className="space-y-1.5 mt-2">
             {linkResults.map((u) => (
-              <div key={u.id} className="flex items-center justify-between bg-black/40 border border-zinc-800 rounded-lg p-2 text-sm">
+              <div key={u.id} className="flex items-center justify-between bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-sm">
                 <span>{u.name} — <PhoneLink phone={u.phoneNumber}>{u.phoneNumber}</PhoneLink></span>
                 <button onClick={() => handleCreateAndLink(u)} className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 rounded-lg font-bold text-xs">
                   צור וקשר
@@ -273,7 +273,7 @@ const ForumUsersSection = ({ showSaved }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="חיפוש לפי כינוי או אימייל..."
-            className="w-full bg-black/40 border border-zinc-800 p-3 pr-10 rounded-xl focus:border-red-600 outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
@@ -301,7 +301,7 @@ const ForumUsersSection = ({ showSaved }) => {
           {filteredForumUsers.map((fu) => {
             const linkedUser = fu.linkedUserId ? siteUsersMap[fu.linkedUserId] : null;
             return (
-              <div key={fu.id} className="bg-black/40 border border-zinc-800 p-3 md:p-4 rounded-xl">
+              <div key={fu.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                   <strong className="text-lg text-white">{fu.nickname}</strong>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${fu.role === 'forumAdmin' ? 'bg-purple-600' : 'bg-zinc-700'}`}>
@@ -340,7 +340,7 @@ const ForumUsersSection = ({ showSaved }) => {
                     ⚖️ מנוי זהב אוטומטי — נשים פטורות מאישור איזון
                   </div>
                 ) : (
-                  <div className="mb-3 px-3 py-2 rounded-lg bg-black/30 border border-zinc-800 text-xs">
+                  <div className="mb-3 px-3 py-2 rounded-lg bg-black/30 border border-[rgba(255,255,255,0.08)] text-xs">
                     ⚖️ איזון מגדרי:{' '}
                     {fu.subscriptionExpiry && new Date(fu.subscriptionExpiry).getTime() > Date.now() ? (
                       <span className="text-emerald-400 font-bold">מאושר עד {new Date(fu.subscriptionExpiry).toLocaleDateString('he-IL')}</span>

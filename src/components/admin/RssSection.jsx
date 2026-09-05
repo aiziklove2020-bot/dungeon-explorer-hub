@@ -41,7 +41,7 @@ const RssSection = ({ showSaved }) => {
   };
 
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">{t('admin.rssFeedsManagement')}</h2>
         <div className="flex gap-2">
@@ -69,7 +69,7 @@ const RssSection = ({ showSaved }) => {
         </div>
       </div>
 
-      <div className="bg-black/40 border border-zinc-800 p-4 rounded-xl">
+      <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-4 rounded-xl">
         <h3 className="text-lg font-bold mb-2">{t('admin.rssTickerSpeed')}</h3>
         <p className="text-zinc-400 text-sm mb-3">{t('admin.rssTickerSpeedDescription')}</p>
         <div className="flex flex-wrap items-center gap-3">
@@ -79,13 +79,13 @@ const RssSection = ({ showSaved }) => {
             max={300}
             value={tickerSpeed}
             onChange={e => setTickerSpeed(parseInt(e.target.value, 10) || 60)}
-            className="w-24 bg-black/40 border border-zinc-800 p-2 rounded-xl focus:border-red-600 outline-none text-white text-right"
+            className="w-24 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
           />
           <span className="text-zinc-500 text-sm">{t('admin.rssSpeedSeconds')}</span>
           <button
             onClick={saveTickerSpeed}
             disabled={tickerSpeedSaving}
-            className="bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl font-bold"
+            className="bg-[#e11d48] hover:bg-[#be0037] disabled:opacity-50 text-white px-4 py-2 rounded-xl font-bold"
           >
             {tickerSpeedSaving ? t('admin.saving') : t('admin.save')}
           </button>
@@ -93,7 +93,7 @@ const RssSection = ({ showSaved }) => {
       </div>
 
       {editingRssFeed ? (
-        <div className="bg-black/40 border border-zinc-800 p-4 rounded-xl">
+        <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-4 rounded-xl">
           <h3 className="text-lg font-bold mb-4">
             {editingRssFeed.id ? t('admin.editFeed') : t('admin.addNewFeed')}
           </h3>
@@ -104,7 +104,7 @@ const RssSection = ({ showSaved }) => {
                 value={rssFeedForm.text}
                 onChange={e => setRssFeedForm({ ...rssFeedForm, text: e.target.value })}
                 rows={4}
-                className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
                 placeholder={t('admin.enterRssText')}
                 required
               />
@@ -116,7 +116,7 @@ const RssSection = ({ showSaved }) => {
                   type="number"
                   value={rssFeedForm.order}
                   onChange={e => setRssFeedForm({ ...rssFeedForm, order: parseInt(e.target.value) || 0 })}
-                  className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+                  className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
                   min="0"
                 />
               </div>
@@ -151,7 +151,7 @@ const RssSection = ({ showSaved }) => {
                     alert(`${t('admin.errorSavingFeed')}: ${error.message}`);
                   }
                 }}
-                className="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-xl font-bold"
+                className="bg-[#e11d48] hover:bg-[#be0037] text-white px-6 py-2 rounded-xl font-bold"
               >
                 {t('admin.save')}
               </button>
@@ -178,7 +178,7 @@ const RssSection = ({ showSaved }) => {
       ) : (
         <div className="space-y-4">
           {feeds.map(feed => (
-            <div key={feed.id} className="bg-black/40 border border-zinc-800 p-4 rounded-xl">
+            <div key={feed.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-4 rounded-xl">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -195,7 +195,7 @@ const RssSection = ({ showSaved }) => {
                       setEditingRssFeed(feed);
                       setRssFeedForm({ text: feed.text, enabled: feed.enabled !== false, order: feed.order || 0 });
                     }}
-                    className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm"
+                    className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold text-sm"
                   >
                     {t('admin.edit')}
                   </button>
@@ -212,7 +212,7 @@ const RssSection = ({ showSaved }) => {
                         }
                       }
                     }}
-                    className="bg-red-900/50 hover:bg-red-900 text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2"
+                    className="bg-[#93000a]/60 hover:bg-[#93000a] text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2"
                   >
                     <Trash2 size={16} />
                   </button>

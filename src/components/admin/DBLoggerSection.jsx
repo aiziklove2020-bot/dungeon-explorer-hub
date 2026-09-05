@@ -125,7 +125,7 @@ const DBLoggerSection = () => {
   };
 
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
           <BarChart3 size={24} />
@@ -192,7 +192,7 @@ const DBLoggerSection = () => {
           </button>
           <button
             onClick={handleClear}
-            className="bg-red-600 hover:bg-red-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+            className="bg-[#e11d48] hover:bg-[#be0037] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
           >
             <Trash2 size={16} />
             נקה הכל
@@ -242,7 +242,7 @@ const DBLoggerSection = () => {
           <h3 className="text-lg font-bold mb-3">קריאות לפי פונקציה (היום)</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {stats.today.byFunction.map((item, index) => (
-              <div key={index} className="flex justify-between items-center p-2 bg-zinc-900/50 rounded">
+              <div key={index} className="flex justify-between items-center p-2 bg-[#121218] rounded">
                 <span className="font-mono text-sm">{item.function}</span>
                 <span className="font-bold text-yellow-400">{item.reads.toLocaleString()}</span>
               </div>
@@ -258,7 +258,7 @@ const DBLoggerSection = () => {
             <div
               key={index}
               className={`p-2 rounded text-xs font-mono ${
-                log.success ? 'bg-zinc-900/50' : 'bg-red-900/30'
+                log.success ? 'bg-[#121218]' : 'bg-red-900/30'
               }`}
             >
               <div className="flex justify-between items-start gap-2">

@@ -105,7 +105,7 @@ const LiveChatSection = ({ showSaved }) => {
       <button
         type="button"
         onClick={handleSave}
-        className="bg-red-600 hover:bg-red-500 text-white font-bold px-6 py-2 rounded-xl"
+        className="bg-[#e11d48] hover:bg-[#be0037] text-white font-bold px-6 py-2 rounded-xl"
       >
         {t('admin.save') || 'שמור'}
       </button>
@@ -120,7 +120,7 @@ const LiveChatSection = ({ showSaved }) => {
         {t('admin.liveChat.openChat') || 'פתח צ׳אט במסך חדש'}
       </a>
 
-      <div className="border-t border-zinc-800 pt-6 space-y-3">
+      <div className="border-t border-[rgba(255,255,255,0.08)] pt-6 space-y-3">
         <div className="text-white font-bold">
           ניקוי הודעות
         </div>

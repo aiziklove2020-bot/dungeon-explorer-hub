@@ -104,7 +104,7 @@ const safePreviewHtml = (raw) => {
 
 const MessagePreviewBox = ({ text }) => (
   <div
-    className="text-white text-sm whitespace-pre-wrap break-words font-sans min-h-[80px] p-3 rounded-lg bg-black/40 border border-zinc-800"
+    className="text-white text-sm whitespace-pre-wrap break-words font-sans min-h-[80px] p-3 rounded-lg bg-[#1f1f23] border border-[rgba(255,255,255,0.08)]"
     dir="auto"
     dangerouslySetInnerHTML={{ __html: safePreviewHtml(text) }}
   />
@@ -390,19 +390,19 @@ const TelegramSection = ({ showSaved }) => {
     }
   };
 
-  const inputCls = 'w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right';
+  const inputCls = 'w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right';
   const labelCls = 'block text-xs uppercase font-bold text-zinc-500 mb-1';
 
   if (loading) {
     return (
-      <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-6 rounded-2xl">
+      <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl">
         <p className="text-zinc-400">{t('loading')}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">{t('admin.telegram.title')}</h2>
         {legacy && (
@@ -415,7 +415,7 @@ const TelegramSection = ({ showSaved }) => {
         {t('admin.telegram.description')}
       </p>
 
-      <div className="flex flex-wrap gap-2 items-center border-b border-zinc-800 pb-3">
+      <div className="flex flex-wrap gap-2 items-center border-b border-[rgba(255,255,255,0.08)] pb-3">
         {['bots', 'channels', 'messages', 'sendMessage'].map((panel) => (
           <button
             key={panel}
@@ -474,13 +474,13 @@ const TelegramSection = ({ showSaved }) => {
                 autoComplete="off"
               />
             </div>
-            <button type="button" onClick={addBot} className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
+            <button type="button" onClick={addBot} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
               <Plus size={16} /> {t('admin.telegram.addBot')}
             </button>
           </div>
           <ul className="space-y-2">
             {bots.map((b) => (
-              <li key={b.id} className="flex items-center gap-3 p-3 bg-zinc-900/60 rounded-xl border border-zinc-800">
+              <li key={b.id} className="flex items-center gap-3 p-3 bg-zinc-900/60 rounded-xl border border-[rgba(255,255,255,0.08)]">
                 {editingBot === b.id ? (
                   <>
                     <input
@@ -547,13 +547,13 @@ const TelegramSection = ({ showSaved }) => {
                 dir="ltr"
               />
             </div>
-            <button type="button" onClick={addChannel} className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
+            <button type="button" onClick={addChannel} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
               <Plus size={16} /> {t('admin.telegram.addChannel')}
             </button>
           </div>
           <ul className="space-y-2">
             {channels.map((c) => (
-              <li key={c.id} className="p-3 bg-zinc-900/60 rounded-xl border border-zinc-800 space-y-2">
+              <li key={c.id} className="p-3 bg-zinc-900/60 rounded-xl border border-[rgba(255,255,255,0.08)] space-y-2">
                 <div className="flex items-center gap-3">
                 {editingChannel === c.id ? (
                   <>
@@ -597,7 +597,7 @@ const TelegramSection = ({ showSaved }) => {
                 </div>
 
                 {editingChannel !== c.id && c.broadcastEnabled !== false && (
-                  <div className="pt-2 border-t border-zinc-800">
+                  <div className="pt-2 border-t border-[rgba(255,255,255,0.08)]">
                     <label className="flex items-center gap-1.5 cursor-pointer text-xs mb-1.5">
                       <input
                         type="checkbox"
@@ -622,7 +622,7 @@ const TelegramSection = ({ showSaved }) => {
                           <span className="text-zinc-600 text-xs">אין מפרסמים מאושרים</span>
                         )}
                         {advertisers.map((a) => (
-                          <label key={a.id} className="flex items-center gap-1 cursor-pointer text-xs bg-black/30 border border-zinc-800 rounded-lg px-2 py-1">
+                          <label key={a.id} className="flex items-center gap-1 cursor-pointer text-xs bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-lg px-2 py-1">
                             <input
                               type="checkbox"
                               checked={c.allowedAdvertiserIds.includes(a.id)}
@@ -649,7 +649,7 @@ const TelegramSection = ({ showSaved }) => {
           </p>
           <ul className="space-y-3">
             {messages.map((m) => (
-              <li key={m.id} className="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-900/60">
+              <li key={m.id} className="border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden bg-zinc-900/60">
                 <div
                   className="flex items-center gap-2 p-3 cursor-pointer"
                   onClick={() => setEditingMessage(editingMessage === m.id ? null : m.id)}
@@ -673,7 +673,7 @@ const TelegramSection = ({ showSaved }) => {
                   )}
                 </div>
                 {editingMessage === m.id && (
-                  <div className="p-4 border-t border-zinc-800 space-y-4">
+                  <div className="p-4 border-t border-[rgba(255,255,255,0.08)] space-y-4">
                     {/* Available variables - at top */}
                     <div className="rounded-xl border border-zinc-700 bg-zinc-950/80 p-4">
                       <div className="text-xs uppercase font-bold text-zinc-400 mb-2">{t('admin.telegram.availableVariables')}</div>
@@ -945,7 +945,7 @@ const TelegramSection = ({ showSaved }) => {
               </li>
             ))}
           </ul>
-          <div className="pt-2 border-t border-zinc-800">
+          <div className="pt-2 border-t border-[rgba(255,255,255,0.08)]">
             <h4 className="text-sm font-bold text-zinc-400 mb-2">{t('admin.telegram.addCustomMessage')}</h4>
             <div className="flex flex-wrap gap-2 items-end">
               <div className="min-w-[160px]">
@@ -998,7 +998,7 @@ const TelegramSection = ({ showSaved }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>{t('admin.telegram.selectBots')}</label>
-              <div className="space-y-2 p-3 bg-zinc-900/60 rounded-xl border border-zinc-800">
+              <div className="space-y-2 p-3 bg-zinc-900/60 rounded-xl border border-[rgba(255,255,255,0.08)]">
                 {bots.length === 0 && <span className="text-zinc-500 text-sm">—</span>}
                 {bots.map((b) => (
                   <label key={b.id} className="flex items-center gap-3 cursor-pointer hover:bg-zinc-800/40 p-2 rounded-lg transition-colors">
@@ -1023,7 +1023,7 @@ const TelegramSection = ({ showSaved }) => {
 
             <div>
               <label className={labelCls}>{t('admin.telegram.selectChannels')}</label>
-              <div className="space-y-2 p-3 bg-zinc-900/60 rounded-xl border border-zinc-800">
+              <div className="space-y-2 p-3 bg-zinc-900/60 rounded-xl border border-[rgba(255,255,255,0.08)]">
                 {channels.length === 0 && <span className="text-zinc-500 text-sm">—</span>}
                 {channels.map((c) => (
                   <label key={c.id} className="flex items-center gap-3 cursor-pointer hover:bg-zinc-800/40 p-2 rounded-lg transition-colors">
@@ -1086,7 +1086,7 @@ const TelegramSection = ({ showSaved }) => {
             type="button"
             onClick={handleSendMessage}
             disabled={sendingMsg}
-            className="bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
+            className="bg-[#e11d48] hover:bg-[#be0037] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
           >
             <Send size={16} />
             {sendingMsg ? t('admin.telegram.sending') : t('admin.telegram.sendNow')}
@@ -1095,8 +1095,8 @@ const TelegramSection = ({ showSaved }) => {
       )}
 
       {activePanel !== 'sendMessage' && (
-        <form onSubmit={handleSave} className="pt-4 border-t border-zinc-800">
-          <button type="submit" disabled={saving} className="bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
+        <form onSubmit={handleSave} className="pt-4 border-t border-[rgba(255,255,255,0.08)]">
+          <button type="submit" disabled={saving} className="bg-[#e11d48] hover:bg-[#be0037] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
             <Send size={16} /> {saving ? t('saving') : t('save')}
           </button>
         </form>

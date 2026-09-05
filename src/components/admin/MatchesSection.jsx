@@ -598,7 +598,7 @@ const MatchesSection = ({ showSaved }) => {
   };
 
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
       
       <div>
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
@@ -635,7 +635,7 @@ const MatchesSection = ({ showSaved }) => {
               const unmatchedCount = partyBalance.filter(m => !m.isMatched).length;
               
               return (
-              <div key={party.id} className="bg-black/40 border border-zinc-800 p-4 rounded-xl">
+              <div key={party.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-4 rounded-xl">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
@@ -815,7 +815,7 @@ const MatchesSection = ({ showSaved }) => {
                   if (e.target.value) setWhatsappSelectedTarget('');
                 }}
                 placeholder="972501234567"
-                className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-emerald-600 outline-none text-white"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-emerald-600 outline-none text-white"
               />
             </div>
 

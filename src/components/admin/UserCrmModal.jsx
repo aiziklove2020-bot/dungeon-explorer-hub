@@ -88,7 +88,7 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
         ) : (
           <div className="space-y-6">
             {/* Basic profile */}
-            <div className="bg-black/20 border border-zinc-800 rounded-xl p-3 space-y-2">
+            <div className="bg-black/20 border border-[rgba(255,255,255,0.08)] rounded-xl p-3 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`px-2 py-1 rounded text-xs font-bold ${user.level === 'admin' ? 'bg-red-600' : user.level === 'gold' ? 'bg-yellow-600' : user.level === 'registered' ? 'bg-green-600' : user.level === 'blocked' ? 'bg-red-900' : 'bg-zinc-600'}`}>
                   {user.level}
@@ -120,7 +120,7 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
               <select
                 value={crm.source}
                 onChange={(e) => handleSourceChange(e.target.value)}
-                className="w-full mt-1 bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+                className="w-full mt-1 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
               >
                 <option value="">לא צוין</option>
                 {CRM_SOURCES.map((s) => (
@@ -133,7 +133,7 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
                 onChange={(e) => setCrm((c) => ({ ...c, sourceNote: e.target.value }))}
                 onBlur={handleSourceNoteBlur}
                 placeholder="פרטים נוספים (למשל: שם החבר שהמליץ)"
-                className="w-full mt-2 bg-black/40 border border-zinc-800 p-2.5 rounded-xl focus:border-red-600 outline-none text-white text-right text-sm"
+                className="w-full mt-2 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-xl focus:border-[#e11d48] outline-none text-white text-right text-sm"
               />
               {savingSource && <p className="text-xs text-zinc-500 mt-1">שומר...</p>}
             </div>
@@ -147,7 +147,7 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
               ) : (
                 <div className="space-y-2 mb-3">
                   {sortedPayments.map((p) => (
-                    <div key={p.id} className="flex items-center justify-between bg-black/40 border border-zinc-800 rounded-xl p-2.5">
+                    <div key={p.id} className="flex items-center justify-between bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-2.5">
                       <div className="text-sm">
                         <span className="font-bold text-white">{p.date}</span>
                         {p.amount != null && <span className="text-green-400 font-bold mx-2">₪{p.amount}</span>}
@@ -162,12 +162,12 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
                 </div>
               )}
 
-              <form onSubmit={handleAddPayment} className="grid grid-cols-2 gap-2 bg-black/20 border border-zinc-800 rounded-xl p-3">
+              <form onSubmit={handleAddPayment} className="grid grid-cols-2 gap-2 bg-black/20 border border-[rgba(255,255,255,0.08)] rounded-xl p-3">
                 <input
                   type="date"
                   value={newPayment.date}
                   onChange={(e) => setNewPayment((p) => ({ ...p, date: e.target.value }))}
-                  className="bg-black/40 border border-zinc-800 p-2 rounded-lg text-white text-sm"
+                  className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg text-white text-sm"
                   required
                 />
                 <input
@@ -177,12 +177,12 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
                   value={newPayment.amount}
                   onChange={(e) => setNewPayment((p) => ({ ...p, amount: e.target.value }))}
                   placeholder="סכום (₪)"
-                  className="bg-black/40 border border-zinc-800 p-2 rounded-lg text-white text-sm text-right"
+                  className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg text-white text-sm text-right"
                 />
                 <select
                   value={newPayment.method}
                   onChange={(e) => setNewPayment((p) => ({ ...p, method: e.target.value }))}
-                  className="col-span-2 bg-black/40 border border-zinc-800 p-2 rounded-lg text-white text-sm text-right"
+                  className="col-span-2 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg text-white text-sm text-right"
                 >
                   {PAYMENT_METHODS.map((m) => (
                     <option key={m} value={m}>{m}</option>
@@ -193,12 +193,12 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
                   value={newPayment.note}
                   onChange={(e) => setNewPayment((p) => ({ ...p, note: e.target.value }))}
                   placeholder="הערה (אופציונלי)"
-                  className="col-span-2 bg-black/40 border border-zinc-800 p-2 rounded-lg text-white text-sm text-right"
+                  className="col-span-2 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg text-white text-sm text-right"
                 />
                 <button
                   type="submit"
                   disabled={addingPayment}
-                  className="col-span-2 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-1.5"
+                  className="col-span-2 bg-[#e11d48] hover:bg-[#be0037] disabled:opacity-50 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-1.5"
                 >
                   <Plus size={16} /> הוסף תשלום
                 </button>

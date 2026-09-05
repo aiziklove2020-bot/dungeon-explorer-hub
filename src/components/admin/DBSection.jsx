@@ -141,7 +141,7 @@ const DBSection = () => {
         </div>
       )}
 
-      <div className="bg-black/40 border border-zinc-800 rounded-xl p-4">
+      <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
         <h3 className="text-sm font-bold text-zinc-500 uppercase mb-2">בחר אוספים לגיבוי</h3>
         <div className="flex flex-wrap gap-x-4 gap-y-1 mb-2">
           <button type="button" onClick={() => setAllSelected(true)} className="text-zinc-400 hover:text-white text-sm">
@@ -201,7 +201,7 @@ const DBSection = () => {
       )}
 
       {summary && summary.collections && (
-        <div className="bg-black/40 border border-zinc-800 rounded-xl p-4">
+        <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
           <h3 className="text-sm font-bold text-zinc-500 uppercase mb-3">מצב Firebase כרגע</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-sm">
             {Object.entries(summary.collections).map(([name, count]) => (

@@ -54,7 +54,7 @@ const SubscriptionEditor = ({
           
           {Object.values(SUBSCRIPTION_KINDS).map(kind => (
             <div key={kind.id} className="py-1">
-              <div className="px-3 py-1.5 text-xs font-bold text-zinc-500 uppercase tracking-wider bg-zinc-900/50">
+              <div className="px-3 py-1.5 text-xs font-bold text-zinc-500 uppercase tracking-wider bg-[#121218]">
                 {kind.label}
               </div>
               

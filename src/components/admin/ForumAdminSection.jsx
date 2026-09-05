@@ -187,13 +187,13 @@ const ForumAdminSection = ({ showSaved }) => {
   // ---- Render: Replies list ----
   if (viewTopic) {
     return (
-      <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4">
+      <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <button onClick={() => setViewTopic(null)} className="text-zinc-400 hover:text-white"><ArrowRight size={20} /></button>
           <h2 className="text-xl font-bold">{viewTopic.title}</h2>
         </div>
 
-        <div className="bg-black/30 border border-zinc-800 rounded-xl p-4 mb-4">
+        <div className="bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-xl p-4 mb-4">
           <p className="text-zinc-500 text-xs mb-2">{viewTopic.authorName} ({viewTopic.authorId}) &middot; {formatDate(viewTopic.createdAt)}</p>
           <ForumPostContent content={viewTopic.content} images={viewTopic.images} uncensored />
         </div>
@@ -205,7 +205,7 @@ const ForumAdminSection = ({ showSaved }) => {
         ) : (
           <div className="space-y-3">
             {replies.map(reply => (
-              <div key={reply.id} className="bg-black/30 border border-zinc-800 rounded-xl p-4">
+              <div key={reply.id} className="bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                 {editingReplyId === reply.id ? (
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -220,10 +220,10 @@ const ForumAdminSection = ({ showSaved }) => {
                       value={editReplyContent}
                       onChange={(e) => setEditReplyContent(e.target.value)}
                       rows={4}
-                      className="w-full bg-black/40 border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-red-600 outline-none text-right"
+                      className="w-full bg-[#1f1f23] border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
                     />
                     <div className="flex gap-2">
-                      <button onClick={saveEditReply} className="bg-red-600 hover:bg-red-500 text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
+                      <button onClick={saveEditReply} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
                       <button onClick={() => setEditingReplyId(null)} className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
                     </div>
                   </div>
@@ -258,7 +258,7 @@ const ForumAdminSection = ({ showSaved }) => {
   // ---- Render: Topics list ----
   if (viewSection) {
     return (
-      <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4">
+      <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <button onClick={() => setViewSection(null)} className="text-zinc-400 hover:text-white"><ArrowRight size={20} /></button>
           <h2 className="text-xl font-bold">נושאים: {viewSection.title}</h2>
@@ -269,14 +269,14 @@ const ForumAdminSection = ({ showSaved }) => {
         ) : (
           <div className="space-y-3">
             {topics.map(topic => (
-              <div key={topic.id} className="bg-black/30 border border-zinc-800 rounded-xl p-4">
+              <div key={topic.id} className="bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                 {editingTopicId === topic.id ? (
                   <div className="space-y-3">
                     <input
                       type="text"
                       value={editTopicForm.title}
                       onChange={(e) => setEditTopicForm({ ...editTopicForm, title: e.target.value })}
-                      className="w-full bg-black/40 border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-red-600 outline-none text-right"
+                      className="w-full bg-[#1f1f23] border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
                     />
                     <div className="flex flex-wrap items-center gap-2">
                       <SpoilerWrapButton
@@ -290,10 +290,10 @@ const ForumAdminSection = ({ showSaved }) => {
                       value={editTopicForm.content}
                       onChange={(e) => setEditTopicForm({ ...editTopicForm, content: e.target.value })}
                       rows={4}
-                      className="w-full bg-black/40 border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-red-600 outline-none text-right"
+                      className="w-full bg-[#1f1f23] border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
                     />
                     <div className="flex gap-2">
-                      <button onClick={saveEditTopic} className="bg-red-600 hover:bg-red-500 text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
+                      <button onClick={saveEditTopic} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
                       <button onClick={() => setEditingTopicId(null)} className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
                     </div>
                   </div>
@@ -337,11 +337,11 @@ const ForumAdminSection = ({ showSaved }) => {
 
   // ---- Render: Sections list ----
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <h2 className="text-xl md:text-2xl font-bold">ניהול פורום</h2>
 
       {/* Create section */}
-      <form onSubmit={handleCreateSection} className="bg-black/30 border border-zinc-800 rounded-xl p-4 space-y-3">
+      <form onSubmit={handleCreateSection} className="bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-xl p-4 space-y-3">
         <h3 className="text-sm font-bold text-zinc-400">הוסף מדור חדש</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <input
@@ -349,7 +349,7 @@ const ForumAdminSection = ({ showSaved }) => {
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder="שם המדור"
-            className="bg-black/40 border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-red-600 outline-none text-right"
+            className="bg-[#1f1f23] border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
             required
           />
           <input
@@ -357,10 +357,10 @@ const ForumAdminSection = ({ showSaved }) => {
             value={newDesc}
             onChange={(e) => setNewDesc(e.target.value)}
             placeholder="תיאור (אופציונלי)"
-            className="bg-black/40 border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-red-600 outline-none text-right"
+            className="bg-[#1f1f23] border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
           />
         </div>
-        <button type="submit" className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-1">
+        <button type="submit" className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-1">
           <Plus size={16} /> הוסף מדור
         </button>
       </form>
@@ -371,23 +371,23 @@ const ForumAdminSection = ({ showSaved }) => {
       ) : (
         <div className="space-y-3">
           {sections.map((sec, idx) => (
-            <div key={sec.id} className={`bg-black/30 border rounded-xl p-4 ${sec.visible === false ? 'border-zinc-700 opacity-60' : 'border-zinc-800'}`}>
+            <div key={sec.id} className={`bg-black/30 border rounded-xl p-4 ${sec.visible === false ? 'border-zinc-700 opacity-60' : 'border-[rgba(255,255,255,0.08)]'}`}>
               {editingSectionId === sec.id ? (
                 <div className="space-y-3">
                   <input
                     type="text"
                     value={editSectionForm.title}
                     onChange={(e) => setEditSectionForm({ ...editSectionForm, title: e.target.value })}
-                    className="w-full bg-black/40 border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-red-600 outline-none text-right"
+                    className="w-full bg-[#1f1f23] border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
                   />
                   <input
                     type="text"
                     value={editSectionForm.description}
                     onChange={(e) => setEditSectionForm({ ...editSectionForm, description: e.target.value })}
-                    className="w-full bg-black/40 border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-red-600 outline-none text-right"
+                    className="w-full bg-[#1f1f23] border border-zinc-700 text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
                   />
                   <div className="flex gap-2">
-                    <button onClick={saveEditSection} className="bg-red-600 hover:bg-red-500 text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
+                    <button onClick={saveEditSection} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
                     <button onClick={() => setEditingSectionId(null)} className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
                   </div>
                 </div>

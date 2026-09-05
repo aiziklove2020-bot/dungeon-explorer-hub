@@ -14,7 +14,7 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
   const femaleRegInfo = femaleUser ? getUserRegistrationInfo(femaleUser) : null;
 
   return (
-    <div className="bg-zinc-900/50 border border-zinc-800 border-l-4 border-l-purple-500 p-2 md:p-3 rounded-lg">
+    <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] border-l-4 border-l-purple-500 p-2 md:p-3 rounded-lg">
       <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2">
         <span className="px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-bold bg-purple-600">
           💑 {t('admin.couple') || 'זוג'}
@@ -45,7 +45,7 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
             {onRemoveFromParty && partyId && (
               <button
                 onClick={() => onRemoveFromParty(partyId, maleReg)}
-                className="bg-red-600 hover:bg-red-500 text-white px-2 py-1 rounded text-[10px] font-bold"
+                className="bg-[#e11d48] hover:bg-[#be0037] text-white px-2 py-1 rounded text-[10px] font-bold"
                 title={t('confirmRemoveUser')}
               >
                 <Trash2 size={10} /> {t('admin.remove')}
@@ -92,7 +92,7 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
             {onRemoveFromParty && partyId && (
               <button
                 onClick={() => onRemoveFromParty(partyId, femaleReg)}
-                className="bg-red-600 hover:bg-red-500 text-white px-2 py-1 rounded text-[10px] font-bold"
+                className="bg-[#e11d48] hover:bg-[#be0037] text-white px-2 py-1 rounded text-[10px] font-bold"
                 title={t('confirmRemoveUser')}
               >
                 <Trash2 size={10} /> {t('admin.remove')}

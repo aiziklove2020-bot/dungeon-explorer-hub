@@ -60,7 +60,7 @@ const GitHistorySection = () => {
   };
 
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
           <GitCommit size={24} />
@@ -152,7 +152,7 @@ const GitHistorySection = () => {
                 )}
               </div>
               {expandedSha === c.sha && Array.isArray(c.files) && c.files.length > 0 && (
-                <div className="border-t border-white/5 bg-zinc-900/50 px-3 md:px-4 py-2">
+                <div className="border-t border-white/5 bg-[#121218] px-3 md:px-4 py-2">
                   <ul className="space-y-1.5 text-sm">
                     {c.files.map((f, idx) => (
                       <li

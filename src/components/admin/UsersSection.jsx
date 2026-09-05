@@ -266,7 +266,7 @@ const UsersSection = ({ showSaved }) => {
 
   return (
     <>
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div>
           <h2 className="text-xl md:text-2xl font-bold">{t('userManagement') || 'ניהול משתמשים'}</h2>
@@ -311,7 +311,7 @@ const UsersSection = ({ showSaved }) => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={t('admin.searchUsers') || 'חיפוש לפי שם, טלפון או טלגרם...'}
-          className="w-full bg-black/40 border border-zinc-800 p-3 pr-10 rounded-xl focus:border-red-600 outline-none text-white text-right"
+          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
         />
         {searchQuery && (
           <button onClick={() => setSearchQuery('')} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-white">
@@ -385,21 +385,21 @@ const UsersSection = ({ showSaved }) => {
         <div className="space-y-4">
           {filteredUsers.map(u => {
             return (
-              <div key={u.id} className="bg-black/40 border border-zinc-800 p-3 md:p-4 rounded-xl">
+              <div key={u.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
                 {editingUser?.id === u.id ? (
                   <form onSubmit={handleSaveUser} className="space-y-3 md:space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       <div>
                         <label className="text-xs uppercase font-bold text-zinc-500">{t('fullName') || 'שם מלא'} *</label>
-                        <input type="text" value={editUserForm.name} onChange={(e) => setEditUserForm({ ...editUserForm, name: e.target.value })} className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right" required />
+                        <input type="text" value={editUserForm.name} onChange={(e) => setEditUserForm({ ...editUserForm, name: e.target.value })} className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right" required />
                       </div>
                       <div>
                         <label className="text-xs uppercase font-bold text-zinc-500">{t('phoneNumber') || 'מספר טלפון'} *</label>
-                        <input type="tel" value={editUserForm.phoneNumber} onChange={handlePhoneChange} placeholder="05XXXXXXXX" maxLength="10" className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right" required />
+                        <input type="tel" value={editUserForm.phoneNumber} onChange={handlePhoneChange} placeholder="05XXXXXXXX" maxLength="10" className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right" required />
                       </div>
                       <div>
                         <label className="text-xs uppercase font-bold text-zinc-500">{t('gender') || 'מין'} *</label>
-                        <select value={editUserForm.gender} onChange={(e) => setEditUserForm({ ...editUserForm, gender: e.target.value })} className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right" required>
+                        <select value={editUserForm.gender} onChange={(e) => setEditUserForm({ ...editUserForm, gender: e.target.value })} className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right" required>
                           <option value="">{t('selectGender') || 'בחר מין'}</option>
                           <option value="male">{t('male') || 'זכר'}</option>
                           <option value="female">{t('female') || 'נקבה'}</option>
@@ -408,15 +408,15 @@ const UsersSection = ({ showSaved }) => {
                       </div>
                       <div>
                         <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.telegramUsername')}</label>
-                        <input type="text" value={editUserForm.telegramUsername || ''} onChange={(e) => { let value = e.target.value.replace(/^@+/g, ''); setEditUserForm({ ...editUserForm, telegramUsername: value }); }} placeholder="username (ללא @)" className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right" />
+                        <input type="text" value={editUserForm.telegramUsername || ''} onChange={(e) => { let value = e.target.value.replace(/^@+/g, ''); setEditUserForm({ ...editUserForm, telegramUsername: value }); }} placeholder="username (ללא @)" className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right" />
                       </div>
                       <div>
                         <label className="text-xs uppercase font-bold text-zinc-500">{t('admin.subscriptionEndDate')}</label>
-                        <input type="date" value={editUserForm.subscriptionEndDate || ''} onChange={(e) => setEditUserForm({ ...editUserForm, subscriptionEndDate: e.target.value })} className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right" />
+                        <input type="date" value={editUserForm.subscriptionEndDate || ''} onChange={(e) => setEditUserForm({ ...editUserForm, subscriptionEndDate: e.target.value })} className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right" />
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button type="submit" className="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-xl font-bold">{t('save') || 'שמור'}</button>
+                      <button type="submit" className="bg-[#e11d48] hover:bg-[#be0037] text-white px-6 py-2 rounded-xl font-bold">{t('save') || 'שמור'}</button>
                       <button type="button" onClick={handleCancelEdit} className="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2 rounded-xl font-bold">{t('cancel') || 'ביטול'}</button>
                     </div>
                   </form>
@@ -449,7 +449,7 @@ const UsersSection = ({ showSaved }) => {
                           <UserCog size={14} /> כרטיס לקוח
                         </button>
 
-                        <button onClick={() => handleEditUser(u)} className="bg-red-600 hover:bg-red-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm">
+                        <button onClick={() => handleEditUser(u)} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm">
                           {t('edit') || 'ערוך'}
                         </button>
                         

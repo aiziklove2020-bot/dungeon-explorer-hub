@@ -160,7 +160,7 @@ const LinksSection = ({ showSaved }) => {
   };
 
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">{t('linksAndGroups')}</h2>
         <div className="flex gap-2">
@@ -202,7 +202,7 @@ const LinksSection = ({ showSaved }) => {
                 alert(t('saveError'));
               }
             }}
-            className="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
+            className="bg-[#e11d48] hover:bg-[#be0037] text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
           >
             <Save size={18} /> {t('saveAll')}
           </button>
@@ -219,7 +219,7 @@ const LinksSection = ({ showSaved }) => {
                 type="url"
                 value={whatsappGroupsData.men || ''}
                 onChange={e => setWhatsappGroupsData({...whatsappGroupsData, men: e.target.value})}
-                className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
                 placeholder="https://chat.whatsapp.com/..."
               />
             </div>
@@ -229,7 +229,7 @@ const LinksSection = ({ showSaved }) => {
                 type="url"
                 value={whatsappGroupsData.women || ''}
                 onChange={e => setWhatsappGroupsData({...whatsappGroupsData, women: e.target.value})}
-                className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
                 placeholder="https://chat.whatsapp.com/..."
               />
             </div>
@@ -239,7 +239,7 @@ const LinksSection = ({ showSaved }) => {
         <div className="space-y-4">
           <h3 className="text-xl font-bold">{t('socialMediaLinks')}</h3>
           {Array.isArray(socialLinksData) && socialLinksData.map((link, index) => (
-            <div key={index} className="bg-black/40 border border-zinc-800 p-4 rounded-xl space-y-3">
+            <div key={index} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-4 rounded-xl space-y-3">
               <div className="space-y-1 text-right">
                 <label className="text-xs uppercase font-bold text-zinc-500">{t('label')}</label>
                 <input
@@ -250,7 +250,7 @@ const LinksSection = ({ showSaved }) => {
                     newLinks[index] = { ...link, label: e.target.value };
                     setSocialLinksData(newLinks);
                   }}
-                  className="w-full bg-zinc-900 border border-zinc-700 p-3 rounded-lg focus:border-red-600 outline-none text-white text-right"
+                  className="w-full bg-zinc-900 border border-zinc-700 p-3 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
                   placeholder="Instagram, Facebook, etc."
                 />
               </div>
@@ -264,7 +264,7 @@ const LinksSection = ({ showSaved }) => {
                     newLinks[index] = { ...link, url: e.target.value };
                     setSocialLinksData(newLinks);
                   }}
-                  className="w-full bg-zinc-900 border border-zinc-700 p-3 rounded-lg focus:border-red-600 outline-none text-white text-right"
+                  className="w-full bg-zinc-900 border border-zinc-700 p-3 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
                   placeholder="https://..."
                 />
               </div>
@@ -272,7 +272,7 @@ const LinksSection = ({ showSaved }) => {
           ))}
         </div>
 
-        <div className="space-y-4 border-t border-zinc-800 pt-6">
+        <div className="space-y-4 border-t border-[rgba(255,255,255,0.08)] pt-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-bold">{t('admin.telegramSettings')}</h3>
             <div className="flex gap-2">
@@ -294,7 +294,7 @@ const LinksSection = ({ showSaved }) => {
               </button>
               <button
                 onClick={() => setShowTelegramForm(!showTelegramForm)}
-                className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm"
+                className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold text-sm"
               >
                 {showTelegramForm ? t('admin.cancel') : t('admin.manageSettings')}
               </button>
@@ -308,7 +308,7 @@ const LinksSection = ({ showSaved }) => {
                   type="text"
                   value={telegramSettings.botToken || ''}
                   onChange={handleBotTokenChange}
-                  className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+                  className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
                   placeholder="Enter Bot Token from @BotFather"
                 />
                 {botInfo && (
@@ -331,7 +331,7 @@ const LinksSection = ({ showSaved }) => {
                   type="text"
                   value={telegramSettings.chatId || ''}
                   onChange={(e) => setTelegramSettings({ ...telegramSettings, chatId: e.target.value })}
-                  className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+                  className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
                   placeholder="Enter Chat ID (number or @username)"
                 />
                 <p className="text-zinc-500 text-xs mt-1">
@@ -347,7 +347,7 @@ const LinksSection = ({ showSaved }) => {
                 />
                 <label>{t('admin.enableTelegramNotifications')}</label>
               </div>
-              <button type="submit" className="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-xl font-bold">
+              <button type="submit" className="bg-[#e11d48] hover:bg-[#be0037] text-white px-6 py-2 rounded-xl font-bold">
                 {t('save') || 'שמור'}
               </button>
             </form>

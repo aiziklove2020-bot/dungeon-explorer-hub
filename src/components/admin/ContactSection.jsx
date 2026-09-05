@@ -13,7 +13,7 @@ const ContactSection = ({ showSaved }) => {
   }, [content]);
 
   return (
-    <div className="bg-zinc-900/50 backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-4">
+    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">{t('admin.editContactPage')}</h2>
         <button
@@ -21,7 +21,7 @@ const ContactSection = ({ showSaved }) => {
             updateContact(contactData);
             showSaved();
           }}
-          className="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
+          className="bg-[#e11d48] hover:bg-[#be0037] text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
         >
           <Save size={18} /> {t('save')}
         </button>
@@ -32,7 +32,7 @@ const ContactSection = ({ showSaved }) => {
           type="text"
           value={contactData.whatsappLink}
           onChange={e => setContactData({...contactData, whatsappLink: e.target.value})}
-          className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
         />
       </div>
       <div className="space-y-1 text-right">
@@ -41,7 +41,7 @@ const ContactSection = ({ showSaved }) => {
           type="text"
           value={contactData.alertText}
           onChange={e => setContactData({...contactData, alertText: e.target.value})}
-          className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
         />
       </div>
       <div className="space-y-1 text-right">
@@ -50,7 +50,7 @@ const ContactSection = ({ showSaved }) => {
           value={contactData.description}
           onChange={e => setContactData({...contactData, description: e.target.value})}
           rows={4}
-          className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
         />
       </div>
       <div className="space-y-1 text-right">
@@ -59,7 +59,7 @@ const ContactSection = ({ showSaved }) => {
           value={contactData.importantNote}
           onChange={e => setContactData({...contactData, importantNote: e.target.value})}
           rows={3}
-          className="w-full bg-black/40 border border-zinc-800 p-3 rounded-xl focus:border-red-600 outline-none text-white text-right"
+          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
         />
       </div>
     </div>

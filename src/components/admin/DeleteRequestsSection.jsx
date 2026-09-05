@@ -111,11 +111,11 @@ const DeleteRequestsSection = ({ showSaved }) => {
       {err && <p className="text-red-400 text-sm">{err}</p>}
 
       {rows.length === 0 ? (
-        <p className="text-zinc-500 text-sm py-6 text-center border border-zinc-800 rounded-lg">
+        <p className="text-zinc-500 text-sm py-6 text-center border border-[rgba(255,255,255,0.08)] rounded-lg">
           אין בקשות מחיקה
         </p>
       ) : (
-        <div className="overflow-x-auto border border-zinc-800 rounded-lg">
+        <div className="overflow-x-auto border border-[rgba(255,255,255,0.08)] rounded-lg">
           <table className="w-full text-sm text-right min-w-[480px]">
             <thead className="bg-zinc-900 text-zinc-400">
               <tr>
@@ -129,7 +129,7 @@ const DeleteRequestsSection = ({ showSaved }) => {
               {rows.map((r) => {
                 const status = r.status || 'pending';
                 return (
-                  <tr key={r.id} className="border-t border-zinc-800 hover:bg-zinc-900/50">
+                  <tr key={r.id} className="border-t border-[rgba(255,255,255,0.08)] hover:bg-[#121218]">
                     <td className="p-2 text-zinc-300 whitespace-nowrap align-top">{formatTime(r.createdAt)}</td>
                     <td className="p-2 align-top">
                       <span dir="ltr" className="font-mono">{r.phoneNumber}</span>

@@ -367,7 +367,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
         />
       ) : (
         <div className="space-y-6">
-          <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-4">
+          <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-start gap-3 text-right">
                 <Clock size={20} className="text-zinc-400 mt-1 shrink-0" aria-hidden="true" />
@@ -381,7 +381,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                   value={retentionHours}
                   onChange={handleRetentionChange}
                   disabled={savingRetention}
-                  className="bg-black/40 border border-zinc-800 px-3 py-2 rounded-xl text-white outline-none focus:border-red-600 disabled:opacity-50"
+                  className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] px-3 py-2 rounded-xl text-white outline-none focus:border-[#e11d48] disabled:opacity-50"
                   aria-label={t('admin.partyRetention.title')}
                 >
                   {RETENTION_OPTIONS.map((opt) => (
@@ -443,7 +443,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
           ) : (
             <div className="space-y-4">
               {activeParties.map(party => (
-                <div key={party.id} className="bg-black/40 border border-zinc-800 p-3 md:p-4 rounded-xl">
+                <div key={party.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
                     <div className="flex-1 w-full">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -485,14 +485,14 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                       <button
                         type="button"
                         onClick={() => handleEditParty(party)}
-                        className="bg-red-600 hover:bg-red-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex-1 sm:flex-none"
+                        className="bg-[#e11d48] hover:bg-[#be0037] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex-1 sm:flex-none"
                       >
                         {t('admin.edit')}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteParty(party.id, party.name || party.title)}
-                        className="bg-red-900/50 hover:bg-red-900 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 justify-center"
+                        className="bg-[#93000a]/60 hover:bg-[#93000a] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 justify-center"
                         aria-label={`${t('a11y.delete')}: ${party.name || party.title || ''}`}
                       >
                         <Trash2 size={14} className="md:w-4 md:h-4" aria-hidden="true" />
@@ -535,7 +535,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                       >
                         📊 {t('admin.exportRegistrations')}
                       </button>
-                      <div className="mt-4 border-t border-zinc-800 pt-4">
+                      <div className="mt-4 border-t border-[rgba(255,255,255,0.08)] pt-4">
                         <h4 className="text-lg font-bold mb-3">{t('admin.registrationsList')}</h4>
                         <div className="space-y-2 max-h-96 overflow-y-auto">
                           {getRegistrationDisplayItems(party.registrations).map((item, idx) =>

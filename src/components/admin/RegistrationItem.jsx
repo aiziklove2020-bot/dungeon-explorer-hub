@@ -55,7 +55,7 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
 
   if (loading) {
     return (
-      <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-lg">
+      <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] p-3 rounded-lg">
         <p className="text-zinc-400 text-sm">{t('registrationItem.loading')}</p>
       </div>
     );
@@ -68,7 +68,7 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
   const isDiscount = registration.registrationType === 'single-female-discount' || registration.registrationType === 'female_discount';
 
   return (
-    <div className="bg-zinc-900/50 border border-zinc-800 p-2 md:p-3 rounded-lg">
+    <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 md:p-3 rounded-lg">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-2">
         <div className="flex-1 w-full">
           <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-1">
@@ -132,7 +132,7 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
           {onRemoveFromParty && partyId && (
             <button
               onClick={() => onRemoveFromParty(partyId, registration)}
-              className="bg-red-600 hover:bg-red-500 text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1"
+              className="bg-[#e11d48] hover:bg-[#be0037] text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1"
               title={t('confirmRemoveUser')}
             >
               <Trash2 size={12} />
