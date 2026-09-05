@@ -772,7 +772,7 @@ const MatchesSection = ({ showSaved }) => {
                 <label className="text-xs uppercase font-bold text-[#94A3B8]">אנשי קשר שמורים</label>
                 <div className="space-y-1">
                   {whatsappRecipients.map((r) => (
-                    <label key={r.phone} className="flex items-center gap-2 text-sm bg-black/30 p-2 rounded-lg cursor-pointer">
+                    <label key={r.phone} className="flex items-center gap-2 text-sm bg-[#1f1f23]/80 p-2 rounded-lg cursor-pointer">
                       <input
                         type="radio"
                         name="whatsappTarget"
@@ -791,7 +791,7 @@ const MatchesSection = ({ showSaved }) => {
                 <label className="text-xs uppercase font-bold text-[#94A3B8]">קבוצות</label>
                 <div className="space-y-1 max-h-40 overflow-y-auto">
                   {whatsappGroups.map((g) => (
-                    <label key={g.id} className="flex items-center gap-2 text-sm bg-black/30 p-2 rounded-lg cursor-pointer">
+                    <label key={g.id} className="flex items-center gap-2 text-sm bg-[#1f1f23]/80 p-2 rounded-lg cursor-pointer">
                       <input
                         type="radio"
                         name="whatsappTarget"

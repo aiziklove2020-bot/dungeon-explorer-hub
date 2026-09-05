@@ -610,7 +610,7 @@ const TelegramSection = ({ showSaved }) => {
                     </label>
                     {Array.isArray(c.allowedAdvertiserIds) && (
                       <div className="flex flex-wrap gap-2 mr-5">
-                        <label className="flex items-center gap-1 cursor-pointer text-xs bg-black/30 border border-amber-800 rounded-lg px-2 py-1">
+                        <label className="flex items-center gap-1 cursor-pointer text-xs bg-[#1f1f23]/80 border border-amber-800 rounded-lg px-2 py-1">
                           <input
                             type="checkbox"
                             checked={c.allowedAdvertiserIds.includes(ADMIN_PSEUDO_ADVERTISER_ID)}
@@ -622,7 +622,7 @@ const TelegramSection = ({ showSaved }) => {
                           <span className="text-[#64748B] text-xs">אין מפרסמים מאושרים</span>
                         )}
                         {advertisers.map((a) => (
-                          <label key={a.id} className="flex items-center gap-1 cursor-pointer text-xs bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-lg px-2 py-1">
+                          <label key={a.id} className="flex items-center gap-1 cursor-pointer text-xs bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-lg px-2 py-1">
                             <input
                               type="checkbox"
                               checked={c.allowedAdvertiserIds.includes(a.id)}

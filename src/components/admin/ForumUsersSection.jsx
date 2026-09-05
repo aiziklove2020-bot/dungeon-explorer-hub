@@ -217,7 +217,10 @@ const ForumUsersSection = ({ showSaved }) => {
     <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold">משתמשי פורום</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl md:text-2xl font-bold">משתמשי פורום</h2>
+            <span className="px-2.5 py-1 rounded-full bg-[#1f1f23] text-[#94A3B8] text-xs font-bold">{forumUsers.length}</span>
+          </div>
           <p className="text-xs text-[#94A3B8] mt-1">
             חשבונות פורום (כינוי + סיסמה) — מערכת נפרדת לגמרי ממשתמשי האתר/מנויים ב"ניהול משתמשים". קישור לחשבון אתר מוצג כאן רק לצורך התמצאות.
           </p>
@@ -233,7 +236,7 @@ const ForumUsersSection = ({ showSaved }) => {
       </div>
 
       {/* Link new account tool */}
-      <div className="bg-black/20 border border-[rgba(255,255,255,0.08)] rounded-xl p-3 space-y-2">
+      <div className="bg-[#1f1f23]/60 border border-[rgba(255,255,255,0.08)] rounded-xl p-3 space-y-2">
         <label className="text-xs uppercase font-bold text-[#94A3B8] flex items-center gap-1.5">
           <Link2 size={14} /> צור חשבון פורום חדש ושייך למשתמש אתר קיים
         </label>
@@ -340,7 +343,7 @@ const ForumUsersSection = ({ showSaved }) => {
                     ⚖️ מנוי זהב אוטומטי — נשים פטורות מאישור איזון
                   </div>
                 ) : (
-                  <div className="mb-3 px-3 py-2 rounded-lg bg-black/30 border border-[rgba(255,255,255,0.08)] text-xs">
+                  <div className="mb-3 px-3 py-2 rounded-lg bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] text-xs">
                     ⚖️ איזון מגדרי:{' '}
                     {fu.subscriptionExpiry && new Date(fu.subscriptionExpiry).getTime() > Date.now() ? (
                       <span className="text-emerald-400 font-bold">מאושר עד {new Date(fu.subscriptionExpiry).toLocaleDateString('he-IL')}</span>

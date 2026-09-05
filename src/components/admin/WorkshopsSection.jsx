@@ -222,7 +222,12 @@ const WorkshopsSection = ({ showSaved }) => {
   return (
     <div className="space-y-6" dir="rtl">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">{t('workshops.title')}</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold">{t('workshops.title')}</h2>
+          {!loading && (
+            <span className="px-2.5 py-1 rounded-full bg-[#1f1f23] text-[#94A3B8] text-xs font-bold">{workshops.length}</span>
+          )}
+        </div>
         <button
           type="button"
           onClick={openAdd}
@@ -406,7 +411,7 @@ const WorkshopsSection = ({ showSaved }) => {
                     </div>
                   </div>
                   {isExpanded && (
-                    <div className="border-t border-white/5 p-4 bg-black/20 space-y-3">
+                    <div className="border-t border-white/5 p-4 bg-[#1f1f23]/60 space-y-3">
                       <div className="flex flex-wrap items-end gap-2">
                         <div>
                           <label className="block text-xs text-[#94A3B8] mb-1">{t('workshops.addRegistrantPhone')}</label>

@@ -97,7 +97,7 @@ const BlogAdminSection = ({ showSaved }) => {
           <h2 className="text-xl font-bold truncate">{viewPost.title}</h2>
         </div>
 
-        <div className="bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-xl p-4 mb-4">
+        <div className="bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4 mb-4">
           <p className="text-[#94A3B8] text-xs mb-2">{viewPost.authorName} ({viewPost.authorId}) &middot; {formatDate(viewPost.createdAt)}</p>
           <ForumPostContent content={viewPost.content} images={viewPost.images} uncensored />
         </div>
@@ -109,7 +109,7 @@ const BlogAdminSection = ({ showSaved }) => {
         ) : (
           <div className="space-y-3">
             {comments.map(comment => (
-              <div key={comment.id} className="bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+              <div key={comment.id} className="bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                 {editingCommentId === comment.id ? (
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -163,7 +163,7 @@ const BlogAdminSection = ({ showSaved }) => {
       ) : (
         <div className="space-y-3">
           {posts.map(post => (
-            <div key={post.id} className="bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <div key={post.id} className="bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
               {editingPostId === post.id ? (
                 <div className="space-y-3">
                   <input

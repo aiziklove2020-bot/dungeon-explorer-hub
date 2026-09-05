@@ -88,7 +88,7 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
         ) : (
           <div className="space-y-6">
             {/* Basic profile */}
-            <div className="bg-black/20 border border-[rgba(255,255,255,0.08)] rounded-xl p-3 space-y-2">
+            <div className="bg-[#1f1f23]/60 border border-[rgba(255,255,255,0.08)] rounded-xl p-3 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`px-2 py-1 rounded text-xs font-bold ${user.level === 'admin' ? 'bg-[#e11d48]' : user.level === 'gold' ? 'bg-yellow-600' : user.level === 'registered' ? 'bg-green-600' : user.level === 'blocked' ? 'bg-[#93000a]' : 'bg-[#353439]'}`}>
                   {user.level}
@@ -162,7 +162,7 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
                 </div>
               )}
 
-              <form onSubmit={handleAddPayment} className="grid grid-cols-2 gap-2 bg-black/20 border border-[rgba(255,255,255,0.08)] rounded-xl p-3">
+              <form onSubmit={handleAddPayment} className="grid grid-cols-2 gap-2 bg-[#1f1f23]/60 border border-[rgba(255,255,255,0.08)] rounded-xl p-3">
                 <input
                   type="date"
                   value={newPayment.date}

@@ -193,7 +193,7 @@ const ForumAdminSection = ({ showSaved }) => {
           <h2 className="text-xl font-bold">{viewTopic.title}</h2>
         </div>
 
-        <div className="bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-xl p-4 mb-4">
+        <div className="bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4 mb-4">
           <p className="text-[#94A3B8] text-xs mb-2">{viewTopic.authorName} ({viewTopic.authorId}) &middot; {formatDate(viewTopic.createdAt)}</p>
           <ForumPostContent content={viewTopic.content} images={viewTopic.images} uncensored />
         </div>
@@ -205,7 +205,7 @@ const ForumAdminSection = ({ showSaved }) => {
         ) : (
           <div className="space-y-3">
             {replies.map(reply => (
-              <div key={reply.id} className="bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+              <div key={reply.id} className="bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                 {editingReplyId === reply.id ? (
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -269,7 +269,7 @@ const ForumAdminSection = ({ showSaved }) => {
         ) : (
           <div className="space-y-3">
             {topics.map(topic => (
-              <div key={topic.id} className="bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+              <div key={topic.id} className="bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                 {editingTopicId === topic.id ? (
                   <div className="space-y-3">
                     <input
@@ -341,7 +341,7 @@ const ForumAdminSection = ({ showSaved }) => {
       <h2 className="text-xl md:text-2xl font-bold">ניהול פורום</h2>
 
       {/* Create section */}
-      <form onSubmit={handleCreateSection} className="bg-black/30 border border-[rgba(255,255,255,0.08)] rounded-xl p-4 space-y-3">
+      <form onSubmit={handleCreateSection} className="bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4 space-y-3">
         <h3 className="text-sm font-bold text-[#a9a9b2]">הוסף מדור חדש</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <input
@@ -371,7 +371,7 @@ const ForumAdminSection = ({ showSaved }) => {
       ) : (
         <div className="space-y-3">
           {sections.map((sec, idx) => (
-            <div key={sec.id} className={`bg-black/30 border rounded-xl p-4 ${sec.visible === false ? 'border-[rgba(255,255,255,0.08)] opacity-60' : 'border-[rgba(255,255,255,0.08)]'}`}>
+            <div key={sec.id} className={`bg-[#1f1f23]/80 border rounded-xl p-4 ${sec.visible === false ? 'border-[rgba(255,255,255,0.08)] opacity-60' : 'border-[rgba(255,255,255,0.08)]'}`}>
               {editingSectionId === sec.id ? (
                 <div className="space-y-3">
                   <input
