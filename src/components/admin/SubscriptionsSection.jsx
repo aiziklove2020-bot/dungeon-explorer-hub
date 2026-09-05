@@ -239,14 +239,6 @@ const SubscriptionsSection = ({ showSaved }) => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div>
           <h2 className="text-xl md:text-2xl font-bold">{t('admin.subscriptions') || 'ניהול מנויים'}</h2>
-          {!loading && (
-            <p className="text-sm text-[#a9a9b2] mt-1 flex flex-wrap gap-x-4 gap-y-0">
-              <span>סה"כ רשומות: <span className="text-white font-medium">{stats.total}</span></span>
-              <span>פעילים: <span className="text-green-400 font-medium">{stats.active}</span></span>
-              <span>זהב: <span className="text-yellow-400 font-medium">{stats.gold}</span></span>
-              <span>פגים: <span className="text-[#ffb4ab] font-medium">{stats.expired}</span></span>
-            </p>
-          )}
           <p className="text-xs text-[#94A3B8] mt-1">
             כאן מוצגים רק משתמשים עם מנוי בתשלום (מסיבות / מסיבות חילופים), מקובצים לפי סוג המנוי. משתמש שרק רשום לאתר בלי מנוי — זה עניין נפרד, ומופיע ב"ניהול משתמשים" ולא כאן.
           </p>
@@ -260,6 +252,27 @@ const SubscriptionsSection = ({ showSaved }) => {
           </button>
         </div>
       </div>
+
+      {!loading && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <p className="text-[#94A3B8] text-xs font-bold">סה״כ רשומות</p>
+            <p className="text-2xl font-bold mt-1">{stats.total}</p>
+          </div>
+          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <p className="text-[#94A3B8] text-xs font-bold">פעילים</p>
+            <p className="text-2xl font-bold mt-1" style={{ color: '#10B981' }}>{stats.active}</p>
+          </div>
+          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <p className="text-[#94A3B8] text-xs font-bold">זהב</p>
+            <p className="text-2xl font-bold mt-1" style={{ color: '#f59e0b' }}>{stats.gold}</p>
+          </div>
+          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <p className="text-[#94A3B8] text-xs font-bold">פגים</p>
+            <p className="text-2xl font-bold mt-1" style={{ color: '#ffb4ab' }}>{stats.expired}</p>
+          </div>
+        </div>
+      )}
 
       {/* Sub Tabs */}
       <div className="flex gap-2 border-b border-[rgba(255,255,255,0.08)] pb-4">
