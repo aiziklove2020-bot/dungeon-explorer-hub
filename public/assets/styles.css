@@ -6,10 +6,11 @@
   --green:#35c76f;--radius:20px;--shadow:0 18px 55px rgba(0,0,0,.38)
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden}
 button,a{-webkit-tap-highlight-color:transparent}
 button,.material-symbols-outlined{-webkit-user-select:none;user-select:none}
 body{
+  overflow-x:hidden;
   margin:0;background:
   radial-gradient(circle at 90% -10%,rgba(255,23,57,.11),transparent 28%),
   radial-gradient(circle at 5% 40%,rgba(120,0,30,.08),transparent 30%),#030304;
