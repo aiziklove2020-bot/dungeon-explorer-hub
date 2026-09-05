@@ -107,7 +107,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
           }}
         >
           <div className="text-center mb-8">
-            <img src="/assets/logo-symbol.png" alt="" className="mx-auto mb-3" style={{ width: 64, height: 64 }} />
+            <img src="/assets/logo-new.png" alt="" className="mx-auto mb-3" style={{ width: 64, height: 64 }} />
             <h1 className="mb-1" style={{ fontFamily: 'Georgia,"Times New Roman",serif', fontWeight: 700, fontSize: 22, color: '#f3b82d' }}>
               {t('adminLogin.setPasswordTitle')}
             </h1>
@@ -149,7 +149,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
               />
             </div>
             {passwordSetupError && (
-              <p id={setupErrorId} className="text-sm text-right" style={{ color: '#ff1739' }} role="alert">{passwordSetupError}</p>
+              <p id={setupErrorId} className="text-sm text-right" style={{ color: '#e11d48' }} role="alert">{passwordSetupError}</p>
             )}
             <button
               type="submit"
@@ -187,7 +187,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
         }}
       >
         <div className="text-center mb-8">
-          <img src="/assets/logo-symbol.png" alt="" className="mx-auto mb-3" style={{ width: 64, height: 64 }} />
+          <img src="/assets/logo-new.png" alt="" className="mx-auto mb-3" style={{ width: 64, height: 64 }} />
           <h1 className="mb-1" style={{ fontFamily: 'Georgia,"Times New Roman",serif', fontWeight: 700, fontSize: 24 }}>
             LIBRAL PARTY
           </h1>
@@ -226,7 +226,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
               aria-describedby={passwordError ? passwordErrorId : undefined}
             />
             {passwordError && (
-              <p id={passwordErrorId} className="text-sm text-right mt-1" style={{ color: '#ff1739' }} role="alert">{passwordError}</p>
+              <p id={passwordErrorId} className="text-sm text-right mt-1" style={{ color: '#e11d48' }} role="alert">{passwordError}</p>
             )}
           </div>
           <button
@@ -235,7 +235,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
             aria-disabled={loading}
             className="w-full text-white font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
             style={{
-              background: 'linear-gradient(135deg,#ff1739,#cf0026)',
+              background: 'linear-gradient(135deg,#e11d48,#be0037)',
               borderRadius: 15,
               minHeight: 54,
             }}

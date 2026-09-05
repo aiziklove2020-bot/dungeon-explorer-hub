@@ -293,7 +293,7 @@ const StoreSection = ({ showSaved }) => {
       pending: '#eab308',
       confirmed: '#3b82f6',
       completed: '#22c55e',
-      cancelled: '#ef4444'
+      cancelled: '#ffb4ab'
     };
     return colors[status] || '#71717a';
   };
