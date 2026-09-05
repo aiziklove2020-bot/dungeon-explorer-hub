@@ -367,6 +367,36 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
         />
       ) : (
         <div className="space-y-6">
+          {!loading && activeParties.length > 0 && (() => {
+            const notExpired = activeParties.filter(p => !isPartyExpiredByDate(p.date, retentionHours));
+            const totalRegs = activeParties.reduce((sum, p) => sum + (p.registrations?.length || 0), 0);
+            const totalCapacity = activeParties.reduce((sum, p) => sum + (Number(p.maleLimit) || 0) + (Number(p.femaleLimit) || 0), 0);
+            const avgOccupancy = totalCapacity > 0 ? Math.round((totalRegs / totalCapacity) * 100) : 0;
+            const soldOut = activeParties.filter(p => {
+              const cap = (Number(p.maleLimit) || 0) + (Number(p.femaleLimit) || 0);
+              return cap > 0 && (p.registrations?.length || 0) >= cap;
+            }).length;
+            return (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+                  <p className="text-[#94A3B8] text-xs font-bold">מסיבות פעילות</p>
+                  <p className="text-2xl font-bold mt-1">{notExpired.length}</p>
+                </div>
+                <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+                  <p className="text-[#94A3B8] text-xs font-bold">סה״כ נרשמים</p>
+                  <p className="text-2xl font-bold mt-1">{totalRegs}</p>
+                </div>
+                <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+                  <p className="text-[#94A3B8] text-xs font-bold">תפוסה ממוצעת</p>
+                  <p className="text-2xl font-bold mt-1" style={{ color: '#10B981' }}>{avgOccupancy}%</p>
+                </div>
+                <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+                  <p className="text-[#94A3B8] text-xs font-bold">מכסה מלאה</p>
+                  <p className="text-2xl font-bold mt-1" style={{ color: soldOut > 0 ? '#ffb4ab' : undefined }}>{soldOut}</p>
+                </div>
+              </div>
+            );
+          })()}
           <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-start gap-3 text-right">
@@ -506,13 +536,30 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                     {party.dj && <p><strong>DJ:</strong> {party.dj}</p>}
                   </div>
                   {party.description && <p className="mb-3"><strong>{t('description') || 'תיאור'}:</strong> {party.description}</p>}
-                  {!party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal') && (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 mb-3 text-sm md:text-base">
-                      <p><strong>{t('maleRegistered') || 'גברים רשומים'}:</strong> {getGenderCount(party, 'male')}/{party.maleLimit}</p>
-                      <p><strong>{t('femaleRegistered') || 'נשים רשומות'}:</strong> {getGenderCount(party, 'female')}/{party.femaleLimit}</p>
-                      <p><strong>{t('totalRegistered') || 'סה"כ רשומים'}:</strong> {party.registrations?.length || 0}</p>
-                    </div>
-                  )}
+                  {!party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal') && (() => {
+                    const maleCount = getGenderCount(party, 'male');
+                    const femaleCount = getGenderCount(party, 'female');
+                    const maleLimit = Number(party.maleLimit) || 0;
+                    const femaleLimit = Number(party.femaleLimit) || 0;
+                    const totalLimit = maleLimit + femaleLimit || 1;
+                    const malePct = Math.min(100, Math.round((maleCount / totalLimit) * 100));
+                    const femalePct = Math.min(100 - malePct, Math.round((femaleCount / totalLimit) * 100));
+                    const maleFull = maleLimit > 0 && maleCount >= maleLimit;
+                    const femaleFull = femaleLimit > 0 && femaleCount >= femaleLimit;
+                    return (
+                      <div className="mb-3">
+                        <div className="w-full h-2.5 rounded-full bg-[#2a292e] overflow-hidden flex">
+                          <div className="h-full" style={{ width: `${malePct}%`, background: '#e11d48' }} title={`גברים: ${maleCount}/${maleLimit}`} />
+                          <div className="h-full" style={{ width: `${femalePct}%`, background: '#ffb3b6' }} title={`נשים: ${femaleCount}/${femaleLimit}`} />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 mt-2 text-sm md:text-base">
+                          <p><strong>{t('maleRegistered') || 'גברים רשומים'}:</strong> <span style={maleFull ? { color: '#ffb4ab' } : undefined}>{maleCount}/{maleLimit}{maleFull ? ' (מלא)' : ''}</span></p>
+                          <p><strong>{t('femaleRegistered') || 'נשים רשומות'}:</strong> <span style={femaleFull ? { color: '#ffb4ab' } : undefined}>{femaleCount}/{femaleLimit}{femaleFull ? ' (מלא)' : ''}</span></p>
+                          <p><strong>{t('totalRegistered') || 'סה"כ רשומים'}:</strong> {party.registrations?.length || 0}</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
                   {party.registrationLink && (party.partyType || 'internal') === 'external' && (
                     <p className="mb-3">
                       <strong>{t('admin.externalRegistrationLink')}:</strong>{' '}
