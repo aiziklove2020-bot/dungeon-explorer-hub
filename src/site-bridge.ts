@@ -543,9 +543,9 @@ function mountSupportChatWidget() {
   const wrap = document.createElement("div");
   wrap.id = "lpSupportChat";
   wrap.innerHTML = `
-    <button id="lpSupportChatToggle" aria-label="תמיכה" style="position:fixed;left:16px;bottom:86px;z-index:300;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#ff1739,#cf0026);border:0;color:#fff;font-size:22px;box-shadow:0 10px 25px rgba(0,0,0,.4);cursor:pointer">💬</button>
+    <button id="lpSupportChatToggle" aria-label="תמיכה" style="position:fixed;left:16px;bottom:86px;z-index:300;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#e11d48,#be0037);border:0;color:#fff;font-size:22px;box-shadow:0 10px 25px rgba(0,0,0,.4);cursor:pointer">💬</button>
     <div id="lpSupportChatPanel" style="display:none;position:fixed;left:16px;bottom:148px;z-index:300;width:min(340px,calc(100vw - 32px));max-height:65vh;background:#0c0c0f;border:1px solid #33333a;border-radius:20px;box-shadow:0 18px 45px rgba(0,0,0,.5);overflow:hidden;flex-direction:column">
-      <div style="padding:14px 16px;background:linear-gradient(135deg,#ff1739,#cf0026);display:flex;justify-content:space-between;align-items:center">
+      <div style="padding:14px 16px;background:linear-gradient(135deg,#e11d48,#be0037);display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;gap:8px;align-items:center">
           <button id="lpSupportChatClose" title="סגירה" style="background:rgba(255,255,255,.18);border:0;color:#fff;font-size:15px;width:26px;height:26px;border-radius:8px;cursor:pointer">✕</button>
           <button id="lpSupportChatMin" title="מזעור" style="background:rgba(255,255,255,.18);border:0;color:#fff;font-size:15px;width:26px;height:26px;border-radius:8px;cursor:pointer">–</button>
