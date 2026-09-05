@@ -4,7 +4,7 @@
 <link rel="icon" type="image/png" href="assets/logo-new.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="assets/styles.css?v=202609052117">
+<link rel="stylesheet" href="assets/styles.css?v=202609052119">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `<article class="p-4 rounded-xl bg-surface-card shadow-md flex flex-col gap-2 w-full min-w-0">
       <div class="flex items-start justify-between gap-3">
         <div class="flex flex-col min-w-0">
-          ${e.category ? `<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary font-medium w-max mb-1">${e.category}</span>` : ""}
+          ${e.category ? `<span class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary font-medium max-w-full truncate mb-1">${e.category}</span>` : ""}
           <h4 class="text-headline-sm font-headline-sm text-text-primary break-words">${e.title}</h4>
         </div>
         <div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-container-lowest">
