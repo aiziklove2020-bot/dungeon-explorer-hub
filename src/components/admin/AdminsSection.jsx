@@ -122,7 +122,12 @@ const AdminsSection = ({ showSaved }) => {
   return (
     <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-        <h2 className="text-xl md:text-2xl font-bold">{t('admin.admins.managementTitle')}</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl md:text-2xl font-bold">{t('admin.admins.managementTitle')}</h2>
+          <span className="px-2.5 py-1 rounded-full bg-[#1f1f23] text-[#94A3B8] text-xs font-bold">
+            {admins.filter(a => a.isActive).length} פעילים מתוך {admins.length}
+          </span>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => {

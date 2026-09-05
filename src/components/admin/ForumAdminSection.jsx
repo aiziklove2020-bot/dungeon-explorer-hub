@@ -338,7 +338,12 @@ const ForumAdminSection = ({ showSaved }) => {
   // ---- Render: Sections list ----
   return (
     <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
-      <h2 className="text-xl md:text-2xl font-bold">ניהול פורום</h2>
+      <div className="flex items-center gap-3">
+        <h2 className="text-xl md:text-2xl font-bold">ניהול פורום</h2>
+        <span className="px-2.5 py-1 rounded-full bg-[#1f1f23] text-[#94A3B8] text-xs font-bold">
+          {sections.filter(s => s.visible !== false).length} מדורים גלויים מתוך {sections.length}
+        </span>
+      </div>
 
       {/* Create section */}
       <form onSubmit={handleCreateSection} className="bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4 space-y-3">
