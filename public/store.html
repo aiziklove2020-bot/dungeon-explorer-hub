@@ -48,36 +48,57 @@
  </nav>
 </aside><div class="scrim"></div>
 
-<main>
-<div class="container section">
-  <div class="section-title"><h1>🛍 חנות</h1></div>
+<main class="max-w-2xl mx-auto px-4">
+  <div class="flex items-center gap-3 mb-6">
+    <span class="w-11 h-11 rounded-xl bg-primary-container/15 flex items-center justify-center flex-shrink-0">
+      <span class="material-symbols-outlined text-[22px] text-primary">storefront</span>
+    </span>
+    <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-text-primary">חנות</h1>
+  </div>
 
-  <div id="storeList" class="cards"><p style="color:#aaa">טוען...</p></div>
+  <div id="storeList" class="grid gap-4">
+    <p class="text-text-secondary text-center py-8">טוען...</p>
+  </div>
 
-  <div class="panel" id="orderPanel" style="display:none;margin-top:20px">
-    <h2 id="orderProductName">הזמנה</h2>
-    <form class="form" id="orderForm">
-      <label>כמות<input type="number" name="quantity" value="1" min="1" required></label>
-      <div class="form-row">
-        <label>שם מלא<input required name="customerName" autocomplete="name"></label>
-        <label>טלפון<input required name="customerPhone" type="tel" placeholder="050-0000000" autocomplete="tel"></label>
+  <div id="orderPanel" style="display:none" class="bg-surface-card border border-white/5 rounded-2xl p-5">
+    <h2 id="orderProductName" class="font-headline-md text-headline-md text-text-primary mb-4">הזמנה</h2>
+    <form id="orderForm" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-text-secondary mb-1.5">כמות</label>
+        <input type="number" name="quantity" value="1" min="1" required class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
       </div>
-      <label>טלגרם (אופציונלי)<input name="customerTelegram" placeholder="@username"></label>
-      <label>הערות (אופציונלי)<textarea name="notes" rows="2"></textarea></label>
-      <button class="btn primary full" type="submit">שליחת הזמנה</button>
-      <button class="btn full" type="button" id="backToStore">חזרה לחנות</button>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-text-secondary mb-1.5">שם מלא</label>
+          <input required name="customerName" autocomplete="name" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-text-secondary mb-1.5">טלפון</label>
+          <input required name="customerPhone" type="tel" placeholder="050-0000000" autocomplete="tel" dir="ltr" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-text-secondary mb-1.5">טלגרם (אופציונלי)</label>
+        <input name="customerTelegram" placeholder="@username" dir="ltr" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-text-secondary mb-1.5">הערות (אופציונלי)</label>
+        <textarea name="notes" rows="2" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none"></textarea>
+      </div>
+      <button type="submit" class="w-full rounded-xl bg-gradient-to-l from-[#e11d48] to-[#be0037] text-white font-bold py-3.5">שליחת הזמנה</button>
+      <button type="button" id="backToStore" class="w-full rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-text-primary font-bold py-3">חזרה לחנות</button>
     </form>
   </div>
 
-  <div class="panel" id="orderSuccess" style="display:none;text-align:center">
-    <h2>ההזמנה נשלחה! 🎉</h2>
-    <p style="color:#aaa">נציג שלנו ייצור איתך קשר לתיאום.</p>
-    <a class="btn primary" href="/store">חזרה לחנות</a>
+  <div id="orderSuccess" style="display:none" class="text-center bg-surface-card border border-white/5 rounded-2xl p-8">
+    <div class="w-16 h-16 rounded-full bg-status-balanced/15 flex items-center justify-center mx-auto mb-4">
+      <span class="material-symbols-outlined text-[36px] text-status-balanced">check_circle</span>
+    </div>
+    <h2 class="font-headline-md text-headline-md text-text-primary">ההזמנה נשלחה!</h2>
+    <p class="text-text-secondary mt-2 mb-5">נציג שלנו ייצור איתך קשר לתיאום.</p>
+    <a href="/store" class="inline-block rounded-xl bg-gradient-to-l from-[#e11d48] to-[#be0037] text-white font-bold py-3 px-8">חזרה לחנות</a>
   </div>
-</div>
 </main>
-
-<footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-new.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
 
 <nav class="fixed bottom-0 inset-x-0 z-50 bg-surface-dim/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.6)]">
 <div class="flex items-center justify-around h-16 px-1">
@@ -120,13 +141,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   list.innerHTML = store.products.map(p => `
-    <article class="card">
-      <div class="event-cover" style="background-image:url('${(p.images && p.images[0]) || ""}')">${p.recommended ? `<span class="badge red">מומלץ</span>` : ""}</div>
-      <div class="card-body">
-        <h3>${p.name}</h3>
-        <p>${(p.description || "").slice(0, 60)}</p>
-        <div class="meta"><span>${p.priceOnRequest ? "מחיר לפי בקשה" : `💰 ${p.price} ₪`}</span></div>
-        <button type="button" class="btn card-cta" data-product="${p.id}" ${p.stock === 0 ? "disabled" : ""}>${p.stock === 0 ? "אזל מהמלאי" : "הזמנה"}</button>
+    <article class="rounded-2xl overflow-hidden bg-surface-card border border-white/5 relative">
+      ${p.recommended ? `<span class="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-full bg-gradient-to-l from-[#e11d48] to-[#be0037] text-white text-xs font-bold">מומלץ</span>` : ""}
+      <div class="w-full bg-black">
+        <img class="w-full h-auto max-h-[40vh] object-contain mx-auto" src="${(p.images && p.images[0]) || ""}" alt="" onerror="this.closest('div').style.display='none'">
+      </div>
+      <div class="p-4 flex flex-col gap-2">
+        <h3 class="font-headline-sm font-headline-sm text-text-primary">${p.name}</h3>
+        <p class="text-text-secondary text-body-sm font-body-sm">${(p.description || "").slice(0, 60)}</p>
+        <p class="text-primary font-bold">${p.priceOnRequest ? "מחיר לפי בקשה" : `${p.price} ₪`}</p>
+        <button type="button" data-product="${p.id}" ${p.stock === 0 ? "disabled" : ""} class="w-full rounded-xl bg-gradient-to-l from-[#e11d48] to-[#be0037] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 mt-1">${p.stock === 0 ? "אזל מהמלאי" : "הזמנה"}</button>
       </div>
     </article>
   `).join("");
@@ -137,7 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!product) return;
       selectedProduct = product;
       document.getElementById("orderProductName").textContent = "הזמנה — " + product.name;
-      list.parentElement.querySelector(".section-title").scrollIntoView({ behavior: "smooth" });
+      list.parentElement.scrollIntoView({ behavior: "smooth" });
       list.style.display = "none";
       orderPanel.style.display = "";
     });
