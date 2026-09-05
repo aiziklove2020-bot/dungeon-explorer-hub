@@ -42,6 +42,15 @@ async function submitLead({ name, phone, track, message, source = "membership_pa
     createdAt: new Date().toISOString(),
   };
   await setDoc(newRef, payload);
+
+  // Best-effort admin notification via the same Telegram relay used for
+  // advertiser-signup alerts — never blocks the lead submission itself.
+  fetch("/api/support-chat-send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ job: "membership-lead", name: trimmedName, phone: cleanedPhone, track, message: payload.message }),
+  }).catch(() => {});
+
   return { id: newRef.id, ...payload };
 }
 
