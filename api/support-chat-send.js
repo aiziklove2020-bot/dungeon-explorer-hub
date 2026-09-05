@@ -182,94 +182,6 @@ async function handleAdvertiserSignupAlert(req, res, body) {
   }
 }
 
-const TRACK_LABELS = {
-  parties: 'מסיבות בדסם',
-  exchange: 'חילופי זוגות',
-  combo: 'מסלול משולב'
-};
-
-async function handleMembershipLeadAlert(req, res, body) {
-  const name = (body.name || '').trim();
-  const phone = (body.phone || '').trim();
-  const track = (body.track || '').trim();
-  const message = (body.message || '').trim();
-
-  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-    return res.status(503).json({ error: 'Not configured' });
-  }
-
-  let admin;
-  try {
-    admin = (await import('firebase-admin')).default;
-    if (!admin.firestore) {
-      const [{ getApps }, { getFirestore }] = await Promise.all([
-        import('firebase-admin/app'),
-        import('firebase-admin/firestore')
-      ]);
-      Object.defineProperty(admin, 'apps', { get: () => getApps(), configurable: true });
-      admin.firestore = () => getFirestore();
-    }
-    if (!admin.apps?.length) {
-      const cred = admin.cert(JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON));
-      admin.initializeApp({ credential: cred, projectId: process.env.GCLOUD_PROJECT || 'tbdsm-5acca' });
-    }
-  } catch (e) {
-    console.error('membership-lead alert Firebase init:', e.message);
-    return res.status(503).json({ error: 'Server configuration error' });
-  }
-
-  try {
-    const privateSnap = await admin.firestore().collection('settings').doc('private').collection('supportChat').doc('config').get();
-    let d = privateSnap.exists ? privateSnap.data() : null;
-    if (!d) {
-      const legacySnap = await admin.firestore().collection('settings').doc('supportChat').get();
-      d = legacySnap?.data?.() || {};
-    }
-    let botToken = d.botToken;
-    let chatId = d.chatId;
-
-    // Same fallback as the plain support-chat send path below: no dedicated
-    // support bot configured yet, use the party-announcements bot instead.
-    if (!botToken || !chatId) {
-      const tgSnap = await admin.firestore().collection('settings').doc('telegram').get();
-      const tg = tgSnap.exists ? tgSnap.data() : null;
-      if (tg) {
-        if (Array.isArray(tg.bots) && tg.bots.length > 0) {
-          botToken = botToken || tg.bots[0]?.token;
-        } else {
-          botToken = botToken || tg.botToken;
-        }
-        if (Array.isArray(tg.channels) && tg.channels.length > 0) {
-          chatId = chatId || tg.channels[0]?.chatId;
-        } else {
-          chatId = chatId || tg.chatId;
-        }
-      }
-    }
-
-    if (!botToken || !chatId) {
-      return res.status(503).json({ error: 'Telegram not configured' });
-    }
-
-    const trackLabel = TRACK_LABELS[track] || track || '—';
-    const msg = `⚖️ בקשת מנוי חדשה — איזון מגדרי\n\nשם: ${name || '—'}\nטלפון: ${phone || '—'}\nמסלול: ${trackLabel}${message ? `\nהודעה: ${message}` : ''}`;
-
-    const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: msg })
-    });
-    const result = await tgRes.json();
-    if (!result.ok) {
-      return res.status(502).json({ error: result.description || 'Telegram error' });
-    }
-    return res.status(200).json({ ok: true });
-  } catch (e) {
-    console.error('membership-lead alert:', e.message);
-    return res.status(500).json({ error: e.message });
-  }
-}
-
 async function handleAgentAlert(req, res, body) {
   const message = (body.message || '').trim().slice(0, 2000);
   if (!message) {
@@ -355,15 +267,6 @@ export default async function handler(req, res) {
     // new serverless function (Vercel Hobby's 12-function limit).
     if (body.job === 'advertiser-signup') {
       return handleAdvertiserSignupAlert(req, res, body);
-    }
-
-    // POST { job: "membership-lead", name, phone, track, message }: fired
-    // best-effort right after a "רוצה להיות מנוי?" lead is written to
-    // Firestore (membership.html → leads.js), so the admin is notified the
-    // same way as a new advertiser signup instead of only surfacing in the
-    // leads collection.
-    if (body.job === 'membership-lead') {
-      return handleMembershipLeadAlert(req, res, body);
     }
 
     // POST { job: "agent-alert", message }: a scheduled cloud-agent routine
