@@ -74,22 +74,17 @@ document.addEventListener("DOMContentLoaded", async () => {
  const ticketHref = e.partyType === "external" && e.registrationLink ? e.registrationLink : `register-event.html?partyId=${e.id}`;
  document.getElementById("eventDetail").innerHTML=`
  <div class="max-w-2xl mx-auto flex flex-col gap-4">
-   <div class="relative w-full rounded-xl overflow-hidden shadow-xl bg-surface-container-lowest">
-     <div class="relative w-full h-72 md:h-96">
-       <img class="w-full h-full object-cover object-center" src="${e.img}" alt="${e.title}">
-       <div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/50 to-transparent"></div>
-       <div class="absolute top-3 right-3 left-3 flex items-center justify-between">
-         ${e.category ? `<span class="inline-flex items-center px-3 py-1 rounded-full bg-primary-container text-on-primary-container text-label-sm font-label-sm shadow-md">${e.category}</span>` : "<span></span>"}
-         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-dim/80 backdrop-blur-md text-tertiary-fixed text-label-sm font-label-sm">
-           <span class="material-symbols-outlined text-[14px]">verified_user</span>21+
-         </span>
-       </div>
-       <div class="absolute bottom-0 inset-x-0 p-5">
-         <h1 class="text-text-primary text-headline-lg-mobile font-headline-lg-mobile font-bold drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">${e.title}</h1>
-       </div>
-     </div>
+   <div class="relative w-full rounded-xl overflow-hidden shadow-xl bg-black">
+     <img class="w-full h-auto max-h-[60vh] object-contain mx-auto" src="${e.img}" alt="${e.title}">
+   </div>
+   <div class="flex items-start justify-between gap-3">
+     <h1 class="text-text-primary text-headline-lg-mobile font-headline-lg-mobile font-bold">${e.title}</h1>
+     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-card text-text-secondary text-label-sm font-label-sm flex-shrink-0">
+       <span class="material-symbols-outlined text-[14px]">verified_user</span>21+
+     </span>
    </div>
    <div class="flex flex-wrap items-center gap-2">
+     ${e.category ? `<span class="inline-flex items-center px-3 py-1 rounded-full bg-primary-container text-on-primary-container text-label-sm font-label-sm">${e.category}</span>` : ""}
      ${(e.day || e.date) ? `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-card text-text-primary text-label-md font-label-md"><span class="material-symbols-outlined text-[16px] text-primary">event</span>${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span>` : ""}
      ${e.time ? `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-card text-text-primary text-label-md font-label-md"><span class="material-symbols-outlined text-[16px] text-primary">schedule</span>${e.time}</span>` : ""}
      ${e.dj ? `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-card text-text-primary text-label-md font-label-md"><span class="material-symbols-outlined text-[16px] text-primary">headphones</span>DJ ${e.dj}</span>` : ""}
