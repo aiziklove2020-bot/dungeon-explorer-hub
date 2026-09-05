@@ -242,13 +242,44 @@ export const registerToPartyNew = async (partyId, registrationData) => {
       const genderRegistrations = partyData.registrations?.filter(
         reg => reg.gender === registrationData.gender
       ) || [];
-      
-      const genderLimit = registrationData.gender === 'male' 
-        ? partyData.maleLimit 
+
+      const genderLimit = registrationData.gender === 'male'
+        ? partyData.maleLimit
         : partyData.femaleLimit;
-      
+
       if (genderRegistrations.length >= genderLimit) {
         throw new Error(`${registrationData.gender === 'male' ? 'Male' : 'Female'} spots are full`);
+      }
+    }
+
+    // Admin's "נעילת מכירה לגברים סולו" quick-control — blocks only the plain
+    // solo-male-balance registration type, not the male half of a couple
+    // registering together (single-male-couple).
+    if (partyData.soloMenSalesLocked && registrationData.registrationType === 'single-male-balance') {
+      throw new Error('הרשמת גברים בודדים למסיבה זו סגורה כרגע');
+    }
+
+    // Admin's "אישור אוטומטי לזוגות מאומתים" quick-control — a couple is
+    // "known" here if BOTH halves already have an existing account (i.e.
+    // they've registered/appeared in the system before, same bar as
+    // isRealUser elsewhere in this codebase — no separate verification
+    // flag exists). Only relevant for the two couple-half registration
+    // types; the legacy combined "couple" type isn't used by the current
+    // public registration form.
+    let autoApproved = false;
+    if (
+      partyData.autoApproveVerifiedCouples &&
+      (registrationData.registrationType === 'single-male-couple' || registrationData.registrationType === 'single-female-couple') &&
+      userData &&
+      registrationData.partnerPhone
+    ) {
+      try {
+        const partnerUser = await getUserByPhone(registrationData.partnerPhone);
+        if (partnerUser && partnerUser.level !== 'blocked') {
+          autoApproved = true;
+        }
+      } catch (error) {
+        // best-effort — falls back to manual review
       }
     }
 
@@ -275,7 +306,8 @@ export const registerToPartyNew = async (partyId, registrationData) => {
 
       coupleId: registrationData.coupleId || null,
       partnerName: registrationData.partnerName || null,
-      partnerPhone: normalizeIsraeliPhone(registrationData.partnerPhone) || registrationData.partnerPhone || null
+      partnerPhone: normalizeIsraeliPhone(registrationData.partnerPhone) || registrationData.partnerPhone || null,
+      autoApproved
     };
     
     await updateDoc(partyRef, {
@@ -292,6 +324,15 @@ export const registerToPartyNew = async (partyId, registrationData) => {
     // Best-effort: a failure here shouldn't fail the registration itself.
     if (finalGender === 'female' && !userId) {
       createUserFromRegistration(registration, 'registered', 'year').catch(() => {});
+    }
+
+    // "אישור אוטומטי לזוגות מאומתים" — the male half of a couple whose
+    // partner already has a real account normally still needs the admin to
+    // manually click "אישור למסיבה זו בלבד" (see RegistrationItem). When the
+    // party has this quick-control enabled, do that same one-party-only
+    // approval automatically instead of waiting on the admin.
+    if (autoApproved && finalGender === 'male' && !userId) {
+      createUserFromRegistration(registration, 'registered', 'day').catch(() => {});
     }
 
     // Registration notifications are sent only from RegistrationForm to the

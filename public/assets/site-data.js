@@ -24075,23 +24075,30 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				let e = a.registrations?.filter((e) => e.gender === t.gender) || [], n = t.gender === "male" ? a.maleLimit : a.femaleLimit;
 				if (e.length >= n) throw Error(`${t.gender === "male" ? "Male" : "Female"} spots are full`);
 			}
-			let c = i?.gender || t.gender, l = i?.name || t.fullName, u = i?.telegramUsername || t.telegramUsername || "", d = {
+			if (a.soloMenSalesLocked && t.registrationType === "single-male-balance") throw Error("הרשמת גברים בודדים למסיבה זו סגורה כרגע");
+			let c = !1;
+			if (a.autoApproveVerifiedCouples && (t.registrationType === "single-male-couple" || t.registrationType === "single-female-couple") && i && t.partnerPhone) try {
+				let e = await ik(t.partnerPhone);
+				e && e.level !== "blocked" && (c = !0);
+			} catch {}
+			let l = i?.gender || t.gender, u = i?.name || t.fullName, d = i?.telegramUsername || t.telegramUsername || "", f = {
 				userId: r || null,
-				userName: l,
-				fullName: l,
+				userName: u,
+				fullName: u,
 				phoneNumber: XE(t.phoneNumber) || t.phoneNumber,
-				telegramUsername: u,
+				telegramUsername: d,
 				registrationType: t.registrationType,
 				partyDays: t.partyDays || [],
 				pickupAddress: t.pickupAddress || "",
 				selfArrival: t.selfArrival || !1,
-				gender: c,
+				gender: l,
 				registeredAt: N.now(),
 				coupleId: t.coupleId || null,
 				partnerName: t.partnerName || null,
-				partnerPhone: XE(t.partnerPhone) || t.partnerPhone || null
+				partnerPhone: XE(t.partnerPhone) || t.partnerPhone || null,
+				autoApproved: c
 			};
-			return await A(o, { registrations: vd(d) }), await q(`party_${e}`), await q("activeParties"), c === "female" && !r && Ij(d, "registered", "year").catch(() => {}), d;
+			return await A(o, { registrations: vd(f) }), await q(`party_${e}`), await q("activeParties"), l === "female" && !r && Ij(f, "registered", "year").catch(() => {}), c && l === "male" && !r && Ij(f, "registered", "day").catch(() => {}), f;
 		} catch (e) {
 			throw e;
 		}
