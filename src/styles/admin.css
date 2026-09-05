@@ -630,7 +630,7 @@
 .lp-admin-theme .bg-red-600,
 .lp-admin-theme .bg-red-700,
 .lp-admin-theme .bg-red-800 {
-  background: linear-gradient(135deg, #e11d48, #cf0026) !important;
+  background: linear-gradient(135deg, #e11d48, #be0037) !important;
 }
 .lp-admin-theme .hover\:bg-red-500:hover,
 .lp-admin-theme .hover\:bg-red-600:hover {
