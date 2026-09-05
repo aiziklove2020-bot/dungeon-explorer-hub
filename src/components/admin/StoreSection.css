@@ -14,7 +14,7 @@
 
 /* Store Settings Card */
 .store-settings-card {
-  background: rgba(39, 39, 42, 0.5);
+  background: rgba(31, 31, 35, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   padding: 1.5rem;
@@ -44,7 +44,7 @@
   transition: all 0.2s ease;
   border: none;
   background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  color: #e11d48;
 }
 
 .store-toggle-btn.enabled {
@@ -90,7 +90,7 @@
 }
 
 .store-tab-badge {
-  background: #ef4444;
+  background: #e11d48;
   color: white;
   font-size: 0.7rem;
   padding: 0.15rem 0.5rem;
@@ -101,7 +101,7 @@
 /* Products Tab */
 .store-products-tab,
 .store-orders-tab {
-  background: rgba(39, 39, 42, 0.5);
+  background: rgba(31, 31, 35, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   padding: 1.5rem;
@@ -152,7 +152,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #e11d48 0%, #be0037 100%);
   border: none;
   border-radius: 10px;
   color: white;
@@ -189,13 +189,13 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(18, 18, 24, 0.4);
   border-radius: 12px;
   transition: all 0.2s ease;
 }
 
 .store-product-item:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(18, 18, 24, 0.6);
 }
 
 .store-product-item.inactive {
@@ -272,7 +272,7 @@
 }
 
 .store-product-price {
-  color: #ef4444;
+  color: #e11d48;
   font-weight: bold;
 }
 
@@ -283,7 +283,7 @@
 
 .store-product-inactive-badge {
   background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  color: #e11d48;
   padding: 0.2rem 0.5rem;
   border-radius: 6px;
   font-size: 0.75rem;
@@ -319,7 +319,7 @@
 
 .store-delete-btn {
   background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  color: #e11d48;
 }
 
 .store-delete-btn:hover {
@@ -334,7 +334,7 @@
 }
 
 .store-order-item {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(18, 18, 24, 0.4);
   border-radius: 12px;
   padding: 1.25rem;
 }
@@ -398,7 +398,7 @@
 
 .store-order-total {
   font-weight: bold;
-  color: #ef4444;
+  color: #e11d48;
 }
 
 .store-order-date {
@@ -461,7 +461,7 @@
 
 .store-status-select {
   flex: 1;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(18, 18, 24, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
@@ -471,11 +471,11 @@
 
 .store-status-select:focus {
   outline: none;
-  border-color: #ef4444;
+  border-color: #e11d48;
 }
 
 .store-status-select:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #e11d48;
   outline-offset: 2px;
 }
 
@@ -550,7 +550,7 @@
 
 .store-form-group input,
 .store-form-group textarea {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(18, 18, 24, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   padding: 0.75rem 1rem;
@@ -562,12 +562,12 @@
 .store-form-group input:focus,
 .store-form-group textarea:focus {
   outline: none;
-  border-color: #ef4444;
+  border-color: #e11d48;
 }
 
 .store-form-group input:focus-visible,
 .store-form-group textarea:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #e11d48;
   outline-offset: 2px;
 }
 
@@ -606,7 +606,7 @@
 }
 
 .store-checkbox input:checked + svg {
-  color: #ef4444;
+  color: #e11d48;
 }
 
 .store-checkbox input:checked ~ span {
@@ -693,8 +693,8 @@
 }
 
 .store-add-image:hover {
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: #e11d48;
+  color: #e11d48;
 }
 
 .store-add-image input {
@@ -728,7 +728,7 @@
 }
 
 .store-save-btn {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #e11d48 0%, #be0037 100%);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 10px;

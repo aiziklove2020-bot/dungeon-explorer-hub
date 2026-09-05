@@ -43,7 +43,12 @@ const RssSection = ({ showSaved }) => {
   return (
     <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">{t('admin.rssFeedsManagement')}</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold">{t('admin.rssFeedsManagement')}</h2>
+          <span className="px-2.5 py-1 rounded-full bg-[#1f1f23] text-[#94A3B8] text-xs font-bold">
+            {feeds.filter(f => f.enabled).length} פעילים מתוך {feeds.length}
+          </span>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={async () => {
