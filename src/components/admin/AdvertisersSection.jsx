@@ -1,4 +1,5 @@
-import { RotateCcw, Check, X, RotateCw, Trash2, KeyRound } from 'lucide-react';
+import { useState } from 'react';
+import { RotateCcw, Check, X, RotateCw, Trash2, KeyRound, Search } from 'lucide-react';
 import AdminLoader from './AdminLoader';
 import PhoneLink from '../PhoneLink';
 import useAdminSection from '../../hooks/useAdminSection';
@@ -19,6 +20,16 @@ const STATUS_BADGE_CLASS = {
 const AdvertisersSection = ({ showSaved }) => {
   const { data, loading, reload } = useAdminSection(getAllAdvertisers);
   const advertisers = data || [];
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  const filteredAdvertisers = advertisers.filter(adv => {
+    const q = search.trim().toLowerCase();
+    const matchesQuery = !q || [adv.businessName, adv.contactName, adv.phoneNumber].some(v => (v || '').toLowerCase().includes(q));
+    const matchesStatus = !statusFilter || adv.status === statusFilter;
+    return matchesQuery && matchesStatus;
+  });
+  const counts = advertisers.reduce((acc, a) => { acc[a.status] = (acc[a.status] || 0) + 1; return acc; }, {});
 
   const handleSetStatus = async (id, status) => {
     try {
@@ -69,15 +80,66 @@ const AdvertisersSection = ({ showSaved }) => {
         </button>
       </div>
 
+      {!loading && advertisers.length > 0 && (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+              <p className="text-[#94A3B8] text-xs font-bold">סה״כ מפרסמים</p>
+              <p className="text-2xl font-bold mt-1">{advertisers.length}</p>
+            </div>
+            <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+              <p className="text-[#94A3B8] text-xs font-bold">ממתינים לאישור</p>
+              <p className="text-2xl font-bold mt-1" style={{ color: '#f59e0b' }}>{counts.pending || 0}</p>
+            </div>
+            <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+              <p className="text-[#94A3B8] text-xs font-bold">מאושרים</p>
+              <p className="text-2xl font-bold mt-1" style={{ color: '#10B981' }}>{counts.approved || 0}</p>
+            </div>
+            <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+              <p className="text-[#94A3B8] text-xs font-bold">נדחו</p>
+              <p className="text-2xl font-bold mt-1" style={{ color: '#ffb4ab' }}>{counts.rejected || 0}</p>
+            </div>
+          </div>
+          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-3 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+            <div className="relative flex-1">
+              <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="חיפוש לפי שם עסק, איש קשר או טלפון..."
+                className="w-full bg-[#121218] rounded-xl pr-9 pl-3 py-2 text-white placeholder:text-[#94A3B8] outline-none focus:ring-1 focus:ring-[#e11d48]"
+              />
+            </div>
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              {[{ id: '', label: 'הכל' }, { id: 'pending', label: 'ממתין' }, { id: 'approved', label: 'מאושר' }, { id: 'rejected', label: 'נדחה' }].map(f => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setStatusFilter(f.id)}
+                  className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap"
+                  style={statusFilter === f.id ? { background: '#e11d48', color: '#fff' } : { background: '#121218', color: '#a9a9b2' }}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
       {loading ? (
         <AdminLoader />
       ) : advertisers.length === 0 ? (
         <div className="text-center py-12 text-[#94A3B8]">
           <p>אין בקשות הרשמה של מפרסמים</p>
         </div>
+      ) : filteredAdvertisers.length === 0 ? (
+        <div className="text-center py-12 text-[#94A3B8]">
+          <p>לא נמצאו מפרסמים התואמים לסינון</p>
+        </div>
       ) : (
         <div className="space-y-4">
-          {advertisers.map((adv) => (
+          {filteredAdvertisers.map((adv) => (
             <div key={adv.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
               <div className="flex justify-between items-start gap-3">
                 <div className="flex-1">

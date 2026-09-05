@@ -270,13 +270,6 @@ const UsersSection = ({ showSaved }) => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div>
           <h2 className="text-xl md:text-2xl font-bold">{t('userManagement') || 'ניהול משתמשים'}</h2>
-          {!loadingUsers && (
-            <p className="text-sm text-[#a9a9b2] mt-1 flex flex-wrap gap-x-4 gap-y-0">
-              <span>{t('admin.totalCount') || 'כמות כוללת'}: <span className="text-white font-medium">{users.length}</span></span>
-              <span>{t('admin.females') || 'נשים'}: <span className="text-white font-medium">{users.filter(u => u.gender === 'female').length}</span></span>
-              <span>{t('admin.males') || 'גברים'}: <span className="text-white font-medium">{users.filter(u => u.gender === 'male').length}</span></span>
-            </p>
-          )}
         </div>
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
@@ -303,6 +296,27 @@ const UsersSection = ({ showSaved }) => {
           <input ref={fileInputRef} type="file" accept=".json" onChange={handleImportUsers} className="hidden" />
         </div>
       </div>
+
+      {!loadingUsers && users.length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <p className="text-[#94A3B8] text-xs font-bold">{t('admin.totalCount') || 'כמות כוללת'}</p>
+            <p className="text-2xl font-bold mt-1">{users.length}</p>
+          </div>
+          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <p className="text-[#94A3B8] text-xs font-bold">{t('admin.females') || 'נשים'}</p>
+            <p className="text-2xl font-bold mt-1" style={{ color: '#ffb3b6' }}>{users.filter(u => u.gender === 'female').length}</p>
+          </div>
+          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <p className="text-[#94A3B8] text-xs font-bold">{t('admin.males') || 'גברים'}</p>
+            <p className="text-2xl font-bold mt-1">{users.filter(u => u.gender === 'male').length}</p>
+          </div>
+          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <p className="text-[#94A3B8] text-xs font-bold">חסומים</p>
+            <p className="text-2xl font-bold mt-1" style={{ color: '#ffb4ab' }}>{users.filter(u => u.level === 'blocked').length}</p>
+          </div>
+        </div>
+      )}
 
       <div className="relative">
         <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#a9a9b2]" />
