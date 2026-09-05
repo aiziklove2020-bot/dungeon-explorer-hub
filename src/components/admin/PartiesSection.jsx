@@ -39,6 +39,8 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
   // must publish to Git for the new rule to actually take effect — we surface
   // a one-shot notice with the count of parties that were rewritten.
   const [retentionPublishNotice, setRetentionPublishNotice] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusTab, setStatusTab] = useState('all');
 
   const loadActiveParties = async () => {
     try {
@@ -464,15 +466,74 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
               </button>
             </div>
           </div>
-          {loading ? (
+          {!loading && activeParties.length > 0 && (() => {
+            const statusOf = (p) => {
+              const maleFull = Number(p.maleLimit) > 0 && getGenderCount(p, 'male') >= Number(p.maleLimit);
+              const femaleFull = Number(p.femaleLimit) > 0 && getGenderCount(p, 'female') >= Number(p.femaleLimit);
+              if (isPartyExpiredByDate(p.date, retentionHours)) return 'expired';
+              if (maleFull || femaleFull) return 'locked';
+              return 'active';
+            };
+            const counts = { all: activeParties.length, active: 0, locked: 0, expired: 0 };
+            activeParties.forEach(p => { counts[statusOf(p)] += 1; });
+            const TABS = [
+              { id: 'all', label: 'הכל' },
+              { id: 'active', label: 'פעילים' },
+              { id: 'locked', label: 'נעול לאיזון' },
+              { id: 'expired', label: 'פג תוקף' },
+            ];
+            return (
+              <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-3 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="חיפוש מסיבה, DJ, תיאור..."
+                    className="w-full bg-[#1f1f23] rounded-xl px-4 py-2 text-white placeholder:text-[#94A3B8] outline-none focus:ring-1 focus:ring-[#e11d48]"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 overflow-x-auto">
+                  {TABS.map(tab => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setStatusTab(tab.id)}
+                      className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors"
+                      style={statusTab === tab.id
+                        ? { background: '#e11d48', color: '#fff' }
+                        : { background: '#1f1f23', color: '#a9a9b2' }}
+                    >
+                      {tab.label} ({counts[tab.id]})
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+          {(() => {
+            const q = searchQuery.trim().toLowerCase();
+            const statusOf = (p) => {
+              const maleFull = Number(p.maleLimit) > 0 && getGenderCount(p, 'male') >= Number(p.maleLimit);
+              const femaleFull = Number(p.femaleLimit) > 0 && getGenderCount(p, 'female') >= Number(p.femaleLimit);
+              if (isPartyExpiredByDate(p.date, retentionHours)) return 'expired';
+              if (maleFull || femaleFull) return 'locked';
+              return 'active';
+            };
+            const filteredParties = activeParties.filter(p => {
+              const matchesTab = statusTab === 'all' || statusOf(p) === statusTab;
+              const matchesQuery = !q || [p.name, p.title, p.dj, p.description].some(v => (v || '').toLowerCase().includes(q));
+              return matchesTab && matchesQuery;
+            });
+            return loading ? (
             <AdminLoader />
-          ) : activeParties.length === 0 ? (
+          ) : filteredParties.length === 0 ? (
             <div className="text-center py-12 text-[#94A3B8]">
-              <p>{t('admin.noActiveParties')}</p>
+              <p>{activeParties.length === 0 ? t('admin.noActiveParties') : 'לא נמצאו מסיבות התואמות לסינון'}</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {activeParties.map(party => (
+              {filteredParties.map(party => (
                 <div key={party.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
                     <div className="flex-1 w-full">
@@ -614,7 +675,8 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                 </div>
               ))}
             </div>
-          )}
+          );
+          })()}
         </div>
       )}
     </div>
