@@ -102,7 +102,7 @@
     <!-- favorites -->
     <div>
       <h2 class="text-label-md font-label-md text-text-secondary mb-2">המועדפים שלי</h2>
-      <p class="text-label-sm font-label-sm text-text-muted mb-2">סמנו לב על מסיבות שמעניינות אתכם כדי לקבל עדכון כשמתקרב תאריך.</p>
+      <p class="text-label-sm font-label-sm text-text-muted mb-2">מסיבות שסימנתם בלב בעמוד מסיבה או ברשימת האירועים.</p>
       <div id="favorites" class="cards"></div>
     </div>
   </div>
@@ -120,7 +120,7 @@
 </div>
 </nav>
 
-<script src="assets/app.js?v=202609061252"></script>
+<script src="assets/app.js?v=202609062025"></script>
 <script type="module">
 import "./assets/site-data.js?v=202609062001";
 
@@ -284,8 +284,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function renderFavorites(phone, currentFavoriteIds) {
     const box = document.getElementById("favorites");
+    if (!currentFavoriteIds || currentFavoriteIds.length === 0) {
+      box.innerHTML = `<div class="rounded-xl bg-surface-card p-4 shadow-md text-center text-text-muted text-body-sm">
+        עדיין לא סימנתם מסיבות כמועדפות. לחצו על הלב בעמוד מסיבה או ברשימת המסיבות כדי לסמן.
+        <a href="/events" class="block mt-2 text-primary underline">למציאת מסיבה</a>
+      </div>`;
+      return;
+    }
     let events = [];
     try { events = await window.LPData.loadEvents(); } catch { events = []; }
+    events = events.filter((e) => currentFavoriteIds.includes(e.id));
     if (!events.length) {
       box.innerHTML = `<p class="text-text-muted text-body-sm">אין כרגע מסיבות פעילות.</p>`;
       return;

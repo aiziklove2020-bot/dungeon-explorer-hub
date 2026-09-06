@@ -65,18 +65,18 @@
 </nav>
 
 
-<script src="assets/app.js?v=202609061252"></script>
+<script src="assets/app.js?v=202609062025"></script>
 <script type="module">
 import "./assets/site-data.js?v=202609062001";
 document.addEventListener("DOMContentLoaded", async () => {
   const box = document.getElementById("favs");
-  const user = LP.current();
-  if (!user) {
-    box.innerHTML = `<div class="panel"><h2>יש להתחבר כדי לראות מועדפים</h2><p style="color:#aaa">מועדפים נשמרים על החשבון שלך, כדי שתקבל/י עדכון כשמתקרבת מסיבה ששמרת.</p><a class="btn primary" href="/login">כניסה / הרשמה</a></div>`;
+  const identity = lpFavIdentity();
+  if (!identity) {
+    box.innerHTML = `<div class="panel"><h2>הזינו מספר טלפון כדי לראות מועדפים</h2><p style="color:#aaa">מועדפים נשמרים לפי מספר הטלפון שלכם, כדי שתקבלו עדכון כשמתקרבת מסיבה ששמרתם.</p><a class="btn primary" href="/my-area">לאזור האישי שלי</a></div>`;
     return;
   }
   try {
-    const ids = await window.LPData.loadMyFavorites(user.id);
+    const ids = await window.LPData.loadMyFavorites(identity);
     const events = await window.LPData.loadEvents();
     const data = events.filter(e => ids.includes(e.id));
     box.innerHTML = data.length ? data.map(e => `<article class="card"><div class="event-cover" style="background-image:url('${e.img}')"></div><div class="card-body">${e.category ? `<span class="chip" style="align-self:center;margin-bottom:6px;font-size:12px;padding:4px 10px;color:#ffb4ab;border-color:#5c3f40">${e.category}</span>` : ""}<h3>${e.title}</h3><p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p><a class="btn primary" href="/event?id=${e.id}">לפרטים</a></div></article>`).join("") : `<div class="panel"><h2>עדיין אין מועדפים</h2><p style="color:#aaa">לחצו על הלב ליד אירוע כדי לשמור אותו כאן.</p><a class="btn primary" href="/events">למציאת מסיבה</a></div>`;

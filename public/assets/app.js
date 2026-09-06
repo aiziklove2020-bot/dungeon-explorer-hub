@@ -138,25 +138,36 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 
 /**
- * Real (Firestore-backed, per-account) favorites — separate from the old
- * anonymous LP.favorites()/[data-fav] pair above, which just persisted to
- * this browser's localStorage for anyone. Saving a favorite now requires a
- * real logged-in forum account (LP.current()), since the point is that a
- * registered user gets notified about parties they cared about — an
- * anonymous localStorage flag has no "who" to notify.
+ * Real (Firestore-backed) favorites — separate from the old anonymous
+ * LP.favorites()/[data-fav] pair above, which just persisted to this
+ * browser's localStorage for anyone. Identity here is either a real
+ * logged-in forum account (LP.current()) or the phone number saved by
+ * /my-area (localStorage "lp_my_area_phone") — both are valid "who" to
+ * attach a favorite to; favorites.js/firestore.rules accept any userId
+ * string, so a phone number works exactly like a forum user id.
  *
  * Call lpWireFavHearts() after injecting any [data-fav-btn="<partyId>"]
  * heart buttons into the page (see events.html / index.html card templates).
  */
+function lpFavIdentity() {
+  const user = LP.current();
+  if (user) return user.id;
+  try {
+    return localStorage.getItem("lp_my_area_phone") || null;
+  } catch {
+    return null;
+  }
+}
+
 async function lpWireFavHearts(container) {
   const root = container || document;
   const buttons = [...root.querySelectorAll("[data-fav-btn]")];
   if (buttons.length === 0) return;
-  const user = LP.current();
+  const identity = lpFavIdentity();
   const iconOf = (btn) => btn.querySelector(".material-symbols-outlined") || btn;
   let myFavIds = [];
-  if (user && window.LPData?.loadMyFavorites) {
-    myFavIds = await window.LPData.loadMyFavorites(user.id).catch(() => []);
+  if (identity && window.LPData?.loadMyFavorites) {
+    myFavIds = await window.LPData.loadMyFavorites(identity).catch(() => []);
   }
   buttons.forEach((btn) => {
     const id = btn.dataset.favBtn;
@@ -164,17 +175,17 @@ async function lpWireFavHearts(container) {
     icon.textContent = myFavIds.includes(id) ? "favorite" : "favorite_border";
     btn.addEventListener("click", async (ev) => {
       ev.preventDefault();
-      const current = LP.current();
+      const current = lpFavIdentity();
       if (!current) {
-        toast("צריך להתחבר כדי לשמור מועדפים");
-        setTimeout(() => (location.href = "/login"), 900);
+        toast("הזינו מספר טלפון באזור האישי כדי לשמור מועדפים");
+        setTimeout(() => (location.href = "/my-area"), 900);
         return;
       }
       const nowFav = icon.textContent === "favorite";
       const next = !nowFav;
       icon.textContent = next ? "favorite" : "favorite_border"; // optimistic
       try {
-        await window.LPData.toggleFavorite(current.id, id, next);
+        await window.LPData.toggleFavorite(current, id, next);
         toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
       } catch (err) {
         icon.textContent = nowFav ? "favorite" : "favorite_border"; // revert
@@ -194,13 +205,13 @@ window.lpWireFavHearts = lpWireFavHearts;
 async function lpWireFavBell() {
   const btn = document.querySelector("[data-fav-bell]");
   if (!btn) return;
-  const user = LP.current();
-  if (!user || !window.LPData?.loadFavoriteAlerts) {
+  const identity = lpFavIdentity();
+  if (!identity || !window.LPData?.loadFavoriteAlerts) {
     btn.style.display = "none";
     return;
   }
   btn.style.display = "";
-  const alerts = await window.LPData.loadFavoriteAlerts(user.id).catch(() => []);
+  const alerts = await window.LPData.loadFavoriteAlerts(identity).catch(() => []);
   const dot = btn.querySelector("[data-fav-bell-dot]");
   if (alerts.length > 0 && dot) dot.style.display = "";
   btn.addEventListener("click", () => {
