@@ -1489,7 +1489,11 @@ export const getMyBalanceMatch = async (phoneNumber) => {
   for (const party of parties) {
     const matches = party.balanceMatches || [];
     for (const m of matches) {
-      if (!m.isMatched || m.matchType !== 'balance') continue;
+      // Both the algorithmic pairing (matchType 'balance', from
+      // createBalanceForParty) and an admin's manually-created match
+      // (matchType 'manual') are real solo-balance matches worth revealing —
+      // only an actual couple registration (isCouple) should be excluded.
+      if (!m.isMatched || m.isCouple) continue;
       const maleMatches = normalizeIsraeliPhone(m.malePhone) === normalized;
       const femaleMatches = normalizeIsraeliPhone(m.femalePhone) === normalized;
       if (maleMatches) {
