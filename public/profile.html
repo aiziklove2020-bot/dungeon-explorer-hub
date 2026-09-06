@@ -107,17 +107,21 @@
     <div id="favsList" class="cards"></div>
   </div>
 
-  <h2 class="font-headline-md text-headline-md text-text-primary mb-3">הגדרות חשבון</h2>
-  <form id="profileForm" class="bg-surface-card border border-white/5 rounded-2xl p-5 space-y-4">
+  <h2 class="font-headline-md text-headline-md text-text-primary mb-3">שינוי סיסמה</h2>
+  <form id="passwordForm" class="bg-surface-card border border-white/5 rounded-2xl p-5 space-y-4">
     <div>
-      <label class="block text-xs font-bold text-text-secondary mb-1.5">טלפון</label>
-      <input name="phone" placeholder="050-0000000" dir="ltr" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
+      <label class="block text-xs font-bold text-text-secondary mb-1.5">סיסמה נוכחית</label>
+      <input name="currentPassword" type="password" required class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
     </div>
     <div>
-      <label class="block text-xs font-bold text-text-secondary mb-1.5">עליי</label>
-      <textarea name="bio" rows="4" placeholder="כמה מילים עליי..." class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none"></textarea>
+      <label class="block text-xs font-bold text-text-secondary mb-1.5">סיסמה חדשה</label>
+      <input name="newPassword" type="password" required minlength="4" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
     </div>
-    <button type="submit" class="w-full rounded-xl bg-gradient-to-l from-[#e11d48] to-[#be0037] hover:brightness-110 text-white font-bold py-3">שמירת שינויים</button>
+    <div>
+      <label class="block text-xs font-bold text-text-secondary mb-1.5">אימות סיסמה חדשה</label>
+      <input name="confirmPassword" type="password" required minlength="4" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
+    </div>
+    <button type="submit" class="w-full rounded-xl bg-gradient-to-l from-[#e11d48] to-[#be0037] hover:brightness-110 text-white font-bold py-3">עדכון סיסמה</button>
   </form>
 </main>
 
@@ -134,7 +138,7 @@
 
 <script src="assets/app.js?v=202609062025"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609062037";
+import "./assets/site-data.js?v=202609062044";
 document.addEventListener("DOMContentLoaded", async () => {
   const u = LP.current();
   if (!u) { location = "/login"; return; }
@@ -242,16 +246,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("membershipLabel").textContent = "לא נמצא רישום מסיבה עם חשבון זה";
   }
 
-  document.getElementById("profileForm").addEventListener("submit", async e => {
+  document.getElementById("passwordForm").addEventListener("submit", async e => {
     e.preventDefault();
     const f = new FormData(e.target);
+    const newPassword = f.get("newPassword");
+    const confirmPassword = f.get("confirmPassword");
+    if (newPassword !== confirmPassword) {
+      toast("הסיסמאות החדשות לא תואמות", "error");
+      return;
+    }
     const btn = e.target.querySelector("button");
     btn.disabled = true;
     try {
-      await window.LPData.updateMyProfile(u.id, { phone: f.get("phone"), bio: f.get("bio") });
-      toast("הפרטים נשמרו");
+      await window.LPData.changeMyForumPassword(u.id, f.get("currentPassword"), newPassword);
+      toast("הסיסמה עודכנה בהצלחה");
+      e.target.reset();
     } catch (err) {
-      toast(err.message || "שגיאה בשמירה", "error");
+      toast(err.message || "שגיאה בעדכון הסיסמה", "error");
     } finally {
       btn.disabled = false;
     }

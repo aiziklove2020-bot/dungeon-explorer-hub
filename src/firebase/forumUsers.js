@@ -274,6 +274,24 @@ export const setForumUserPasswordWithReset = async (id, plainPassword) => {
   invalidateForumUserCache(id);
 };
 
+/**
+ * Self-service password change from the personal area (profile.html) —
+ * requires the current password (unlike completeForumPasswordReset, which
+ * is for the "admin set a temp password" flow and has no old password to
+ * check against).
+ */
+export const changeMyPassword = async (id, currentPassword, newPassword) => {
+  if (!id || !currentPassword || !newPassword) throw new Error('חסרים פרטים');
+  if (newPassword.length < 4) throw new Error('סיסמה חדשה חייבת להכיל לפחות 4 תווים');
+  const snap = await getDoc(doc(db, COL, id));
+  if (!snap.exists()) throw new Error('משתמש לא נמצא');
+  const match = await bcrypt.compare(currentPassword, snap.data().password);
+  if (!match) throw new Error('הסיסמה הנוכחית שגויה');
+  const hashed = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  await updateDoc(doc(db, COL, id), { password: hashed, mustResetPassword: false });
+  invalidateForumUserCache(id);
+};
+
 /** Self-service: clear the must-reset flag once the user picks their new password. */
 export const completeForumPasswordReset = async (id, newPlainPassword) => {
   if (!id || !newPlainPassword) throw new Error('חסר משתמש או סיסמה');

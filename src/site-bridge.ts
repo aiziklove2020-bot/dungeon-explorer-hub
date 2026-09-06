@@ -12,7 +12,7 @@ import { collection, query, where, getDocsFromServer } from "firebase/firestore"
 import { db } from "./firebase/config";
 import { sendRegistrationTelegram, sendManualPartyAnnouncement } from "./firebase/telegram";
 import { getSocialLinks, getRssFeeds, getContent } from "./firebase/settings";
-import { registerForumUser, loginForumUser, getForumUserByEmail, updateForumUser, getForumUserById, getMyLinkedPhoneNumber } from "./firebase/forumUsers";
+import { registerForumUser, loginForumUser, getForumUserByEmail, updateForumUser, getForumUserById, getMyLinkedPhoneNumber, changeMyPassword } from "./firebase/forumUsers";
 import {
   getSessionId,
   sendSupportMessage,
@@ -587,6 +587,10 @@ async function uploadMyProfilePhoto(phoneNumber: string, file: File) {
  * first (see getMyLinkedPhoneNumber) so people who already have a real
  * forum login don't need to type their phone in separately.
  */
+async function changeMyForumPassword(userId: string, currentPassword: string, newPassword: string) {
+  await changeMyPassword(userId, currentPassword, newPassword);
+}
+
 async function loadMyForumPersonalArea(forumUserId: string) {
   const phone = await getMyLinkedPhoneNumber(forumUserId).catch(() => null);
   if (!phone) return { phone: null, registrations: [], balanceMatch: null, profile: null, favorites: [] };
@@ -633,6 +637,7 @@ async function loadNewsFeed() {
   loadMyPersonalArea,
   uploadMyProfilePhoto,
   loadMyForumPersonalArea,
+  changeMyForumPassword,
 };
 
 /**
