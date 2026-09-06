@@ -87,16 +87,19 @@
       </div>
     </div>
 
+    <!-- balance match -->
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined text-primary text-[20px]">favorite</span>
+        <h2 class="text-label-md font-label-md text-text-secondary">האיזון שלי</h2>
+      </div>
+      <div id="balanceMatch"></div>
+    </div>
+
     <!-- registrations -->
     <div>
       <h2 class="text-label-md font-label-md text-text-secondary mb-2">המסיבות שנרשמתי אליהן</h2>
       <div id="registrations" class="flex flex-col gap-2"></div>
-    </div>
-
-    <!-- balance match -->
-    <div>
-      <h2 class="text-label-md font-label-md text-text-secondary mb-2">האיזון שלי</h2>
-      <div id="balanceMatch"></div>
     </div>
 
     <!-- favorites -->
@@ -207,10 +210,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const glowStyle = "background:linear-gradient(135deg,rgba(225,29,72,.18),rgba(190,0,55,.12));border:2px solid #e11d48;box-shadow:0 0 24px rgba(225,29,72,.25)";
+
     if (!hasActiveSubscription) {
-      box.innerHTML = `<div class="rounded-xl bg-surface-card p-5 shadow-md flex flex-col items-center text-center gap-2">
+      box.innerHTML = `<div class="rounded-xl p-5 flex flex-col items-center text-center gap-2" style="${glowStyle}">
         <span class="material-symbols-outlined text-primary text-[32px]">lock</span>
-        <p class="text-text-primary text-body-sm font-bold">יש לכם התאמת איזון!</p>
+        <p class="text-text-primary text-body-sm font-bold">🎉 יש לכם התאמת איזון!</p>
         <p class="text-text-secondary text-body-sm">כדי לראות עם מי אתם מאוזנים, יש לרכוש מנוי (גם ליום אחד מספיק).</p>
         <a href="/membership" class="mt-2 h-11 px-6 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-md text-label-md shadow-md flex items-center">לרכישת מנוי</a>
       </div>`;
@@ -218,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (match.role === "male") {
-      box.innerHTML = `<div class="rounded-xl bg-surface-card p-5 shadow-md flex flex-col gap-3">
+      box.innerHTML = `<div class="rounded-xl p-5 flex flex-col gap-3" style="${glowStyle}">
         <p class="text-label-sm font-label-sm text-text-muted">${match.partyName ? "עבור " + match.partyName : ""}</p>
         <div class="flex items-center gap-3">
           <span class="w-11 h-11 rounded-full bg-primary-container/15 flex items-center justify-center shrink-0">
@@ -240,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    box.innerHTML = `<div class="rounded-xl bg-surface-card p-5 shadow-md flex flex-col gap-4">
+    box.innerHTML = `<div class="rounded-xl p-5 flex flex-col gap-4" style="${glowStyle}">
       <p class="text-label-sm font-label-sm text-text-muted">${match.partyName ? "עבור " + match.partyName : ""}</p>
       <div class="flex items-center gap-3">
         <span class="w-11 h-11 rounded-full bg-primary-container/15 flex items-center justify-center shrink-0">

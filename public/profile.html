@@ -92,14 +92,17 @@
     </div>
   </div>
 
+  <div id="matchSection" class="mb-6" style="display:none">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="material-symbols-outlined text-primary text-[24px]">favorite</span>
+      <h2 class="font-headline-md text-headline-md text-text-primary">האיזון שלי</h2>
+    </div>
+    <div id="matchBox"><p class="text-text-muted text-sm">טוען...</p></div>
+  </div>
+
   <div id="regsSection" class="mb-6" style="display:none">
     <h2 class="font-headline-md text-headline-md text-text-primary mb-3">המסיבות שנרשמתי אליהן</h2>
     <div id="regsList" class="flex flex-col gap-2"><p class="text-text-muted text-sm">טוען...</p></div>
-  </div>
-
-  <div id="matchSection" class="mb-6" style="display:none">
-    <h2 class="font-headline-md text-headline-md text-text-primary mb-3">האיזון שלי</h2>
-    <div id="matchBox"><p class="text-text-muted text-sm">טוען...</p></div>
   </div>
 
   <div id="favsSection" class="mb-6" style="display:none">
@@ -232,17 +235,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       const match = personalArea.balanceMatch;
       const box = document.getElementById("matchBox");
       if (!active) {
-        box.innerHTML = `<div class="bg-surface-card border border-white/5 rounded-2xl p-5 text-center">
-          <p class="text-text-primary font-bold mb-1">יש לכם התאמת איזון!</p>
+        box.innerHTML = `<div class="rounded-2xl p-5 text-center" style="background:linear-gradient(135deg,rgba(225,29,72,.18),rgba(190,0,55,.12));border:2px solid #e11d48;box-shadow:0 0 24px rgba(225,29,72,.25)">
+          <p class="text-text-primary font-bold text-lg mb-1">🎉 יש לכם התאמת איזון!</p>
           <p class="text-text-secondary text-sm">כדי לראות עם מי אתם מאוזנים, יש לרכוש מנוי (גם ליום אחד מספיק).</p>
           <a href="/membership" class="inline-block mt-3 rounded-xl bg-gradient-to-l from-[#e11d48] to-[#be0037] text-white font-bold text-sm py-2.5 px-4">לרכישת מנוי</a>
         </div>`;
       } else {
-        box.innerHTML = `<div class="bg-surface-card border border-white/5 rounded-2xl p-5">
-          <p class="text-text-muted text-xs mb-2">${match.partyName ? "עבור " + match.partyName : ""}</p>
-          <h3 class="text-text-primary font-bold text-lg mb-2">${match.matchName || "—"}</h3>
+        box.innerHTML = `<div class="rounded-2xl p-5" style="background:linear-gradient(135deg,rgba(225,29,72,.18),rgba(190,0,55,.12));border:2px solid #e11d48;box-shadow:0 0 24px rgba(225,29,72,.25)">
+          <p class="text-primary font-bold text-xs mb-2 uppercase tracking-wide">🎉 מצאנו לכם התאמה${match.partyName ? " ל" + match.partyName : ""}!</p>
+          <h3 class="text-text-primary font-bold text-xl mb-2">${match.matchName || "—"}</h3>
           ${match.matchPhone
-            ? `<a href="tel:${match.matchPhone}" class="text-primary font-bold" dir="ltr">${match.matchPhone}</a>`
+            ? `<a href="tel:${match.matchPhone}" class="text-primary font-bold text-lg" dir="ltr">${match.matchPhone}</a>`
             : `<p class="text-text-muted text-sm">עדיין לא שותף מספר טלפון.</p>`
           }
         </div>`;
