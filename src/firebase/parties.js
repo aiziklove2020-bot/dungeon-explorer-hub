@@ -1185,26 +1185,35 @@ export const getPartyById = getPartyByIdFromDataAccess;
 export const updateParty = async (partyId, partyData) => {
   try {
     const partyRef = doc(db, PARTIES_COLLECTION, partyId);
-    let dateValue = partyData.date instanceof Date ? partyData.date : null;
-    if (!dateValue) {
-      const s = String(partyData.date);
-      const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      dateValue = isoMatch
-        ? new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]), 0, 0, 0, 0)
-        : new Date(s);
-    }
-    
-    const updateData = {
-      name: partyData.name,
-      description: partyData.description || '',
-      date: Timestamp.fromDate(dateValue)
-    };
+    const updateData = {};
 
-    // The party's expiration depends on `date`; every update writes `date`,
-    // so we always recompute and persist the matching expiration alongside it.
-    const retentionHours = await resolveRetentionHours();
-    const expirationTs = buildExpirationTimestamp(dateValue, retentionHours);
-    if (expirationTs) updateData.expiration = expirationTs;
+    // `name`/`description` and the date/expiration recompute below only run
+    // for a full edit (PartyEditor always supplies `date`) — partial calls
+    // like the admin's quick-control toggles or guardian list only pass the
+    // one or two fields they're changing. Writing `name: undefined` (or an
+    // invalid date parsed from `undefined`) made Firestore's updateDoc()
+    // reject the whole write with "Unsupported field value: undefined",
+    // silently breaking every partial update.
+    if (partyData.name !== undefined) updateData.name = partyData.name;
+    if (partyData.description !== undefined) updateData.description = partyData.description || '';
+
+    if (partyData.date !== undefined) {
+      let dateValue = partyData.date instanceof Date ? partyData.date : null;
+      if (!dateValue) {
+        const s = String(partyData.date);
+        const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        dateValue = isoMatch
+          ? new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]), 0, 0, 0, 0)
+          : new Date(s);
+      }
+      updateData.date = Timestamp.fromDate(dateValue);
+
+      // The party's expiration depends on `date`, so it's recomputed
+      // whenever `date` is part of this update.
+      const retentionHours = await resolveRetentionHours();
+      const expirationTs = buildExpirationTimestamp(dateValue, retentionHours);
+      if (expirationTs) updateData.expiration = expirationTs;
+    }
 
     if (partyData.maleLimit !== undefined) updateData.maleLimit = partyData.maleLimit;
     if (partyData.femaleLimit !== undefined) updateData.femaleLimit = partyData.femaleLimit;
