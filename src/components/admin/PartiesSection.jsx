@@ -41,6 +41,11 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
   const [retentionPublishNotice, setRetentionPublishNotice] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusTab, setStatusTab] = useState('all');
+  // Which party's full detail/quick-control panel is showing on the right
+  // (desktop) or below the list (mobile) — list rows stay compact, matching
+  // the reference mockup's list+detail split instead of one long stacked card
+  // per party.
+  const [selectedPartyId, setSelectedPartyId] = useState(null);
 
   const loadActiveParties = async () => {
     try {
@@ -566,79 +571,23 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
               const matchesQuery = !q || [p.name, p.title, p.dj, p.description].some(v => (v || '').toLowerCase().includes(q));
               return matchesTab && matchesQuery;
             });
-            return loading ? (
-            <AdminLoader />
-          ) : filteredParties.length === 0 ? (
-            <div className="text-center py-12 text-[#94A3B8]">
-              <p>{activeParties.length === 0 ? t('admin.noActiveParties') : 'לא נמצאו מסיבות התואמות לסינון'}</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredParties.map(party => (
-                <div key={party.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
-                  <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
-                    <div className="flex-1 w-full">
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <h3 className="text-lg md:text-xl font-bold">{party.name || party.title}</h3>
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${
-                          party.partyType === 'exchange' ? 'bg-purple-600'
-                            : party.partyType === 'external' ? 'bg-blue-600'
-                            : 'bg-[#e11d48]'
-                        }`}>
-                          {party.partyType === 'exchange' ? t('admin.exchangeParty')
-                            : party.partyType === 'external' ? t('admin.externalParty')
-                            : t('admin.internalParty')}
-                        </span>
-                        {party.createdByType === 'advertiser' && (
-                          <span className="px-2 py-1 rounded text-xs font-bold bg-indigo-600">
-                            פורסם ע"י מפרסם
-                          </span>
-                        )}
-                        {isPartyExpiredByDate(party.date, retentionHours) && (
-                          <span className="px-2 py-1 rounded text-xs font-bold bg-[#2a292e] text-[#e4e1e7]">
-                            פג תוקף
-                          </span>
-                        )}
-                        {party.publishToInstagram === true && (
-                          <span className="px-2 py-1 rounded text-xs font-bold bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-600 text-white">
-                            כלול באינסטגרם
-                          </span>
-                        )}
-                      </div>
-                      {party.imageURL && (
-                        <PartyImage
-                          src={party.imageURL}
-                          alt={party.name || party.title}
-                          onClick={() => window.open(party.imageURL, '_blank')}
-                        />
-                      )}
-                    </div>
-                    <div className="flex gap-2 w-full sm:w-auto">
-                      <button
-                        type="button"
-                        onClick={() => handleEditParty(party)}
-                        className="bg-[#e11d48] hover:bg-[#be0037] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex-1 sm:flex-none"
-                      >
-                        {t('admin.edit')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteParty(party.id, party.name || party.title)}
-                        className="bg-[#93000a]/60 hover:bg-[#93000a] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 justify-center"
-                        aria-label={`${t('a11y.delete')}: ${party.name || party.title || ''}`}
-                      >
-                        <Trash2 size={14} className="md:w-4 md:h-4" aria-hidden="true" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                    <p><strong>{t('date') || 'תאריך'}:</strong> {formatDate(party.date)}</p>
-                    {party.day && <p><strong>{t('admin.day')}:</strong> {party.day}</p>}
-                    {party.time && <p><strong>{t('admin.time')}:</strong> {party.time}</p>}
-                    {party.dj && <p><strong>DJ:</strong> {party.dj}</p>}
-                  </div>
-                  {party.description && <p className="mb-3"><strong>{t('description') || 'תיאור'}:</strong> {party.description}</p>}
-                  {!party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal') && (() => {
+            const selectedParty = filteredParties.find(p => p.id === selectedPartyId) || filteredParties[0] || null;
+
+            if (loading) return <AdminLoader />;
+            if (filteredParties.length === 0) {
+              return (
+                <div className="text-center py-12 text-[#94A3B8]">
+                  <p>{activeParties.length === 0 ? t('admin.noActiveParties') : 'לא נמצאו מסיבות התואמות לסינון'}</p>
+                </div>
+              );
+            }
+
+            return (
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-4 items-start">
+                {/* Compact clickable list — one row per party. */}
+                <div className="space-y-2">
+                  {filteredParties.map(party => {
+                    const status = statusOf(party);
                     const maleCount = getGenderCount(party, 'male');
                     const femaleCount = getGenderCount(party, 'female');
                     const maleLimit = Number(party.maleLimit) || 0;
@@ -646,114 +595,232 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                     const totalLimit = maleLimit + femaleLimit || 1;
                     const malePct = Math.min(100, Math.round((maleCount / totalLimit) * 100));
                     const femalePct = Math.min(100 - malePct, Math.round((femaleCount / totalLimit) * 100));
-                    const maleFull = maleLimit > 0 && maleCount >= maleLimit;
-                    const femaleFull = femaleLimit > 0 && femaleCount >= femaleLimit;
+                    const selected = selectedParty?.id === party.id;
                     return (
-                      <div className="mb-3">
-                        <div className="w-full h-2.5 rounded-full bg-[#2a292e] overflow-hidden flex">
-                          <div className="h-full" style={{ width: `${malePct}%`, background: '#e11d48' }} title={`גברים: ${maleCount}/${maleLimit}`} />
-                          <div className="h-full" style={{ width: `${femalePct}%`, background: '#ffb3b6' }} title={`נשים: ${femaleCount}/${femaleLimit}`} />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 mt-2 text-sm md:text-base">
-                          <p><strong>{t('maleRegistered') || 'גברים רשומים'}:</strong> <span style={maleFull ? { color: '#ffb4ab' } : undefined}>{maleCount}/{maleLimit}{maleFull ? ' (מלא)' : ''}</span></p>
-                          <p><strong>{t('femaleRegistered') || 'נשים רשומות'}:</strong> <span style={femaleFull ? { color: '#ffb4ab' } : undefined}>{femaleCount}/{femaleLimit}{femaleFull ? ' (מלא)' : ''}</span></p>
-                          <p><strong>{t('totalRegistered') || 'סה"כ רשומים'}:</strong> {party.registrations?.length || 0}</p>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                  {!party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal') && (
-                    <div className="mb-3 rounded-xl bg-[#1f1f23] p-3 flex flex-col gap-3">
-                      <span className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">שליטה מהירה</span>
-                      <label className="flex items-center justify-between gap-2 cursor-pointer">
-                        <span className="text-sm">נעילת מכירה לגברים סולו</span>
-                        <input
-                          type="checkbox"
-                          checked={!!party.soloMenSalesLocked}
-                          onChange={(e) => handleToggleQuickControl(party.id, 'soloMenSalesLocked', e.target.checked)}
-                          className="w-5 h-5 accent-[#e11d48] cursor-pointer"
-                        />
-                      </label>
-                      <label className="flex items-center justify-between gap-2 cursor-pointer">
-                        <span className="text-sm">אישור אוטומטי לזוגות מאומתים</span>
-                        <input
-                          type="checkbox"
-                          checked={!!party.autoApproveVerifiedCouples}
-                          onChange={(e) => handleToggleQuickControl(party.id, 'autoApproveVerifiedCouples', e.target.checked)}
-                          className="w-5 h-5 accent-[#10B981] cursor-pointer"
-                        />
-                      </label>
-                      <div className="pt-2 border-t border-[rgba(255,255,255,0.08)]">
-                        <span className="text-xs font-bold text-[#94A3B8]">נאמני מרחב משובצים ({(party.guardians || []).length})</span>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {(party.guardians || []).map((g, i) => (
-                            <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#2a292e] text-sm">
-                              {g.name}{g.role ? ` · ${g.role}` : ''}
-                              <button type="button" onClick={() => handleRemoveGuardian(party, i)} className="text-[#94A3B8] hover:text-[#ffb4ab]" aria-label={`הסר ${g.name}`}>
-                                <X size={12} />
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                        <GuardianAddForm onAdd={(name, role) => handleAddGuardian(party, name, role)} />
-                      </div>
-                    </div>
-                  )}
-                  {party.registrationLink && (party.partyType || 'internal') === 'external' && (
-                    <p className="mb-3">
-                      <strong>{t('admin.externalRegistrationLink')}:</strong>{' '}
-                      <a href={party.registrationLink} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
-                        {party.registrationLink}
-                      </a>
-                    </p>
-                  )}
-                  {party.whatsappNumber && (
-                    <p className="mb-3">
-                      <strong>{t('admin.whatsappNumber') || 'מספר וואטסאפ'}:</strong>{' '}
-                      <span dir="ltr">{party.whatsappNumber}</span>
-                    </p>
-                  )}
-                  {!party.whatsappNumber && party.registrations && party.registrations.length > 0 && ['internal', 'exchange'].includes(party.partyType || 'internal') && (
-                    <div className="mt-4 space-y-4">
                       <button
-                        onClick={() => exportRegistrationsByType(party)}
-                        className="bg-blue-600 hover:bg-blue-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm mr-2"
+                        type="button"
+                        key={party.id}
+                        onClick={() => setSelectedPartyId(party.id)}
+                        className="w-full text-right rounded-xl p-3 border transition-colors flex items-center gap-3"
+                        style={selected
+                          ? { background: '#1f1f23', borderColor: '#e11d48' }
+                          : { background: '#121218', borderColor: 'rgba(255,255,255,0.08)' }}
                       >
-                        📊 {t('admin.exportRegistrations')}
-                      </button>
-                      <div className="mt-4 border-t border-[rgba(255,255,255,0.08)] pt-4">
-                        <h4 className="text-lg font-bold mb-3">{t('admin.registrationsList')}</h4>
-                        <div className="space-y-2 max-h-96 overflow-y-auto">
-                          {getRegistrationDisplayItems(party.registrations).map((item, idx) =>
-                            item.type === 'couple' ? (
-                              <CoupleRegistrationItem
-                                key={`couple-${item.maleReg?.coupleId || idx}`}
-                                maleReg={item.maleReg}
-                                femaleReg={item.femaleReg}
-                                partyId={party.id}
-                                onConvertToUser={handleConvertClientToUser}
-                                onRemoveFromParty={handleRemoveFromParty}
-                                allUsersMap={allUsersMap}
-                              />
-                            ) : (
-                              <RegistrationItem
-                                key={`single-${item.registration?.phoneNumber || idx}`}
-                                registration={item.registration}
-                                partyId={party.id}
-                                onConvertToUser={handleConvertClientToUser}
-                                onRemoveFromParty={handleRemoveFromParty}
-                                userFromMap={item.registration?.phoneNumber ? allUsersMap.get(item.registration.phoneNumber) : null}
-                              />
-                            )
+                        {party.imageURL ? (
+                          <img
+                            src={party.imageURL}
+                            alt=""
+                            className="w-12 h-12 rounded-lg object-cover shrink-0 bg-black"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg shrink-0 bg-[#2a292e]" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-bold text-sm truncate">{party.name || party.title}</h4>
+                            {status === 'locked' && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#e11d48]/20 text-[#ffb3b6]">נעול לאיזון</span>
+                            )}
+                            {status === 'expired' && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#2a292e] text-[#94A3B8]">פג תוקף</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-[#94A3B8] truncate mt-0.5">
+                            {formatDate(party.date)}{party.dj ? ` · DJ ${party.dj}` : ''}
+                          </p>
+                          {!party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal') && (
+                            <div className="w-full h-1.5 rounded-full bg-[#2a292e] overflow-hidden flex mt-2">
+                              <div className="h-full" style={{ width: `${malePct}%`, background: '#e11d48' }} />
+                              <div className="h-full" style={{ width: `${femalePct}%`, background: '#ffb3b6' }} />
+                            </div>
                           )}
                         </div>
+                        <span className="text-xs text-[#94A3B8] shrink-0">{party.registrations?.length || 0}/{totalLimit}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Detail + quick-control panel for the selected party — sticky
+                    alongside the list on desktop, falls below it on mobile. */}
+                {selectedParty && (
+                  <div className="lg:sticky lg:top-4 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
+                    <div className="flex flex-col gap-3 mb-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-lg md:text-xl font-bold">{selectedParty.name || selectedParty.title}</h3>
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${
+                          selectedParty.partyType === 'exchange' ? 'bg-purple-600'
+                            : selectedParty.partyType === 'external' ? 'bg-blue-600'
+                            : 'bg-[#e11d48]'
+                        }`}>
+                          {selectedParty.partyType === 'exchange' ? t('admin.exchangeParty')
+                            : selectedParty.partyType === 'external' ? t('admin.externalParty')
+                            : t('admin.internalParty')}
+                        </span>
+                        {selectedParty.createdByType === 'advertiser' && (
+                          <span className="px-2 py-1 rounded text-xs font-bold bg-indigo-600">
+                            פורסם ע"י מפרסם
+                          </span>
+                        )}
+                        {isPartyExpiredByDate(selectedParty.date, retentionHours) && (
+                          <span className="px-2 py-1 rounded text-xs font-bold bg-[#2a292e] text-[#e4e1e7]">
+                            פג תוקף
+                          </span>
+                        )}
+                        {selectedParty.publishToInstagram === true && (
+                          <span className="px-2 py-1 rounded text-xs font-bold bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-600 text-white">
+                            כלול באינסטגרם
+                          </span>
+                        )}
+                      </div>
+                      {selectedParty.imageURL && (
+                        <PartyImage
+                          src={selectedParty.imageURL}
+                          alt={selectedParty.name || selectedParty.title}
+                          onClick={() => window.open(selectedParty.imageURL, '_blank')}
+                        />
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEditParty(selectedParty)}
+                          className="bg-[#e11d48] hover:bg-[#be0037] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex-1"
+                        >
+                          {t('admin.edit')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteParty(selectedParty.id, selectedParty.name || selectedParty.title)}
+                          className="bg-[#93000a]/60 hover:bg-[#93000a] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 justify-center"
+                          aria-label={`${t('a11y.delete')}: ${selectedParty.name || selectedParty.title || ''}`}
+                        >
+                          <Trash2 size={14} className="md:w-4 md:h-4" aria-hidden="true" />
+                        </button>
                       </div>
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          );
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+                      <p><strong>{t('date') || 'תאריך'}:</strong> {formatDate(selectedParty.date)}</p>
+                      {selectedParty.day && <p><strong>{t('admin.day')}:</strong> {selectedParty.day}</p>}
+                      {selectedParty.time && <p><strong>{t('admin.time')}:</strong> {selectedParty.time}</p>}
+                      {selectedParty.dj && <p><strong>DJ:</strong> {selectedParty.dj}</p>}
+                    </div>
+                    {selectedParty.description && <p className="mb-3"><strong>{t('description') || 'תיאור'}:</strong> {selectedParty.description}</p>}
+                    {!selectedParty.whatsappNumber && ['internal', 'exchange'].includes(selectedParty.partyType || 'internal') && (() => {
+                      const maleCount = getGenderCount(selectedParty, 'male');
+                      const femaleCount = getGenderCount(selectedParty, 'female');
+                      const maleLimit = Number(selectedParty.maleLimit) || 0;
+                      const femaleLimit = Number(selectedParty.femaleLimit) || 0;
+                      const totalLimit = maleLimit + femaleLimit || 1;
+                      const malePct = Math.min(100, Math.round((maleCount / totalLimit) * 100));
+                      const femalePct = Math.min(100 - malePct, Math.round((femaleCount / totalLimit) * 100));
+                      const maleFull = maleLimit > 0 && maleCount >= maleLimit;
+                      const femaleFull = femaleLimit > 0 && femaleCount >= femaleLimit;
+                      return (
+                        <div className="mb-3">
+                          <div className="w-full h-2.5 rounded-full bg-[#2a292e] overflow-hidden flex">
+                            <div className="h-full" style={{ width: `${malePct}%`, background: '#e11d48' }} title={`גברים: ${maleCount}/${maleLimit}`} />
+                            <div className="h-full" style={{ width: `${femalePct}%`, background: '#ffb3b6' }} title={`נשים: ${femaleCount}/${femaleLimit}`} />
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 mt-2 text-sm md:text-base">
+                            <p><strong>{t('maleRegistered') || 'גברים רשומים'}:</strong> <span style={maleFull ? { color: '#ffb4ab' } : undefined}>{maleCount}/{maleLimit}{maleFull ? ' (מלא)' : ''}</span></p>
+                            <p><strong>{t('femaleRegistered') || 'נשים רשומות'}:</strong> <span style={femaleFull ? { color: '#ffb4ab' } : undefined}>{femaleCount}/{femaleLimit}{femaleFull ? ' (מלא)' : ''}</span></p>
+                            <p><strong>{t('totalRegistered') || 'סה"כ רשומים'}:</strong> {selectedParty.registrations?.length || 0}</p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                    {!selectedParty.whatsappNumber && ['internal', 'exchange'].includes(selectedParty.partyType || 'internal') && (
+                      <div className="mb-3 rounded-xl bg-[#121218] p-3 flex flex-col gap-3">
+                        <span className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">שליטה מהירה</span>
+                        <label className="flex items-center justify-between gap-2 cursor-pointer">
+                          <span className="text-sm">נעילת מכירה לגברים סולו</span>
+                          <input
+                            type="checkbox"
+                            checked={!!selectedParty.soloMenSalesLocked}
+                            onChange={(e) => handleToggleQuickControl(selectedParty.id, 'soloMenSalesLocked', e.target.checked)}
+                            className="w-5 h-5 accent-[#e11d48] cursor-pointer"
+                          />
+                        </label>
+                        <label className="flex items-center justify-between gap-2 cursor-pointer">
+                          <span className="text-sm">אישור אוטומטי לזוגות מאומתים</span>
+                          <input
+                            type="checkbox"
+                            checked={!!selectedParty.autoApproveVerifiedCouples}
+                            onChange={(e) => handleToggleQuickControl(selectedParty.id, 'autoApproveVerifiedCouples', e.target.checked)}
+                            className="w-5 h-5 accent-[#10B981] cursor-pointer"
+                          />
+                        </label>
+                        <div className="pt-2 border-t border-[rgba(255,255,255,0.08)]">
+                          <span className="text-xs font-bold text-[#94A3B8]">נאמני מרחב משובצים ({(selectedParty.guardians || []).length})</span>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {(selectedParty.guardians || []).map((g, i) => (
+                              <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#2a292e] text-sm">
+                                {g.name}{g.role ? ` · ${g.role}` : ''}
+                                <button type="button" onClick={() => handleRemoveGuardian(selectedParty, i)} className="text-[#94A3B8] hover:text-[#ffb4ab]" aria-label={`הסר ${g.name}`}>
+                                  <X size={12} />
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                          <GuardianAddForm onAdd={(name, role) => handleAddGuardian(selectedParty, name, role)} />
+                        </div>
+                      </div>
+                    )}
+                    {selectedParty.registrationLink && (selectedParty.partyType || 'internal') === 'external' && (
+                      <p className="mb-3">
+                        <strong>{t('admin.externalRegistrationLink')}:</strong>{' '}
+                        <a href={selectedParty.registrationLink} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                          {selectedParty.registrationLink}
+                        </a>
+                      </p>
+                    )}
+                    {selectedParty.whatsappNumber && (
+                      <p className="mb-3">
+                        <strong>{t('admin.whatsappNumber') || 'מספר וואטסאפ'}:</strong>{' '}
+                        <span dir="ltr">{selectedParty.whatsappNumber}</span>
+                      </p>
+                    )}
+                    {!selectedParty.whatsappNumber && selectedParty.registrations && selectedParty.registrations.length > 0 && ['internal', 'exchange'].includes(selectedParty.partyType || 'internal') && (
+                      <div className="mt-4 space-y-4">
+                        <button
+                          onClick={() => exportRegistrationsByType(selectedParty)}
+                          className="bg-blue-600 hover:bg-blue-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm mr-2"
+                        >
+                          📊 {t('admin.exportRegistrations')}
+                        </button>
+                        <div className="mt-4 border-t border-[rgba(255,255,255,0.08)] pt-4">
+                          <h4 className="text-lg font-bold mb-3">{t('admin.registrationsList')}</h4>
+                          <div className="space-y-2 max-h-96 overflow-y-auto">
+                            {getRegistrationDisplayItems(selectedParty.registrations).map((item, idx) =>
+                              item.type === 'couple' ? (
+                                <CoupleRegistrationItem
+                                  key={`couple-${item.maleReg?.coupleId || idx}`}
+                                  maleReg={item.maleReg}
+                                  femaleReg={item.femaleReg}
+                                  partyId={selectedParty.id}
+                                  onConvertToUser={handleConvertClientToUser}
+                                  onRemoveFromParty={handleRemoveFromParty}
+                                  allUsersMap={allUsersMap}
+                                />
+                              ) : (
+                                <RegistrationItem
+                                  key={`single-${item.registration?.phoneNumber || idx}`}
+                                  registration={item.registration}
+                                  partyId={selectedParty.id}
+                                  onConvertToUser={handleConvertClientToUser}
+                                  onRemoveFromParty={handleRemoveFromParty}
+                                  userFromMap={item.registration?.phoneNumber ? allUsersMap.get(item.registration.phoneNumber) : null}
+                                />
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
           })()}
         </div>
       )}
