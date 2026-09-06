@@ -109,21 +109,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   let allEvents = [];
   let activeType = "";
 
-  // Small corner date badge (day number + short month) parsed from the ISO
-  // date the bridge already gives us — kept out of the image itself so it
-  // never covers a flyer's own baked-in text.
-  function dateBadge(e) {
-    if (!e.dateISO) return "";
-    const d = new Date(e.dateISO + "T00:00:00");
-    if (Number.isNaN(d.getTime())) return "";
-    const day = d.getDate();
-    const month = d.toLocaleDateString("he-IL", { month: "short" }).replace(".", "");
-    return `<div class="absolute top-2 right-2 z-10 rounded-lg bg-black/70 backdrop-blur-sm px-2.5 py-1.5 text-center leading-none shadow-md">
-      <div class="text-white text-base font-extrabold">${day}</div>
-      <div class="text-primary text-[10px] font-bold uppercase">${month}</div>
-    </div>`;
-  }
-
   function favBtnHtml(e) {
     return `<button type="button" data-fav-btn="${e.id}" aria-label="שמירה למועדפים" class="absolute top-2 left-2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
       <span class="material-symbols-outlined text-white text-[20px]">favorite_border</span>
@@ -134,7 +119,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (featured) {
       return `<article class="relative w-full rounded-2xl overflow-hidden bg-surface-card shadow-2xl">
         <div class="relative w-full bg-black">
-          ${dateBadge(e)}
           ${favBtnHtml(e)}
           <img class="w-full h-auto max-h-[70vh] object-contain mx-auto" src="${e.img}" alt="">
         </div>
@@ -154,7 +138,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     return `<article class="rounded-2xl overflow-hidden bg-surface-card shadow-md w-full min-w-0">
       <div class="relative w-full bg-black">
-        ${dateBadge(e)}
         ${favBtnHtml(e)}
         <img class="w-full h-auto max-h-[50vh] object-contain mx-auto" src="${e.img}" alt="" onerror="this.closest('div').style.display='none'">
       </div>

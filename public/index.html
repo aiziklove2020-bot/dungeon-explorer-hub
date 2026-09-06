@@ -304,27 +304,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const box = document.getElementById("eventCards");
 
-  // Small corner date badge (day number + short month) — kept off the image
-  // itself so it never covers a flyer's own baked-in text. Same pattern used
-  // on events.html.
-  function dateBadge(e) {
-    if (!e.dateISO) return "";
-    const d = new Date(e.dateISO + "T00:00:00");
-    if (Number.isNaN(d.getTime())) return "";
-    const day = d.getDate();
-    const month = d.toLocaleDateString("he-IL", { month: "short" }).replace(".", "");
-    return `<div class="absolute top-2 right-2 z-10 rounded-lg bg-black/70 backdrop-blur-sm px-2.5 py-1.5 text-center leading-none shadow-md">
-      <div class="text-white text-base font-extrabold">${day}</div>
-      <div class="text-primary text-[10px] font-bold uppercase">${month}</div>
-    </div>`;
-  }
-
   try {
     const events = await window.LPData.loadEvents();
     box.innerHTML = events.length ? events.slice(0, 4).map(e => `
       <article class="w-full rounded-xl overflow-hidden bg-surface-card shadow-lg flex flex-col">
         <div class="relative w-full bg-black">
-          ${dateBadge(e)}
           <button type="button" data-fav-btn="${e.id}" aria-label="שמירה למועדפים" class="absolute top-2 left-2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
             <span class="material-symbols-outlined text-white text-[20px]">favorite_border</span>
           </button>
