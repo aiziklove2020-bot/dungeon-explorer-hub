@@ -103,8 +103,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   const c=LP.current();
   document.querySelectorAll("[data-auth-label]").forEach(el=>el.textContent=c?c.name:"כניסה");
   document.querySelectorAll("[data-dashboard-link]").forEach(el=>{
-    el.href = c?.role==="advertiser" ? "/advertiser-dashboard" : c?.role==="admin" ? "/admin" : "/profile";
-    if (!c) return;
+    if (!c) return; // keep the anchor's own href (/login) — it's only a dashboard link once logged in
+    el.href = c.role==="advertiser" ? "/advertiser-dashboard" : c.role==="admin" ? "/admin" : "/profile";
     const displayName = c.businessName || c.name || "מחובר/ת";
     const label = el.querySelector("small");
     if (label) label.textContent = displayName;
