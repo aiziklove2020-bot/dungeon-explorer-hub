@@ -47,6 +47,11 @@
   <a href="/store"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">storefront</span></span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/contact"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">call</span></span><span class="dr-tx">צור קשר</span></a>
  </nav>
 </aside><div class="scrim"></div>
+<div id="pageLoader" style="display:none;min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+  <div style="width:36px;height:36px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#e11d48;animation:lp-spin 0.8s linear infinite"></div>
+  <p class="text-text-muted text-sm">טוען את האזור האישי...</p>
+</div>
+<style>@keyframes lp-spin{to{transform:rotate(360deg)}}</style>
 <main class="max-w-xl mx-auto px-4" style="display:none">
   <div class="flex items-center justify-between mb-6">
     <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-text-primary">האזור האישי</h1>
@@ -145,14 +150,16 @@ import "./assets/site-data.js?v=202609062056";
 document.addEventListener("DOMContentLoaded", async () => {
   const u = LP.current();
   if (!u) { location = "/login"; return; }
-  document.querySelector("main").style.display = "";
+  document.getElementById("pageLoader").style.display = "flex";
   document.getElementById("pname").textContent = u.name;
   document.getElementById("pemail").textContent = u.email;
   document.getElementById("logout").onclick = () => { localStorage.removeItem("lp_current"); location = "/"; };
 
-  // Show these sections with a "טוען..." placeholder right away instead of
-  // popping the whole block in once the (network-bound) data arrives a
-  // second or two later — avoids the jarring layout shift users reported.
+  // These sections start visible (with a "טוען..." placeholder) so their
+  // final content swaps in without changing the section's presence — the
+  // page itself stays behind #pageLoader until all data is ready, so the
+  // whole layout appears once, fully formed, instead of shifting under the
+  // user as pieces arrive (the "jump" that was reported).
   document.getElementById("regsSection").style.display = "";
   document.getElementById("matchSection").style.display = "";
 
@@ -295,6 +302,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else {
     document.getElementById("membershipLabel").textContent = "לא נמצא רישום מסיבה עם חשבון זה";
   }
+
+  document.getElementById("pageLoader").style.display = "none";
+  document.querySelector("main").style.display = "";
 
   document.getElementById("passwordForm").addEventListener("submit", async e => {
     e.preventDefault();
