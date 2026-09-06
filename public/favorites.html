@@ -79,7 +79,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     const ids = await window.LPData.loadMyFavorites(identity);
     const events = await window.LPData.loadEvents();
     const data = events.filter(e => ids.includes(e.id));
-    box.innerHTML = data.length ? data.map(e => `<article class="card"><div class="event-cover" style="background-image:url('${e.img}')"></div><div class="card-body">${e.category ? `<span class="chip" style="align-self:center;margin-bottom:6px;font-size:12px;padding:4px 10px;color:#ffb4ab;border-color:#5c3f40">${e.category}</span>` : ""}<h3>${e.title}</h3><p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p><a class="btn primary" href="/event?id=${e.id}">לפרטים</a></div></article>`).join("") : `<div class="panel"><h2>עדיין אין מועדפים</h2><p style="color:#aaa">לחצו על הלב ליד אירוע כדי לשמור אותו כאן.</p><a class="btn primary" href="/events">למציאת מסיבה</a></div>`;
+    box.innerHTML = data.length ? data.map(e => `
+      <article class="card" data-fav-card="${e.id}">
+        <div class="event-cover" style="background-image:url('${e.img}')"></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            ${e.category ? `<span class="chip" style="font-size:12px;padding:4px 10px;color:#ffb4ab;border-color:#5c3f40">${e.category}</span>` : "<span></span>"}
+            <button type="button" data-fav-remove="${e.id}" title="הסרה מהמועדפים" style="background:none;border:none;padding:4px;cursor:pointer">
+              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;color:#e11d48">favorite</span>
+            </button>
+          </div>
+          <h3>${e.title}</h3>
+          <p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p>
+          <a class="btn primary" href="/event?id=${e.id}">לפרטים</a>
+        </div>
+      </article>
+    `).join("") : `<div class="panel"><h2>עדיין אין מועדפים</h2><p style="color:#aaa">לחצו על הלב ליד אירוע כדי לשמור אותו כאן.</p><a class="btn primary" href="/events">למציאת מסיבה</a></div>`;
+    box.querySelectorAll("[data-fav-remove]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const id = btn.getAttribute("data-fav-remove");
+        btn.disabled = true;
+        try {
+          await window.LPData.toggleFavorite(identity, id, false);
+          const card = box.querySelector(`[data-fav-card="${id}"]`);
+          if (card) card.remove();
+          if (!box.querySelector("[data-fav-card]")) {
+            box.innerHTML = `<div class="panel"><h2>עדיין אין מועדפים</h2><p style="color:#aaa">לחצו על הלב ליד אירוע כדי לשמור אותו כאן.</p><a class="btn primary" href="/events">למציאת מסיבה</a></div>`;
+          }
+          toast("הוסר מהמועדפים");
+        } catch {
+          toast("שגיאה בהסרת מועדף", "error");
+          btn.disabled = false;
+        }
+      });
+    });
   } catch (err) {
     box.innerHTML = "<p style=\"color:#aaa\">לא הצלחנו לטעון מועדפים כרגע.</p>";
   }
