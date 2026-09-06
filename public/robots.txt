@@ -11,6 +11,7 @@ Disallow: /chat
 Disallow: /bookmarks
 Disallow: /profile/
 Disallow: /my-match
+Disallow: /my-area
 
 # Token-bearing utility URLs (one-shot links emailed to users)
 Disallow: /forum/reset

@@ -91,6 +91,10 @@
       "destination": "/my-match.html"
     },
     {
+      "source": "/my-area",
+      "destination": "/my-area.html"
+    },
+    {
       "source": "/news",
       "destination": "/news.html"
     },

@@ -6,7 +6,8 @@
 // Exposes window.LPData — real data only. window.LP (assets/app.js) still
 // owns local UI state (current logged-in user session, favorites list) until
 // auth is migrated too.
-import { getActiveParties, registerToPartyNew, createParty, getAllParties, getPartyById, updateParty, deleteParty, getMyBalanceMatch, setBalanceMatchPhoneShared } from "./firebase/parties";
+import { getActiveParties, registerToPartyNew, createParty, getAllParties, getPartyById, updateParty, deleteParty, getMyBalanceMatch, setBalanceMatchPhoneShared, getMyRegistrations } from "./firebase/parties";
+import { getMyPersonalAreaProfile, updateMyProfilePhoto } from "./firebase/users";
 import { collection, query, where, getDocsFromServer } from "firebase/firestore";
 import { db } from "./firebase/config";
 import { sendRegistrationTelegram, sendManualPartyAnnouncement } from "./firebase/telegram";
@@ -552,6 +553,34 @@ async function loadFavoriteAlerts(userId: string, withinDays = 3) {
   });
 }
 
+/**
+ * Unified personal area, keyed by the phone number typed in (no login) —
+ * one call combining registrations (with status), balance match, favorited
+ * parties and profile/subscription info, so the page needs a single load.
+ */
+async function loadMyPersonalArea(phoneNumber: string) {
+  const [registrations, balanceMatch, profile, favoriteIds] = await Promise.all([
+    getMyRegistrations(phoneNumber).catch(() => []),
+    getMyBalanceMatch(phoneNumber).catch(() => null),
+    getMyPersonalAreaProfile(phoneNumber).catch(() => null),
+    getFavoritePartyIds(phoneNumber).catch(() => []),
+  ]);
+
+  let favorites: any[] = [];
+  if (favoriteIds.length > 0) {
+    const events = await loadEvents().catch(() => []);
+    favorites = events.filter((e: any) => favoriteIds.includes(e.id));
+  }
+
+  return { registrations, balanceMatch, profile, favorites };
+}
+
+async function uploadMyProfilePhoto(phoneNumber: string, file: File) {
+  const url = await uploadImage(file);
+  if (url) await updateMyProfilePhoto(phoneNumber, url);
+  return url;
+}
+
 async function loadNewsFeed() {
   const feeds = await getRssFeeds().catch(() => []);
   return (feeds || [])
@@ -588,6 +617,8 @@ async function loadNewsFeed() {
   loadFavoriteAlerts,
   loadMyBalanceMatch,
   shareMyBalancePhone,
+  loadMyPersonalArea,
+  uploadMyProfilePhoto,
 };
 
 /**

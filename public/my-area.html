@@ -1,0 +1,389 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#131317"><title>האזור האישי שלי | LIBRAL PARTY</title>
+<link rel="icon" type="image/png" href="assets/logo-new.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/styles.css?v=202609052145">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-low": "#1b1b1f", "surface-dim": "#131317", "tertiary": "#ffb2b8", "surface-container-high": "#2a292e", "on-primary-container": "#fffaf9", "surface-card": "#121218", "surface-container-lowest": "#0e0e12", "outline": "#ac8889", "text-muted": "#64748B", "surface-container-highest": "#353439", "primary-fixed": "#ffdada", "surface-container": "#1f1f23", "on-surface": "#e4e1e7", "secondary-container": "#e10111", "surface-elevated": "#1A1A24", "surface-variant": "#353439", "secondary": "#ffb4aa", "status-balanced": "#10B981", "text-secondary": "#94A3B8", "on-primary": "#68001a", "surface": "#131317", "primary": "#ffb3b6", "primary-container": "#e11d48", "background": "#131317", "surface-glass": "rgba(18, 18, 24, 0.75)", "on-secondary-container": "#fff1ef", "on-surface-variant": "#e5bdbe", "surface-base": "#0B0B0F", "on-tertiary-container": "#fffaf9", "tertiary-container": "#d82f53", "on-background": "#e4e1e7", "glow-crimson": "rgba(225, 29, 72, 0.45)", "text-primary": "#F8FAFC" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" } } } }</script>
+<style>
+  @layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;background:#131317}}
+  .stitch-page::-webkit-scrollbar{display:none}
+  .stitch-page main{padding-top:5rem;padding-bottom:6rem}
+  .status-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600}
+  .status-matched{background:rgba(16,185,129,.15);color:#10B981}
+  .status-waiting{background:rgba(234,179,8,.15);color:#eab308}
+  .status-confirmed{background:rgba(148,163,184,.15);color:#94A3B8}
+</style>
+</head><body class="stitch-page bg-surface font-body-md text-body-md text-on-surface antialiased">
+
+<header class="fixed top-0 inset-x-0 z-50 bg-surface-dim/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+  <div class="h-16 px-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <button data-menu aria-label="תפריט" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary">
+        <span class="material-symbols-outlined text-[24px]">menu</span>
+      </button>
+      <a href="/" class="flex items-center gap-2">
+        <img alt="Logo" class="h-8 w-auto object-contain" src="assets/logo-new.png">
+        <span class="font-headline-sm text-headline-sm text-text-primary tracking-wider uppercase font-bold">LIBRAL PARTY</span>
+      </a>
+    </div>
+    <div class="flex items-center gap-1">
+      <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="login-link w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
+        <span class="material-symbols-outlined text-[22px]">person</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<aside class="drawer">
+ <div class="drawer-head"><span class="logo-wrap"><img src="assets/logo-new.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>מסיבות ליברליות בישראל</small></span></span><button data-close class="dr-close" aria-label="סגור"><span class="material-symbols-outlined">close</span></button></div>
+ <nav>
+  <a href="/"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">home</span></span><span class="dr-tx">בית</span></a><a href="/about"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">info</span></span><span class="dr-tx">אודות</span></a><a href="/calendar"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">calendar_month</span></span><span class="dr-tx">לוח אירועים</span></a>
+  <a href="/my-area"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">האזור האישי שלי</span></a><a href="/news"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">campaign</span></span><span class="dr-tx">חדשות ועדכונים</span></a><a href="/community"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">forum</span></span><span class="dr-tx">קהילה / צ׳אט</span></a>
+  <a href="/store"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">storefront</span></span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/contact"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">call</span></span><span class="dr-tx">צור קשר</span></a>
+ </nav>
+</aside><div class="scrim"></div>
+
+<main class="max-w-xl mx-auto px-4">
+  <div class="flex items-center gap-2 mb-4">
+    <span class="material-symbols-outlined text-primary text-[26px]">account_circle</span>
+    <h1 class="text-headline-md font-headline-md text-text-primary">האזור האישי שלי</h1>
+  </div>
+
+  <div id="gate">
+    <p class="text-body-sm font-body-sm text-text-secondary mb-5">הזינו את מספר הטלפון שנרשמתם איתו למסיבה, כדי לראות את הרישומים, האיזון והמועדפים שלכם.</p>
+    <form id="lookupForm" class="rounded-xl bg-surface-card p-4 shadow-md flex flex-col gap-3">
+      <label class="text-label-md font-label-md text-text-secondary">מספר טלפון</label>
+      <input id="phoneInput" type="tel" required placeholder="05XXXXXXXX" dir="ltr" class="w-full h-12 px-4 rounded-lg bg-surface-container text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container text-left">
+      <button type="submit" class="h-12 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-lg text-label-lg shadow-md">כניסה</button>
+    </form>
+  </div>
+
+  <div id="area" style="display:none" class="flex flex-col gap-5">
+    <div class="flex items-center justify-between">
+      <p class="text-body-sm font-body-sm text-text-muted" dir="ltr" id="areaPhone"></p>
+      <button id="switchPhone" class="text-label-sm font-label-sm text-primary underline">להחליף מספר</button>
+    </div>
+
+    <!-- profile photo + subscription -->
+    <div class="rounded-xl bg-surface-card p-4 shadow-md flex items-center gap-4">
+      <div class="relative shrink-0">
+        <img id="profilePhoto" src="" alt="" class="w-16 h-16 rounded-full object-cover bg-surface-container" style="display:none">
+        <div id="profilePhotoPlaceholder" class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center">
+          <span class="material-symbols-outlined text-text-muted text-[28px]">person</span>
+        </div>
+        <button id="photoUploadBtn" class="absolute -bottom-1 -left-1 w-6 h-6 rounded-full bg-primary-container flex items-center justify-center shadow-md">
+          <span class="material-symbols-outlined text-[14px] text-on-primary-container">edit</span>
+        </button>
+        <input type="file" id="photoInput" accept="image/*" style="display:none">
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-label-sm font-label-sm text-text-muted mb-1">סטטוס מנוי</p>
+        <p id="subStatus" class="text-body-sm font-body-sm text-text-primary font-bold">בודק...</p>
+        <a href="/membership" class="text-label-sm font-label-sm text-primary underline">לרכישת מנוי</a>
+      </div>
+    </div>
+
+    <!-- registrations -->
+    <div>
+      <h2 class="text-label-md font-label-md text-text-secondary mb-2">המסיבות שנרשמתי אליהן</h2>
+      <div id="registrations" class="flex flex-col gap-2"></div>
+    </div>
+
+    <!-- balance match -->
+    <div>
+      <h2 class="text-label-md font-label-md text-text-secondary mb-2">האיזון שלי</h2>
+      <div id="balanceMatch"></div>
+    </div>
+
+    <!-- favorites -->
+    <div>
+      <h2 class="text-label-md font-label-md text-text-secondary mb-2">המועדפים שלי</h2>
+      <p class="text-label-sm font-label-sm text-text-muted mb-2">סמנו לב על מסיבות שמעניינות אתכם כדי לקבל עדכון כשמתקרב תאריך.</p>
+      <div id="favorites" class="cards"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-new.png" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
+
+<nav class="fixed bottom-0 inset-x-0 z-50 bg-surface-dim/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.6)]">
+<div class="flex items-center justify-around h-16 px-1">
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-sm text-label-sm">בית</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/about"><span class="material-symbols-outlined text-[22px]">info</span><span class="font-label-sm text-label-sm">אודות</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/membership"><span class="material-symbols-outlined text-[22px]">balance</span><span class="font-label-sm text-label-sm">מנוי לאיזון</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/community"><span class="material-symbols-outlined text-[22px]">forum</span><span class="font-label-sm text-label-sm">קהילה</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/contact"><span class="material-symbols-outlined text-[22px]">call</span><span class="font-label-sm text-label-sm">צור קשר</span></a>
+</div>
+</nav>
+
+<script src="assets/app.js?v=202609061252"></script>
+<script type="module">
+import "./assets/site-data.js?v=202609062001";
+
+const STORAGE_KEY = "lp_my_area_phone";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const gate = document.getElementById("gate");
+  const area = document.getElementById("area");
+  const form = document.getElementById("lookupForm");
+  const phoneInput = document.getElementById("phoneInput");
+  const areaPhone = document.getElementById("areaPhone");
+  const switchPhoneBtn = document.getElementById("switchPhone");
+
+  const savedPhone = localStorage.getItem(STORAGE_KEY);
+  if (savedPhone) {
+    openArea(savedPhone);
+  }
+
+  form.addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const phone = phoneInput.value.trim();
+    if (!phone) return;
+    localStorage.setItem(STORAGE_KEY, phone);
+    openArea(phone);
+  });
+
+  switchPhoneBtn.addEventListener("click", () => {
+    localStorage.removeItem(STORAGE_KEY);
+    area.style.display = "none";
+    gate.style.display = "block";
+    phoneInput.value = "";
+  });
+
+  async function openArea(phone) {
+    gate.style.display = "none";
+    area.style.display = "flex";
+    areaPhone.textContent = phone;
+    await loadAll(phone);
+  }
+
+  function statusLabel(status) {
+    if (status === "matched") return { cls: "status-matched", icon: "favorite", text: "מאוזן" };
+    if (status === "waiting") return { cls: "status-waiting", icon: "hourglass_empty", text: "ממתין לאיזון" };
+    return { cls: "status-confirmed", icon: "check_circle", text: "רשום" };
+  }
+
+  function formatDate(d) {
+    try {
+      const dt = d instanceof Date ? d : new Date(d);
+      if (Number.isNaN(dt.getTime())) return "";
+      return dt.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
+    } catch { return ""; }
+  }
+
+  function renderRegistrations(list) {
+    const box = document.getElementById("registrations");
+    if (!list || list.length === 0) {
+      box.innerHTML = `<div class="rounded-xl bg-surface-card p-4 shadow-md text-center text-text-muted text-body-sm">אין לכם רישומים פעילים כרגע.</div>`;
+      return;
+    }
+    box.innerHTML = list.map((r) => {
+      const s = statusLabel(r.status);
+      return `<div class="rounded-xl bg-surface-card p-4 shadow-md flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <h3 class="text-body-md font-body-md text-text-primary font-bold truncate">${r.partyName || ""}</h3>
+          <p class="text-label-sm font-label-sm text-text-muted">${formatDate(r.date)}</p>
+        </div>
+        <span class="status-chip ${s.cls}"><span class="material-symbols-outlined text-[14px]">${s.icon}</span>${s.text}</span>
+      </div>`;
+    }).join("");
+  }
+
+  function renderBalanceMatch(match, hasActiveSubscription) {
+    const box = document.getElementById("balanceMatch");
+    if (!match) {
+      box.innerHTML = `<div class="rounded-xl bg-surface-card p-5 shadow-md text-center">
+        <span class="material-symbols-outlined text-text-muted text-[32px] mb-2 block">search_off</span>
+        <p class="text-text-secondary text-body-sm">אין לכם איזון פעיל כרגע. אם נרשמתם לאיזון מגדרי, האיזון מתבצע ידנית ועשוי לקחת זמן.</p>
+      </div>`;
+      return;
+    }
+
+    if (!hasActiveSubscription) {
+      box.innerHTML = `<div class="rounded-xl bg-surface-card p-5 shadow-md flex flex-col items-center text-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[32px]">lock</span>
+        <p class="text-text-primary text-body-sm font-bold">יש לכם התאמת איזון!</p>
+        <p class="text-text-secondary text-body-sm">כדי לראות עם מי אתם מאוזנים, יש לרכוש מנוי (גם ליום אחד מספיק).</p>
+        <a href="/membership" class="mt-2 h-11 px-6 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-md text-label-md shadow-md flex items-center">לרכישת מנוי</a>
+      </div>`;
+      return;
+    }
+
+    if (match.role === "male") {
+      box.innerHTML = `<div class="rounded-xl bg-surface-card p-5 shadow-md flex flex-col gap-3">
+        <p class="text-label-sm font-label-sm text-text-muted">${match.partyName ? "עבור " + match.partyName : ""}</p>
+        <div class="flex items-center gap-3">
+          <span class="w-11 h-11 rounded-full bg-primary-container/15 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-primary text-[22px]">favorite</span>
+          </span>
+          <div>
+            <p class="text-label-sm font-label-sm text-text-muted">האיזון שלך</p>
+            <h3 class="text-headline-sm font-headline-sm text-text-primary">${match.matchName || "—"}</h3>
+          </div>
+        </div>
+        ${match.matchPhone
+          ? `<div class="rounded-lg bg-surface-container p-3 flex items-center justify-between">
+              <span class="text-body-sm font-body-sm text-text-secondary">בחרה לשתף איתך את הטלפון שלה</span>
+              <a href="tel:${match.matchPhone}" class="text-primary font-label-md font-bold" dir="ltr">${match.matchPhone}</a>
+            </div>`
+          : `<p class="text-body-sm font-body-sm text-text-muted">היא עדיין לא בחרה לשתף איתך מספר טלפון. אם תבחר בכך, המספר יופיע כאן.</p>`
+        }
+      </div>`;
+      return;
+    }
+
+    box.innerHTML = `<div class="rounded-xl bg-surface-card p-5 shadow-md flex flex-col gap-4">
+      <p class="text-label-sm font-label-sm text-text-muted">${match.partyName ? "עבור " + match.partyName : ""}</p>
+      <div class="flex items-center gap-3">
+        <span class="w-11 h-11 rounded-full bg-primary-container/15 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-primary text-[22px]">favorite</span>
+        </span>
+        <div>
+          <p class="text-label-sm font-label-sm text-text-muted">האיזון שלך</p>
+          <h3 class="text-headline-sm font-headline-sm text-text-primary">${match.matchName || "—"}</h3>
+        </div>
+      </div>
+      ${match.matchPhone
+        ? `<div class="rounded-lg bg-surface-container p-3 flex items-center justify-between">
+            <span class="text-body-sm font-body-sm text-text-secondary">מספר הטלפון שלו</span>
+            <a href="tel:${match.matchPhone}" class="text-primary font-label-md font-bold" dir="ltr">${match.matchPhone}</a>
+          </div>`
+        : ""
+      }
+      <div class="rounded-lg bg-surface-container p-3 flex items-center justify-between gap-3">
+        <div>
+          <p class="text-body-sm font-body-sm text-text-primary font-bold">לשתף איתו את מספר הטלפון שלי</p>
+          <p class="text-label-sm font-label-sm text-text-muted mt-0.5">לגמרי בבחירתך — אפשר לשנות בכל רגע.</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+          <input type="checkbox" id="shareToggle" class="sr-only peer" ${match.phoneShared ? "checked" : ""}>
+          <div class="w-11 h-6 bg-surface-container-high rounded-full peer peer-checked:bg-primary-container transition-colors"></div>
+          <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:-translate-x-5"></div>
+        </label>
+      </div>
+    </div>`;
+
+    document.getElementById("shareToggle").addEventListener("change", async (ev) => {
+      const shared = ev.target.checked;
+      ev.target.disabled = true;
+      try {
+        await window.LPData.shareMyBalancePhone(match.partyId, match.femalePhone, shared);
+        toast(shared ? "המספר שלך שותף עם האיזון" : "הפסקת לשתף את המספר");
+      } catch (err) {
+        ev.target.checked = !shared;
+        toast("שגיאה בשמירה, נסי שוב", "error");
+      } finally {
+        ev.target.disabled = false;
+      }
+    });
+  }
+
+  async function renderFavorites(phone, currentFavoriteIds) {
+    const box = document.getElementById("favorites");
+    let events = [];
+    try { events = await window.LPData.loadEvents(); } catch { events = []; }
+    if (!events.length) {
+      box.innerHTML = `<p class="text-text-muted text-body-sm">אין כרגע מסיבות פעילות.</p>`;
+      return;
+    }
+    const favSet = new Set(currentFavoriteIds);
+    box.innerHTML = events.map((e) => `
+      <article class="card" data-fav-card="${e.id}">
+        <div class="event-cover" style="background-image:url('${e.img || ""}')"></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <h3 style="margin:0">${e.title || ""}</h3>
+            <button type="button" data-fav-toggle="${e.id}" style="background:none;border:none;padding:4px;cursor:pointer">
+              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' ${favSet.has(e.id) ? 1 : 0};color:${favSet.has(e.id) ? "#e11d48" : "#94A3B8"}">favorite</span>
+            </button>
+          </div>
+          <p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p>
+          <a class="btn primary" href="/event?id=${e.id}">לפרטים</a>
+        </div>
+      </article>
+    `).join("");
+
+    box.querySelectorAll("[data-fav-toggle]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const id = btn.getAttribute("data-fav-toggle");
+        const isFav = favSet.has(id);
+        btn.disabled = true;
+        try {
+          await window.LPData.toggleFavorite(phone, id, !isFav);
+          if (isFav) favSet.delete(id); else favSet.add(id);
+          const icon = btn.querySelector("span");
+          icon.style.color = favSet.has(id) ? "#e11d48" : "#94A3B8";
+          icon.style.fontVariationSettings = `'FILL' ${favSet.has(id) ? 1 : 0}`;
+        } catch {
+          toast("שגיאה בשמירת מועדף, נסו שוב", "error");
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  function wirePhotoUpload(phone, hasProfile) {
+    const btn = document.getElementById("photoUploadBtn");
+    const input = document.getElementById("photoInput");
+    btn.addEventListener("click", () => {
+      if (!hasProfile) {
+        toast("התמונה תישמר לאחר הרשמה למסיבה עם המספר הזה", "error");
+        return;
+      }
+      input.click();
+    });
+    input.addEventListener("change", async () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      try {
+        const url = await window.LPData.uploadMyProfilePhoto(phone, file);
+        if (url) {
+          document.getElementById("profilePhoto").src = url;
+          document.getElementById("profilePhoto").style.display = "block";
+          document.getElementById("profilePhotoPlaceholder").style.display = "none";
+          toast("התמונה נשמרה");
+        }
+      } catch {
+        toast("שגיאה בהעלאת התמונה, נסו שוב", "error");
+      }
+    });
+  }
+
+  async function loadAll(phone) {
+    document.getElementById("subStatus").textContent = "בודק...";
+    document.getElementById("registrations").innerHTML = `<p class="text-text-muted text-body-sm text-center">טוען...</p>`;
+    document.getElementById("balanceMatch").innerHTML = `<p class="text-text-muted text-body-sm text-center">טוען...</p>`;
+
+    try {
+      const data = await window.LPData.loadMyPersonalArea(phone);
+
+      if (data.profile) {
+        if (data.profile.photoUrl) {
+          document.getElementById("profilePhoto").src = data.profile.photoUrl;
+          document.getElementById("profilePhoto").style.display = "block";
+          document.getElementById("profilePhotoPlaceholder").style.display = "none";
+        }
+        document.getElementById("subStatus").textContent = data.profile.hasActiveSubscription
+          ? "מנוי פעיל"
+          : "אין מנוי פעיל";
+      } else {
+        document.getElementById("subStatus").textContent = "טרם נמצא רישום עם המספר הזה";
+      }
+      wirePhotoUpload(phone, !!data.profile);
+
+      renderRegistrations(data.registrations);
+      renderBalanceMatch(data.balanceMatch, !!(data.profile && data.profile.hasActiveSubscription));
+      const favIds = (data.favorites || []).map((e) => e.id);
+      await renderFavorites(phone, favIds);
+    } catch (err) {
+      document.getElementById("registrations").innerHTML = `<p class="text-text-muted text-body-sm text-center">לא הצלחנו לטעון כרגע, נסו שוב מאוחר יותר.</p>`;
+    }
+  }
+});
+</script>
+</body></html>

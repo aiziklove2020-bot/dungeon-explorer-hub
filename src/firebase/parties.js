@@ -1486,7 +1486,10 @@ export const getMyBalanceMatch = async (phoneNumber) => {
   if (!normalized) return null;
 
   const parties = await getActiveParties();
+  const now = Date.now();
   for (const party of parties) {
+    const partyDate = party.date instanceof Date ? party.date : new Date(party.date);
+    if (!Number.isNaN(partyDate.getTime()) && partyDate.getTime() < now) continue;
     const matches = party.balanceMatches || [];
     for (const m of matches) {
       // Both the algorithmic pairing (matchType 'balance', from
@@ -1545,5 +1548,55 @@ export const setBalanceMatchPhoneShared = async (partyId, femalePhone, shared) =
   await invalidateCache(`party_${partyId}`);
   await invalidateCache(`balanceMatches_${partyId}`);
   await invalidateCache('activeParties');
+};
+
+/**
+ * Public lookup: every party a phone number is currently registered to
+ * (only upcoming parties — one that already happened simply drops off),
+ * with a per-registration status: 'matched' / 'waiting' (asked for a
+ * gender-balance match and doesn't have one yet) / 'confirmed' (no balance
+ * concept applies, e.g. a couple registration).
+ */
+export const getMyRegistrations = async (phoneNumber) => {
+  const normalized = normalizeIsraeliPhone(phoneNumber) || (phoneNumber || '').replace(/\D/g, '').trim();
+  if (!normalized) return [];
+
+  const parties = await getActiveParties();
+  const now = Date.now();
+  const results = [];
+
+  for (const party of parties) {
+    const partyDate = party.date instanceof Date ? party.date : new Date(party.date);
+    if (!Number.isNaN(partyDate.getTime()) && partyDate.getTime() < now) continue;
+
+    const registrations = party.registrations || [];
+    const myReg = registrations.find(
+      (reg) => normalizeIsraeliPhone(reg.phoneNumber) === normalized
+    );
+    if (!myReg) continue;
+
+    const isBalanceType = String(myReg.registrationType || '').includes('balance');
+    let status = 'confirmed';
+    if (isBalanceType) {
+      const matches = party.balanceMatches || [];
+      const matched = matches.some(
+        (m) =>
+          m.isMatched &&
+          !m.isCouple &&
+          (normalizeIsraeliPhone(m.malePhone) === normalized || normalizeIsraeliPhone(m.femalePhone) === normalized)
+      );
+      status = matched ? 'matched' : 'waiting';
+    }
+
+    results.push({
+      partyId: party.id,
+      partyName: party.name || party.title || '',
+      date: party.date,
+      registrationType: myReg.registrationType,
+      status,
+    });
+  }
+
+  return results;
 };
 

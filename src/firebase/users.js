@@ -18,6 +18,7 @@ import {
   setSubscriptionExpiry,
   removeSubscription,
   getSubscription,
+  hasAnyActiveSubscription,
 } from './subscriptions';
 
 const USERS_COLLECTION = 'users';
@@ -50,6 +51,46 @@ export const getUserByTelegram = async (telegramUsername) => {
   } catch (error) {
     throw error;
   }
+};
+
+/**
+ * Read-only profile summary for the unified personal area, keyed by the
+ * phone number the visitor typed in (no separate login). Returns null when
+ * the phone has no `users` doc yet (nobody has registered with it).
+ */
+export const getMyPersonalAreaProfile = async (phoneNumber) => {
+  const user = await getUserByPhone(normalizeIsraeliPhone(phoneNumber) || phoneNumber);
+  if (!user) return null;
+
+  const partiesSub = getSubscription(user, 'parties');
+  const exchangeSub = getSubscription(user, 'exchangeParties');
+  const active = hasAnyActiveSubscription(user);
+
+  return {
+    userId: user.id,
+    photoUrl: user.photoUrl || '',
+    hasActiveSubscription: active,
+    subscriptionMessage: partiesSub.isActive
+      ? partiesSub.message
+      : exchangeSub.isActive
+        ? exchangeSub.message
+        : partiesSub.message,
+  };
+};
+
+/**
+ * Saves a profile photo URL (already uploaded to storage) onto the phone
+ * number's `users` doc. No-ops silently if the phone has no doc yet — we
+ * never create a bare user doc just from a photo upload; a real doc is only
+ * ever created by an actual party registration (see createUserFromRegistration).
+ */
+export const updateMyProfilePhoto = async (phoneNumber, photoUrl) => {
+  const user = await getUserByPhone(normalizeIsraeliPhone(phoneNumber) || phoneNumber);
+  if (!user) return false;
+  await updateDoc(doc(db, USERS_COLLECTION, user.id), { photoUrl });
+  await invalidateCache(`userByPhone_${normalizeIsraeliPhone(phoneNumber) || phoneNumber}`);
+  await invalidateCache(`userById_${user.id}`);
+  return true;
 };
 
 export const isUserBlocked = async (phoneNumber, telegramUsername = null) => {
