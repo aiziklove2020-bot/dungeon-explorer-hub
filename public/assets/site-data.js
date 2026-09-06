@@ -24610,6 +24610,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				partyId: e.id,
 				partyName: e.name || e.title || "",
 				date: e.date,
+				image: e.imageURL || "",
 				registrationType: a.registrationType,
 				status: s
 			});

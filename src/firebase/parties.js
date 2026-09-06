@@ -1592,6 +1592,7 @@ export const getMyRegistrations = async (phoneNumber) => {
       partyId: party.id,
       partyName: party.name || party.title || '',
       date: party.date,
+      image: party.imageURL || '',
       registrationType: myReg.registrationType,
       status,
     });

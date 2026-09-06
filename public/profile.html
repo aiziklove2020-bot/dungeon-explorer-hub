@@ -94,12 +94,12 @@
 
   <div id="regsSection" class="mb-6" style="display:none">
     <h2 class="font-headline-md text-headline-md text-text-primary mb-3">המסיבות שנרשמתי אליהן</h2>
-    <div id="regsList" class="flex flex-col gap-2"></div>
+    <div id="regsList" class="flex flex-col gap-2"><p class="text-text-muted text-sm">טוען...</p></div>
   </div>
 
   <div id="matchSection" class="mb-6" style="display:none">
     <h2 class="font-headline-md text-headline-md text-text-primary mb-3">האיזון שלי</h2>
-    <div id="matchBox"></div>
+    <div id="matchBox"><p class="text-text-muted text-sm">טוען...</p></div>
   </div>
 
   <div id="favsSection" class="mb-6" style="display:none">
@@ -138,7 +138,7 @@
 
 <script src="assets/app.js?v=202609062025"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609062044";
+import "./assets/site-data.js?v=202609062056";
 document.addEventListener("DOMContentLoaded", async () => {
   const u = LP.current();
   if (!u) { location = "/login"; return; }
@@ -146,6 +146,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("pname").textContent = u.name;
   document.getElementById("pemail").textContent = u.email;
   document.getElementById("logout").onclick = () => { localStorage.removeItem("lp_current"); location = "/"; };
+
+  // Show these sections with a "טוען..." placeholder right away instead of
+  // popping the whole block in once the (network-bound) data arrives a
+  // second or two later — avoids the jarring layout shift users reported.
+  document.getElementById("regsSection").style.display = "";
+  document.getElementById("matchSection").style.display = "";
 
   function statusLabel(status) {
     if (status === "matched") return { cls: "background:rgba(16,185,129,.15);color:#10B981", icon: "favorite", text: "מאוזן" };
@@ -205,14 +211,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("regsSection").style.display = "";
       document.getElementById("regsList").innerHTML = regs.map((r) => {
         const s = statusLabel(r.status);
-        return `<div class="bg-surface-card border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-3">
-          <div class="min-w-0">
-            <h3 class="text-text-primary font-bold truncate">${r.partyName || ""}</h3>
+        return `<div class="bg-surface-card border border-white/5 rounded-2xl p-3 flex items-center gap-3">
+          ${r.image
+            ? `<div style="width:48px;height:48px;border-radius:12px;background-size:cover;background-position:center;flex-shrink:0;background-image:url('${r.image}')"></div>`
+            : `<div style="width:48px;height:48px;border-radius:12px;flex-shrink:0;background:var(--tw-surface-container-high, #2a292e);display:flex;align-items:center;justify-content:center" class="bg-surface-container-high"><span class="material-symbols-outlined text-text-muted" style="font-size:22px">celebration</span></div>`
+          }
+          <div class="min-w-0 flex-1">
+            <h3 class="text-text-primary font-bold truncate text-sm">${r.partyName || ""}</h3>
             <p class="text-text-muted text-xs">${formatDate(r.date)}</p>
           </div>
-          <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;${s.cls}"><span class="material-symbols-outlined" style="font-size:14px">${s.icon}</span>${s.text}</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;flex-shrink:0;${s.cls}"><span class="material-symbols-outlined" style="font-size:14px">${s.icon}</span>${s.text}</span>
         </div>`;
       }).join("");
+    } else {
+      document.getElementById("regsSection").style.display = "none";
     }
 
     if (personalArea.balanceMatch) {
@@ -235,6 +247,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         </div>`;
       }
+    } else {
+      document.getElementById("matchSection").style.display = "none";
     }
 
     const favs = personalArea.favorites || [];
