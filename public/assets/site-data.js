@@ -24549,7 +24549,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 		for (let e of n) {
 			let n = e.balanceMatches || [];
 			for (let r of n) {
-				if (!r.isMatched || r.matchType !== "balance") continue;
+				if (!r.isMatched || r.isCouple) continue;
 				let n = XE(r.malePhone) === t, i = XE(r.femalePhone) === t;
 				if (n) return {
 					partyId: e.id,
@@ -24564,6 +24564,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 					partyName: e.name || e.title || "",
 					role: "female",
 					matchName: r.maleName || "",
+					matchPhone: r.malePhone || "",
 					phoneShared: !!r.phoneShared,
 					femalePhone: r.femalePhone || ""
 				};
