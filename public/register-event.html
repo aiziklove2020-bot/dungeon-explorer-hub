@@ -139,6 +139,10 @@
               <input name="malePhone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none" dir="ltr">
             </div>
           </div>
+          <div>
+            <label class="block text-xs font-bold text-text-secondary mb-1.5">טלגרם (אופציונלי)</label>
+            <input name="maleTelegramUsername" placeholder="@username" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none" dir="ltr">
+          </div>
         </div>
         <div class="rounded-xl border border-white/10 p-4 space-y-3">
           <p class="text-primary text-xs font-bold flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">woman</span>פרטי האישה</p>
@@ -151,6 +155,10 @@
               <label class="block text-xs font-bold text-text-secondary mb-1.5">טלפון</label>
               <input name="femalePhone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none" dir="ltr">
             </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-text-secondary mb-1.5">טלגרם (אופציונלי)</label>
+            <input name="femaleTelegramUsername" placeholder="@username" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none" dir="ltr">
           </div>
         </div>
       </div>
@@ -422,6 +430,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       await window.LPData.registerForParty(selectedParty.id, {
         fullName: maleFullName,
         phoneNumber: malePhone,
+        telegramUsername: f.get("maleTelegramUsername") || "",
+        womanTelegramUsername: f.get("femaleTelegramUsername") || "",
         registrationType: "single-male-couple",
         partnerName: femaleFullName,
         partnerPhone: femalePhone,
@@ -429,6 +439,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       await window.LPData.registerForParty(selectedParty.id, {
         fullName: femaleFullName,
         phoneNumber: femalePhone,
+        telegramUsername: f.get("femaleTelegramUsername") || "",
         registrationType: "single-female-couple",
         partnerName: maleFullName,
         partnerPhone: malePhone,

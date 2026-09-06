@@ -262,6 +262,11 @@ async function registerForParty(partyId: string, data: {
   fullName: string;
   phoneNumber: string;
   telegramUsername?: string;
+  // Only meaningful on the male half of a couple registration — the female
+  // half's own registerForParty call never sends a notification (see
+  // skipAutoSend below), so her Telegram handle has to ride along on his
+  // call to reach the single combined couple message.
+  womanTelegramUsername?: string;
   registrationType: "single-male-balance" | "single-female-balance" | "single-female-discount" | "single-male-couple" | "single-female-couple" | "couple";
   partnerName?: string;
   partnerPhone?: string;
