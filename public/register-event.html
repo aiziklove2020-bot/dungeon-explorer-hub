@@ -72,7 +72,10 @@
 
   <div id="regStep2" style="display:none" class="bg-surface-card border border-white/5 rounded-2xl p-5">
     <div class="flex items-center justify-between mb-4">
-      <h2 id="selectedPartyTitle" class="font-headline-md text-headline-md text-text-primary">פרטי הרשמה</h2>
+      <div>
+        <h2 id="selectedPartyTitle" class="font-headline-md text-headline-md text-text-primary">פרטי הרשמה</h2>
+        <p id="selectedPartyMeta" class="text-text-secondary text-xs mt-1 flex items-center gap-1"></p>
+      </div>
       <button type="button" id="backToParties2" class="text-text-muted hover:text-text-primary text-sm flex items-center gap-1">
         <span class="material-symbols-outlined text-[18px]">arrow_forward</span>שינוי מסיבה
       </button>
@@ -166,7 +169,8 @@
       <span class="material-symbols-outlined text-[36px] text-status-balanced">check_circle</span>
     </div>
     <h2 class="font-headline-md text-headline-md text-text-primary">ההרשמה נשלחה!</h2>
-    <p class="text-text-secondary mt-2 mb-5">נציג שלנו ייצור איתך קשר לאישור סופי. נתראה במסיבה!</p>
+    <p class="text-text-secondary mt-2 mb-3">נציג שלנו ייצור איתך קשר לאישור סופי. נתראה במסיבה!</p>
+    <div id="successSummary" class="text-right bg-surface-container rounded-xl p-4 mb-5 space-y-1.5"></div>
     <a class="inline-block rounded-xl bg-gradient-to-l from-[#e11d48] to-[#be0037] text-white font-bold py-3 px-8" href="/">חזרה לדף הבית</a>
   </div>
 </main>
@@ -255,6 +259,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   function showStep2(party) {
     selectedParty = party;
     document.getElementById("selectedPartyTitle").textContent = party.title;
+    const metaEl = document.getElementById("selectedPartyMeta");
+    const metaParts = [party.day, party.date].filter(Boolean);
+    metaEl.innerHTML = metaParts.length
+      ? `<span class="material-symbols-outlined text-[14px]">calendar_month</span><span>${metaParts.join(", ")}</span>`
+      : "";
     step1.style.display = "none";
     step2.style.display = "";
     setStep(2);
@@ -304,6 +313,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     pickupWrap.style.display = (typeSelect.value === "single-female-discount" || typeSelect.value === "single-female-balance") ? "" : "none";
   });
 
+  function showSuccess(party, pickupAddress) {
+    const summary = document.getElementById("successSummary");
+    const rows = [];
+    rows.push(`<div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">celebration</span><span class="font-bold text-text-primary">${party.title}</span></div>`);
+    const metaParts = [party.day, party.date].filter(Boolean);
+    if (metaParts.length) {
+      rows.push(`<div class="flex items-center gap-2 text-text-secondary text-sm"><span class="material-symbols-outlined text-[18px]">calendar_month</span><span>${metaParts.join(", ")}</span></div>`);
+    }
+    if (pickupAddress) {
+      rows.push(`<div class="flex items-center gap-2 text-text-secondary text-sm"><span class="material-symbols-outlined text-[18px]">directions_car</span><span>איסוף: ${pickupAddress}</span></div>`);
+    }
+    summary.innerHTML = rows.join("");
+    step2.style.display = "none";
+    document.getElementById("regSuccess").style.display = "";
+  }
+
   const ISRAELI_PHONE_RE = /^05\d{8}$/;
   const phoneInputs = [form.phoneNumber, form.malePhone, form.femalePhone].filter(Boolean);
   phoneInputs.forEach(input => {
@@ -332,16 +357,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         btn.disabled = false;
         return;
       }
+      const pickupAddress = (f.get("registrationType") === "single-female-discount" || f.get("registrationType") === "single-female-balance") ? (f.get("pickupAddress") || "") : "";
       try {
         await window.LPData.registerForParty(selectedParty.id, {
           fullName: f.get("fullName"),
           phoneNumber,
           telegramUsername: f.get("telegramUsername"),
           registrationType: f.get("registrationType"),
-          pickupAddress: (f.get("registrationType") === "single-female-discount" || f.get("registrationType") === "single-female-balance") ? (f.get("pickupAddress") || "") : "",
+          pickupAddress,
         });
-        step2.style.display = "none";
-        document.getElementById("regSuccess").style.display = "";
+        showSuccess(selectedParty, pickupAddress);
       } catch (err) {
         toast(err.message || "שגיאה בהרשמה, נסו שוב", "error");
       } finally {
@@ -413,8 +438,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // formatted couple notification on its own (registerForParty in
       // site-bridge.ts skips the female half's auto-send). This used to
       // fire a *third*, near-identical message on top of that.
-      step2.style.display = "none";
-      document.getElementById("regSuccess").style.display = "";
+      showSuccess(selectedParty, "");
     } catch (err) {
       toast(err.message || "שגיאה בהרשמה, נסו שוב", "error");
     } finally {
