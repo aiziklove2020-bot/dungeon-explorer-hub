@@ -1508,6 +1508,12 @@ export const getMyBalanceMatch = async (phoneNumber) => {
           partyName: party.name || party.title || '',
           role: 'female',
           matchName: m.maleName || '',
+          // Asymmetric by design: the man only ever opted into gender
+          // balance, so his contact info is low-risk to share — the woman
+          // sees his name and phone unconditionally. Her own phone is the
+          // sensitive direction (see the male branch above), gated behind
+          // her own explicit opt-in via setBalanceMatchPhoneShared.
+          matchPhone: m.malePhone || '',
           phoneShared: !!m.phoneShared,
           femalePhone: m.femalePhone || '',
         };
