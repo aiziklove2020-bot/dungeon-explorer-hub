@@ -51,9 +51,19 @@ const Admin = () => {
     publishContent, importContentFromGit, reloadContent, clearAllContentCache
   } = useContent();
 
-  const [isAuthenticated, setIsAuthenticated] = useState(() =>
-    sessionStorage.getItem('admin_authenticated') === 'true'
-  );
+  // Always start unauthenticated so the very first client render matches
+  // what the server rendered (the server has no sessionStorage, so it
+  // always renders the logged-out view) — reading sessionStorage in the
+  // initializer made the client's first render disagree with the server's,
+  // which React flags as a hydration mismatch. The real check happens once,
+  // safely, after mount below.
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    if (sessionStorage.getItem('admin_authenticated') === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
   const [activeSection, setActiveSection] = useState('parties');
   // Advanced tools (DB backup, DB read-log, git history) are real working
   // features, just rarely-clicked/technical — collapsed by default to keep
