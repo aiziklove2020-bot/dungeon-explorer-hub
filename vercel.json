@@ -87,6 +87,10 @@
       "destination": "/membership.html"
     },
     {
+      "source": "/my-match",
+      "destination": "/my-match.html"
+    },
+    {
       "source": "/news",
       "destination": "/news.html"
     },

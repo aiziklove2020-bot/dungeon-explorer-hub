@@ -6,7 +6,7 @@
 // Exposes window.LPData — real data only. window.LP (assets/app.js) still
 // owns local UI state (current logged-in user session, favorites list) until
 // auth is migrated too.
-import { getActiveParties, registerToPartyNew, createParty, getAllParties, getPartyById, updateParty, deleteParty } from "./firebase/parties";
+import { getActiveParties, registerToPartyNew, createParty, getAllParties, getPartyById, updateParty, deleteParty, getMyBalanceMatch, setBalanceMatchPhoneShared } from "./firebase/parties";
 import { collection, query, where, getDocsFromServer } from "firebase/firestore";
 import { db } from "./firebase/config";
 import { sendRegistrationTelegram, sendManualPartyAnnouncement } from "./firebase/telegram";
@@ -498,6 +498,21 @@ async function loginAdvertiser(phoneNumber: string, password: string) {
   return { id: a.id, businessName: a.businessName, name: a.contactName, role: "advertiser" };
 }
 
+/**
+ * "Who is my balance match" lookup — party registrations have no login of
+ * their own, so identity here is just the phone number the person
+ * registered with (same trust model the rest of party registration already
+ * uses). Never exposes a phone number except the matched woman's own,
+ * explicit, opt-in share.
+ */
+async function loadMyBalanceMatch(phoneNumber: string) {
+  return getMyBalanceMatch(phoneNumber);
+}
+
+async function shareMyBalancePhone(partyId: string, femalePhone: string, shared: boolean) {
+  await setBalanceMatchPhoneShared(partyId, femalePhone, shared);
+}
+
 /** Real per-account favorites (requires a logged-in forum user — see login()/register() above). */
 async function toggleFavorite(userId: string, partyId: string, isFavorite: boolean) {
   if (!userId) throw new Error("יש להתחבר כדי לשמור מועדפים");
@@ -566,6 +581,8 @@ async function loadNewsFeed() {
   toggleFavorite,
   loadMyFavorites,
   loadFavoriteAlerts,
+  loadMyBalanceMatch,
+  shareMyBalancePhone,
 };
 
 /**

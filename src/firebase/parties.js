@@ -1469,3 +1469,71 @@ export const saveBalanceMatches = async (partyId, balanceMatches) => {
 // Re-export from dataAccess for backward compatibility
 export const getBalanceMatches = getBalanceMatchesFromDataAccess;
 
+/**
+ * Public lookup: "who is my balance match" for a solo registrant, by the
+ * phone number they registered with — no separate login exists for party
+ * registrations (only forum accounts have one, and those are a completely
+ * different, email/password system). Searches every currently-active
+ * party's persisted `balanceMatches` (written by the admin's "התאמות" tab)
+ * for an entry naming this phone as either side of a solo balance match.
+ *
+ * Only ever returns the OTHER person's name, never their phone — a phone
+ * number is included only for the male side, and only once the matched
+ * woman has explicitly opted in via setBalanceMatchPhoneShared below.
+ */
+export const getMyBalanceMatch = async (phoneNumber) => {
+  const normalized = normalizeIsraeliPhone(phoneNumber) || (phoneNumber || '').replace(/\D/g, '').trim();
+  if (!normalized) return null;
+
+  const parties = await getActiveParties();
+  for (const party of parties) {
+    const matches = party.balanceMatches || [];
+    for (const m of matches) {
+      if (!m.isMatched || m.matchType !== 'balance') continue;
+      const maleMatches = normalizeIsraeliPhone(m.malePhone) === normalized;
+      const femaleMatches = normalizeIsraeliPhone(m.femalePhone) === normalized;
+      if (maleMatches) {
+        return {
+          partyId: party.id,
+          partyName: party.name || party.title || '',
+          role: 'male',
+          matchName: m.femaleName || '',
+          matchPhone: m.phoneShared ? (m.femalePhone || '') : '',
+          femalePhone: m.femalePhone || '', // needed as the entry's own key, not shown to the man
+        };
+      }
+      if (femaleMatches) {
+        return {
+          partyId: party.id,
+          partyName: party.name || party.title || '',
+          role: 'female',
+          matchName: m.maleName || '',
+          phoneShared: !!m.phoneShared,
+          femalePhone: m.femalePhone || '',
+        };
+      }
+    }
+  }
+  return null;
+};
+
+/**
+ * A matched woman's own choice to reveal her phone number to her balance
+ * match — never automatic, never settable by anyone but her (identified by
+ * the phone number she registered with, matching the entry's femalePhone).
+ */
+export const setBalanceMatchPhoneShared = async (partyId, femalePhone, shared) => {
+  const normalized = normalizeIsraeliPhone(femalePhone) || (femalePhone || '').replace(/\D/g, '').trim();
+  const partyRef = doc(db, PARTIES_COLLECTION, partyId);
+  const partySnap = await getDoc(partyRef);
+  if (!partySnap.exists()) throw new Error('המסיבה לא נמצאה');
+  const matches = partySnap.data().balanceMatches || [];
+  const updated = matches.map((m) =>
+    normalizeIsraeliPhone(m.femalePhone) === normalized ? { ...m, phoneShared: !!shared } : m
+  );
+  await updateDoc(partyRef, { balanceMatches: updated });
+  await invalidateCache(`party_${partyId}`);
+  await invalidateCache(`balanceMatches_${partyId}`);
+  await invalidateCache('activeParties');
+};
+
