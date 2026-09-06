@@ -29,6 +29,10 @@
       </a>
     </div>
     <div class="flex items-center gap-1">
+      <button type="button" data-fav-bell aria-label="עדכונים על מועדפים" style="display:none" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
+        <span class="material-symbols-outlined text-[22px]">notifications</span>
+        <span data-fav-bell-dot style="display:none;position:absolute;top:6px;left:6px;width:8px;height:8px;border-radius:50%;background:#e11d48"></span>
+      </button>
       <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="login-link w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
         <span class="material-symbols-outlined text-[22px]">person</span>
       </a>
@@ -66,13 +70,19 @@
 import "./assets/site-data.js?v=202609052348";
 document.addEventListener("DOMContentLoaded", async () => {
   const box = document.getElementById("favs");
+  const user = LP.current();
+  if (!user) {
+    box.innerHTML = `<div class="panel"><h2>יש להתחבר כדי לראות מועדפים</h2><p style="color:#aaa">מועדפים נשמרים על החשבון שלך, כדי שתקבל/י עדכון כשמתקרבת מסיבה ששמרת.</p><a class="btn primary" href="/login">כניסה / הרשמה</a></div>`;
+    return;
+  }
   try {
-    const ids = LP.favorites();
+    const ids = await window.LPData.loadMyFavorites(user.id);
     const events = await window.LPData.loadEvents();
     const data = events.filter(e => ids.includes(e.id));
     box.innerHTML = data.length ? data.map(e => `<article class="card"><div class="event-cover" style="background-image:url('${e.img}')"></div><div class="card-body">${e.category ? `<span class="chip" style="align-self:center;margin-bottom:6px;font-size:12px;padding:4px 10px;color:#ffb4ab;border-color:#5c3f40">${e.category}</span>` : ""}<h3>${e.title}</h3><p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p><a class="btn primary" href="/event?id=${e.id}">לפרטים</a></div></article>`).join("") : `<div class="panel"><h2>עדיין אין מועדפים</h2><p style="color:#aaa">לחצו על הלב ליד אירוע כדי לשמור אותו כאן.</p><a class="btn primary" href="/events">למציאת מסיבה</a></div>`;
   } catch (err) {
     box.innerHTML = "<p style=\"color:#aaa\">לא הצלחנו לטעון מועדפים כרגע.</p>";
   }
+  lpWireFavBell();
 });
 </script></body></html>

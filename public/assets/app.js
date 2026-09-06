@@ -136,3 +136,90 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
   });
 });
+
+/**
+ * Real (Firestore-backed, per-account) favorites — separate from the old
+ * anonymous LP.favorites()/[data-fav] pair above, which just persisted to
+ * this browser's localStorage for anyone. Saving a favorite now requires a
+ * real logged-in forum account (LP.current()), since the point is that a
+ * registered user gets notified about parties they cared about — an
+ * anonymous localStorage flag has no "who" to notify.
+ *
+ * Call lpWireFavHearts() after injecting any [data-fav-btn="<partyId>"]
+ * heart buttons into the page (see events.html / index.html card templates).
+ */
+async function lpWireFavHearts(container) {
+  const root = container || document;
+  const buttons = [...root.querySelectorAll("[data-fav-btn]")];
+  if (buttons.length === 0) return;
+  const user = LP.current();
+  const iconOf = (btn) => btn.querySelector(".material-symbols-outlined") || btn;
+  let myFavIds = [];
+  if (user && window.LPData?.loadMyFavorites) {
+    myFavIds = await window.LPData.loadMyFavorites(user.id).catch(() => []);
+  }
+  buttons.forEach((btn) => {
+    const id = btn.dataset.favBtn;
+    const icon = iconOf(btn);
+    icon.textContent = myFavIds.includes(id) ? "favorite" : "favorite_border";
+    btn.addEventListener("click", async (ev) => {
+      ev.preventDefault();
+      const current = LP.current();
+      if (!current) {
+        toast("צריך להתחבר כדי לשמור מועדפים");
+        setTimeout(() => (location.href = "/login"), 900);
+        return;
+      }
+      const nowFav = icon.textContent === "favorite";
+      const next = !nowFav;
+      icon.textContent = next ? "favorite" : "favorite_border"; // optimistic
+      try {
+        await window.LPData.toggleFavorite(current.id, id, next);
+        toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
+      } catch (err) {
+        icon.textContent = nowFav ? "favorite" : "favorite_border"; // revert
+        toast("שגיאה בשמירת מועדף", "error");
+      }
+    });
+  });
+}
+window.lpWireFavHearts = lpWireFavHearts;
+
+/**
+ * In-app reminder bell for a logged-in user: shows a red dot when any
+ * favorited party is happening within the next few days, and a small list
+ * on click. No push/SMS — just visible next time they open the site.
+ * Call lpWireFavBell() once per page that has a [data-fav-bell] button.
+ */
+async function lpWireFavBell() {
+  const btn = document.querySelector("[data-fav-bell]");
+  if (!btn) return;
+  const user = LP.current();
+  if (!user || !window.LPData?.loadFavoriteAlerts) {
+    btn.style.display = "none";
+    return;
+  }
+  btn.style.display = "";
+  const alerts = await window.LPData.loadFavoriteAlerts(user.id).catch(() => []);
+  const dot = btn.querySelector("[data-fav-bell-dot]");
+  if (alerts.length > 0 && dot) dot.style.display = "";
+  btn.addEventListener("click", () => {
+    const existing = document.getElementById("lpFavBellPopup");
+    if (existing) { existing.remove(); return; }
+    const popup = document.createElement("div");
+    popup.id = "lpFavBellPopup";
+    popup.style.cssText = "position:fixed;top:64px;left:16px;right:16px;max-width:360px;margin-inline-start:auto;background:#1f1f23;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;z-index:400;box-shadow:0 20px 50px rgba(0,0,0,.5)";
+    popup.innerHTML = alerts.length
+      ? `<div style="font-weight:800;margin-bottom:8px">מסיבות מועדפות שמתקרבות</div>` +
+        alerts.map(e => `<a href="/event?id=${e.id}" style="display:block;padding:8px 0;border-top:1px solid rgba(255,255,255,.08);color:#fff;text-decoration:none">
+          <div style="font-weight:700">${e.title}</div>
+          <div style="font-size:12px;color:#94A3B8">${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</div>
+        </a>`).join("")
+      : `<div style="color:#94A3B8">אין עדכונים כרגע על מסיבות מועדפות</div>`;
+    document.body.appendChild(popup);
+    setTimeout(() => document.addEventListener("click", function close(ev) {
+      if (!popup.contains(ev.target) && ev.target !== btn) { popup.remove(); document.removeEventListener("click", close); }
+    }), 0);
+  });
+}
+window.lpWireFavBell = lpWireFavBell;

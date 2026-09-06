@@ -23,6 +23,7 @@ import { getStoreSettings, getProducts, createOrder } from "./firebase/store";
 import { uploadPartyImage } from "./firebase/storage";
 import { registerAdvertiser, authenticateAdvertiser } from "./firebase/advertisers";
 import { ensureMainRoom, subscribeMessages, sendChatMessage, joinRoom } from "./firebase/liveChat";
+import { addFavorite, removeFavorite, getFavoritePartyIds } from "./firebase/favorites";
 
 /** "יום שישי" from any Firestore/JS date shape; "" when unparseable. */
 function hebrewDayFromDate(d: any): string {
@@ -497,6 +498,40 @@ async function loginAdvertiser(phoneNumber: string, password: string) {
   return { id: a.id, businessName: a.businessName, name: a.contactName, role: "advertiser" };
 }
 
+/** Real per-account favorites (requires a logged-in forum user — see login()/register() above). */
+async function toggleFavorite(userId: string, partyId: string, isFavorite: boolean) {
+  if (!userId) throw new Error("יש להתחבר כדי לשמור מועדפים");
+  if (isFavorite) {
+    await addFavorite(userId, partyId);
+  } else {
+    await removeFavorite(userId, partyId);
+  }
+}
+
+async function loadMyFavorites(userId: string) {
+  if (!userId) return [];
+  return getFavoritePartyIds(userId).catch(() => []);
+}
+
+/**
+ * In-app "reminder bell" for the logged-in user: favorited parties happening
+ * within the next few days. No push/SMS infra yet — this is the simple v1
+ * (badge + list shown when the user is on the site), not a background alert.
+ */
+async function loadFavoriteAlerts(userId: string, withinDays = 3) {
+  if (!userId) return [];
+  const favIds = await getFavoritePartyIds(userId).catch(() => []);
+  if (favIds.length === 0) return [];
+  const events = await loadEvents().catch(() => []);
+  const now = Date.now();
+  const horizon = now + withinDays * 24 * 60 * 60 * 1000;
+  return events.filter((e: any) => {
+    if (!favIds.includes(e.id)) return false;
+    const ms = new Date(e.dateISO + "T00:00:00").getTime();
+    return Number.isFinite(ms) && ms >= now - 24 * 60 * 60 * 1000 && ms <= horizon;
+  });
+}
+
 async function loadNewsFeed() {
   const feeds = await getRssFeeds().catch(() => []);
   return (feeds || [])
@@ -528,6 +563,9 @@ async function loadNewsFeed() {
   deleteAdvertiserParty,
   publishPartyToTelegram,
   registerForParty,
+  toggleFavorite,
+  loadMyFavorites,
+  loadFavoriteAlerts,
 };
 
 /**

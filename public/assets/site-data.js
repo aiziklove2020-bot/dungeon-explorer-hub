@@ -24449,17 +24449,18 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 		}
 	}, bM = sk, xM = async (e, t) => {
 		try {
-			let n = E(H, nM, e), r = t.date instanceof Date ? t.date : null;
-			if (!r) {
-				let e = String(t.date), n = e.match(/^(\d{4})-(\d{2})-(\d{2})/);
-				r = n ? new Date(Number(n[1]), Number(n[2]) - 1, Number(n[3]), 0, 0, 0, 0) : new Date(e);
+			let n = E(H, nM, e), r = {};
+			if (t.name !== void 0 && (r.name = t.name), t.description !== void 0 && (r.description = t.description || ""), t.date !== void 0) {
+				let e = t.date instanceof Date ? t.date : null;
+				if (!e) {
+					let n = String(t.date), r = n.match(/^(\d{4})-(\d{2})-(\d{2})/);
+					e = r ? new Date(Number(r[1]), Number(r[2]) - 1, Number(r[3]), 0, 0, 0, 0) : new Date(n);
+				}
+				r.date = N.fromDate(e);
+				let n = await eM(), i = tM(e, n);
+				i && (r.expiration = i);
 			}
-			let i = {
-				name: t.name,
-				description: t.description || "",
-				date: N.fromDate(r)
-			}, a = await eM(), o = tM(r, a);
-			return o && (i.expiration = o), t.maleLimit !== void 0 && (i.maleLimit = t.maleLimit), t.femaleLimit !== void 0 && (i.femaleLimit = t.femaleLimit), t.day !== void 0 && (i.day = t.day), t.time !== void 0 && (i.time = t.time), t.dj !== void 0 && (i.dj = t.dj), t.title !== void 0 && (i.title = t.title), t.registrationLink !== void 0 && (i.registrationLink = t.registrationLink), t.whatsappNumber !== void 0 && (i.whatsappNumber = t.whatsappNumber), t.partyType === void 0 ? i.partyType = "internal" : i.partyType = t.partyType, t.publishToInstagram !== void 0 && (i.publishToInstagram = t.publishToInstagram === !0), t.soloMenSalesLocked !== void 0 && (i.soloMenSalesLocked = t.soloMenSalesLocked === !0), t.autoApproveVerifiedCouples !== void 0 && (i.autoApproveVerifiedCouples = t.autoApproveVerifiedCouples === !0), t.guardians !== void 0 && (i.guardians = Array.isArray(t.guardians) ? t.guardians : []), t.imageURL !== void 0 && (i.imageURL = t.imageURL, t.imageDeleteUrl && (i.imageDeleteUrl = t.imageDeleteUrl)), i.needsPublish = !0, await A(n, i), await q(`party_${e}`), await q(`balanceMatches_${e}`), await q("activeParties"), !0;
+			return t.maleLimit !== void 0 && (r.maleLimit = t.maleLimit), t.femaleLimit !== void 0 && (r.femaleLimit = t.femaleLimit), t.day !== void 0 && (r.day = t.day), t.time !== void 0 && (r.time = t.time), t.dj !== void 0 && (r.dj = t.dj), t.title !== void 0 && (r.title = t.title), t.registrationLink !== void 0 && (r.registrationLink = t.registrationLink), t.whatsappNumber !== void 0 && (r.whatsappNumber = t.whatsappNumber), t.partyType === void 0 ? r.partyType = "internal" : r.partyType = t.partyType, t.publishToInstagram !== void 0 && (r.publishToInstagram = t.publishToInstagram === !0), t.soloMenSalesLocked !== void 0 && (r.soloMenSalesLocked = t.soloMenSalesLocked === !0), t.autoApproveVerifiedCouples !== void 0 && (r.autoApproveVerifiedCouples = t.autoApproveVerifiedCouples === !0), t.guardians !== void 0 && (r.guardians = Array.isArray(t.guardians) ? t.guardians : []), t.imageURL !== void 0 && (r.imageURL = t.imageURL, t.imageDeleteUrl && (r.imageDeleteUrl = t.imageDeleteUrl)), r.needsPublish = !0, await A(n, r), await q(`party_${e}`), await q(`balanceMatches_${e}`), await q("activeParties"), !0;
 		} catch (e) {
 			throw e;
 		}
@@ -34833,20 +34834,30 @@ function cU(e) {
 	return typeof t[e] == "function" ? t[e] : $F[e];
 }
 var lU = (...e) => cU("subscribeMessages")(...e), uU = (...e) => cU("ensureMainRoom")(...e), dU = (...e) => cU("joinRoom")(...e), fU = (...e) => cU("sendChatMessage")(...e);
+B(), W();
+var pU = "favorites", mU = (e, t) => `${e}_${t}`, hU = async (e, t) => {
+	await $u(E(H, pU, mU(e, t)), {
+		userId: e,
+		partyId: t,
+		createdAt: N.now()
+	});
+}, gU = async (e, t) => {
+	await ed(E(H, pU, mU(e, t)));
+}, _U = async (e) => (await k(D(T(H, pU), O("userId", "==", e)))).docs.map((e) => e.data().partyId);
 B(), W(), pA(), Sk();
-function pU(e) {
+function vU(e) {
 	let t = e instanceof Date ? e : e?.toDate ? e.toDate() : new Date(e);
 	return !t || Number.isNaN(t.getTime()) ? "" : t.toLocaleDateString("he-IL", { weekday: "long" });
 }
-function mU(e) {
+function yU(e) {
 	let t = e instanceof Date ? e : e?.toDate ? e.toDate() : new Date(e);
 	return !t || Number.isNaN(t.getTime()) ? "" : `${String(t.getDate()).padStart(2, "0")}.${String(t.getMonth() + 1).padStart(2, "0")}.${t.getFullYear()}`;
 }
-function hU(e) {
+function bU(e) {
 	let t = e instanceof Date ? e : e?.toDate ? e.toDate() : new Date(e);
 	return !t || Number.isNaN(t.getTime()) ? "" : `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 }
-var gU = [
+var xU = [
 	{
 		category: "בדסמ",
 		words: [
@@ -34886,12 +34897,12 @@ var gU = [
 		words: ["פסטיבל", "festival"]
 	}
 ];
-function _U(e, t) {
+function SU(e, t) {
 	let n = `${e} ${t}`.toLowerCase();
-	for (let { category: e, words: t } of gU) if (t.some((e) => n.includes(e.toLowerCase()))) return e;
+	for (let { category: e, words: t } of xU) if (t.some((e) => n.includes(e.toLowerCase()))) return e;
 	return "";
 }
-var vU = [
+var CU = [
 	{
 		city: "פתח תקווה",
 		words: ["אבי"]
@@ -34911,23 +34922,23 @@ var vU = [
 		words: ["no limit", "נו לימיט"]
 	}
 ];
-function yU(e) {
+function wU(e) {
 	let t = e.toLowerCase();
-	for (let { city: e, words: n } of vU) if (n.some((e) => t.includes(e.toLowerCase()))) return e;
+	for (let { city: e, words: n } of CU) if (n.some((e) => t.includes(e.toLowerCase()))) return e;
 	return "";
 }
-function bU(e) {
+function TU(e) {
 	let t = e.title || "", n = e.description || "";
 	return {
 		id: e.id,
 		title: t,
-		day: e.day || pU(e.date),
-		date: mU(e.date),
-		dateISO: hU(e.date),
+		day: e.day || vU(e.date),
+		date: yU(e.date),
+		dateISO: bU(e.date),
 		time: e.time || "",
 		dj: e.dj || "",
-		category: e.category || _U(t, n),
-		city: e.city || yU(t),
+		category: e.category || SU(t, n),
+		city: e.city || wU(t),
 		type: e.partyType === "external" ? "אירוע חיצוני" : "מסיבה",
 		img: e.imageURL || "",
 		desc: n,
@@ -34936,11 +34947,11 @@ function bU(e) {
 		partyType: e.partyType || "internal"
 	};
 }
-function xU(e) {
+function EU(e) {
 	let t = (e?.date instanceof Date ? e.date : e?.date?.toDate ? e.date.toDate() : new Date(e?.date))?.getTime?.();
 	return Number.isFinite(t) ? t : Infinity;
 }
-async function SU() {
+async function DU() {
 	let e = null;
 	try {
 		e = (await Qu(D(T(H, "parties"), O("status", "==", "active")))).docs.map((e) => {
@@ -34956,17 +34967,17 @@ async function SU() {
 	}
 	let t = Date.now(), n = (e || []).filter((e) => {
 		let n = e.expiration?.toDate?.() || (e.expiration ? new Date(e.expiration) : null);
-		return n ? n.getTime() >= t : xU(e) >= t - 1440 * 60 * 1e3;
+		return n ? n.getTime() >= t : EU(e) >= t - 1440 * 60 * 1e3;
 	});
-	return e && e.length !== n.length && fetch("/api/telegram-webhook?job=cleanup-parties").catch(() => {}), n.sort((e, t) => xU(e) - xU(t)).map(bU);
+	return e && e.length !== n.length && fetch("/api/telegram-webhook?job=cleanup-parties").catch(() => {}), n.sort((e, t) => EU(e) - EU(t)).map(TU);
 }
-async function CU() {
+async function OU() {
 	return (await yk().catch(() => ({})))?.about || {};
 }
-async function wU() {
+async function kU() {
 	return (await yk().catch(() => ({})))?.contact || {};
 }
-function TU() {
+function AU() {
 	return {
 		sessionId: tN(),
 		send: (e, t) => nN(e, tN()),
@@ -34975,7 +34986,7 @@ function TU() {
 		fetchOnce: () => aN(tN())
 	};
 }
-async function EU() {
+async function jU() {
 	let e = await _k().catch(() => ({})), t = [];
 	return Object.entries({
 		instagram: "אינסטגרם",
@@ -34992,11 +35003,11 @@ async function EU() {
 		});
 	}), t;
 }
-function DU(e) {
+function MU(e) {
 	return String(e || "").trim().replace(/\s+/g, "-").replace(/[^\p{L}\p{N}_-]/gu, "");
 }
-async function OU(e, t, n, r) {
-	let i = DU(e);
+async function NU(e, t, n, r) {
+	let i = MU(e);
 	if (i.length < 2) throw Error("השם קצר מדי — נא להזין לפחות 2 תווים (אותיות/ספרות)");
 	let a = await JM(i, n, t);
 	return r && await ZM(a.id, { gender: r }).catch(() => {}), {
@@ -35007,7 +35018,7 @@ async function OU(e, t, n, r) {
 		role: "user"
 	};
 }
-async function kU(e, t) {
+async function PU(e, t) {
 	let n = await qM(e).catch(() => null);
 	if (!n) throw Error("לא נמצא חשבון עם האימייל הזה");
 	let r = await YM(n.nickname, t);
@@ -35019,13 +35030,13 @@ async function kU(e, t) {
 		role: "user"
 	};
 }
-async function AU(e, t) {
+async function FU(e, t) {
 	await ZM(e, {
 		phone: t.phone || "",
 		bio: t.bio || ""
 	});
 }
-async function jU(e, t) {
+async function IU(e, t) {
 	if (t === "female") return {
 		active: !0,
 		tier: "gold",
@@ -35040,7 +35051,7 @@ async function jU(e, t) {
 		expiry: n
 	};
 }
-async function MU(e, t) {
+async function LU(e, t) {
 	let n = t.registrationType, r = n === "couple" ? "couple" : n.startsWith("single-female") ? "female" : "male", i = await sM(e, {
 		fullName: t.fullName,
 		phoneNumber: t.phoneNumber,
@@ -35061,7 +35072,7 @@ async function MU(e, t) {
 	} catch {}
 	return i;
 }
-async function NU() {
+async function RU() {
 	return (await cN().catch(() => ({ enabled: !1 })))?.enabled ? {
 		enabled: !0,
 		products: (await lN(!0).catch(() => []) || []).map((e) => ({
@@ -35079,7 +35090,7 @@ async function NU() {
 		products: []
 	};
 }
-async function PU(e) {
+async function zU(e) {
 	let t = e.price * e.quantity;
 	return dN({
 		customerName: e.customerName,
@@ -35098,7 +35109,7 @@ async function PU(e) {
 		notes: e.notes || ""
 	});
 }
-function FU() {
+function BU() {
 	let e = null, t = () => (e ||= uU().then((e) => e.id), e);
 	return {
 		subscribe: async (e) => lU(await t(), e),
@@ -35112,11 +35123,11 @@ function FU() {
 		}
 	};
 }
-async function IU(e) {
+async function VU(e) {
 	let t = await mN(e, `adv_${Date.now()}`);
 	return typeof t == "string" ? t : t?.url || "";
 }
-async function LU(e, t) {
+async function HU(e, t) {
 	return rM({
 		city: t.city || "",
 		whatsappNumber: t.whatsappNumber || "",
@@ -35133,18 +35144,18 @@ async function LU(e, t) {
 		createdBy: e
 	});
 }
-async function RU(e) {
-	return (await aM() || []).filter((t) => t.createdBy === e).sort((e, t) => xU(t) - xU(e)).map(bU);
+async function UU(e) {
+	return (await aM() || []).filter((t) => t.createdBy === e).sort((e, t) => EU(t) - EU(e)).map(TU);
 }
-async function zU(e, t) {
+async function WU(e, t) {
 	let n = await bM(t);
 	if (!n || n.createdBy !== e) throw Error("המסיבה לא נמצאה");
-	return bU({
+	return TU({
 		...n,
 		id: t
 	});
 }
-async function BU(e, t, n) {
+async function GU(e, t, n) {
 	let r = await bM(t);
 	if (!r || r.createdBy !== e) throw Error("המסיבה לא נמצאה");
 	return await xM(t, {
@@ -35160,18 +35171,18 @@ async function BU(e, t, n) {
 		whatsappNumber: n.whatsappNumber || ""
 	}), !0;
 }
-async function VU(e, t) {
+async function KU(e, t) {
 	let n = await bM(t);
 	if (!n || n.createdBy !== e) throw Error("המסיבה לא נמצאה");
 	return await SM(t), !0;
 }
-async function HU(e) {
+async function qU(e) {
 	let t = await bM(e);
 	if (!t) throw Error("המסיבה לא נמצאה");
 	let n = await dA(t);
 	return await xM(e, { manualTelegramPublishedAt: (/* @__PURE__ */ new Date()).toISOString() }), n;
 }
-async function UU(e) {
+async function JU(e) {
 	let t = await _N(e);
 	return {
 		id: t.id,
@@ -35180,7 +35191,7 @@ async function UU(e) {
 		role: "advertiser"
 	};
 }
-async function WU(e, t) {
+async function YU(e, t) {
 	let n = await vN(e, t);
 	if (!n.authenticated) throw Error(n.error || "פרטי התחברות שגויים");
 	let r = n.advertiser;
@@ -35191,39 +35202,60 @@ async function WU(e, t) {
 		role: "advertiser"
 	};
 }
-async function GU() {
+async function XU(e, t, n) {
+	if (!e) throw Error("יש להתחבר כדי לשמור מועדפים");
+	n ? await hU(e, t) : await gU(e, t);
+}
+async function ZU(e) {
+	return e ? _U(e).catch(() => []) : [];
+}
+async function QU(e, t = 3) {
+	if (!e) return [];
+	let n = await _U(e).catch(() => []);
+	if (n.length === 0) return [];
+	let r = await DU().catch(() => []), i = Date.now(), a = i + t * 24 * 60 * 60 * 1e3;
+	return r.filter((e) => {
+		if (!n.includes(e.id)) return !1;
+		let t = (/* @__PURE__ */ new Date(e.dateISO + "T00:00:00")).getTime();
+		return Number.isFinite(t) && t >= i - 1440 * 60 * 1e3 && t <= a;
+	});
+}
+async function $U() {
 	return (await bk().catch(() => []) || []).filter((e) => e?.enabled !== !1 && e?.text).map((e) => e.text);
 }
 window.LPData = {
-	loadEvents: SU,
-	loadSocialLinks: EU,
-	loadNewsFeed: GU,
-	loadAbout: CU,
-	loadContact: wU,
-	supportChat: TU,
-	loadStore: NU,
-	createStoreOrder: PU,
-	communityChat: FU,
-	registerAdvertiserAccount: UU,
-	loginAdvertiser: WU,
-	register: OU,
-	login: kU,
-	getMembershipStatus: jU,
-	updateMyProfile: AU,
-	uploadImage: IU,
-	createAdvertiserParty: LU,
-	loadAdvertiserParties: RU,
-	getAdvertiserParty: zU,
-	updateAdvertiserParty: BU,
-	deleteAdvertiserParty: VU,
-	publishPartyToTelegram: HU,
-	registerForParty: MU
+	loadEvents: DU,
+	loadSocialLinks: jU,
+	loadNewsFeed: $U,
+	loadAbout: OU,
+	loadContact: kU,
+	supportChat: AU,
+	loadStore: RU,
+	createStoreOrder: zU,
+	communityChat: BU,
+	registerAdvertiserAccount: JU,
+	loginAdvertiser: YU,
+	register: NU,
+	login: PU,
+	getMembershipStatus: IU,
+	updateMyProfile: FU,
+	uploadImage: VU,
+	createAdvertiserParty: HU,
+	loadAdvertiserParties: UU,
+	getAdvertiserParty: WU,
+	updateAdvertiserParty: GU,
+	deleteAdvertiserParty: KU,
+	publishPartyToTelegram: qU,
+	registerForParty: LU,
+	toggleFavorite: XU,
+	loadMyFavorites: ZU,
+	loadFavoriteAlerts: QU
 };
-function KU() {
+function eW() {
 	if (document.getElementById("lpSupportChat")) return;
 	let e = document.createElement("div");
 	e.id = "lpSupportChat", e.innerHTML = "\n    <button id=\"lpSupportChatToggle\" aria-label=\"תמיכה\" style=\"position:fixed;left:16px;bottom:86px;z-index:300;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#e11d48,#be0037);border:0;color:#fff;box-shadow:0 10px 30px rgba(225,29,72,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s\" onmouseover=\"this.style.transform='scale(1.06)'\" onmouseout=\"this.style.transform='scale(1)'\">\n      <span class=\"material-symbols-outlined\" style=\"font-size:26px\">chat_bubble</span>\n    </button>\n    <div id=\"lpSupportChatPanel\" style=\"display:none;position:fixed;left:16px;bottom:150px;z-index:300;width:min(360px,calc(100vw - 32px));max-height:65vh;background:rgba(19,19,23,.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.55);overflow:hidden;flex-direction:column;font-family:'Inter',Arial,sans-serif\">\n      <div style=\"padding:14px 16px;background:linear-gradient(135deg,#e11d48,#be0037);display:flex;justify-content:space-between;align-items:center\">\n        <div style=\"display:flex;gap:10px;align-items:center\">\n          <div style=\"width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center\">\n            <span class=\"material-symbols-outlined\" style=\"font-size:19px;color:#fff\">support_agent</span>\n          </div>\n          <div>\n            <b style=\"font-size:15px;display:block;color:#fff\">צ'אט תמיכה</b>\n            <small style=\"font-size:11px;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:4px\"><span style=\"width:6px;height:6px;border-radius:50%;background:#35c76f;display:inline-block\"></span>מגיב בהקדם</small>\n          </div>\n        </div>\n        <div style=\"display:flex;gap:6px;align-items:center\">\n          <button id=\"lpSupportChatMin\" title=\"מזעור\" style=\"background:rgba(255,255,255,.16);border:0;color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center\"><span class=\"material-symbols-outlined\" style=\"font-size:17px\">remove</span></button>\n          <button id=\"lpSupportChatClose\" title=\"סגירה\" style=\"background:rgba(255,255,255,.16);border:0;color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center\"><span class=\"material-symbols-outlined\" style=\"font-size:17px\">close</span></button>\n        </div>\n      </div>\n\n      <div id=\"lpSupportChatGate\" style=\"padding:26px 20px;text-align:center\">\n        <div style=\"width:48px;height:48px;border-radius:50%;background:rgba(225,29,72,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 14px\">\n          <span class=\"material-symbols-outlined\" style=\"font-size:24px;color:#e11d48\">waving_hand</span>\n        </div>\n        <p style=\"margin:0 0 14px;font-size:14px;color:#e4e1e7\">הזן את שמך כדי להתחיל את הצ'אט</p>\n        <input id=\"lpSupportChatName\" placeholder=\"שם\" style=\"width:100%;box-sizing:border-box;text-align:center;margin-bottom:14px;background:#1f1f23;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;padding:12px;font-size:14px;outline:none\">\n        <button id=\"lpSupportChatStart\" style=\"width:100%;border:0;border-radius:12px;background:linear-gradient(135deg,#e11d48,#be0037);color:#fff;font-weight:700;padding:12px;cursor:pointer;font-size:14px\">התחל צ'אט</button>\n      </div>\n\n      <div id=\"lpSupportChatBody\" style=\"display:none;flex-direction:column;flex:1;min-height:0\">\n        <div id=\"lpSupportChatMsgs\" class=\"chat-window\" style=\"flex:1;overflow-y:auto;padding:12px;min-height:160px\"></div>\n        <div style=\"display:flex;gap:8px;padding:10px 12px;align-items:center\">\n          <input id=\"lpSupportChatInput\" placeholder=\"כתבו הודעה...\" style=\"flex:1;background:#1f1f23;border:1px solid rgba(255,255,255,.1);border-radius:999px;color:#fff;padding:10px 16px;font-size:14px;outline:none\">\n          <button id=\"lpSupportChatSend\" aria-label=\"שליחה\" style=\"flex-shrink:0;width:40px;height:40px;border-radius:50%;border:0;background:linear-gradient(135deg,#e11d48,#be0037);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center\">\n            <span class=\"material-symbols-outlined\" style=\"font-size:19px;transform:scaleX(-1)\">send</span>\n          </button>\n        </div>\n      </div>\n    </div>\n  ", document.body.appendChild(e);
-	let t = e.querySelector("#lpSupportChatPanel"), n = e.querySelector("#lpSupportChatToggle"), r = e.querySelector("#lpSupportChatClose"), i = e.querySelector("#lpSupportChatMin"), a = e.querySelector("#lpSupportChatGate"), o = e.querySelector("#lpSupportChatName"), s = e.querySelector("#lpSupportChatStart"), c = e.querySelector("#lpSupportChatBody"), l = e.querySelector("#lpSupportChatMsgs"), u = e.querySelector("#lpSupportChatInput"), d = e.querySelector("#lpSupportChatSend"), f = TU(), p = !1, m = () => localStorage.getItem("lp_support_chat_name") || "", h = (e) => localStorage.setItem("lp_support_chat_name", e), g = () => window.LP?.current?.()?.name || m() || "אורח/ת", ee = (e) => {
+	let t = e.querySelector("#lpSupportChatPanel"), n = e.querySelector("#lpSupportChatToggle"), r = e.querySelector("#lpSupportChatClose"), i = e.querySelector("#lpSupportChatMin"), a = e.querySelector("#lpSupportChatGate"), o = e.querySelector("#lpSupportChatName"), s = e.querySelector("#lpSupportChatStart"), c = e.querySelector("#lpSupportChatBody"), l = e.querySelector("#lpSupportChatMsgs"), u = e.querySelector("#lpSupportChatInput"), d = e.querySelector("#lpSupportChatSend"), f = AU(), p = !1, m = () => localStorage.getItem("lp_support_chat_name") || "", h = (e) => localStorage.setItem("lp_support_chat_name", e), g = () => window.LP?.current?.()?.name || m() || "אורח/ת", ee = (e) => {
 		l.innerHTML = e.map((e) => {
 			let t = e.role === "user", n = e.createdAt instanceof Date ? e.createdAt.toLocaleTimeString("he-IL", {
 				hour: "2-digit",
@@ -35267,5 +35299,5 @@ function KU() {
 		e.key === "Enter" && re();
 	});
 }
-typeof document < "u" && (document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", KU) : KU());
+typeof document < "u" && (document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", eW) : eW());
 //#endregion

@@ -1,0 +1,425 @@
+rules_version = '2';
+// TBDSM Firestore rules.
+//
+// Threat model notes:
+// - This codebase does not yet use Firebase Auth, so request.auth is null on
+//   all client calls. Until the Firebase Auth migration (Phase 1.2 of the
+//   security plan) lands, ownership cannot be enforced server-side and these
+//   rules can only enforce STRUCTURAL validation (shape, length, immutability
+//   of identity fields, deny-deletes, restricted update masks).
+// - Cloud Functions (functions/) re-sanitize HTML on forum/blog writes; client
+//   uses DOMPurify. Keep both layers.
+// - Once Firebase Auth + custom claims ship, replace `clientWritable()` and the
+//   per-collection `allow write` rules with `isOwner()` / `isAdmin()` checks.
+// - Mitigation in place at the API layer (Phase 0 of the security plan):
+//     * Admin-only Vercel routes (publish, import, git-history, support-send,
+//       support-chat-diagnostic) require `Authorization: Bearer ${ADMIN_API_SECRET}`
+//       — see lib/apiAuth.js.
+//     * Telegram webhook verifies `X-Telegram-Bot-Api-Secret-Token` against
+//       `TELEGRAM_WEBHOOK_SECRET` when configured.
+//   These do NOT cover client-direct Firestore writes (forum/blog/store/
+//   registrations/support-chat). That gap is closed by Phase 1.2 (Firebase Auth).
+//
+// Deploy: firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ─────────────────────────────────────────────────────────
+    function hasAll(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+    function isString(field) {
+      return request.resource.data[field] is string;
+    }
+    function maxLen(field, len) {
+      return request.resource.data[field].size() <= len;
+    }
+    function isNonEmpty(field) {
+      return request.resource.data[field] is string
+             && request.resource.data[field].size() > 0;
+    }
+    function affectedOnly(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+    // Future-ready (no-op while Firebase Auth is not adopted):
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Default-deny is implicit; explicitly listed collections only.
+
+    // ── Parties (CMS-managed) ───────────────────────────────────────────
+    match /parties/{partyId} {
+      allow read: if true;
+      // TODO(auth): restrict to isAdmin() once auth migration is complete.
+      allow write: if true;
+    }
+
+    // ── Settings ────────────────────────────────────────────────────────
+    // PUBLIC settings (theme, public flags) — readable by anyone.
+    match /settings/{document} {
+      allow read: if true;
+      // TODO(auth): restrict to isAdmin().
+      allow write: if true;
+    }
+    // PRIVATE settings (tokens, secrets) — never returned to clients.
+    // The app must move bot tokens / API keys here and read them only from
+    // Cloud Functions / server using Admin SDK (which bypasses these rules).
+    match /settings/private/{document=**} {
+      allow read, write: if false;
+    }
+
+    // ── Registrations ───────────────────────────────────────────────────
+    match /registrations/{docId} {
+      // PII (phone + name). Open read only until auth lands.
+      // TODO(auth): restrict to isAdmin() and the registrant.
+      allow read: if true;
+      allow create: if hasAll(['regType', 'selectedParties'])
+                    && request.resource.data.selectedParties is list
+                    && request.resource.data.selectedParties.size() <= 50;
+      // Updates limited to admin status fields; no field-deletion.
+      allow update: if affectedOnly(['status', 'notes', 'updatedAt', 'cancelled']);
+      allow delete: if false;
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      // TODO(auth): restrict to isAdmin() / owner.
+      allow write: if true;
+    }
+
+    // ── Advertisers (self-signup, admin-approved) ──────────────────────
+    match /advertisers/{docId} {
+      // Contains a bcrypt password hash — do not expose broadly once
+      // Firebase Auth lands. Open read/write for now, matching the same
+      // no-auth-yet pattern as every other collection in this file.
+      // TODO(auth): restrict to isAdmin() / the owning advertiser.
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /rssFeeds/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // ── Logging collections ─────────────────────────────────────────────
+    match /webhookLogs/{docId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /dbReadLogs/{docId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ── Store ───────────────────────────────────────────────────────────
+    match /storeProducts/{docId} {
+      allow read: if true;
+      // TODO(auth): restrict to isAdmin().
+      allow write: if true;
+    }
+
+    match /storeOrders/{docId} {
+      allow read: if true;
+      allow create: if hasAll(['items', 'createdAt'])
+                    && request.resource.data.items is list
+                    && request.resource.data.items.size() > 0
+                    && request.resource.data.items.size() <= 100;
+      // Status changes only; cannot edit items after creation.
+      allow update: if affectedOnly(['status', 'notes', 'updatedAt', 'paidAt', 'shippedAt']);
+      allow delete: if false;
+    }
+
+    // ── Workshops ───────────────────────────────────────────────────────
+    match /workshops/{workshopId} {
+      allow read: if true;
+      // TODO(auth): restrict to isAdmin().
+      allow write: if true;
+    }
+
+    match /workshopRegistrations/{docId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if affectedOnly(['status', 'notes', 'updatedAt', 'cancelled']);
+      allow delete: if false;
+    }
+
+    // ── Leads (public "רוצה להיות מנוי?" banner submissions) ─────────────
+    match /leads/{docId} {
+      allow read: if true;
+      allow create: if hasAll(['name', 'phone', 'track', 'status', 'createdAt'])
+                    && isNonEmpty('name') && maxLen('name', 120)
+                    && isString('phone') && maxLen('phone', 20)
+                    && request.resource.data.track in ['parties', 'exchange', 'combo']
+                    && request.resource.data.status == 'new';
+      // TODO(auth): restrict update/delete to isAdmin() once auth migration is complete.
+      allow update: if affectedOnly(['status', 'updatedAt']);
+      allow delete: if true;
+    }
+
+    // ── Support chat ────────────────────────────────────────────────────
+    // sessionId is a client-generated UUID; treat it as a capability token.
+    match /supportChat/{sessionId} {
+      allow read, write: if true;
+    }
+    match /supportChat/{sessionId}/messages/{messageId} {
+      allow read: if true;
+      allow create: if hasAll(['text', 'createdAt'])
+                    && isString('text')
+                    && maxLen('text', 4000);
+      allow update: if false;
+      allow delete: if false;
+    }
+    match /supportChatTelegramMap/{docId} {
+      // TODO(auth): server-only via Admin SDK.
+      allow read, write: if true;
+    }
+
+    match /deleteRequests/{docId} {
+      allow create: if hasAll(['userId', 'createdAt']);
+      allow read: if true;
+      allow update: if affectedOnly(['status', 'processedAt', 'notes']);
+      allow delete: if false;
+    }
+
+    // ── Forum ───────────────────────────────────────────────────────────
+    match /forumSections/{docId} {
+      allow read: if true;
+      // TODO(auth): restrict to isAdmin().
+      allow write: if true;
+    }
+
+    match /forumTopics/{docId} {
+      allow read: if true;
+      allow create: if hasAll(['sectionId', 'title', 'content', 'authorId', 'authorName'])
+                    && isNonEmpty('title')
+                    && maxLen('title', 150)
+                    && maxLen('content', 20000)
+                    && isString('authorId');
+      // Authorship and section identity must not change after creation.
+      allow update: if request.resource.data.authorId == resource.data.authorId
+                    && request.resource.data.sectionId == resource.data.sectionId
+                    && (!('content' in request.resource.data) || request.resource.data.content.size() <= 20000)
+                    && (!('title' in request.resource.data) || request.resource.data.title.size() <= 150);
+      // TODO(auth): restrict to isAdmin() or author.
+      allow delete: if true;
+    }
+
+    match /forumReplies/{docId} {
+      allow read: if true;
+      allow create: if hasAll(['topicId', 'content', 'authorId', 'authorName'])
+                    && isNonEmpty('content')
+                    && maxLen('content', 20000)
+                    && isString('authorId');
+      allow update: if request.resource.data.authorId == resource.data.authorId
+                    && request.resource.data.topicId == resource.data.topicId
+                    && (!('content' in request.resource.data) || request.resource.data.content.size() <= 20000);
+      // TODO(auth): restrict to isAdmin() or author.
+      allow delete: if true;
+    }
+
+    match /forumUsers/{docId} {
+      // Public read exposes hashed passwords. TODO(auth): replace with Firebase Auth.
+      allow read: if true;
+      allow create: if hasAll(['nickname', 'password'])
+                    && isNonEmpty('nickname')
+                    && maxLen('nickname', 30)
+                    && isNonEmpty('password');
+      // Identity fields must not change post-create; password change limited.
+      // `nicknameLower` is denormalized from `nickname` for case-insensitive
+      // lookup and must stay pinned in lockstep with it (legacy docs without
+      // `nicknameLower` may have it written exactly once on first login).
+      // Email fields can be set/changed by the owning client, but the client
+      // must never FLIP `emailVerified` from false → true. Only the API
+      // endpoints (admin SDK, which bypasses rules) can mark an address as
+      // verified. We compare against `resource.data` so a partial update
+      // (e.g. profile bio edit) doesn't fail just because the post-write
+      // doc still carries the existing `emailVerified == true`.
+      allow update: if request.resource.data.nickname == resource.data.nickname
+                    && (!('nicknameLower' in request.resource.data)
+                        || !('nicknameLower' in resource.data)
+                        || request.resource.data.nicknameLower == resource.data.nicknameLower)
+                    && (
+                         !('emailVerified' in request.resource.data)
+                         || request.resource.data.emailVerified == false
+                         || (
+                              'emailVerified' in resource.data
+                              && resource.data.emailVerified == true
+                              && request.resource.data.emailVerified == true
+                            )
+                       )
+                    && (!('createdAt' in request.resource.data)
+                        || request.resource.data.createdAt == resource.data.createdAt);
+      // Forum user deletion is admin-driven from the Users tab. Until Firebase
+      // Auth + custom claims land we can't enforce isAdmin() at the rule
+      // layer, so this matches the existing pattern used for other
+      // admin-mutating collections (e.g. blogPosts/forumPosts allow delete).
+      // TODO(auth): restrict to isAdmin() once Firebase Auth migration ships.
+      allow delete: if true;
+    }
+
+    // Password-reset, email-verification tokens, and the per-key throttle
+    // bookkeeping doc are all server-only (admin SDK). Clients must never
+    // read or write these. Default-deny would already cover this, but make
+    // it explicit so future blanket "writes for forumUsers" changes don't
+    // accidentally open the doors.
+    match /forumPasswordResets/{docId} {
+      allow read, write: if false;
+    }
+    match /forumEmailTokens/{docId} {
+      allow read, write: if false;
+    }
+    match /forumAuthThrottle/{docId} {
+      allow read, write: if false;
+    }
+
+    // A logged-in forum user's saved/favorited parties. Same trust model as
+    // forumUsers above (no Firebase Auth yet, so the client's claimed userId
+    // can't be verified at the rule layer — matches the existing pattern
+    // until the Firebase Auth migration lands).
+    match /favorites/{favId} {
+      allow read: if true;
+      allow create: if hasAll(['userId', 'partyId']) && isNonEmpty('userId') && isNonEmpty('partyId');
+      allow update: if false;
+      allow delete: if true;
+    }
+
+    // ── Blog ────────────────────────────────────────────────────────────
+    match /blogPosts/{docId} {
+      allow read: if true;
+      allow create: if hasAll(['title', 'content', 'authorId', 'authorName'])
+                    && isNonEmpty('title')
+                    && maxLen('title', 200)
+                    && maxLen('content', 50000)
+                    && isString('authorId');
+      allow update: if request.resource.data.authorId == resource.data.authorId
+                    && (!('content' in request.resource.data) || request.resource.data.content.size() <= 50000)
+                    && (!('title' in request.resource.data) || request.resource.data.title.size() <= 200);
+      // TODO(auth): restrict to isAdmin() or author.
+      allow delete: if true;
+    }
+
+    match /blogComments/{docId} {
+      allow read: if true;
+      allow create: if hasAll(['postId', 'content', 'authorId'])
+                    && isNonEmpty('content')
+                    && maxLen('content', 5000)
+                    && isString('authorId');
+      allow update: if request.resource.data.authorId == resource.data.authorId
+                    && request.resource.data.postId == resource.data.postId
+                    && (!('content' in request.resource.data) || request.resource.data.content.size() <= 5000);
+      allow delete: if true;
+    }
+
+    match /blogAuthorFollows/{docId} {
+      allow read: if true;
+      allow create: if hasAll(['followerId', 'authorId'])
+                    && isString('followerId')
+                    && isString('authorId');
+      // Identity-only document; no updates needed.
+      allow update: if false;
+      allow delete: if true;
+    }
+
+    // ── Bookmarks ───────────────────────────────────────────────────────
+    match /bookmarks/{docId} {
+      allow read: if true;
+      allow create: if hasAll(['userId', 'itemType', 'itemId'])
+                    && isString('userId')
+                    && isString('itemId')
+                    && (request.resource.data.itemType == 'topic'
+                        || request.resource.data.itemType == 'blogPost');
+      allow update: if request.resource.data.userId == resource.data.userId
+                    && request.resource.data.itemType == resource.data.itemType
+                    && request.resource.data.itemId == resource.data.itemId;
+      allow delete: if true;
+    }
+
+    // ── Notifications ───────────────────────────────────────────────────
+    match /notifications/{docId} {
+      allow read: if true;
+      allow create: if hasAll(['userId', 'type', 'read', 'createdAt'])
+                    && isString('userId')
+                    && request.resource.data.read == false
+                    && (!('message' in request.resource.data) || maxLen('message', 200))
+                    && (!('refTitle' in request.resource.data) || maxLen('refTitle', 100));
+      // Mark-as-read only.
+      allow update: if affectedOnly(['read'])
+                    && request.resource.data.read == true;
+      allow delete: if false;
+    }
+
+    // ── Private Messages ────────────────────────────────────────────────
+    match /privateMessages/{docId} {
+      // TODO(auth): restrict to participants only.
+      allow read: if true;
+      allow create: if hasAll(['conversationId', 'senderId', 'receiverId', 'content', 'read', 'createdAt'])
+                    && isString('senderId')
+                    && isString('receiverId')
+                    && request.resource.data.senderId != request.resource.data.receiverId
+                    && request.resource.data.read == false
+                    && maxLen('content', 2000);
+      // Mark-as-read only.
+      allow update: if affectedOnly(['read'])
+                    && request.resource.data.read == true;
+      allow delete: if false;
+    }
+
+    // ── Conversations (denormalized metadata) ──────────────────────────
+    match /conversations/{docId} {
+      // TODO(auth): restrict to participants only.
+      allow read: if true;
+      allow create: if hasAll(['participants', 'lastMessage', 'lastAt', 'lastSenderId'])
+                    && request.resource.data.participants is list
+                    && request.resource.data.participants.size() == 2;
+      // Identity-bearing fields immutable; metadata may update.
+      allow update: if request.resource.data.participants == resource.data.participants;
+      allow delete: if false;
+    }
+
+    // ── Live chat ───────────────────────────────────────────────────────
+    // This was originally designed to require real Firebase Auth (a custom
+    // token minted by the issueForumChatToken Cloud Function, carrying
+    // forumUid/forumAdmin/chatGlobalMod claims). That Cloud Function was
+    // never deployed for this project (requires the paid Blaze plan), so
+    // request.auth is always null here — the client instead runs in its
+    // built-in direct-Firestore-write fallback mode (VITE_CHAT_CALLABLE_SEND=false),
+    // identifying users via the app-level forumUser.id the same way every
+    // other collection in this file already does.
+    // TODO(auth): reinstate the stricter request.auth-based rules above (see
+    // git history) if/when Cloud Functions get deployed on a paid plan.
+    match /chatRooms/{roomId} {
+      allow read, write: if true;
+    }
+
+    match /chatRooms/{roomId}/messages/{messageId} {
+      allow read, write: if true;
+    }
+
+    match /chatRooms/{roomId}/messages/{messageId}/reactions/{reactionId} {
+      allow read, write: if true;
+    }
+
+    match /chatRooms/{roomId}/members/{memberId} {
+      allow read, write: if true;
+    }
+
+    match /chatRooms/{roomId}/typing/{userId} {
+      allow read, write: if true;
+    }
+
+    match /chatMutes/{userId} {
+      allow read, write: if true;
+    }
+
+    match /chatMessageReports/{reportId} {
+      allow read, write: if true;
+    }
+  }
+}

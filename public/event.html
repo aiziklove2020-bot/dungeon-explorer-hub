@@ -29,6 +29,10 @@
       </a>
     </div>
     <div class="flex items-center gap-1">
+      <button type="button" data-fav-bell aria-label="עדכונים על מועדפים" style="display:none" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
+        <span class="material-symbols-outlined text-[22px]">notifications</span>
+        <span data-fav-bell-dot style="display:none;position:absolute;top:6px;left:6px;width:8px;height:8px;border-radius:50%;background:#e11d48"></span>
+      </button>
       <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="login-link w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
         <span class="material-symbols-outlined text-[22px]">person</span>
       </a>
@@ -106,21 +110,37 @@ document.addEventListener("DOMContentLoaded", async () => {
      </button>
    </div>
  </div>`;
- // app.js wires up [data-fav] buttons once on its own DOMContentLoaded pass,
- // which already ran before this button existed (it's injected here after
- // the async LPData fetch) — so it never got a click handler. Wire it directly.
+ // Real per-account favorite (requires login — see app.js's lpWireFavHearts).
+ // Wired directly since this button is injected after the async LPData
+ // fetch, missing app.js's own DOMContentLoaded pass.
  const favBtn = document.getElementById("favBtn");
  const favId = e.id;
- const isFav = () => LP.favorites().includes(favId);
  const favLabel = (saved) => `<span class="material-symbols-outlined text-[18px]">${saved ? "favorite" : "favorite_border"}</span>${saved ? "נשמר במועדפים" : "שמירה למועדפים"}`;
- favBtn.innerHTML = favLabel(isFav());
- favBtn.addEventListener("click", () => {
-   let fs = LP.favorites();
-   fs = fs.includes(favId) ? fs.filter(x => x !== favId) : [...fs, favId];
-   LP.setFavorites(fs);
-   favBtn.innerHTML = favLabel(fs.includes(favId));
-   toast(fs.includes(favId) ? "נוסף למועדפים" : "הוסר מהמועדפים");
+ const currentUser = LP.current();
+ let savedNow = false;
+ if (currentUser) {
+   savedNow = (await window.LPData.loadMyFavorites(currentUser.id).catch(() => [])).includes(favId);
+ }
+ favBtn.innerHTML = favLabel(savedNow);
+ favBtn.addEventListener("click", async () => {
+   const user = LP.current();
+   if (!user) {
+     toast("צריך להתחבר כדי לשמור מועדפים");
+     setTimeout(() => (location.href = "/login"), 900);
+     return;
+   }
+   const next = !savedNow;
+   favBtn.innerHTML = favLabel(next);
+   try {
+     await window.LPData.toggleFavorite(user.id, favId, next);
+     savedNow = next;
+     toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
+   } catch (err) {
+     favBtn.innerHTML = favLabel(savedNow);
+     toast("שגיאה בשמירת מועדף", "error");
+   }
  });
+ lpWireFavBell();
 });
 </script>
 </body></html>

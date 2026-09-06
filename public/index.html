@@ -27,6 +27,10 @@
       </a>
     </div>
     <div class="flex items-center gap-1">
+      <button type="button" data-fav-bell aria-label="עדכונים על מועדפים" style="display:none" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
+        <span class="material-symbols-outlined text-[22px]">notifications</span>
+        <span data-fav-bell-dot style="display:none;position:absolute;top:6px;left:6px;width:8px;height:8px;border-radius:50%;background:#e11d48"></span>
+      </button>
       <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="login-link w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
         <span class="material-symbols-outlined text-[22px]">person</span>
       </a>
@@ -315,23 +319,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     </div>`;
   }
 
-  function wireFavButtons() {
-    box.querySelectorAll("[data-fav-btn]").forEach((btn) => {
-      const id = btn.dataset.favBtn;
-      const icon = btn.querySelector(".material-symbols-outlined");
-      const isFav = () => LP.favorites().includes(id);
-      icon.textContent = isFav() ? "favorite" : "favorite_border";
-      btn.addEventListener("click", (ev) => {
-        ev.preventDefault();
-        let fs = LP.favorites();
-        fs = fs.includes(id) ? fs.filter((x) => x !== id) : [...fs, id];
-        LP.setFavorites(fs);
-        icon.textContent = fs.includes(id) ? "favorite" : "favorite_border";
-        toast(fs.includes(id) ? "נוסף למועדפים" : "הוסר מהמועדפים");
-      });
-    });
-  }
-
   try {
     const events = await window.LPData.loadEvents();
     box.innerHTML = events.length ? events.slice(0, 4).map(e => `
@@ -357,10 +344,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
       </article>
     `).join("") : `<p class="text-text-muted text-body-sm">אין כרגע מסיבות פעילות.</p>`;
-    wireFavButtons();
+    lpWireFavHearts(box);
   } catch (err) {
     box.innerHTML = `<p class="text-text-muted text-body-sm">לא הצלחנו לטעון אירועים כרגע.</p>`;
   }
+  lpWireFavBell();
 });
 </script>
 </body></html>
