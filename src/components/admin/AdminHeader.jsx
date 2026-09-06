@@ -36,7 +36,9 @@ const AdminHeader = ({
   return (
     <>
       <div className="mb-8 flex justify-between items-center">
-        <div className="flex items-center gap-3">
+        {/* The desktop sidebar (Admin.jsx) already carries the logo/branding —
+            this block would just duplicate it there, so it's mobile-only. */}
+        <div className="flex items-center gap-3 md:hidden">
           <img src="/assets/logo-new.png" alt="" style={{ width: 44, height: 44 }} />
           <div>
             <h1 style={{ fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 700, fontSize: 26 }}>
