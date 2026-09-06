@@ -56,8 +56,15 @@
   </div>
 
   <div class="bg-surface-card border border-white/5 rounded-2xl p-5 flex items-center gap-4 mb-4">
-    <div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center flex-shrink-0">
-      <span class="material-symbols-outlined text-[32px] text-text-muted">person</span>
+    <div class="relative flex-shrink-0">
+      <img id="pphoto" src="" alt="" class="w-16 h-16 rounded-full object-cover bg-surface-container-high" style="display:none">
+      <div id="pphotoPlaceholder" class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center">
+        <span class="material-symbols-outlined text-[32px] text-text-muted">person</span>
+      </div>
+      <button id="photoUploadBtn" style="display:none" class="absolute -bottom-1 -left-1 w-6 h-6 rounded-full bg-primary-container flex items-center justify-center shadow-md">
+        <span class="material-symbols-outlined text-[14px] text-on-primary-container">edit</span>
+      </button>
+      <input type="file" id="photoInput" accept="image/*" style="display:none">
     </div>
     <div class="min-w-0">
       <h2 id="pname" class="font-headline-md text-headline-md text-text-primary truncate">משתמש</h2>
@@ -83,6 +90,21 @@
         <span class="material-symbols-outlined text-[18px]">confirmation_number</span>הרשמה לאיזון מגדרי
       </a>
     </div>
+  </div>
+
+  <div id="regsSection" class="mb-6" style="display:none">
+    <h2 class="font-headline-md text-headline-md text-text-primary mb-3">המסיבות שנרשמתי אליהן</h2>
+    <div id="regsList" class="flex flex-col gap-2"></div>
+  </div>
+
+  <div id="matchSection" class="mb-6" style="display:none">
+    <h2 class="font-headline-md text-headline-md text-text-primary mb-3">האיזון שלי</h2>
+    <div id="matchBox"></div>
+  </div>
+
+  <div id="favsSection" class="mb-6" style="display:none">
+    <h2 class="font-headline-md text-headline-md text-text-primary mb-3">המועדפים שלי</h2>
+    <div id="favsList" class="cards"></div>
   </div>
 
   <h2 class="font-headline-md text-headline-md text-text-primary mb-3">הגדרות חשבון</h2>
@@ -112,7 +134,7 @@
 
 <script src="assets/app.js?v=202609062025"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609062001";
+import "./assets/site-data.js?v=202609062037";
 document.addEventListener("DOMContentLoaded", async () => {
   const u = LP.current();
   if (!u) { location = "/login"; return; }
@@ -121,21 +143,103 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("pemail").textContent = u.email;
   document.getElementById("logout").onclick = () => { localStorage.removeItem("lp_current"); location = "/"; };
 
+  function statusLabel(status) {
+    if (status === "matched") return { cls: "background:rgba(16,185,129,.15);color:#10B981", icon: "favorite", text: "מאוזן" };
+    if (status === "waiting") return { cls: "background:rgba(234,179,8,.15);color:#eab308", icon: "hourglass_empty", text: "ממתין לאיזון" };
+    return { cls: "background:rgba(148,163,184,.15);color:#94A3B8", icon: "check_circle", text: "רשום" };
+  }
+  function formatDate(d) {
+    try {
+      const dt = d instanceof Date ? d : new Date(d);
+      if (Number.isNaN(dt.getTime())) return "";
+      return dt.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
+    } catch { return ""; }
+  }
+
+  let personalArea = null;
   try {
-    const status = await window.LPData.getMembershipStatus(u.id, u.gender);
+    personalArea = await window.LPData.loadMyForumPersonalArea(u.id);
+  } catch (err) {
+    personalArea = null;
+  }
+
+  if (personalArea && personalArea.phone) {
     const labelEl = document.getElementById("membershipLabel");
     const expiryEl = document.getElementById("membershipExpiry");
-    labelEl.textContent = status.label;
-    labelEl.style.color = status.active ? "#35c76f" : "#ff5a72";
-    if (status.expiry) {
-      expiryEl.textContent = "בתוקף עד " + new Date(status.expiry).toLocaleDateString("he-IL");
-    } else if (status.tier === "gold") {
-      expiryEl.textContent = "ללא הגבלת זמן";
-    } else {
-      expiryEl.textContent = "";
+    const active = !!(personalArea.profile && personalArea.profile.hasActiveSubscription);
+    labelEl.textContent = active ? "מנוי פעיל" : "אין מנוי פעיל";
+    labelEl.style.color = active ? "#35c76f" : "#ff5a72";
+    expiryEl.textContent = (personalArea.profile && personalArea.profile.subscriptionMessage) || "";
+    document.getElementById("membershipCta").style.display = active ? "none" : "";
+
+    if (personalArea.profile && personalArea.profile.photoUrl) {
+      document.getElementById("pphoto").src = personalArea.profile.photoUrl;
+      document.getElementById("pphoto").style.display = "block";
+      document.getElementById("pphotoPlaceholder").style.display = "none";
     }
-  } catch (err) {
-    document.getElementById("membershipLabel").textContent = "לא הצלחנו לטעון את סטטוס המנוי";
+    const photoBtn = document.getElementById("photoUploadBtn");
+    photoBtn.style.display = "";
+    photoBtn.addEventListener("click", () => document.getElementById("photoInput").click());
+    document.getElementById("photoInput").addEventListener("change", async () => {
+      const file = document.getElementById("photoInput").files?.[0];
+      if (!file) return;
+      try {
+        const url = await window.LPData.uploadMyProfilePhoto(personalArea.phone, file);
+        if (url) {
+          document.getElementById("pphoto").src = url;
+          document.getElementById("pphoto").style.display = "block";
+          document.getElementById("pphotoPlaceholder").style.display = "none";
+          toast("התמונה נשמרה");
+        }
+      } catch {
+        toast("שגיאה בהעלאת התמונה", "error");
+      }
+    });
+
+    const regs = personalArea.registrations || [];
+    if (regs.length > 0) {
+      document.getElementById("regsSection").style.display = "";
+      document.getElementById("regsList").innerHTML = regs.map((r) => {
+        const s = statusLabel(r.status);
+        return `<div class="bg-surface-card border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <h3 class="text-text-primary font-bold truncate">${r.partyName || ""}</h3>
+            <p class="text-text-muted text-xs">${formatDate(r.date)}</p>
+          </div>
+          <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;${s.cls}"><span class="material-symbols-outlined" style="font-size:14px">${s.icon}</span>${s.text}</span>
+        </div>`;
+      }).join("");
+    }
+
+    if (personalArea.balanceMatch) {
+      document.getElementById("matchSection").style.display = "";
+      const match = personalArea.balanceMatch;
+      const box = document.getElementById("matchBox");
+      if (!active) {
+        box.innerHTML = `<div class="bg-surface-card border border-white/5 rounded-2xl p-5 text-center">
+          <p class="text-text-primary font-bold mb-1">יש לכם התאמת איזון!</p>
+          <p class="text-text-secondary text-sm">כדי לראות עם מי אתם מאוזנים, יש לרכוש מנוי (גם ליום אחד מספיק).</p>
+          <a href="/membership" class="inline-block mt-3 rounded-xl bg-gradient-to-l from-[#e11d48] to-[#be0037] text-white font-bold text-sm py-2.5 px-4">לרכישת מנוי</a>
+        </div>`;
+      } else {
+        box.innerHTML = `<div class="bg-surface-card border border-white/5 rounded-2xl p-5">
+          <p class="text-text-muted text-xs mb-2">${match.partyName ? "עבור " + match.partyName : ""}</p>
+          <h3 class="text-text-primary font-bold text-lg mb-2">${match.matchName || "—"}</h3>
+          ${match.matchPhone
+            ? `<a href="tel:${match.matchPhone}" class="text-primary font-bold" dir="ltr">${match.matchPhone}</a>`
+            : `<p class="text-text-muted text-sm">עדיין לא שותף מספר טלפון.</p>`
+          }
+        </div>`;
+      }
+    }
+
+    const favs = personalArea.favorites || [];
+    if (favs.length > 0) {
+      document.getElementById("favsSection").style.display = "";
+      document.getElementById("favsList").innerHTML = favs.map((e) => `<article class="card"><div class="event-cover" style="background-image:url('${e.img || ""}')"></div><div class="card-body"><h3>${e.title || ""}</h3><p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p><a class="btn primary" href="/event?id=${e.id}">לפרטים</a></div></article>`).join("");
+    }
+  } else {
+    document.getElementById("membershipLabel").textContent = "לא נמצא רישום מסיבה עם חשבון זה";
   }
 
   document.getElementById("profileForm").addEventListener("submit", async e => {

@@ -12,7 +12,7 @@ import { collection, query, where, getDocsFromServer } from "firebase/firestore"
 import { db } from "./firebase/config";
 import { sendRegistrationTelegram, sendManualPartyAnnouncement } from "./firebase/telegram";
 import { getSocialLinks, getRssFeeds, getContent } from "./firebase/settings";
-import { registerForumUser, loginForumUser, getForumUserByEmail, updateForumUser, getForumUserById } from "./firebase/forumUsers";
+import { registerForumUser, loginForumUser, getForumUserByEmail, updateForumUser, getForumUserById, getMyLinkedPhoneNumber } from "./firebase/forumUsers";
 import {
   getSessionId,
   sendSupportMessage,
@@ -581,6 +581,19 @@ async function uploadMyProfilePhoto(phoneNumber: string, file: File) {
   return url;
 }
 
+/**
+ * Same unified personal area as loadMyPersonalArea, but for a logged-in
+ * forum account (profile.html) — resolves the account's linked phone number
+ * first (see getMyLinkedPhoneNumber) so people who already have a real
+ * forum login don't need to type their phone in separately.
+ */
+async function loadMyForumPersonalArea(forumUserId: string) {
+  const phone = await getMyLinkedPhoneNumber(forumUserId).catch(() => null);
+  if (!phone) return { phone: null, registrations: [], balanceMatch: null, profile: null, favorites: [] };
+  const data = await loadMyPersonalArea(phone);
+  return { phone, ...data };
+}
+
 async function loadNewsFeed() {
   const feeds = await getRssFeeds().catch(() => []);
   return (feeds || [])
@@ -619,6 +632,7 @@ async function loadNewsFeed() {
   shareMyBalancePhone,
   loadMyPersonalArea,
   uploadMyProfilePhoto,
+  loadMyForumPersonalArea,
 };
 
 /**

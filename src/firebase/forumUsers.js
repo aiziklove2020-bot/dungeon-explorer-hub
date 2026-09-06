@@ -223,6 +223,31 @@ export const getForumUserById = async (id) => {
   return batch[id] ?? null;
 };
 
+/**
+ * The phone number behind a logged-in forum account, so the personal area
+ * (profile.html) can show real registration/balance/subscription data
+ * without asking the person to type their phone in again. Most forum
+ * accounts already have `linkedUserId` pointing at their `users/{id}` party-
+ * registration record (set the first time their phone matched); falls back
+ * to the forum account's own manually-entered `phone` field otherwise.
+ */
+export const getMyLinkedPhoneNumber = async (forumUserId) => {
+  const forumUser = await getForumUserById(forumUserId);
+  if (!forumUser) return null;
+  if (forumUser.linkedUserId) {
+    try {
+      const siteUserSnap = await getDoc(doc(db, 'users', forumUser.linkedUserId));
+      if (siteUserSnap.exists()) {
+        const phone = siteUserSnap.data().phoneNumber;
+        if (phone) return phone;
+      }
+    } catch {
+      /* fall through to the manual phone field below */
+    }
+  }
+  return forumUser.phone || null;
+};
+
 export const getAllForumUsers = async () => {
   const snap = await getDocs(query(collection(db, COL), limit(FORUM_USERS_HARD_LIMIT)));
   return snap.docs.map(d => stripPassword({ id: d.id, ...d.data() }));
