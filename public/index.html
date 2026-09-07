@@ -111,13 +111,6 @@
 </div>
 </section>
 
-<!-- Facebook group banner (data-driven from admin → קישורים חברתיים) -->
-<section class="w-full px-4 mb-6" id="facebookGroupSection" style="display:none">
-<a id="facebookGroupLink" href="#" target="_blank" rel="noopener noreferrer" class="block relative rounded-2xl overflow-hidden shadow-[0_10px_36px_rgba(24,119,242,0.35)] active:scale-[0.98] transition-transform">
-<img src="assets/facebook-banner.png?v=202609062112" alt="הצטרפו לקבוצת הפייסבוק של LIBRAL PARTY" class="w-full h-full object-cover" style="aspect-ratio:2056/765">
-</a>
-</section>
-
 <!-- Quick filters -->
 <section class="w-full px-4 -mt-2 mb-6">
 <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-nowrap">
@@ -291,20 +284,25 @@
 <script type="module">
 import "./assets/site-data.js?v=202609062056";
 document.addEventListener("DOMContentLoaded", async () => {
+  let fbGroupUrl = null;
   try {
     const links = await window.LPData.loadSocialLinks();
     const fb = links.find(l => l.type === "facebook" && l.url);
-    if (fb) {
-      document.getElementById("facebookGroupLink").href = fb.url;
-      document.getElementById("facebookGroupSection").style.display = "";
-    }
+    if (fb) fbGroupUrl = fb.url;
   } catch (err) {}
 
   const box = document.getElementById("eventCards");
+  // Facebook group banner (data-driven from admin → קישורים חברתיים),
+  // shown between the 2nd and 3rd party cards in the list.
+  const fbBannerHtml = fbGroupUrl ? `
+      <a href="${fbGroupUrl}" target="_blank" rel="noopener noreferrer" class="block relative rounded-2xl overflow-hidden shadow-[0_10px_36px_rgba(24,119,242,0.35)] active:scale-[0.98] transition-transform">
+        <img src="assets/facebook-banner.png?v=202609062112" alt="הצטרפו לקבוצת הפייסבוק של LIBRAL PARTY" class="w-full h-full object-cover" style="aspect-ratio:2056/765">
+      </a>
+    ` : "";
 
   try {
     const events = await window.LPData.loadEvents();
-    box.innerHTML = events.length ? events.slice(0, 4).map(e => `
+    const cardsHtml = events.slice(0, 4).map(e => `
       <article class="w-full rounded-xl overflow-hidden bg-surface-card shadow-lg flex flex-col">
         <div class="relative w-full bg-black">
           <button type="button" data-fav-btn="${e.id}" aria-label="שמירה למועדפים" class="absolute top-2 left-2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
@@ -325,7 +323,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           </a>
         </div>
       </article>
-    `).join("") : `<p class="text-text-muted text-body-sm">אין כרגע מסיבות פעילות.</p>`;
+    `);
+    if (cardsHtml.length) {
+      if (fbBannerHtml) cardsHtml.splice(2, 0, fbBannerHtml);
+      box.innerHTML = cardsHtml.join("");
+    } else {
+      box.innerHTML = `<p class="text-text-muted text-body-sm">אין כרגע מסיבות פעילות.</p>`;
+    }
     lpWireFavHearts(box);
   } catch (err) {
     box.innerHTML = `<p class="text-text-muted text-body-sm">לא הצלחנו לטעון אירועים כרגע.</p>`;
