@@ -191,7 +191,7 @@ th,td{text-align:right;padding:14px;border-bottom:1px solid #25252b}th{color:#aa
 .drawer.open{transform:translateX(0)}.drawer img{width:300px;max-width:85%}
 .drawer-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:16px;margin-bottom:8px}
 .drawer-head .logo-text b{font-family:'Inter',sans-serif}
-.drawer-logo-img{width:160px;max-width:60%;height:auto;object-fit:contain}
+.drawer-logo-img{width:240px;max-width:72%;height:auto;object-fit:contain}
 .dr-close{background:rgba(255,255,255,.06);color:#e4e1e7;border:0;width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;transition:.2s}
 .dr-close:hover{background:rgba(225,29,72,.18);color:#ffb4aa}
 .dr-close .material-symbols-outlined{font-size:20px}
