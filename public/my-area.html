@@ -11,7 +11,7 @@
 <style>
   @layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;background:#131317}}
   .stitch-page::-webkit-scrollbar{display:none}
-  .stitch-page main{padding-top:7rem;padding-bottom:6rem}@media (min-width:640px){.stitch-page main{padding-top:8rem}}@media (min-width:768px){.stitch-page main{padding-top:9rem}}@media (min-width:1024px){.stitch-page main{padding-top:10rem}}
+  .stitch-page main{padding-top:10rem;padding-bottom:6rem}@media (min-width:640px){.stitch-page main{padding-top:11rem}}@media (min-width:768px){.stitch-page main{padding-top:12rem}}@media (min-width:1024px){.stitch-page main{padding-top:13rem}}
   .status-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600}
   .status-matched{background:rgba(16,185,129,.15);color:#10B981}
   .status-waiting{background:rgba(234,179,8,.15);color:#eab308}
@@ -20,18 +20,22 @@
 </head><body class="stitch-page bg-surface font-body-md text-body-md text-on-surface antialiased">
 
 <header class="fixed top-0 inset-x-0 z-50 bg-surface-dim/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
-  <div class="h-28 sm:h-32 md:h-36 lg:h-40 px-4 flex items-center justify-between relative">
-    <div class="flex items-center gap-3">
+  <div class="px-4">
+    <div class="h-12 flex items-center justify-between">
+      <div class="flex items-center gap-3">
       <button data-menu aria-label="תפריט" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary">
         <span class="material-symbols-outlined text-[24px]">menu</span>
       </button>
       </div>
-    <a href="/" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2">
-      <img alt="LIBRAL PARTY" class="h-20 sm:h-24 md:h-28 lg:h-32 w-auto object-contain" src="assets/logo-new.png?v=202609062151">
-    </a>
-    <div class="flex items-center gap-1">
+      <div class="flex items-center gap-1">
       <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="login-link w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
         <span class="material-symbols-outlined text-[22px]">person</span>
+      </a>
+    </div>
+    </div>
+    <div class="flex items-center justify-center pb-3">
+      <a href="/" class="flex items-center gap-2">
+        <img alt="LIBRAL PARTY" class="h-24 sm:h-28 md:h-32 lg:h-36 w-auto object-contain" src="assets/logo-new.png?v=202609062151">
       </a>
     </div>
   </div>
