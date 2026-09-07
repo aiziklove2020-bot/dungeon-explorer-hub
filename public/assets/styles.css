@@ -148,7 +148,7 @@ header.topbar,nav.navbar,main,footer.footer{position:relative;z-index:1}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .auth-shell{min-height:calc(100vh - 130px);display:grid;place-items:center;padding:45px 0}
 .auth-card{width:min(540px,100%);background:#0c0c0f;border:1px solid #33333a;border-radius:24px;padding:30px;box-shadow:var(--shadow)}
-.auth-card .logo-mini{text-align:center;margin-bottom:20px}.auth-card .logo-mini img{width:72px;height:72px;object-fit:contain}
+.auth-card .logo-mini{text-align:center;margin-bottom:24px}.auth-card .logo-mini img{width:min(260px,85%);height:auto;object-fit:contain}
 .tabs{display:grid;grid-template-columns:1fr 1fr;background:#09090b;border:1px solid #2c2c32;border-radius:13px;overflow:hidden;margin-bottom:18px}
 .tabs a{padding:12px;text-align:center}.tabs a.active{background:#24070d;color:var(--red)}
 .notice{padding:12px 14px;border:1px solid #604216;background:#241a07;border-radius:12px;color:#ffd479;font-size:14px}
