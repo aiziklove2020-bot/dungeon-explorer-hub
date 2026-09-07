@@ -12,21 +12,21 @@
   @layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;background:#131317}}
   .stitch-page::-webkit-scrollbar{display:none}
   .stitch-page .topbar,.stitch-page .navbar,.stitch-page .mobile-bottom{display:none!important}
-  .stitch-page main{padding-top:4rem;padding-bottom:6rem}
+  .stitch-page main{padding-top:7rem;padding-bottom:6rem}
   .stitch-page .panel,.stitch-page .card{background:#121218;border-color:rgba(255,255,255,.08)}
 </style>
 </head><body class="stitch-page bg-surface font-body-md text-body-md text-on-surface antialiased">
 
 <header class="fixed top-0 inset-x-0 z-50 bg-surface-dim/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
-  <div class="h-16 px-4 flex items-center justify-between">
+  <div class="h-28 px-4 flex items-center justify-between relative">
     <div class="flex items-center gap-3">
       <button data-menu aria-label="תפריט" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary">
         <span class="material-symbols-outlined text-[24px]">menu</span>
       </button>
-      <a href="/" class="flex items-center gap-2">
-        <img alt="LIBRAL PARTY" class="h-9 w-auto object-contain" src="assets/logo-new.png?v=202609062151">
-              </a>
-    </div>
+      </div>
+    <a href="/" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2">
+      <img alt="LIBRAL PARTY" class="h-24 w-auto object-contain" src="assets/logo-new.png?v=202609062151">
+    </a>
     <div class="flex items-center gap-1">
       <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="login-link w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
         <span class="material-symbols-outlined text-[22px]">person</span>
