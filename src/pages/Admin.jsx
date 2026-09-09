@@ -315,7 +315,7 @@ const Admin = () => {
       <aside className="hidden md:flex fixed right-0 top-0 h-full w-64 flex-col justify-between z-40" style={{ background: '#121218', borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
         <div className="flex flex-col overflow-y-auto">
           <div className="h-16 px-5 flex items-center gap-3 shrink-0">
-            <img src="/assets/logo-new.png" alt="" className="w-9 h-9 object-contain" />
+            <img src="/assets/logo-new.png" alt="" className="object-contain" style={{ width: 100, height: 'auto' }} />
             <div className="flex flex-col">
               <span className="font-bold text-sm tracking-tight">LIBRAL PARTY</span>
               <span className="text-xs" style={{ color: '#ffb3b6' }}>פורטל ניהול</span>
