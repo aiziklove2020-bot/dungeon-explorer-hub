@@ -107,7 +107,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
           }}
         >
           <div className="text-center mb-8">
-            <img src="/assets/logo-new.png" alt="" className="mx-auto mb-3" style={{ width: 220, height: 'auto', objectFit: 'contain' }} />
+            <img src="/assets/logo-new.png" alt="" className="mx-auto mb-3" style={{ width: 320, height: 'auto', objectFit: 'contain' }} />
             <h1 className="mb-1" style={{ fontFamily: 'Georgia,"Times New Roman",serif', fontWeight: 700, fontSize: 22, color: '#f3b82d' }}>
               {t('adminLogin.setPasswordTitle')}
             </h1>
@@ -187,7 +187,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
         }}
       >
         <div className="text-center mb-8">
-          <img src="/assets/logo-new.png" alt="" className="mx-auto mb-3" style={{ width: 64, height: 64 }} />
+          <img src="/assets/logo-new.png" alt="" className="mx-auto mb-3" style={{ width: 320, height: 'auto', objectFit: 'contain' }} />
           <h1 className="mb-1" style={{ fontFamily: 'Georgia,"Times New Roman",serif', fontWeight: 700, fontSize: 24 }}>
             LIBRAL PARTY
           </h1>
