@@ -69,7 +69,10 @@ export const sendNewExternalPartyWhatsApp = async (party, partyUrl, language = '
  * and would leak every party into every group.
  */
 export const sendAllPartiesWhatsApp = async () => {
-  const res = await fetch(`${WHATSAPP_BOT_URL}/broadcast-parties`, { method: 'POST' });
+  const res = await fetch(`${WHATSAPP_BOT_URL}/broadcast-parties`, {
+    method: 'POST',
+    headers: { ...botAuthHeaders() },
+  });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data?.message || `HTTP ${res.status}`);
   return { partiesSent: data.partiesSent ?? 0, total: data.partiesSent ?? 0, results: data.results || [] };
