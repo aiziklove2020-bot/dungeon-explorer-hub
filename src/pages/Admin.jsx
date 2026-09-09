@@ -72,7 +72,6 @@ const Admin = () => {
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
   const [postingParties, setPostingParties] = useState(false);
-  const [postingPartiesWhatsApp, setPostingPartiesWhatsApp] = useState(false);
   const [postingPartiesInstagram, setPostingPartiesInstagram] = useState(false);
   const [partiesRefreshKey, setPartiesRefreshKey] = useState(0);
   const savedTimeoutRef = useRef(null);
@@ -132,25 +131,10 @@ const Admin = () => {
     }
   };
 
-  const handlePostPartiesWhatsApp = async () => {
-    if (postingPartiesWhatsApp) return;
-    if (!confirm('לפרסם עכשיו את כל המסיבות הפעילות באתר לוואטסאפ? (דורש שהבוט ירוץ על המחשב שלך)')) return;
-    setPostingPartiesWhatsApp(true);
-    try {
-      const { sendAllPartiesWhatsApp } = await import('../firebase/whatsapp');
-      const { partiesSent } = await sendAllPartiesWhatsApp();
-      alert(`הפרסום לוואטסאפ הושלם.\nמסיבות שנבדקו: ${partiesSent} (כל קבוצה מקבלת רק את מה שמותר לה).`);
-    } catch (err) {
-      alert(`הפרסום לוואטסאפ נכשל: ${err.message}`);
-    } finally {
-      setPostingPartiesWhatsApp(false);
-    }
-  };
-
   // Posts every currently active party to Instagram (feed post + story each),
-  // one at a time. Mirrors handlePostParties (Telegram) / handlePostPartiesWhatsApp,
-  // but runs client-side since there's no dedup/cron job for Instagram yet —
-  // each click re-posts every active party, same behavior as the other two buttons.
+  // one at a time. Mirrors handlePostParties (Telegram), but runs client-side
+  // since there's no dedup/cron job for Instagram yet — each click re-posts
+  // every active party, same behavior as the Telegram button.
   const handlePostPartiesInstagram = async () => {
     if (postingPartiesInstagram) return;
     if (!confirm('לפרסם עכשיו את כל המסיבות שמסומנות "כלול באינסטגרם" לאינסטגרם (פוסט + סטורי לכל אחת)?')) return;
@@ -312,7 +296,6 @@ const Admin = () => {
           saved={saved}
           importing={importing} importMessage={importMessage} onImport={handleImportFromGit}
           postingParties={postingParties} onPostParties={handlePostParties}
-          postingPartiesWhatsApp={postingPartiesWhatsApp} onPostPartiesWhatsApp={handlePostPartiesWhatsApp}
           postingPartiesInstagram={postingPartiesInstagram} onPostPartiesInstagram={handlePostPartiesInstagram}
           onReset={() => {
             if (confirm(t('admin.resetConfirm') || 'האם אתה בטוח שברצונך לאפס את כל התוכן לברירות מחדל?')) {

@@ -12,8 +12,6 @@ const AdminHeader = ({
   onLogout,
   postingParties,
   onPostParties,
-  postingPartiesWhatsApp,
-  onPostPartiesWhatsApp,
   postingPartiesInstagram,
   onPostPartiesInstagram,
   onImport,
@@ -88,16 +86,6 @@ const AdminHeader = ({
               >
                 {postingParties ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Megaphone size={16} style={{ color: '#ad43ff' }} />}
                 {postingParties ? 'מפרסם...' : 'טלגרם'}
-              </button>
-              <button
-                onClick={onPostPartiesWhatsApp}
-                disabled={postingPartiesWhatsApp}
-                title="שולח עכשיו את כל המסיבות הפעילות באתר לוואטסאפ, דרך הבוט שרץ על המחשב שלך (localhost:3000)"
-                className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
-                style={{ background: '#15151a', border: '1px solid #2d2d34', borderRadius: 15, padding: '10px 16px' }}
-              >
-                {postingPartiesWhatsApp ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Megaphone size={16} style={{ color: '#3ecf6d' }} />}
-                {postingPartiesWhatsApp ? 'מפרסם...' : 'וואטסאפ'}
               </button>
               <button
                 onClick={onPostPartiesInstagram}
