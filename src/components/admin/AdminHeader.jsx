@@ -35,22 +35,25 @@ const AdminHeader = ({
 
   return (
     <>
-      <div className="mb-8 flex justify-between items-center">
-        {/* The desktop sidebar (Admin.jsx) already carries the logo/branding —
-            this block would just duplicate it there, so it's mobile-only. */}
-        <div className="flex items-center gap-3 md:hidden">
-          <img src="/assets/logo-new.png" alt="" style={{ width: 160, height: 'auto', objectFit: 'contain' }} />
-          <div>
-            <h1 style={{ fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 700, fontSize: 26 }}>
+      {/* The desktop sidebar (Admin.jsx) already carries the logo/branding —
+          this block would just duplicate it there, so it's mobile-only. */}
+      <div
+        className="mb-6 p-3 flex items-center justify-between gap-3 md:hidden"
+        style={{ background: 'linear-gradient(180deg,#101014,#0a0a0c)', border: '1px solid #2d2d34', borderRadius: 18 }}
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <img src="/assets/logo-new.png" alt="" style={{ width: 68, height: 'auto', objectFit: 'contain', flexShrink: 0 }} />
+          <div className="min-w-0">
+            <h1 className="truncate" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 700, fontSize: 17, lineHeight: 1.25 }}>
               LIBRAL PARTY <span style={{ color: '#e11d48' }}>ניהול</span>
             </h1>
-            <p style={{ color: '#a9a9b2', fontSize: 13 }}>{t('admin.panelSubtitle')}</p>
+            <p className="truncate" style={{ color: '#a9a9b2', fontSize: 12 }}>{t('admin.panelSubtitle')}</p>
           </div>
         </div>
         <button
           onClick={onLogout}
-          className="text-white text-sm font-bold flex items-center gap-2"
-          style={{ background: 'transparent', border: '1px solid #e11d48', borderRadius: 15, padding: '10px 16px' }}
+          className="text-white text-sm font-bold flex items-center gap-2 shrink-0"
+          style={{ background: 'transparent', border: '1px solid #e11d48', borderRadius: 15, padding: '8px 14px' }}
         >
           <X size={16} /> {t('admin.logout')}
         </button>
