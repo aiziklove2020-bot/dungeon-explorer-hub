@@ -198,14 +198,20 @@
 <script src="assets/app.js?v=202609062118"></script>
 <script type="module">
 import "./assets/site-data.js?v=202609062056";
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // window.LPData.registerForParty only dedupes by logged-in userId, not by
 // phone number — this form is anonymous (no login), so without this check
 // the same person could submit repeatedly to the same party.
+// Firebase is imported lazily (only when this actually runs, at submit
+// time) instead of at the top of the module, so it doesn't add to the
+// page's initial load weight — this page already loads a bundled Firebase
+// build via site-data.js for everything else.
 async function isPhoneAlreadyRegistered(partyId, phoneNumber) {
   try {
+    const [{ initializeApp, getApps, getApp }, { getFirestore, doc, getDoc }] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+    ]);
     const firebaseConfig = {
       apiKey: "AIzaSyAJv0APn-Qmv59H2Behu3PhskObCaPHW_A",
       authDomain: "tbdsm-5acca.firebaseapp.com",
