@@ -15,7 +15,6 @@ const TAB_ICONS = {
 import { useNavigate } from '@tanstack/react-router';
 import { useContent } from '../context/ContentContext';
 import { useLanguage } from '../i18n/LanguageContext';
-import { getDeployStatus } from '../firebase/settings';
 import SEO from '../components/SEO';
 import AdminAuthForm from '../components/admin/AdminAuthForm';
 import AdminHeader from '../components/admin/AdminHeader';
@@ -48,7 +47,7 @@ const Admin = () => {
   const { t } = useLanguage();
   const {
     resetToDefaults,
-    publishContent, importContentFromGit, reloadContent, clearAllContentCache
+    importContentFromGit, reloadContent, clearAllContentCache
   } = useContent();
 
   // Always start unauthenticated so the very first client render matches
@@ -70,18 +69,12 @@ const Admin = () => {
   // the main tab row focused, not removed.
   const [showAdvancedTabs, setShowAdvancedTabs] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [publishing, setPublishing] = useState(false);
-  const [publishMessage, setPublishMessage] = useState('');
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
   const [postingParties, setPostingParties] = useState(false);
   const [postingPartiesWhatsApp, setPostingPartiesWhatsApp] = useState(false);
   const [postingPartiesInstagram, setPostingPartiesInstagram] = useState(false);
   const [partiesRefreshKey, setPartiesRefreshKey] = useState(0);
-  const [publishedCommitSha, setPublishedCommitSha] = useState(null);
-  const [deployStatusLoading, setDeployStatusLoading] = useState(false);
-  const [deployStatus, setDeployStatus] = useState(null);
-  const pollCountRef = useRef(0);
   const savedTimeoutRef = useRef(null);
   const [, startTransition] = useTransition();
 
@@ -95,39 +88,6 @@ const Admin = () => {
       }
     };
   }, []);
-
-  const POLL_INTERVAL_MS = 6000;
-  const MAX_POLLS = 25;
-
-  useEffect(() => {
-    if (!publishedCommitSha || !deployStatusLoading) return;
-    const shortSha = publishedCommitSha.toLowerCase();
-
-    const check = async () => {
-      const status = await getDeployStatus();
-      if (status?.commitSha?.toLowerCase?.()?.includes(shortSha) ||
-          status?.tag?.toLowerCase?.()?.includes(shortSha)) {
-        setDeployStatus(status);
-        setDeployStatusLoading(false);
-        return true;
-      }
-      if (status) setDeployStatus(status);
-      return false;
-    };
-
-    const id = setInterval(async () => {
-      pollCountRef.current += 1;
-      const done = await check();
-      if (done || pollCountRef.current >= MAX_POLLS) {
-        clearInterval(id);
-        if (!done) setDeployStatusLoading(false);
-      }
-    }, POLL_INTERVAL_MS);
-
-    check();
-
-    return () => clearInterval(id);
-  }, [publishedCommitSha, deployStatusLoading]);
 
   const handleAuthenticated = () => {
     setIsAuthenticated(true);
@@ -148,39 +108,6 @@ const Admin = () => {
       setSaved(false);
       savedTimeoutRef.current = null;
     }, 2000);
-  };
-
-  const handlePublish = async () => {
-    if (publishing) return;
-    if (!confirm(t('admin.publishConfirm') || 'לפרסם את התוכן הנוכחי ל-Git? המבקרים יראו גרסה זו.')) return;
-    setPublishing(true);
-    setPublishMessage('');
-    setPublishedCommitSha(null);
-    setDeployStatus(null);
-    setDeployStatusLoading(false);
-    try {
-      const result = await publishContent();
-      const shortSha = result?.commit?.sha?.substring(0, 7) || null;
-      setPublishMessage(
-        shortSha
-          ? `${t('admin.publishSuccess') || 'פורסם בהצלחה'}. Commit: ${shortSha}`
-          : (t('admin.publishSuccess') || 'פורסם בהצלחה')
-      );
-      if (shortSha) {
-        pollCountRef.current = 0;
-        setPublishedCommitSha(shortSha);
-        setDeployStatusLoading(true);
-      }
-      setPartiesRefreshKey(k => k + 1);
-      if (typeof reloadContent === 'function') reloadContent();
-    } catch (err) {
-      setPublishMessage(
-        (err?.message || err?.details?.message || t('admin.publishError') || 'שגיאה בפרסום') +
-        (err?.details?.hint ? ` — ${err.details.hint}` : '')
-      );
-    } finally {
-      setPublishing(false);
-    }
   };
 
   const handlePostParties = async () => {
@@ -383,10 +310,6 @@ const Admin = () => {
 
         <AdminHeader
           saved={saved}
-          publishing={publishing} publishMessage={publishMessage} onPublish={handlePublish}
-          publishedCommitSha={publishedCommitSha}
-          deployStatusLoading={deployStatusLoading}
-          deployStatus={deployStatus}
           importing={importing} importMessage={importMessage} onImport={handleImportFromGit}
           postingParties={postingParties} onPostParties={handlePostParties}
           postingPartiesWhatsApp={postingPartiesWhatsApp} onPostPartiesWhatsApp={handlePostPartiesWhatsApp}

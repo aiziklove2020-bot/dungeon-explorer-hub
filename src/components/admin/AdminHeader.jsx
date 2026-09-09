@@ -1,21 +1,15 @@
-import { X, RotateCcw, CheckCircle2, Eye, Upload, Download, Loader2, Megaphone, Instagram } from 'lucide-react';
+import { X, RotateCcw, CheckCircle2, Eye, Download, Loader2, Megaphone, Instagram } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 /**
- * Admin panel top bar: title, logout, action buttons (publish, import, reset, view site),
- * and the saved/publish/import status messages.
+ * Admin panel top bar: title, logout, action buttons (import, reset, view site),
+ * and the saved/import status messages.
  */
 const AdminHeader = ({
   saved,
-  publishing,
-  publishMessage,
-  publishedCommitSha,
-  deployStatusLoading,
-  deployStatus,
   importing,
   importMessage,
   onLogout,
-  onPublish,
   postingParties,
   onPostParties,
   postingPartiesWhatsApp,
@@ -27,11 +21,6 @@ const AdminHeader = ({
   onViewSite,
 }) => {
   const { t } = useLanguage();
-  const shortSha = (publishedCommitSha || '').toLowerCase();
-  const buildMatches =
-    deployStatus &&
-    (deployStatus.commitSha?.toLowerCase?.()?.includes(shortSha) ||
-      deployStatus.tag?.toLowerCase?.()?.includes(shortSha));
 
   return (
     <>
@@ -83,16 +72,6 @@ const AdminHeader = ({
                 style={{ background: '#15151a', border: '1px solid #2d2d34', borderRadius: 15, padding: '10px 16px' }}
               >
                 <Eye size={16} style={{ color: '#3ecf6d' }} /> {t('admin.editSite')}
-              </button>
-              <button
-                onClick={onPublish}
-                disabled={publishing}
-                title={t('admin.publishTitle')}
-                className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
-                style={{ background: 'linear-gradient(135deg,#e11d48,#be0037)', borderRadius: 15, padding: '10px 16px' }}
-              >
-                {publishing ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Upload size={16} />}
-                {publishing ? t('admin.publishing') : t('admin.publish')}
               </button>
             </div>
           </div>
@@ -159,29 +138,6 @@ const AdminHeader = ({
         </div>
       </div>
 
-      {publishMessage && (
-        <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <p className={`text-sm ${publishMessage.startsWith('פורסם') ? 'text-green-400' : 'text-[#ffb4ab]'}`}>
-            {publishMessage}
-          </p>
-          {publishedCommitSha && (publishMessage.startsWith('פורסם') || publishMessage.includes('Commit:')) && (
-            <span className="text-sm text-[#a9a9b2] flex items-center gap-2">
-              {deployStatusLoading && (
-                <>
-                  <Loader2 size={16} className="animate-spin shrink-0" />
-                  <span>{t('admin.buildChecking') || 'בודק סטטוס בנייה...'}</span>
-                </>
-              )}
-              {!deployStatusLoading && buildMatches && (
-                <span className="text-green-400">✓ {t('admin.buildPassed') || 'Build: passed'}</span>
-              )}
-              {!deployStatusLoading && !buildMatches && publishedCommitSha && (
-                <span className="text-amber-400">{t('admin.buildPending') || 'בונה...'}</span>
-              )}
-            </span>
-          )}
-        </div>
-      )}
       {importMessage && (
         <p className={`mb-4 text-sm ${importMessage.includes('הצלחה') ? 'text-green-400' : 'text-[#ffb4ab]'}`}>
           {importMessage}
