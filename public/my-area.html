@@ -126,7 +126,7 @@
 
 <script src="assets/app.js?v=202609062118"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609101859";
+import "./assets/site-data.js?v=202609101906";
 
 const STORAGE_KEY = "lp_my_area_phone";
 
@@ -201,12 +201,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }).join("");
   }
 
-  function renderBalanceMatch(match, hasActiveSubscription) {
+  async function renderBalanceMatch(match, hasActiveSubscription, phone) {
     const box = document.getElementById("balanceMatch");
     if (!match) {
+      let debugHtml = "";
+      try {
+        const dbg = await window.LPData.debugMyBalanceMatch(phone);
+        debugHtml = `<pre style="text-align:right;direction:ltr;font-size:10px;white-space:pre-wrap;background:#000;color:#0f0;padding:8px;border-radius:8px;margin-top:8px;max-height:300px;overflow:auto">${JSON.stringify(dbg, null, 2).replace(/</g, "&lt;")}</pre>`;
+      } catch (err) {
+        debugHtml = `<p style="color:#f66;font-size:11px">debug error: ${String(err && err.message || err)}</p>`;
+      }
       box.innerHTML = `<div class="rounded-xl bg-surface-card p-5 shadow-md text-center">
         <span class="material-symbols-outlined text-text-muted text-[32px] mb-2 block">search_off</span>
         <p class="text-text-secondary text-body-sm">אין לכם איזון פעיל כרגע. אם נרשמתם לאיזון מגדרי, האיזון מתבצע ידנית ועשוי לקחת זמן.</p>
+        ${debugHtml}
       </div>`;
       return;
     }
@@ -395,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
       wirePhotoUpload(phone, !!data.profile);
 
       renderRegistrations(data.registrations);
-      renderBalanceMatch(data.balanceMatch, !!(data.profile && data.profile.hasActiveSubscription));
+      await renderBalanceMatch(data.balanceMatch, !!(data.profile && data.profile.hasActiveSubscription), phone);
       const favIds = (data.favorites || []).map((e) => e.id);
       await renderFavorites(phone, favIds);
     } catch (err) {
