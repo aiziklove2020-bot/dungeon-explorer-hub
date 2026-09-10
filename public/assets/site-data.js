@@ -24010,7 +24010,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 	updateParty: () => CM,
 	updateRegistrationType: () => yM,
 	updateUserRegistrationsInParties: () => EM
-}), nM, rM, iM, aM, oM, sM, cM, lM, uM, dM, fM, pM, mM, hM, gM, _M, vM, yM, bM, xM, SM, CM, wM, TM, EM, DM, OM, kM, AM, debugMyBalanceMatch, jM, MM, NM = o((() => {
+}), nM, rM, iM, aM, oM, sM, cM, lM, uM, dM, fM, pM, mM, hM, gM, _M, vM, yM, bM, xM, SM, CM, wM, TM, EM, DM, OM, kM, AM, jM, MM, NM = o((() => {
 	B(), W(), ZE(), pA(), Qj(), mk(), FO(), eM(), nM = async () => {
 		try {
 			return (await $j())?.retentionHours || 48;
@@ -24587,66 +24587,6 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 			}
 		}
 		return null;
-	}, debugMyBalanceMatch = async (e) => {
-		let t = XE(e) || (e || "").replace(/\D/g, "").trim(), n = await oM(), last8 = t.slice(-8), candidates = [];
-		n.forEach((p) => (p.balanceMatches || []).forEach((m) => {
-			let maleDigits = (m.malePhone || "").replace(/\D/g, ""), femaleDigits = (m.femalePhone || "").replace(/\D/g, "");
-			if (maleDigits.includes(last8) || femaleDigits.includes(last8) || XE(m.malePhone) === t || XE(m.femalePhone) === t) {
-				candidates.push({
-					partyId: p.id,
-					partyName: p.name || p.title || "",
-					partyStatus: p.status,
-					isMatched: m.isMatched,
-					isCouple: m.isCouple,
-					malePhone: m.malePhone,
-					femalePhone: m.femalePhone,
-					malePhoneNorm: XE(m.malePhone),
-					femalePhoneNorm: XE(m.femalePhone)
-				});
-			}
-		}));
-		let allCandidates = [];
-		try {
-			let allParties = await sM();
-			allParties.forEach((p) => (p.balanceMatches || []).forEach((m) => {
-				let maleDigits = (m.malePhone || "").replace(/\D/g, ""), femaleDigits = (m.femalePhone || "").replace(/\D/g, "");
-				if (maleDigits.includes(last8) || femaleDigits.includes(last8) || XE(m.malePhone) === t || XE(m.femalePhone) === t) {
-					allCandidates.push({
-						partyId: p.id,
-						partyName: p.name || p.title || "",
-						partyStatus: p.status,
-						isMatched: m.isMatched,
-						isCouple: m.isCouple,
-						malePhone: m.malePhone,
-						femalePhone: m.femalePhone
-					});
-				}
-			}));
-		} catch (err) {
-			allCandidates = [{
-				__error: String(err && err.message || err)
-			}];
-		}
-		return {
-			normalizedPhone: t,
-			partiesCount: n.length,
-			candidates,
-			allCandidatesAnyStatusUncached: allCandidates,
-			parties: n.map((e) => ({
-				id: e.id,
-				name: e.name || e.title || "",
-				status: e.status,
-				date: e.date,
-				matches: (e.balanceMatches || []).map((e) => ({
-					isMatched: e.isMatched,
-					isCouple: e.isCouple,
-					malePhone: e.malePhone,
-					femalePhone: e.femalePhone,
-					malePhoneNorm: XE(e.malePhone),
-					femalePhoneNorm: XE(e.femalePhone)
-				}))
-			}))
-		};
 	}, jM = async (e, t, n) => {
 		let r = XE(t) || (t || "").replace(/\D/g, "").trim(), i = E(H, iM, e), a = await Ju(i);
 		if (!a.exists()) throw Error("המסיבה לא נמצאה");
@@ -35447,7 +35387,6 @@ window.LPData = {
 	loadMyFavorites: oW,
 	loadFavoriteAlerts: sW,
 	loadMyBalanceMatch: rW,
-	debugMyBalanceMatch,
 	shareMyBalancePhone: iW,
 	loadMyPersonalArea: cW,
 	uploadMyProfilePhoto: lW,
