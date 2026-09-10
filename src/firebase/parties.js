@@ -11,7 +11,8 @@ import {
   arrayUnion,
   arrayRemove,
   Timestamp,
-  writeBatch
+  writeBatch,
+  waitForPendingWrites
 } from 'firebase/firestore';
 import { db } from './config';
 import { normalizeIsraeliPhone } from '../utils/phone';
@@ -1450,20 +1451,31 @@ export const linkClientRegistrationsToUser = async (phoneNumber, userId, userDat
 };
 
 export const saveBalanceMatches = async (partyId, balanceMatches) => {
-  try {
-    const partyRef = doc(db, PARTIES_COLLECTION, partyId);
-    await updateDoc(partyRef, {
-      balanceMatches: balanceMatches,
-      balanceUpdatedAt: Timestamp.now()
-    });
-    
-    // Clear cache - CRITICAL: Must clear all related caches
-    await invalidateCache(`party_${partyId}`); // Clear partyById cache
-    await invalidateCache(`balanceMatches_${partyId}`);
-    await invalidateCache('activeParties'); // Clear all parties cache
-  } catch (error) {
-    throw error;
+  const partyRef = doc(db, PARTIES_COLLECTION, partyId);
+  await updateDoc(partyRef, {
+    balanceMatches: balanceMatches,
+    balanceUpdatedAt: Timestamp.now()
+  });
+
+  // updateDoc() resolves as soon as the write lands in Firestore's
+  // persistent local cache (enabled in firebase/config.js), which happens
+  // even fully offline — the admin sees "saved" instantly while the write
+  // may still be queued and never reach the server on a flaky mobile
+  // connection. The public site reads fresh from the server and will never
+  // see a write stuck in another device's local queue, so confirm this one
+  // actually synced before treating it as done.
+  const synced = await Promise.race([
+    waitForPendingWrites(db).then(() => true),
+    new Promise((resolve) => setTimeout(() => resolve(false), 8000)),
+  ]);
+  if (!synced) {
+    throw new Error('ההתאמה נשמרה מקומית אך עדיין לא אושרה מהשרת — בדוק חיבור לאינטרנט ונסה שוב');
   }
+
+  // Clear cache - CRITICAL: Must clear all related caches
+  await invalidateCache(`party_${partyId}`); // Clear partyById cache
+  await invalidateCache(`balanceMatches_${partyId}`);
+  await invalidateCache('activeParties_all'); // Clear all parties cache
 };
 
 // Re-export from dataAccess for backward compatibility
