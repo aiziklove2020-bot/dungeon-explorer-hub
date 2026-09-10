@@ -24605,10 +24605,33 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				});
 			}
 		}));
+		let allCandidates = [];
+		try {
+			let allParties = await sM();
+			allParties.forEach((p) => (p.balanceMatches || []).forEach((m) => {
+				let maleDigits = (m.malePhone || "").replace(/\D/g, ""), femaleDigits = (m.femalePhone || "").replace(/\D/g, "");
+				if (maleDigits.includes(last8) || femaleDigits.includes(last8) || XE(m.malePhone) === t || XE(m.femalePhone) === t) {
+					allCandidates.push({
+						partyId: p.id,
+						partyName: p.name || p.title || "",
+						partyStatus: p.status,
+						isMatched: m.isMatched,
+						isCouple: m.isCouple,
+						malePhone: m.malePhone,
+						femalePhone: m.femalePhone
+					});
+				}
+			}));
+		} catch (err) {
+			allCandidates = [{
+				__error: String(err && err.message || err)
+			}];
+		}
 		return {
 			normalizedPhone: t,
 			partiesCount: n.length,
 			candidates,
+			allCandidatesAnyStatusUncached: allCandidates,
 			parties: n.map((e) => ({
 				id: e.id,
 				name: e.name || e.title || "",
