@@ -24590,7 +24590,8 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 	}, debugMyBalanceMatch = async (e) => {
 		let t = XE(e) || (e || "").replace(/\D/g, "").trim(), n = await oM(), last8 = t.slice(-8), candidates = [];
 		n.forEach((p) => (p.balanceMatches || []).forEach((m) => {
-			if ((m.malePhone || "").includes(last8) || (m.femalePhone || "").includes(last8)) {
+			let maleDigits = (m.malePhone || "").replace(/\D/g, ""), femaleDigits = (m.femalePhone || "").replace(/\D/g, "");
+			if (maleDigits.includes(last8) || femaleDigits.includes(last8) || XE(m.malePhone) === t || XE(m.femalePhone) === t) {
 				candidates.push({
 					partyId: p.id,
 					partyName: p.name || p.title || "",
