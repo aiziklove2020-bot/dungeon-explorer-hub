@@ -24561,9 +24561,8 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 	}, kM = ok, AM = async (e) => {
 		let t = XE(e) || (e || "").replace(/\D/g, "").trim();
 		if (!t) return null;
-		let n = await oM(), r = Date.now(), h = await nM();
+		let n = await oM();
 		for (let e of n) {
-			if (OO(e.date, h, r)) continue;
 			let i = e.balanceMatches || [];
 			for (let n of i) {
 				if (!n.isMatched || n.isCouple) continue;
