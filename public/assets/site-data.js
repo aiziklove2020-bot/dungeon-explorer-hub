@@ -24587,6 +24587,26 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 			}
 		}
 		return null;
+	}, debugMyBalanceMatch = async (e) => {
+		let t = XE(e) || (e || "").replace(/\D/g, "").trim(), n = await oM();
+		return {
+			normalizedPhone: t,
+			partiesCount: n.length,
+			parties: n.map((e) => ({
+				id: e.id,
+				name: e.name || e.title || "",
+				status: e.status,
+				date: e.date,
+				matches: (e.balanceMatches || []).map((e) => ({
+					isMatched: e.isMatched,
+					isCouple: e.isCouple,
+					malePhone: e.malePhone,
+					femalePhone: e.femalePhone,
+					malePhoneNorm: XE(e.malePhone),
+					femalePhoneNorm: XE(e.femalePhone)
+				}))
+			}))
+		};
 	}, jM = async (e, t, n) => {
 		let r = XE(t) || (t || "").replace(/\D/g, "").trim(), i = E(H, iM, e), a = await Ju(i);
 		if (!a.exists()) throw Error("המסיבה לא נמצאה");
@@ -35387,6 +35407,7 @@ window.LPData = {
 	loadMyFavorites: oW,
 	loadFavoriteAlerts: sW,
 	loadMyBalanceMatch: rW,
+	debugMyBalanceMatch,
 	shareMyBalancePhone: iW,
 	loadMyPersonalArea: cW,
 	uploadMyProfilePhoto: lW,
