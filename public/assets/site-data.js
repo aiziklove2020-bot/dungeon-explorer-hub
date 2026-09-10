@@ -24588,10 +24588,26 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 		}
 		return null;
 	}, debugMyBalanceMatch = async (e) => {
-		let t = XE(e) || (e || "").replace(/\D/g, "").trim(), n = await oM();
+		let t = XE(e) || (e || "").replace(/\D/g, "").trim(), n = await oM(), last8 = t.slice(-8), candidates = [];
+		n.forEach((p) => (p.balanceMatches || []).forEach((m) => {
+			if ((m.malePhone || "").includes(last8) || (m.femalePhone || "").includes(last8)) {
+				candidates.push({
+					partyId: p.id,
+					partyName: p.name || p.title || "",
+					partyStatus: p.status,
+					isMatched: m.isMatched,
+					isCouple: m.isCouple,
+					malePhone: m.malePhone,
+					femalePhone: m.femalePhone,
+					malePhoneNorm: XE(m.malePhone),
+					femalePhoneNorm: XE(m.femalePhone)
+				});
+			}
+		}));
 		return {
 			normalizedPhone: t,
 			partiesCount: n.length,
+			candidates,
 			parties: n.map((e) => ({
 				id: e.id,
 				name: e.name || e.title || "",
