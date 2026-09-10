@@ -126,7 +126,7 @@
 
 <script src="assets/app.js?v=202609062118"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609101938";
+import "./assets/site-data.js?v=202609101951";
 
 const STORAGE_KEY = "lp_my_area_phone";
 
@@ -210,7 +210,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const candidatesHtml = dbg.candidates && dbg.candidates.length
           ? `<pre style="text-align:right;direction:ltr;font-size:10px;white-space:pre-wrap;background:#003300;color:#0f0;padding:8px;border-radius:8px;margin-top:8px;max-height:300px;overflow:auto">CANDIDATES:\n${JSON.stringify(dbg.candidates, null, 2).replace(/</g, "&lt;")}</pre>`
           : `<p style="color:#fa0;font-size:11px;margin-top:8px">no candidates matched this phone in any balanceMatches entry</p>`;
-        debugHtml = candidatesHtml + `<pre style="text-align:right;direction:ltr;font-size:10px;white-space:pre-wrap;background:#000;color:#0f0;padding:8px;border-radius:8px;margin-top:8px;max-height:300px;overflow:auto">${JSON.stringify(dbg, null, 2).replace(/</g, "&lt;")}</pre>`;
+        const allCandHtml = dbg.allCandidatesAnyStatusUncached && dbg.allCandidatesAnyStatusUncached.length
+          ? `<pre style="text-align:right;direction:ltr;font-size:10px;white-space:pre-wrap;background:#330033;color:#f6f;padding:8px;border-radius:8px;margin-top:8px;max-height:300px;overflow:auto">ANY STATUS (uncached, direct read):\n${JSON.stringify(dbg.allCandidatesAnyStatusUncached, null, 2).replace(/</g, "&lt;")}</pre>`
+          : `<p style="color:#f0f;font-size:11px;margin-top:8px">ANY STATUS (uncached, direct read): also empty — this phone is not in ANY party document at all</p>`;
+        debugHtml = candidatesHtml + allCandHtml + `<pre style="text-align:right;direction:ltr;font-size:10px;white-space:pre-wrap;background:#000;color:#0f0;padding:8px;border-radius:8px;margin-top:8px;max-height:300px;overflow:auto">${JSON.stringify(dbg, null, 2).replace(/</g, "&lt;")}</pre>`;
       } catch (err) {
         debugHtml = `<p style="color:#f66;font-size:11px">debug error: ${String(err && err.message || err)}</p>`;
       }
