@@ -1486,10 +1486,25 @@ export const getMyBalanceMatch = async (phoneNumber) => {
   if (!normalized) return null;
 
   const parties = await getActiveParties();
-  const now = Date.now();
+
+  // Same retention rule as everywhere else (shared/partyExpiry.js): a party
+  // labeled for "today" is still live through the whole day, not just until
+  // midnight. The old `partyDate.getTime() < now` check compared against
+  // Israel-midnight of the labeled day, so a match vanished from "האזור
+  // האישי" the instant the party's date arrived — hours before the party
+  // itself, exactly when someone would check it.
+  let retentionHours = DEFAULT_PARTY_RETENTION_HOURS;
+  try {
+    const settings = await getPartySettings();
+    if (settings?.retentionHours) retentionHours = settings.retentionHours;
+  } catch {
+    // keep default
+  }
+  const nowMs = Date.now();
+
   for (const party of parties) {
     const partyDate = party.date instanceof Date ? party.date : new Date(party.date);
-    if (!Number.isNaN(partyDate.getTime()) && partyDate.getTime() < now) continue;
+    if (isPartyExpiredByDate(partyDate, retentionHours, nowMs)) continue;
     const matches = party.balanceMatches || [];
     for (const m of matches) {
       // Both the algorithmic pairing (matchType 'balance', from
