@@ -1485,26 +1485,17 @@ export const getMyBalanceMatch = async (phoneNumber) => {
   const normalized = normalizeIsraeliPhone(phoneNumber) || (phoneNumber || '').replace(/\D/g, '').trim();
   if (!normalized) return null;
 
+  // getActiveParties() already filters to status === 'active' — the same
+  // admin-controlled flag (flipped off by the retention-aware cleanup job)
+  // that every other "is this party still current" check on the site
+  // trusts. An extra date check here previously compared against
+  // Israel-midnight of the labeled day, which made a match vanish from
+  // "האזור האישי" the instant the party's date arrived — hours before the
+  // party itself, exactly when someone would go looking for it. Don't
+  // duplicate that logic; just trust the same flag everyone else trusts.
   const parties = await getActiveParties();
 
-  // Same retention rule as everywhere else (shared/partyExpiry.js): a party
-  // labeled for "today" is still live through the whole day, not just until
-  // midnight. The old `partyDate.getTime() < now` check compared against
-  // Israel-midnight of the labeled day, so a match vanished from "האזור
-  // האישי" the instant the party's date arrived — hours before the party
-  // itself, exactly when someone would check it.
-  let retentionHours = DEFAULT_PARTY_RETENTION_HOURS;
-  try {
-    const settings = await getPartySettings();
-    if (settings?.retentionHours) retentionHours = settings.retentionHours;
-  } catch {
-    // keep default
-  }
-  const nowMs = Date.now();
-
   for (const party of parties) {
-    const partyDate = party.date instanceof Date ? party.date : new Date(party.date);
-    if (isPartyExpiredByDate(partyDate, retentionHours, nowMs)) continue;
     const matches = party.balanceMatches || [];
     for (const m of matches) {
       // Both the algorithmic pairing (matchType 'balance', from
