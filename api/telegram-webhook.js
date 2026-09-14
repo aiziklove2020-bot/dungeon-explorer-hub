@@ -710,10 +710,11 @@ async function sendAllPartyReminders(targetChatId) {
       }
     }
 
-    // Instagram rides the same schedule, but only on the real full run — a
-    // manual resend to one fixed Telegram channel (targetChatId) shouldn't
-    // also trigger an Instagram post.
-    const instagramResults = targetChatId ? [] : await publishActiveInstagramParties(admin, activeParties);
+    // Automatic Instagram posting disabled — it re-posted every active party
+    // on every scheduled run (no dedup), which got the account close to
+    // being blocked by Instagram. Manual posting from the admin panel (a
+    // separate code path, api/publish-content.js) is unaffected.
+    const instagramResults = [];
     const whatsappResult = targetChatId ? null : await publishActiveWhatsApp();
 
     return { partiesSent: activeParties.length, destinationCount: destinations.length, results, instagramResults, whatsappResult };
