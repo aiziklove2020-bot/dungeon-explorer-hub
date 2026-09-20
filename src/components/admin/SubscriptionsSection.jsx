@@ -1,19 +1,22 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Download, RotateCcw } from 'lucide-react';
+import { Search, Download, RotateCcw, Plus } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import useAdminSection from '../../hooks/useAdminSection';
 import AdminLoader from './AdminLoader';
 import PhoneLink from '../PhoneLink';
-import { getAllUsers } from '../../firebase/users';
-import { 
-  SUBSCRIPTION_KINDS, 
-  getSubscription, 
-  addOrExtendSubscription, 
-  setSubscriptionExpiry, 
-  removeSubscription 
+import { createUser, getAllUsers } from '../../firebase/users';
+import { addPaymentRecord, PAYMENT_METHODS } from '../../firebase/crm';
+import {
+  SUBSCRIPTION_KINDS,
+  getSubscription,
+  addOrExtendSubscription,
+  setSubscriptionExpiry,
+  removeSubscription
 } from '../../firebase/subscriptions';
 import SubscriptionBadge from './SubscriptionBadge';
 import SubscriptionEditor from './SubscriptionEditor';
+import NewSubscriberModal from './NewSubscriberModal';
+import RenewSubscriptionModal from './RenewSubscriptionModal';
 
 const SubscriptionsSection = ({ showSaved }) => {
   const { t } = useLanguage();
@@ -22,6 +25,35 @@ const SubscriptionsSection = ({ showSaved }) => {
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'parties', 'exchangeParties'
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'active', 'gold', 'expiringSoon', 'expired'
+  const [showNewSubscriber, setShowNewSubscriber] = useState(false);
+  const [renewingUser, setRenewingUser] = useState(null);
+
+  const handleCreateSubscriber = async ({ firstName, lastName, phoneNumber, paymentMethod, expiryDate }) => {
+    const fullName = `${firstName} ${lastName}`.trim();
+    const user = await createUser(phoneNumber, fullName, 'male');
+    await setSubscriptionExpiry(user.id, 'parties', new Date(`${expiryDate}T00:00:00.000Z`));
+    await addPaymentRecord(user.id, {
+      date: new Date().toISOString().split('T')[0],
+      method: paymentMethod,
+      note: 'הפעלת מנוי חדש',
+    });
+    setShowNewSubscriber(false);
+    reload();
+    showSaved();
+  };
+
+  const handleRenewSubscription = async ({ expiryDate, paymentMethod }) => {
+    if (!renewingUser) return;
+    await setSubscriptionExpiry(renewingUser.id, 'parties', new Date(`${expiryDate}T00:00:00.000Z`));
+    await addPaymentRecord(renewingUser.id, {
+      date: new Date().toISOString().split('T')[0],
+      method: paymentMethod,
+      note: 'חידוש מנוי',
+    });
+    setRenewingUser(null);
+    reload();
+    showSaved();
+  };
 
   const handleAction = async (userId, kind, action, payload) => {
     try {
@@ -244,6 +276,9 @@ const SubscriptionsSection = ({ showSaved }) => {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <button onClick={() => setShowNewSubscriber(true)} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
+            <Plus size={14} /> מנוי חדש
+          </button>
           <button onClick={reload} className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
             <RotateCcw size={14} /> רענן
           </button>
@@ -366,7 +401,15 @@ const SubscriptionsSection = ({ showSaved }) => {
                       </div>
                     </div>
 
-                    <div className="w-full md:w-auto self-end md:self-center">
+                    <div className="w-full md:w-auto self-end md:self-center flex flex-wrap gap-2 justify-end">
+                      {u.subs.parties.isExpired && (
+                        <button
+                          onClick={() => setRenewingUser(u)}
+                          className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm"
+                        >
+                          🔄 חידוש מנוי
+                        </button>
+                      )}
                       <SubscriptionEditor onAction={(kind, action, payload) => handleAction(u.id, kind, action, payload)} />
                     </div>
                   </div>
@@ -375,6 +418,21 @@ const SubscriptionsSection = ({ showSaved }) => {
             </div>
           ))}
         </div>
+      )}
+
+      {showNewSubscriber && (
+        <NewSubscriberModal
+          onClose={() => setShowNewSubscriber(false)}
+          onSubmit={handleCreateSubscriber}
+        />
+      )}
+
+      {renewingUser && (
+        <RenewSubscriptionModal
+          user={renewingUser}
+          onClose={() => setRenewingUser(null)}
+          onSubmit={handleRenewSubscription}
+        />
       )}
     </div>
   );
