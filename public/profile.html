@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!u) { location = "/login"; return; }
   document.getElementById("pageLoader").style.display = "flex";
   document.getElementById("pname").textContent = u.name;
-  document.getElementById("pemail").textContent = u.email;
+  document.getElementById("pemail").textContent = u.phone;
   document.getElementById("logout").onclick = () => { localStorage.removeItem("lp_current"); location = "/"; };
 
   // These sections start visible (with a "טוען..." placeholder) so their
