@@ -49,17 +49,23 @@
  </nav>
 </aside><div class="scrim"></div>
 
-<main class="max-w-xl mx-auto px-4">
-  <div class="text-center mb-6">
-    <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-text-primary">הרשמה למסיבה</h1>
+<main class="max-w-xl mx-auto px-4 relative">
+  <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-80 h-32 bg-primary-container/20 blur-3xl pointer-events-none rounded-full"></div>
+
+  <div class="flex flex-col items-center text-center gap-1 mb-6 relative">
+    <div class="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-surface-container-high/80 text-secondary font-label-caps text-[11px] tracking-widest uppercase mb-2">
+      <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+      <span>הרשמה דיסקרטית ומאובטחת</span>
+    </div>
+    <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-text-primary tracking-tight">הרשמה למסיבה</h1>
     <p class="text-text-secondary text-sm mt-1">תהליך קצר, בטוח ודיסקרטי — כמה שניות ואתם רשומים</p>
   </div>
 
-  <div class="flex items-center justify-center gap-2 mb-6" id="stepIndicator">
+  <div class="flex items-center justify-between p-3 bg-surface-container-low/90 rounded-xl mb-6" id="stepIndicator">
     <span class="flex items-center gap-2 text-primary font-bold text-sm" data-step-badge="1">
-      <span class="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-white text-xs">1</span>בחירת מסיבה
+      <span class="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-white text-xs shadow-[0_0_12px_rgba(255,87,8,0.4)]">1</span>בחירת מסיבה
     </span>
-    <span class="w-8 h-px bg-white/15"></span>
+    <span class="flex-1 h-[2px] mx-3 bg-gradient-to-l from-primary-container to-secondary-container/40 rounded-full"></span>
     <span class="flex items-center gap-2 text-text-muted font-bold text-sm" data-step-badge="2">
       <span class="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center text-xs">2</span>פרטים אישיים
     </span>
