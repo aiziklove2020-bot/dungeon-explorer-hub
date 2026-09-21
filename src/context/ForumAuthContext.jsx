@@ -193,7 +193,8 @@ export function ForumAuthProvider({ children }) {
       }
     }
 
-    let user = await registerForumUser(nickname, password, trimmedEmail);
+    const phoneForForum = siteUser?.phoneNumber || siteFields?.phone;
+    let user = await registerForumUser(nickname, password, phoneForForum, trimmedEmail);
 
     if (siteUser?.id) {
       await autoLink(user);

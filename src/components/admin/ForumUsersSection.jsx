@@ -186,7 +186,7 @@ const ForumUsersSection = ({ showSaved }) => {
       if (!/^[\p{L}\p{N}_-]+$/u.test(cleanNick)) { alert('כינוי יכול להכיל אותיות, ספרות, מקף וקו תחתון בלבד'); return; }
       const makeAdmin = window.confirm('להפוך את המשתמש למנהל פורום?');
       const tempPassword = Math.random().toString(36).slice(-8);
-      const newUser = await registerForumUser(cleanNick, tempPassword);
+      const newUser = await registerForumUser(cleanNick, tempPassword, siteUser.phoneNumber);
       await linkForumUserToSiteUser(newUser.id, siteUser.id);
       await setForumUserPasswordWithReset(newUser.id, tempPassword);
       if (makeAdmin) await setForumUserRole(newUser.id, 'forumAdmin');
