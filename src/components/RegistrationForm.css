@@ -35,9 +35,9 @@
 
 .registration-form-title {
   font-size: 1.875rem;
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
   color: #ffffff;
+  letter-spacing: -0.01em;
 }
 
 @media (min-width: 768px) {
@@ -47,11 +47,11 @@
 }
 
 .registration-form-title-red {
-  color: #dc2626;
+  color: #ff7a29;
 }
 
 .registration-form-subtitle {
-  color: #71717a;
+  color: #ffb952;
   font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: 0.4em;
@@ -84,8 +84,9 @@
 .registration-success-icon-container {
   width: 5rem;
   height: 5rem;
-  background-color: rgba(22, 163, 74, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background-color: rgba(255, 87, 8, 0.18);
+  border: 1px solid rgba(255, 87, 8, 0.35);
+  box-shadow: 0 0 30px rgba(255, 87, 8, 0.35);
   border-radius: 9999px;
   display: flex;
   align-items: center;
@@ -96,25 +97,24 @@
 }
 
 .registration-success-icon {
-  color: #22c55e;
+  color: #ffb59c;
 }
 
 .registration-success-title {
   font-size: 1.875rem;
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
   margin-bottom: 1rem;
 }
 
 .registration-success-text {
-  color: #a1a1aa;
+  color: #e5beb2;
   font-size: 0.875rem;
   margin-bottom: 2rem;
   font-weight: 300;
 }
 
 .registration-success-back-btn {
-  color: #ef4444;
+  color: #ffb952;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.3em;
@@ -145,18 +145,17 @@
 
 .registration-step1-question {
   font-size: 1.25rem;
-  font-weight: 300;
+  font-weight: 500;
   text-align: center;
   margin-bottom: 1.5rem;
-  color: #a1a1aa;
-  font-style: italic;
+  color: #e5beb2;
 }
 
 .registration-type-button {
   width: 100%;
-  background-color: rgba(39, 39, 42, 0.5);
+  background-color: rgba(32, 31, 34, 0.7);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 1.25rem;
   border-radius: 1.5rem;
   display: flex;
@@ -164,31 +163,32 @@
   gap: 1rem;
   transition: all 0.3s;
   cursor: pointer;
-  border: none;
 }
 
 .registration-type-button:hover {
-  background-color: rgba(39, 39, 42, 0.8);
+  background-color: rgba(42, 42, 44, 0.9);
+  border-color: rgba(255, 87, 8, 0.35);
 }
 
 .registration-type-icon-container {
   width: 3rem;
   height: 3rem;
-  background-color: #18181b;
+  background-color: #2a2a2c;
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.5s;
+  transition: all 0.3s;
   flex-shrink: 0;
 }
 
 .registration-type-button:hover .registration-type-icon-container {
-  background-color: #dc2626;
+  background-color: #ff5708;
+  box-shadow: 0 0 16px rgba(255, 87, 8, 0.5);
 }
 
 .registration-type-icon {
-  color: #a1a1aa;
+  color: #e5beb2;
   transition: color 0.3s;
 }
 
@@ -208,13 +208,12 @@
 
 .registration-type-subtitle {
   font-size: 0.625rem;
-  color: #71717a;
-  font-style: italic;
+  color: #ac897e;
 }
 
 .registration-cancel-btn {
   width: 100%;
-  color: #71717a;
+  color: #ac897e;
   font-size: 0.75rem;
   font-weight: 700;
   margin-top: 1rem;
@@ -222,6 +221,10 @@
   border: none;
   cursor: pointer;
   padding: 0;
+}
+
+.registration-cancel-btn:hover {
+  color: #e5e1e4;
 }
 
 .registration-step2-container {
@@ -244,7 +247,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #71717a;
+  color: #ac897e;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -260,15 +263,15 @@
 }
 
 .registration-form {
-  background-color: rgba(39, 39, 42, 0.5);
+  background-color: rgba(32, 31, 34, 0.7);
   backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 1rem;
   border-radius: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 87, 8, 0.06);
 }
 
 @media (min-width: 768px) {
@@ -290,33 +293,35 @@
   font-size: 0.625rem;
   text-transform: uppercase;
   font-weight: 700;
-  color: #71717a;
+  color: #ac897e;
   margin-right: 0.5rem;
 }
 
 .registration-form-input {
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  border: 1px solid #27272a;
+  background-color: rgba(14, 14, 16, 0.7);
+  border: 1px solid #353437;
   padding: 1rem;
   border-radius: 1rem;
   outline: none;
   color: #ffffff;
   text-align: right;
   font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .registration-form-input:focus {
-  border-color: #dc2626;
+  border-color: #ff5708;
+  box-shadow: 0 0 0 3px rgba(255, 87, 8, 0.18);
 }
 
 .registration-form-input:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #ffb952;
   outline-offset: 2px;
 }
 
 .registration-form-input-error {
-  border-color: #dc2626;
+  border-color: #ffb4ab;
 }
 
 .registration-form-partner-field {
@@ -353,14 +358,14 @@
 }
 
 .registration-form-error {
-  color: #ef4444;
+  color: #ffb4ab;
   font-size: 0.75rem;
   margin-top: 0.25rem;
   text-align: right;
 }
 
 .registration-form-info {
-  color: #0ea5e9;
+  color: #7dd3fc;
   font-size: 0.875rem;
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
@@ -374,7 +379,7 @@
 
 /* סימון לא תקין למסיבות: רק תווית אדומה + הודעה מתחת, בלי אדום על כפתורי המסיבות */
 .registration-parties-section-error .registration-parties-label {
-  color: #ef4444;
+  color: #ffb4ab;
 }
 
 .registration-parties-message {
@@ -400,9 +405,9 @@
   border-radius: 0.75rem;
   font-size: 0.75rem;
   text-align: right;
-  background-color: rgba(234, 179, 8, 0.2);
-  border: 1px solid rgba(234, 179, 8, 0.3);
-  color: #fbbf24;
+  background-color: rgba(255, 170, 0, 0.15);
+  border: 1px solid rgba(255, 170, 0, 0.3);
+  color: #ffcf90;
 }
 
 .registration-info-expired {
@@ -411,9 +416,9 @@
   border-radius: 0.75rem;
   font-size: 0.75rem;
   text-align: right;
-  background-color: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  background-color: rgba(147, 0, 10, 0.25);
+  border: 1px solid rgba(255, 180, 171, 0.3);
+  color: #ffb4ab;
 }
 
 .registration-info-expiring {
@@ -422,9 +427,9 @@
   border-radius: 0.75rem;
   font-size: 0.75rem;
   text-align: right;
-  background-color: rgba(249, 115, 22, 0.2);
-  border: 1px solid rgba(249, 115, 22, 0.3);
-  color: #fb923c;
+  background-color: rgba(255, 87, 8, 0.15);
+  border: 1px solid rgba(255, 87, 8, 0.3);
+  color: #ffb59c;
 }
 
 .registration-info-active {
@@ -433,7 +438,7 @@
   border-radius: 0.75rem;
   font-size: 0.75rem;
   text-align: right;
-  background-color: rgba(34, 197, 94, 0.2);
+  background-color: rgba(34, 197, 94, 0.15);
   border: 1px solid rgba(34, 197, 94, 0.3);
   color: #4ade80;
 }
@@ -469,7 +474,7 @@
   font-size: 0.625rem;
   text-transform: uppercase;
   font-weight: 700;
-  color: #71717a;
+  color: #ac897e;
   margin-right: 0.5rem;
   display: flex;
   justify-content: flex-start;
@@ -479,10 +484,10 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(14, 14, 16, 0.6);
   padding: 0.25rem;
   border-radius: 1rem;
-  border: 1px solid #18181b;
+  border: 1px solid #2a2a2c;
 }
 
 .registration-arrival-btn {
@@ -501,24 +506,24 @@
 }
 
 .registration-arrival-btn-independent {
-  background-color: #27272a;
+  background-color: #2a2a2c;
   color: #ffffff;
 }
 
 .registration-arrival-btn-pickup {
-  background-color: rgba(220, 38, 38, 0.2);
-  color: #ef4444;
-  border: 1px solid rgba(153, 27, 27, 0.5);
+  background-color: rgba(255, 87, 8, 0.18);
+  color: #ffb59c;
+  border: 1px solid rgba(255, 87, 8, 0.4);
 }
 
 .registration-arrival-btn-inactive {
-  color: #52525b;
+  color: #71615c;
 }
 
 .registration-pickup-input {
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(153, 27, 27, 0.3);
+  background-color: rgba(14, 14, 16, 0.7);
+  border: 1px solid rgba(255, 87, 8, 0.3);
   padding: 1rem;
   border-radius: 1rem;
   color: #ffffff;
@@ -527,11 +532,11 @@
 }
 
 .registration-pickup-input:focus {
-  border-color: #dc2626;
+  border-color: #ff5708;
 }
 
 .registration-pickup-input:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #ffb952;
   outline-offset: 2px;
 }
 
@@ -546,7 +551,7 @@
   font-size: 0.625rem;
   text-transform: uppercase;
   font-weight: 700;
-  color: #71717a;
+  color: #ac897e;
   margin-right: 0.5rem;
 }
 
@@ -554,7 +559,7 @@
   text-align: center;
   padding-top: 2rem;
   padding-bottom: 2rem;
-  color: #71717a;
+  color: #ac897e;
   font-size: 0.875rem;
 }
 
@@ -577,16 +582,16 @@
 }
 
 .registration-party-button-selected {
-  border-color: #dc2626;
-  background-color: rgba(220, 38, 38, 0.1);
+  border-color: #ff5708;
+  background-color: rgba(255, 87, 8, 0.12);
   color: #ffffff;
-  box-shadow: 0 0 15px rgba(220, 38, 38, 0.2);
+  box-shadow: 0 0 18px rgba(255, 87, 8, 0.3);
 }
 
 .registration-party-button-unselected {
-  border-color: #27272a;
-  background-color: rgba(0, 0, 0, 0.4);
-  color: #71717a;
+  border-color: #2a2a2c;
+  background-color: rgba(14, 14, 16, 0.6);
+  color: #ac897e;
 }
 
 .registration-party-button-unselected:hover {
@@ -621,18 +626,18 @@
 
 .registration-submit-btn {
   width: 100%;
-  background-color: #b91c1c;
+  background: linear-gradient(90deg, #ff5708 0%, #ffaa00 100%);
   color: #ffffff;
   padding-top: 1rem;
   padding-bottom: 1rem;
   border-radius: 1rem;
-  font-weight: 900;
+  font-weight: 800;
   font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 24px rgba(255, 87, 8, 0.4);
   transition: all 0.3s;
   border: none;
   cursor: pointer;
@@ -648,15 +653,21 @@
 }
 
 .registration-submit-btn:hover {
-  background-color: #dc2626;
+  filter: brightness(1.08);
+  box-shadow: 0 4px 30px rgba(255, 87, 8, 0.6);
+}
+
+.registration-submit-btn:active {
+  transform: scale(0.98);
 }
 
 .registration-submit-btn:disabled,
 .registration-submit-btn[aria-disabled="true"] {
-  background-color: #27272a;
-  color: #a1a1aa;
+  background: #2a2a2c;
+  color: #ac897e;
   opacity: 1;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .registration-submit-icon {
@@ -689,4 +700,3 @@
     transform: rotate(360deg);
   }
 }
-
