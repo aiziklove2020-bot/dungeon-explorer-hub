@@ -73,8 +73,8 @@
 }
 
 .delete-account-error {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: rgba(255, 122, 41, 0.15);
+  border: 1px solid rgba(255, 122, 41, 0.4);
   color: #fca5a5;
 }
 
@@ -104,12 +104,12 @@
 
 .delete-account-input:focus {
   outline: none;
-  border-color: #dc2626;
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+  border-color: #ff5708;
+  box-shadow: 0 0 0 2px rgba(255, 87, 8, 0.2);
 }
 
 .delete-account-input:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #ff7a29;
   outline-offset: 2px;
 }
 
@@ -133,7 +133,7 @@
   font-size: 1rem;
   font-weight: 600;
   color: #fff;
-  background: #dc2626;
+  background: #ff5708;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -141,7 +141,7 @@
 }
 
 .delete-account-submit:hover:not(:disabled) {
-  background: #b91c1c;
+  background: #ff5708;
 }
 
 .delete-account-submit:disabled {

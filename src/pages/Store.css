@@ -20,7 +20,7 @@
 
 .store-disabled-icon,
 .store-success-icon {
-  color: #ef4444;
+  color: #ff7a29;
   opacity: 0.5;
 }
 
@@ -37,7 +37,7 @@
 }
 
 .store-back-btn {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #ff7a29 0%, #ff5708 100%);
   color: white;
   border: none;
   padding: 0.75rem 2rem;
@@ -49,7 +49,7 @@
 
 .store-back-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 122, 41, 0.3);
 }
 
 /* Store Header */
@@ -64,7 +64,7 @@
 }
 
 .store-title-red {
-  color: #ef4444;
+  color: #ff7a29;
 }
 
 .store-subtitle {
@@ -101,7 +101,7 @@
 
 .store-product-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(239, 68, 68, 0.3);
+  border-color: rgba(255, 122, 41, 0.3);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
@@ -201,7 +201,7 @@
 .store-product-price {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #ef4444;
+  color: #ff7a29;
   margin-bottom: 0.5rem;
 }
 
@@ -225,12 +225,12 @@
 }
 
 .store-product-stock .out-of-stock {
-  color: #ef4444;
+  color: #ff7a29;
 }
 
 .store-add-to-cart-btn {
   width: 100%;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #ff7a29 0%, #ff5708 100%);
   color: white;
   border: none;
   padding: 0.75rem 1rem;
@@ -246,7 +246,7 @@
 
 .store-add-to-cart-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 122, 41, 0.3);
 }
 
 .store-add-to-cart-btn:disabled {
@@ -266,7 +266,7 @@
   left: 2rem;
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #ff7a29 0%, #ff5708 100%);
   color: white;
   border: none;
   border-radius: 50%;
@@ -275,7 +275,7 @@
   align-items: center;
   justify-content: center;
   z-index: 100;
-  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 122, 41, 0.4);
   transition: all 0.3s ease;
 }
 
@@ -288,7 +288,7 @@
   top: -5px;
   right: -5px;
   background: white;
-  color: #ef4444;
+  color: #ff7a29;
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -419,7 +419,7 @@
 }
 
 .store-cart-item-price {
-  color: #ef4444;
+  color: #ff7a29;
   font-weight: bold;
 }
 
@@ -461,7 +461,7 @@
 .store-cart-item-remove {
   background: none;
   border: none;
-  color: #ef4444;
+  color: #ff7a29;
   cursor: pointer;
   padding: 0.5rem;
   opacity: 0.7;
@@ -487,13 +487,13 @@
 
 .store-cart-total-price {
   font-weight: bold;
-  color: #ef4444;
+  color: #ff7a29;
   font-size: 1.5rem;
 }
 
 .store-checkout-btn {
   width: 100%;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #ff7a29 0%, #ff5708 100%);
   color: white;
   border: none;
   padding: 1rem;
@@ -509,7 +509,7 @@
 }
 
 .store-checkout-btn:hover {
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 122, 41, 0.3);
 }
 
 /* Checkout Modal */
@@ -590,7 +590,7 @@
 }
 
 .store-checkout-total span:last-child {
-  color: #ef4444;
+  color: #ff7a29;
 }
 
 .store-checkout-form {
@@ -622,18 +622,18 @@
 
 .store-form-group input:focus {
   outline: none;
-  border-color: #ef4444;
+  border-color: #ff7a29;
 }
 
 .store-form-group input:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #ff7a29;
   outline-offset: 2px;
 }
 
 .store-form-error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+  background: rgba(255, 122, 41, 0.1);
+  border: 1px solid rgba(255, 122, 41, 0.3);
+  color: #ff7a29;
   padding: 0.75rem;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -794,7 +794,7 @@
 }
 
 .store-gallery-dot.active {
-  background: #ef4444;
+  background: #ff7a29;
 }
 
 .store-product-modal-content {
@@ -829,7 +829,7 @@
 .store-product-modal-price {
   font-size: 2rem;
   font-weight: bold;
-  color: #ef4444;
+  color: #ff7a29;
   margin-bottom: 1rem;
 }
 
@@ -853,7 +853,7 @@
 }
 
 .store-product-modal-stock .out-of-stock {
-  color: #ef4444;
+  color: #ff7a29;
 }
 
 /* Responsive */

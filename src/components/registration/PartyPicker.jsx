@@ -1,4 +1,5 @@
 import Loader from '../Loader';
+import PartyImage from '../PartyImage';
 
 function formatPartyDate(date) {
   const d = date instanceof Date ? date : new Date(date);
@@ -73,6 +74,13 @@ export default function PartyPicker({
                       : 'registration-party-button-unselected'
                   }`}
                 >
+                  {party.img && (
+                    <PartyImage
+                      src={party.img}
+                      alt={party.name || party.title || ''}
+                      style={{ marginBottom: '0.75rem', height: '110px' }}
+                    />
+                  )}
                   <div className="registration-party-content">
                     <span className="registration-party-name">
                       {party.name || party.title || t('party.defaultName')}

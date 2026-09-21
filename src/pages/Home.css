@@ -76,7 +76,7 @@
 }
 
 .hero-title-hebrew {
-  color: #dc2626;
+  color: #ff5708;
 }
 
 .hero-title-english {
@@ -109,7 +109,7 @@
 }
 
 .hero-tagline {
-  color: #ef4444;
+  color: #ff7a29;
   font-weight: 700;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -141,7 +141,7 @@
 
 .hero-register-btn {
   margin-top: 0;
-  background-color: #dc2626;
+  background-color: #ff5708;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
   padding-top: 1rem;
@@ -154,7 +154,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 0 40px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 0 40px rgba(255, 87, 8, 0.3);
   border: none;
   cursor: pointer;
   color: #ffffff;
@@ -301,7 +301,7 @@
 }
 
 .hero-register-btn:hover {
-  background-color: #ef4444;
+  background-color: #ff7a29;
   transform: scale(1.05);
 }
 
@@ -351,7 +351,7 @@
   font-style: italic;
   margin-bottom: 2rem;
   text-decoration: underline;
-  text-decoration-color: #dc2626;
+  text-decoration-color: #ff5708;
   text-decoration-thickness: 4px;
   text-underline-offset: 8px;
 }
@@ -386,7 +386,7 @@
 }
 
 .event-card:hover {
-  border-color: rgba(220, 38, 38, 0.5);
+  border-color: rgba(255, 87, 8, 0.5);
 }
 
 .event-card-blue:hover {
@@ -443,7 +443,7 @@
 .event-meta-icon {
   width: 0.75rem;
   height: 0.75rem;
-  color: #dc2626;
+  color: #ff5708;
 }
 
 .event-meta-icon-blue {
@@ -491,8 +491,8 @@
   padding-top: 1rem;
   padding-bottom: 1rem;
   border-width: 2px;
-  border-color: #991b1b;
-  color: #ef4444;
+  border-color: #b23f00;
+  color: #ff7a29;
   font-weight: 700;
   border-radius: 0.75rem;
   transition: all 0.3s;
@@ -505,7 +505,7 @@
 }
 
 .event-register-btn:hover {
-  background-color: #991b1b;
+  background-color: #b23f00;
   color: #ffffff;
 }
 

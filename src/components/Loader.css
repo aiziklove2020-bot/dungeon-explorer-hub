@@ -129,8 +129,8 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #dc2626;
-  box-shadow: 0 0 10px rgba(220, 38, 38, 0.6);
+  background-color: #ff5708;
+  box-shadow: 0 0 10px rgba(255, 87, 8, 0.6);
   animation: loaderDotBounce 1.4s ease-in-out infinite;
 }
 

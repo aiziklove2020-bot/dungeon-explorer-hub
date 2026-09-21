@@ -11,9 +11,9 @@ html.editor-zen-fullscreen .support-chat-window {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #ff5708 0%, #ff5708 100%);
   border: none;
-  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 87, 8, 0.4);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -25,7 +25,7 @@ html.editor-zen-fullscreen .support-chat-window {
 
 .support-chat-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 25px rgba(220, 38, 38, 0.5);
+  box-shadow: 0 6px 25px rgba(255, 87, 8, 0.5);
 }
 
 .support-chat-button.hidden {
@@ -76,7 +76,7 @@ html.editor-zen-fullscreen .support-chat-window {
 }
 
 .support-chat-header {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #ff5708 0%, #ff5708 100%);
   color: white;
   padding: 14px 16px;
   display: flex;
@@ -167,7 +167,7 @@ html.editor-zen-fullscreen .support-chat-window {
 }
 
 .support-chat-name-input:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #ff7a29;
   outline-offset: 2px;
 }
 
@@ -213,7 +213,7 @@ html.editor-zen-fullscreen .support-chat-window {
   padding: 12px 20px;
   border-radius: 12px;
   border: none;
-  background: #dc2626;
+  background: #ff5708;
   color: white;
   font-size: 15px;
   font-weight: 600;
@@ -221,7 +221,7 @@ html.editor-zen-fullscreen .support-chat-window {
 }
 
 .support-chat-start-btn:hover:not(:disabled) {
-  background: #b91c1c;
+  background: #ff5708;
 }
 
 .support-chat-start-btn:disabled {
@@ -286,7 +286,7 @@ html.editor-zen-fullscreen .support-chat-window {
 
 .support-chat-msg--user {
   align-self: flex-end;
-  background: #dc2626;
+  background: #ff5708;
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -331,11 +331,11 @@ html.editor-zen-fullscreen .support-chat-window {
 }
 
 .support-chat-input:focus {
-  border-color: #dc2626;
+  border-color: #ff5708;
 }
 
 .support-chat-input:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #ff7a29;
   outline-offset: 2px;
 }
 
@@ -348,7 +348,7 @@ html.editor-zen-fullscreen .support-chat-window {
   height: 44px;
   border-radius: 12px;
   border: none;
-  background: #dc2626;
+  background: #ff5708;
   color: white;
   cursor: pointer;
   display: flex;
@@ -358,7 +358,7 @@ html.editor-zen-fullscreen .support-chat-window {
 }
 
 .support-chat-send:hover:not(:disabled) {
-  background: #b91c1c;
+  background: #ff5708;
 }
 
 .support-chat-send:disabled {
