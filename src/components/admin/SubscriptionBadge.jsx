@@ -21,10 +21,11 @@ const SubscriptionBadge = ({ user, kind }) => {
   }
 
   if (info.isGold) {
+    const isLifetime = user.gender === 'female';
     return (
       <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-yellow-900/30 border border-yellow-700/50">
         <span className="text-yellow-500 font-bold text-[10px] md:text-xs">{label}:</span>
-        <span className="text-yellow-400 font-bold text-[10px] md:text-xs">⭐ זהב</span>
+        <span className="text-yellow-400 font-bold text-[10px] md:text-xs">{isLifetime ? '🎗️ לכל החיים' : '⭐ זהב'}</span>
       </div>
     );
   }
