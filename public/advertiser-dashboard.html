@@ -51,7 +51,7 @@
 <main class="max-w-xl mx-auto px-4" style="display:none">
   <div class="flex items-center justify-between mb-5">
     <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-text-primary">אזור מפרסם</h1>
-    <a href="/create-event" class="flex items-center gap-1.5 rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold text-sm py-2.5 px-4 shadow-[0_4px_20px_rgba(225,29,72,0.35)]">
+    <a href="/create-event" class="flex items-center gap-1.5 rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold text-sm py-2.5 px-4 shadow-[0_4px_20px_rgba(255, 87, 8,0.35)]">
       <span class="material-symbols-outlined text-[18px]">add</span>אירוע חדש
     </a>
   </div>
@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               ${e.dj ? `<p class="text-text-secondary text-sm">DJ ${e.dj}</p>` : ""}
               ${(e.day || e.date) ? `<div class="flex items-center gap-1 text-text-muted text-xs mt-1"><span class="material-symbols-outlined text-[14px]">calendar_month</span>${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</div>` : ""}
             </div>
-            <button type="button" data-publish="${e.id}" data-title="${e.title.replace(/"/g, '&quot;')}" class="w-full rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold py-3 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(225,29,72,0.3)]">
+            <button type="button" data-publish="${e.id}" data-title="${e.title.replace(/"/g, '&quot;')}" class="w-full rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold py-3 flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(255, 87, 8,0.3)]">
               <span class="material-symbols-outlined text-[18px]">campaign</span>פרסם עכשיו לטלגרם
             </button>
             <div class="flex gap-2">
