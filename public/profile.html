@@ -243,13 +243,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       const match = personalArea.balanceMatch;
       const box = document.getElementById("matchBox");
       if (!active) {
-        box.innerHTML = `<div class="rounded-2xl p-5 text-center" style="background:linear-gradient(135deg,rgba(255, 87, 8,.18),rgba(190,0,55,.12));border:2px solid #ff5708;box-shadow:0 0 24px rgba(255, 87, 8,.25)">
+        box.innerHTML = `<div class="rounded-2xl p-5 text-center" style="background:linear-gradient(135deg,rgba(255, 87, 8,.18),rgba(255, 170, 0,.12));border:2px solid #ff5708;box-shadow:0 0 24px rgba(255, 87, 8,.25)">
           <p class="text-text-primary font-bold text-lg mb-1">🎉 יש לכם התאמת איזון!</p>
           <p class="text-text-secondary text-sm">כדי לראות עם מי אתם מאוזנים, יש לרכוש מנוי (גם ליום אחד מספיק).</p>
           <a href="/membership" class="inline-block mt-3 rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold text-sm py-2.5 px-4">לרכישת מנוי</a>
         </div>`;
       } else {
-        box.innerHTML = `<div class="rounded-2xl p-5" style="background:linear-gradient(135deg,rgba(255, 87, 8,.18),rgba(190,0,55,.12));border:2px solid #ff5708;box-shadow:0 0 24px rgba(255, 87, 8,.25)">
+        box.innerHTML = `<div class="rounded-2xl p-5" style="background:linear-gradient(135deg,rgba(255, 87, 8,.18),rgba(255, 170, 0,.12));border:2px solid #ff5708;box-shadow:0 0 24px rgba(255, 87, 8,.25)">
           <p class="text-primary font-bold text-xs mb-2 uppercase tracking-wide">🎉 מצאנו לכם התאמה${match.partyName ? " ל" + match.partyName : ""}!</p>
           <h3 class="text-text-primary font-bold text-xl mb-2">${match.matchName || "—"}</h3>
           ${match.matchPhone
