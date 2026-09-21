@@ -48,35 +48,54 @@
   <a href="/store"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">storefront</span></span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/contact"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">call</span></span><span class="dr-tx">צור קשר</span></a>
  </nav>
 </aside><div class="scrim"></div>
-<main class="max-w-xl mx-auto px-4" style="display:none">
-  <div class="flex items-center justify-between mb-5">
-    <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-text-primary">אזור מפרסם</h1>
-    <a href="/create-event" class="flex items-center gap-1.5 rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold text-sm py-2.5 px-4 shadow-[0_4px_20px_rgba(255, 87, 8,0.35)]">
-      <span class="material-symbols-outlined text-[18px]">add</span>אירוע חדש
-    </a>
+<main class="max-w-xl mx-auto px-4 relative" style="display:none">
+  <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-80 h-32 bg-primary-container/20 blur-3xl pointer-events-none rounded-full"></div>
+
+  <div class="flex flex-col items-center text-center gap-1 mb-6 relative">
+    <div class="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-surface-container-high/80 text-secondary font-label-caps text-[11px] tracking-widest uppercase mb-2">
+      <span class="material-symbols-outlined text-[14px]">nightlife</span>
+      <span>פורטל מפיקים ומארגנים</span>
+    </div>
+    <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-text-primary tracking-tight">אזור מפרסם</h1>
+    <p class="text-text-secondary text-sm mt-1">לוח בקרה וניהול אירועים לקהילת מסיבות ליברליות</p>
   </div>
 
-  <div class="bg-surface-card border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-3 mb-4">
-    <div class="min-w-0">
-      <p class="text-text-muted text-xs">מחובר/ת בתור</p>
-      <p id="advAccountName" class="text-primary font-bold truncate">…</p>
+  <div class="bg-surface-container-high/60 backdrop-blur-md rounded-2xl p-4 flex items-center justify-between gap-3 mb-4">
+    <div class="min-w-0 flex items-center gap-3">
+      <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-primary-container to-secondary-container flex items-center justify-center text-on-primary shrink-0">
+        <span class="material-symbols-outlined text-[22px]">verified</span>
+      </div>
+      <div class="min-w-0">
+        <p class="text-text-muted text-xs">מחובר/ת בתור</p>
+        <p id="advAccountName" class="text-on-surface font-bold truncate">…</p>
+      </div>
     </div>
-    <button id="advLogoutBtn" class="flex-shrink-0 flex items-center gap-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-text-primary text-sm font-bold px-4 py-2">
+    <button id="advLogoutBtn" class="flex-shrink-0 flex items-center gap-1.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container-highest text-text-primary text-sm font-bold px-4 py-2 transition-colors">
       <span class="material-symbols-outlined text-[18px]">logout</span>יציאה
     </button>
   </div>
 
-  <div class="bg-surface-card border border-white/5 rounded-2xl p-5 flex items-center gap-4 mb-6">
-    <div class="w-12 h-12 rounded-xl bg-primary-container/15 flex items-center justify-center flex-shrink-0">
-      <span class="material-symbols-outlined text-[24px] text-primary">confirmation_number</span>
+  <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-low p-5 shadow-xl flex items-center gap-4 mb-6">
+    <div class="absolute -top-10 -left-10 w-32 h-32 bg-primary-container/25 rounded-full blur-2xl pointer-events-none"></div>
+    <div class="relative w-14 h-14 rounded-xl bg-primary-container/15 flex items-center justify-center flex-shrink-0">
+      <span class="material-symbols-outlined text-[26px] text-primary">confirmation_number</span>
     </div>
-    <div>
+    <div class="relative">
       <p id="advEventCount" class="text-3xl font-bold text-text-primary leading-none">…</p>
       <p class="text-text-secondary text-sm mt-1">אירועים שפרסמתי</p>
     </div>
   </div>
 
-  <h2 class="font-headline-md text-headline-md text-text-primary mb-3" id="events">האירועים שלי</h2>
+  <a href="/create-event" class="w-full mb-6 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-container to-secondary-container text-white font-headline-sm text-headline-sm font-bold py-3.5 shadow-[0_4px_24px_rgba(255,87,8,0.4)] active:scale-[0.98] transition-all">
+    <span class="material-symbols-outlined text-[20px]">add</span><span>פרסום מסיבה חדשה</span>
+  </a>
+
+  <div class="flex items-center gap-2 mb-3">
+    <span class="flex h-7 w-7 items-center justify-center rounded-full bg-secondary-container/20 text-primary-container">
+      <span class="material-symbols-outlined text-[16px]">event</span>
+    </span>
+    <h2 class="font-headline-md text-headline-md text-text-primary" id="events">האירועים שלי</h2>
+  </div>
   <div id="advEventsList" class="space-y-4">
     <p class="text-text-secondary text-center py-8">טוען...</p>
   </div>
