@@ -12,7 +12,7 @@ import { collection, query, where, getDocsFromServer } from "firebase/firestore"
 import { db } from "./firebase/config";
 import { sendRegistrationTelegram, sendManualPartyAnnouncement } from "./firebase/telegram";
 import { getSocialLinks, getRssFeeds, getContent } from "./firebase/settings";
-import { registerForumUser, loginForumUser, getForumUserByEmail, updateForumUser, getForumUserById, getMyLinkedPhoneNumber, changeMyPassword } from "./firebase/forumUsers";
+import { registerForumUser, loginForumUser, getForumUserByPhone, updateForumUser, getForumUserById, getMyLinkedPhoneNumber, changeMyPassword } from "./firebase/forumUsers";
 import {
   getSessionId,
   sendSupportMessage,
@@ -211,21 +211,21 @@ function sanitizeNickname(name: string): string {
     .replace(/[^\p{L}\p{N}_-]/gu, "");
 }
 
-/** Real registration: creates a forum user (the site's actual account system). */
-async function register(name: string, email: string, password: string, gender?: string) {
+/** Real registration: creates a forum user (the site's actual account system). Phone is the login identifier. */
+async function register(name: string, phone: string, password: string, gender?: string) {
   const nickname = sanitizeNickname(name);
   if (nickname.length < 2) throw new Error("השם קצר מדי — נא להזין לפחות 2 תווים (אותיות/ספרות)");
-  const user = await registerForumUser(nickname, password, email);
+  const user = await registerForumUser(nickname, password, phone);
   if (gender) await updateForumUser(user.id, { gender }).catch(() => {});
-  return { id: user.id, name: user.nickname, email: user.email || email, gender: gender || null, role: "user" };
+  return { id: user.id, name: user.nickname, phone: (user as any).phone || phone, gender: gender || null, role: "user" };
 }
 
-/** Real login: looks up the account by email, then verifies via the real password check. */
-async function login(email: string, password: string) {
-  const found = await getForumUserByEmail(email).catch(() => null);
-  if (!found) throw new Error("לא נמצא חשבון עם האימייל הזה");
+/** Real login: looks up the account by phone, then verifies via the real password check. */
+async function login(phone: string, password: string) {
+  const found = await getForumUserByPhone(phone).catch(() => null);
+  if (!found) throw new Error("לא נמצא חשבון עם מספר הטלפון הזה");
   const user = await loginForumUser(found.nickname, password);
-  return { id: user.id, name: user.nickname, email: user.email || email, gender: (found as any).gender || null, role: "user" };
+  return { id: user.id, name: user.nickname, phone: (user as any).phone || phone, gender: (found as any).gender || null, role: "user" };
 }
 
 /**

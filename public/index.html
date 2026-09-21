@@ -34,142 +34,197 @@
   "inLanguage": "he-IL"
 }
 </script>
-<style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "secondary": "#ffcf90", "on-primary-container": "#511500", "on-primary": "#5c1900", "primary-container": "#ff5708", "on-tertiary-fixed-variant": "#8e0049", "surface-dim": "#131315", "secondary-fixed-dim": "#ffb952", "inverse-primary": "#aa3600", "surface-container": "#201f22", "primary-fixed": "#ffdbcf", "on-primary-fixed": "#390c00", "tertiary": "#ffb1c7", "primary": "#ffb59c", "outline-variant": "#5c4037", "error-container": "#93000a", "on-surface-variant": "#e5beb2", "outline": "#ac897e", "surface-container-high": "#2a2a2c", "error": "#ffb4ab", "on-primary-fixed-variant": "#822700", "on-tertiary-container": "#59002b", "surface-container-lowest": "#0e0e10", "on-secondary-fixed-variant": "#633f00", "on-background": "#e5e1e4", "surface-container-highest": "#353437", "secondary-container": "#ffaa00", "tertiary-fixed-dim": "#ffb1c7", "surface": "#131315", "secondary-fixed": "#ffddb4", "inverse-on-surface": "#313032", "on-secondary-fixed": "#291800", "surface-bright": "#39393b", "on-error": "#690005", "surface-variant": "#353437", "on-tertiary": "#650032", "surface-container-low": "#1c1b1d", "on-secondary-container": "#694300", "on-surface": "#e5e1e4", "background": "#131315", "tertiary-fixed": "#ffd9e2", "on-error-container": "#ffdad6", "tertiary-container": "#ff4994", "primary-fixed-dim": "#ffb59c", "on-secondary": "#452b00", "surface-tint": "#ffb59c", "on-tertiary-fixed": "#3e001d", "inverse-surface": "#e5e1e4" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "margin-lg": "3rem", "gutter": "1rem", "space-xs": "0.25rem", "margin-md": "2rem", "space-lg": "1.5rem", "gutter-md": "1.5rem", "gutter-lg": "2rem", "space-xl": "2.5rem", "space-md": "1rem", "space-sm": "0.5rem", "margin": "1rem" }, fontFamily: { "label-caps": ["Rubik"], "headline-lg-mobile": ["Rubik"], "headline-sm": ["Rubik"], "headline-lg": ["Rubik"], "headline-md": ["Rubik"], "body-md": ["Rubik"], "label-md": ["Rubik"], "body-lg": ["Rubik"], "display-hero": ["Rubik"], "display-hero-mobile": ["Rubik"], "body-sm": ["Rubik"] }, fontSize: { "label-caps": ["11px", { lineHeight: "14px", letterSpacing: "0.08em", fontWeight: "700" }], "headline-lg-mobile": ["26px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "700" }], "headline-sm": ["18px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "600" }], "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }], "headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }], "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }], "label-md": ["13px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "500" }], "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" }], "display-hero": ["56px", { lineHeight: "64px", letterSpacing: "-0.03em", fontWeight: "800" }], "display-hero-mobile": ["36px", { lineHeight: "42px", letterSpacing: "-0.02em", fontWeight: "800" }], "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "400" }] } } } }</script></head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 inset-x-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.5)] pt-safe"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="relative flex items-center justify-center"><img src="assets/logo-icon-new.png?v=202609211410" alt="LIBRAL PARTY Logo" class="w-10 h-10 object-contain rounded-full shadow-lg border border-primary/40"></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-wider uppercase text-on-surface drop-shadow-[0_0_12px_rgba(255,87,8,0.5)] leading-tight">מסיבות ליברליות בישראל</span><span class="font-label-caps text-label-caps text-secondary-fixed-dim">חיבור · איזון · חיי לילה</span></div></div><div class="flex items-center gap-2"><span class="px-2.5 py-1 rounded-full bg-surface-container font-label-caps text-label-caps text-secondary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>LIVE</span><a href="/login" title="כניסת מנויים ומפרסמים" aria-label="כניסת מנויים ומפרסמים" class="w-10 h-10 rounded-xl bg-surface-container-high text-primary flex items-center justify-center hover:bg-surface-bright active:scale-95 transition-transform shadow-sm"><span class="material-symbols-outlined text-[24px]">account_circle</span></a><button id="menu-btn" aria-label="פתח תפריט" onclick="document.getElementById('side-drawer').classList.remove('-translate-x-full'); document.getElementById('drawer-backdrop').classList.remove('opacity-0', 'pointer-events-none');" class="w-10 h-10 rounded-xl bg-surface-container-high text-on-surface flex items-center justify-center hover:bg-surface-bright active:scale-95 transition-transform shadow-sm"><span class="material-symbols-outlined text-[24px]">menu</span></button></div></div></header><main class="flex flex-col relative w-full pt-16 pb-24 bg-surface min-h-screen"><div class="flex flex-col w-full px-gutter gap-space-lg">
-<!-- Live Pulse Banner & Headline -->
-<section class="flex flex-col gap-space-sm pt-space-xs">
-<div class="flex items-center justify-between">
-<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high shadow-sm">
-<span class="relative flex h-2 w-2">
-<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary-container opacity-75"></span>
-<span class="relative inline-flex rounded-full h-2 w-2 bg-tertiary-container"></span>
-</span>
-<span class="font-label-caps text-label-caps text-tertiary uppercase tracking-wider">מעודכן לסופ״ש הקרוב</span>
-</div>
-<div class="flex items-center gap-1 text-on-surface-variant font-label-md text-label-md">
-<span class="material-symbols-outlined text-[16px] text-secondary">bolt</span>
-<span id="eventCountBadge">טוען...</span>
-</div>
-</div>
-<div class="flex flex-col items-center text-center my-2"><div class="relative flex flex-col items-center"><div class="w-20 h-20 bg-[#1a1512] border border-[#ff5500]/30 rounded-2xl flex items-center justify-center p-3.5 shadow-[0_0_25px_rgba(255,85,0,0.3)]"><img src="assets/logo-icon-new.png?v=202609211410" alt="Libral Party Logo" class="w-full h-full object-contain"></div><span class="bg-gradient-to-r from-[#ff5500] to-[#ff7a29] text-white text-[11px] font-black tracking-widest px-3 py-0.5 rounded-full uppercase -mt-2.5 z-10 shadow-[0_2px_8px_rgba(255,85,0,0.4)]">LIVE PASS</span></div><h1 class="text-2xl font-black tracking-wider text-white mt-3 text-center uppercase">מסיבות ליברליות בישראל</h1><p class="font-bold text-sm text-[#ff9e58] text-center max-w-xs mx-auto mt-1">חיבור. תשוקה. חיי לילה. — איזון מושלם בין זוגות וקצב</p><p class="text-xs text-neutral-400 text-center mt-1">כניסה לעולם המסיבות וההטבות הבלעדיות בישראל</p></div>
-<!-- Filter Pills Carousel -->
-<div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 -mx-gutter px-gutter no-scrollbar" id="filter-container">
-<a href="/events" class="shrink-0 px-4 py-2 rounded-full font-label-md text-label-md bg-primary-container text-on-primary shadow-[0_4px_16px_rgba(255,87,8,0.35)] transition-transform active:scale-95">הכל</a>
-<a href="/calendar" class="shrink-0 px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-transform active:scale-95">סופ״ש הקרוב</a>
-<a href="/events" class="shrink-0 px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-transform active:scale-95">תל אביב והמרכז</a>
-<a href="/events" class="shrink-0 px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-transform active:scale-95">אנדרגראונד</a>
-<a href="/events" class="shrink-0 px-4 py-2 rounded-full font-label-md text-label-md bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-transform active:scale-95">פסטיבלים</a>
-</div>
+<style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "secondary": "#ffcf90", "on-primary-container": "#511500", "on-primary": "#5c1900", "primary-container": "#ff5708", "on-tertiary-fixed-variant": "#8e0049", "surface-dim": "#131315", "secondary-fixed-dim": "#ffb952", "inverse-primary": "#aa3600", "surface-container": "#201f22", "primary-fixed": "#ffdbcf", "on-primary-fixed": "#390c00", "tertiary": "#ffb1c7", "primary": "#ffb59c", "outline-variant": "#5c4037", "error-container": "#93000a", "on-surface-variant": "#e5beb2", "outline": "#ac897e", "surface-container-high": "#2a2a2c", "error": "#ffb4ab", "on-primary-fixed-variant": "#822700", "on-tertiary-container": "#59002b", "surface-container-lowest": "#0e0e10", "on-secondary-fixed-variant": "#633f00", "on-background": "#e5e1e4", "surface-container-highest": "#353437", "secondary-container": "#ffaa00", "tertiary-fixed-dim": "#ffb1c7", "surface": "#131315", "secondary-fixed": "#ffddb4", "inverse-on-surface": "#313032", "on-secondary-fixed": "#291800", "surface-bright": "#39393b", "on-error": "#690005", "surface-variant": "#353437", "on-tertiary": "#650032", "surface-container-low": "#1c1b1d", "on-secondary-container": "#694300", "on-surface": "#e5e1e4", "background": "#131315", "tertiary-fixed": "#ffd9e2", "on-error-container": "#ffdad6", "tertiary-container": "#ff4994", "primary-fixed-dim": "#ffb59c", "on-secondary": "#452b00", "surface-tint": "#ffb59c", "on-tertiary-fixed": "#3e001d", "inverse-surface": "#e5e1e4" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "margin-lg": "3rem", "gutter": "1rem", "space-xs": "0.25rem", "margin-md": "2rem", "space-lg": "1.5rem", "gutter-md": "1.5rem", "gutter-lg": "2rem", "space-xl": "2.5rem", "space-md": "1rem", "space-sm": "0.5rem", "margin": "1rem" }, fontFamily: { "label-caps": ["Rubik"], "headline-lg-mobile": ["Rubik"], "headline-sm": ["Rubik"], "headline-lg": ["Rubik"], "headline-md": ["Rubik"], "body-md": ["Rubik"], "label-md": ["Rubik"], "body-lg": ["Rubik"], "display-hero": ["Rubik"], "display-hero-mobile": ["Rubik"], "body-sm": ["Rubik"] }, fontSize: { "label-caps": ["11px", { lineHeight: "14px", letterSpacing: "0.08em", fontWeight: "700" }], "headline-lg-mobile": ["26px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "700" }], "headline-sm": ["18px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "600" }], "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }], "headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }], "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }], "label-md": ["13px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "500" }], "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "400" }], "display-hero": ["56px", { lineHeight: "64px", letterSpacing: "-0.03em", fontWeight: "800" }], "display-hero-mobile": ["36px", { lineHeight: "42px", letterSpacing: "-0.02em", fontWeight: "800" }], "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "400" }] } } } }</script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-low": "#1c1b1d", "surface-dim": "#131315", "tertiary": "#ffb1c7", "surface-container-high": "#2a2a2c", "on-primary-container": "#511500", "surface-card": "#1c1b1d", "surface-container-lowest": "#0e0e10", "outline": "#ac897e", "text-muted": "#ac897e", "surface-container-highest": "#353437", "primary-fixed": "#ffdbcf", "surface-container": "#201f22", "on-surface": "#e5e1e4", "secondary-container": "#ffaa00", "surface-elevated": "#2a2a2c", "surface-variant": "#353437", "secondary": "#ffcf90", "status-balanced": "#10B981", "text-secondary": "#e5beb2", "on-primary": "#5c1900", "surface": "#131315", "primary": "#ffb59c", "primary-container": "#ff5708", "background": "#131315", "surface-glass": "rgba(19, 19, 21, 0.75)", "on-secondary-container": "#694300", "on-surface-variant": "#e5beb2", "surface-base": "#0e0e10", "on-tertiary-container": "#511500", "tertiary-container": "#ff4994", "on-background": "#e5e1e4", "glow-crimson": "rgba(255, 87, 8, 0.45)", "text-primary": "#e5e1e4" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-sm": "0.75rem", "space-2xl": "3rem", "space-3xl": "4.5rem", "space-lg": "1.5rem", "gutter-mobile": "1rem", "space-2xs": "0.25rem", "container-max": "72rem", "space-xs": "0.5rem", "gutter-desktop": "2rem", "space-xl": "2rem", "space-md": "1rem" }, "fontFamily": { "headline-sm": ["Rubik"], "body-sm": ["Rubik"], "headline-lg": ["Rubik"], "label-md": ["Rubik"], "headline-lg-mobile": ["Rubik"], "display-hero-mobile": ["Rubik"], "headline-md": ["Rubik"], "body-lg": ["Rubik"], "body-md": ["Rubik"], "label-lg": ["Rubik"], "display-hero": ["Rubik"], "label-sm": ["Rubik"] }, "fontSize": { "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-lg": ["30px", { "lineHeight": "38px", "fontWeight": "700" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-lg-mobile": ["22px", { "lineHeight": "30px", "fontWeight": "700" }], "display-hero-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "800" }], "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "display-hero": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500" }] } } } }</script>
+<style>
+  @layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;background:#131315}}
+  .stitch-page::-webkit-scrollbar{display:none}
+</style>
+</head><body class="stitch-page bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
+
+<header class="fixed top-0 inset-x-0 z-50 bg-surface-dim/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+  <div class="h-16 sm:h-20 md:h-24 lg:h-28 px-4 flex items-center justify-between relative">
+    <div class="flex items-center gap-3">
+      <button data-menu aria-label="תפריט" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary">
+        <span class="material-symbols-outlined text-[24px]">menu</span>
+      </button>
+      </div>
+    <a href="/" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2">
+      <img alt="LIBRAL PARTY" class="w-60 sm:w-72 md:w-80 lg:w-96 h-auto object-contain" src="assets/logo-new.png?v=202609211410">
+    </a>
+    <div class="flex items-center gap-1">
+      <button type="button" data-fav-bell aria-label="עדכונים על מועדפים" style="display:none" class="w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
+        <span class="material-symbols-outlined text-[22px]">notifications</span>
+        <span data-fav-bell-dot style="display:none;position:absolute;top:6px;left:6px;width:8px;height:8px;border-radius:50%;background:#ff5708"></span>
+      </button>
+      <a data-dashboard-link href="/login" aria-label="כניסה / הרשמה" class="login-link w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-text-primary relative">
+        <span class="material-symbols-outlined text-[22px]">person</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<aside class="drawer">
+ <div class="drawer-head"><img src="assets/logo-new.png?v=202609211410" alt="LIBRAL PARTY" class="drawer-logo-img"><button data-close class="dr-close" aria-label="סגור"><span class="material-symbols-outlined">close</span></button></div>
+ <nav>
+  <a href="/"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">home</span></span><span class="dr-tx">בית</span></a><a href="/about"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">info</span></span><span class="dr-tx">אודות</span></a><a href="/calendar"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">calendar_month</span></span><span class="dr-tx">לוח אירועים</span></a>
+  <a href="/favorites"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">favorite</span></span><span class="dr-tx">המועדפים שלי</span></a><a href="/my-area"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">האזור האישי שלי</span></a><a href="/news"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">campaign</span></span><span class="dr-tx">חדשות ועדכונים</span></a><a href="/advertiser-login"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">confirmation_number</span></span><span class="dr-tx">כניסת מפרסמים</span></a><a href="/community"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">forum</span></span><span class="dr-tx">קהילה / צ׳אט</span></a>
+  <a href="/store"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">storefront</span></span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/gallery"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">photo_library</span></span><span class="dr-tx">גלריה</span></a><a href="/contact"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">call</span></span><span class="dr-tx">צור קשר</span></a>
+ </nav>
+</aside><div class="scrim"></div>
+
+<main class="flex-1 flex flex-col relative w-full pt-16 sm:pt-20 md:pt-24 lg:pt-28 pb-24 bg-surface">
+<div class="flex flex-col w-full">
+
+<section class="px-4 pt-2 pb-3 flex flex-col gap-3">
+  <div class="relative w-full">
+    <div class="flex items-center w-full h-12 rounded-xl bg-surface-card px-3 shadow-md transition-all focus-within:ring-1 focus-within:ring-primary-container">
+      <span class="material-symbols-outlined text-text-muted text-[20px] select-none ml-2">search</span>
+      <input class="w-full bg-transparent text-text-primary placeholder:text-text-muted text-body-md font-body-md outline-none text-right" id="search" placeholder="חיפוש לפי שם אירוע..." type="search">
+    </div>
+  </div>
+  <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-nowrap" id="typePills">
+    <button type="button" data-type="" class="type-pill whitespace-nowrap px-3.5 py-1.5 rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md shadow-md transition-all">הכל</button>
+    <button type="button" data-type="חילופי זוגות" class="type-pill whitespace-nowrap px-3.5 py-1.5 rounded-full bg-surface-container-high text-text-secondary font-label-md text-label-md transition-all">חילופי זוגות</button>
+    <button type="button" data-type="בדסמ" class="type-pill whitespace-nowrap px-3.5 py-1.5 rounded-full bg-surface-container-high text-text-secondary font-label-md text-label-md transition-all">בדסמ</button>
+    <button type="button" data-type="מאנץ'" class="type-pill whitespace-nowrap px-3.5 py-1.5 rounded-full bg-surface-container-high text-text-secondary font-label-md text-label-md transition-all">מאנץ'</button>
+    <button type="button" data-type="פסטיבל" class="type-pill whitespace-nowrap px-3.5 py-1.5 rounded-full bg-surface-container-high text-text-secondary font-label-md text-label-md transition-all">פסטיבל</button>
+  </div>
+  <div class="flex items-center gap-2">
+    <select id="city" class="flex-1 bg-surface-container text-text-primary font-label-md text-label-md rounded-xl px-3 py-2 outline-none">
+      <option value="">כל האזורים</option>
+      <option>אום אל-פחם</option><option>אופקים</option><option>אור יהודה</option><option>אור עקיבא</option><option>אילת</option><option>אלעד</option><option>אריאל</option><option>אשדוד</option><option>אשקלון</option><option>באקה אל-גרבייה</option><option>באר יעקב</option><option>באר שבע</option><option>בית שאן</option><option>בית שמש</option><option>ביתר עילית</option><option>בני ברק</option><option>בת ים</option><option>גבעת שמואל</option><option>גבעתיים</option><option>דימונה</option><option>הוד השרון</option><option>הרצליה</option><option>חדרה</option><option>חולון</option><option>חיפה</option><option>טבריה</option><option>טייבה</option><option>טירה</option><option>טירת כרמל</option><option>טמרה</option><option>יבנה</option><option>יהוד-מונוסון</option><option>ירושלים</option><option>כפר יונה</option><option>כפר סבא</option><option>כפר קאסם</option><option>כרמיאל</option><option>לוד</option><option>מגדל העמק</option><option>מודיעין-מכבים-רעות</option><option>מודיעין עילית</option><option>מעלה אדומים</option><option>מעלות-תרשיחא</option><option>נהריה</option><option>נוף הגליל</option><option>נס ציונה</option><option>נצרת</option><option>נשר</option><option>נתיבות</option><option>נתניה</option><option>סח'נין</option><option>עכו</option><option>עפולה</option><option>ערד</option><option>עראבה</option><option>פתח תקווה</option><option>צפת</option><option>קלנסווה</option><option>קריית אונו</option><option>קריית אתא</option><option>קריית ביאליק</option><option>קריית גת</option><option>קריית ים</option><option>קריית מוצקין</option><option>קריית מלאכי</option><option>קריית שמונה</option><option>ראש העין</option><option>ראשון לציון</option><option>רהט</option><option>רחובות</option><option>רמלה</option><option>רמת גן</option><option>רמת השרון</option><option>רעננה</option><option>שדרות</option><option>שפרעם</option><option>תל אביב-יפו</option>
+    </select>
+    <input type="date" id="date" class="bg-surface-container text-text-primary font-label-md text-label-md rounded-xl px-3 py-2 outline-none">
+    <button type="button" id="reset" class="px-3 py-2 rounded-xl bg-surface-container-high text-text-secondary font-label-md text-label-md">איפוס</button>
+  </div>
+  <div class="flex items-center gap-2">
+    <span class="w-2 h-2 rounded-full bg-status-balanced animate-pulse"></span>
+    <p class="text-label-md font-label-md text-text-primary">נמצאו <span class="font-bold text-primary" id="eventCount">0</span> מסיבות</p>
+  </div>
 </section>
 
-<!-- Entrance directive (critical door-code notice) -->
-<section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-container-high via-surface-container to-surface-container-low p-4 shadow-2xl">
-<div class="absolute -top-12 -right-12 w-32 h-32 bg-primary-container/30 rounded-full blur-2xl"></div>
-<div class="relative z-10 flex items-center gap-3">
-<div class="w-10 h-10 shrink-0 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shadow-lg">
-<span class="material-symbols-outlined text-[20px]">how_to_reg</span>
-</div>
-<div class="flex flex-col min-w-0">
-<span class="font-headline-sm text-headline-sm text-on-surface font-bold">חובה לומר בכניסה: <span class="text-primary">"הגעתי דרך חן ואיציק"</span></span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">ללא אמירת המשפט תשלמו מחיר מלא בקופה</span>
-</div>
-</div>
+<section class="px-4 flex flex-col gap-3" id="dynamicEvents">
+  <p class="text-text-muted text-body-sm">טוען אירועים...</p>
 </section>
 
-<!-- Real party cards (dynamic) -->
-<div id="eventCards" class="flex flex-col gap-space-lg">
-  <p class="text-on-surface-variant text-center py-10">טוען מסיבות...</p>
 </div>
+</main>
 
-<!-- Community Concierge & Telegram Links -->
-<section class="flex flex-col gap-3 p-4 rounded-xl bg-surface-container mb-4">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-secondary text-[22px]">diversity_3</span>
-<h3 class="font-headline-sm text-headline-sm text-on-surface">קהילת מסיבות ליברליות בישראל</h3>
+<nav class="fixed bottom-0 inset-x-0 z-50 bg-surface-dim/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.6)]">
+<div class="flex items-center justify-around h-16 px-1">
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-sm text-label-sm">בית</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/about"><span class="material-symbols-outlined text-[22px]">info</span><span class="font-label-sm text-label-sm">אודות</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/membership"><span class="material-symbols-outlined text-[22px]">balance</span><span class="font-label-sm text-label-sm">מנוי לאיזון</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/community"><span class="material-symbols-outlined text-[22px]">forum</span><span class="font-label-sm text-label-sm">קהילה</span></a>
+<a class="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] text-text-muted" href="/contact"><span class="material-symbols-outlined text-[22px]">call</span><span class="font-label-sm text-label-sm">צור קשר</span></a>
 </div>
-<p class="font-body-md text-body-md text-on-surface-variant">
-      עדכונים בזמן אמת על ליינאפים סודיים, בדיקות איזון וקונסיירז׳ אישי בכניסה
-    </p>
-<div class="grid grid-cols-2 gap-2 mt-1">
-<a class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg bg-surface-container-high text-on-surface font-label-md text-label-md active:scale-95 transition-transform" href="/community">
-<span class="material-symbols-outlined text-primary text-[18px]">send</span>
-<span>ערוץ הטלגרם</span>
-</a>
-<a class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg bg-surface-container-high text-on-surface font-label-md text-label-md active:scale-95 transition-transform" href="/contact">
-<span class="material-symbols-outlined text-secondary text-[18px]">chat</span>
-<span>וואטסאפ קונסיירז׳</span>
-</a>
-</div>
-<div class="flex items-center justify-between pt-2 text-on-surface-variant font-label-caps text-label-caps">
-<span>חן &amp; איציק • הנהלת LIBRAL</span>
-<span class="text-secondary">איזון • מוזיקה • כבוד הדדי</span>
-</div>
-</section>
-</div>
-</main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface-container-lowest/85 backdrop-blur-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.7)]"><div class="flex justify-around items-center h-20 px-space-xs"><a class="flex flex-col items-center justify-center gap-1 min-w-[52px] h-14 transition-all text-primary-container font-headline-sm" href="/"><div class="w-8 h-8 rounded-full flex items-center justify-center transition-all bg-primary-container/20 shadow-[0_0_20px_rgba(255,87,8,0.6)]"><span class="material-symbols-outlined text-[22px]">local_fire_department</span></div><span class="font-label-md text-label-md">מסיבות</span></a><a class="flex flex-col items-center justify-center gap-1 min-w-[52px] h-14 text-on-surface-variant transition-all" href="/my-area"><div class="w-8 h-8 rounded-full flex items-center justify-center transition-all"><span class="material-symbols-outlined text-[22px]">confirmation_number</span></div><span class="font-label-md text-label-md">האזור שלי</span></a><a class="flex flex-col items-center justify-center gap-1 min-w-[52px] h-14 text-on-surface-variant transition-all" href="/membership"><div class="w-8 h-8 rounded-full flex items-center justify-center transition-all"><span class="material-symbols-outlined text-[22px]">auto_awesome</span></div><span class="font-label-md text-label-md">איזון והטבות</span></a><a class="flex flex-col items-center justify-center gap-1 min-w-[52px] h-14 text-on-surface-variant transition-all" href="/login"><div class="w-8 h-8 rounded-full flex items-center justify-center transition-all"><span class="material-symbols-outlined text-[22px]">vpn_key</span></div><span class="font-label-md text-label-md">כניסה</span></a></div></nav>
-
-
-
-<div id="drawer-backdrop" onclick="document.getElementById('side-drawer').classList.add('-translate-x-full'); this.classList.add('opacity-0', 'pointer-events-none');" class="fixed inset-0 bg-surface-container-lowest/80 backdrop-blur-md z-50 transition-opacity duration-300 opacity-0 pointer-events-none"></div><aside id="side-drawer" class="fixed top-0 bottom-0 left-0 w-80 max-w-[85vw] bg-surface-container-low border-r border-outline-variant/30 shadow-[0_0_40px_rgba(0,0,0,0.8)] z-50 flex flex-col justify-between p-4 transition-transform duration-300 ease-out -translate-x-full"><div class="flex flex-col gap-4"><div class="flex items-center justify-between pb-3 border-b border-outline-variant/20"><div class="flex items-center gap-2"><img src="assets/logo-icon-new.png?v=202609211410" alt="Libral Party Logo" class="h-9 w-9 object-contain rounded-full shadow-md border border-primary/40 p-0.5"><span class="font-headline-sm text-headline-sm text-on-surface">תפריט מסיבות ליברליות בישראל</span></div><button onclick="document.getElementById('side-drawer').classList.add('-translate-x-full'); document.getElementById('drawer-backdrop').classList.add('opacity-0', 'pointer-events-none');" aria-label="סגור תפריט" class="w-9 h-9 rounded-lg bg-surface-container-high text-on-surface flex items-center justify-center hover:bg-surface-bright active:scale-95 transition-transform"><span class="material-symbols-outlined text-[20px]">close</span></button></div><nav class="flex flex-col gap-1.5"><a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary-container/20 text-primary-container font-headline-sm text-body-md transition-colors"><span class="material-symbols-outlined text-[20px]">home</span><span>דף הבית</span></a><a href="/events" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface hover:bg-surface-container-high font-body-md text-body-md transition-colors"><span class="material-symbols-outlined text-[20px] text-secondary">nightlife</span><span>לוח מסיבות</span></a><a href="/about" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface hover:bg-surface-container-high font-body-md text-body-md transition-colors"><span class="material-symbols-outlined text-[20px] text-tertiary">info</span><span>אודות מסיבות ליברליות בישראל</span></a><a href="/community" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface hover:bg-surface-container-high font-body-md text-body-md transition-colors"><span class="material-symbols-outlined text-[20px] text-secondary">hub</span><span>רשתות חברתיות ועדכונים</span></a><a href="/contact" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface hover:bg-surface-container-high font-body-md text-body-md transition-colors"><span class="material-symbols-outlined text-[20px] text-secondary-fixed-dim">mail</span><span>יצירת קשר והצטרפות</span></a><a href="/my-area" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface hover:bg-surface-container-high font-body-md text-body-md transition-colors"><span class="material-symbols-outlined text-[20px] text-primary">account_circle</span><span>האזור האישי שלי</span></a><a href="/advertiser-login" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface hover:bg-surface-container-high font-body-md text-body-md transition-colors"><span class="material-symbols-outlined text-[20px] text-secondary">confirmation_number</span><span>כניסת מפרסמים</span></a></nav><div class="flex flex-col gap-2 pt-2 border-t border-outline-variant/20"><span class="font-label-caps text-label-caps text-secondary-fixed-dim uppercase px-1">רשתות חברתיות וקהילה</span><div class="flex flex-col gap-1.5" id="drawerSocialLinks"></div></div></div><div class="p-3 rounded-lg bg-surface-container-lowest text-center"><p class="font-label-caps text-label-caps text-on-surface-variant">חן &amp; איציק • חיבור • איזון • חיי לילה</p></div></aside>
+</nav>
 
 <script src="assets/app.js?v=202609062118"></script>
 <script type="module">
 import "./assets/site-data.js?v=202609102005";
-
-const ICONS = { instagram: "public", facebook: "public", telegramChannel: "send", telegramGroup: "chat", whatsapp: "chat" };
-
 document.addEventListener("DOMContentLoaded", async () => {
-  const box = document.getElementById("eventCards");
-  const countBadge = document.getElementById("eventCountBadge");
+  const box = document.getElementById("dynamicEvents");
+  const search = document.getElementById("search");
+  const city = document.getElementById("city");
+  const date = document.getElementById("date");
+  const reset = document.getElementById("reset");
+  const countEl = document.getElementById("eventCount");
+  const pills = [...document.querySelectorAll(".type-pill")];
+  let allEvents = [];
+  let activeType = "";
 
-  try {
-    const events = await window.LPData.loadEvents();
-    countBadge.textContent = `${events.length} אירועים פעילים`;
-    box.innerHTML = events.length
-      ? events.map((e, i) => `
-        <article class="relative flex flex-col rounded-xl overflow-hidden bg-surface-container-low shadow-xl">
-          <div class="relative w-full ${i === 0 ? "h-56" : "h-44"}">
-            <img class="w-full h-full object-cover" src="${e.img || ""}" alt="" onerror="this.style.display='none'">
-            <div class="absolute inset-0 bg-gradient-to-t from-surface-container-low via-surface-container-low/40 to-transparent"></div>
-            <div class="absolute top-3 right-3 flex items-center gap-2">
-              <button type="button" data-fav-btn="${e.id}" aria-label="שמירה למועדפים" class="w-8 h-8 rounded-full bg-surface-container-lowest/90 backdrop-blur-md flex items-center justify-center shadow-md">
-                <span class="material-symbols-outlined text-[18px]">favorite_border</span>
-              </button>
-              ${e.category ? `<span class="px-2.5 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-md font-label-caps text-label-caps text-secondary shadow-md">${e.category}</span>` : ""}
-            </div>
-            ${(e.day || e.date) ? `<div class="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-surface-container-lowest/95 backdrop-blur-lg flex items-center gap-2 shadow-lg"><span class="material-symbols-outlined text-primary-container text-[18px]">calendar_today</span><span class="font-label-md text-label-md text-on-surface">${e.day || ""}${e.day && e.date ? " • " : ""}${e.date || ""}</span></div>` : ""}
+  function favBtnHtml(e) {
+    return `<button type="button" data-fav-btn="${e.id}" aria-label="שמירה למועדפים" class="absolute top-2 left-2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-transform">
+      <span class="material-symbols-outlined text-white text-[20px]">favorite_border</span>
+    </button>`;
+  }
+
+  function cardHtml(e, featured) {
+    if (featured) {
+      return `<article class="relative w-full rounded-2xl overflow-hidden bg-surface-card shadow-2xl">
+        <div class="relative w-full bg-black">
+          ${favBtnHtml(e)}
+          <img class="w-full h-auto max-h-[70vh] object-contain mx-auto" src="${e.img}" alt="">
+        </div>
+        <div class="p-4 flex flex-col gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            ${e.category ? `<span class="text-label-sm font-label-sm text-primary px-2 py-0.5 rounded bg-primary-container/15 font-semibold">${e.category}</span>` : ""}
+            ${e.city ? `<span class="text-label-sm font-label-sm text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_on</span>${e.city}</span>` : ""}
+            ${(e.day || e.date) ? `<span class="text-label-sm font-label-sm text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">event</span>${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span>` : ""}
           </div>
-          <div class="flex flex-col p-4 gap-3">
-            <div>
-              <h2 class="${i === 0 ? "font-headline-lg-mobile text-headline-lg-mobile" : "font-headline-md text-headline-md"} text-on-surface mt-0.5">${e.title || ""}</h2>
-              ${e.dj ? `<div class="flex items-center gap-2 mt-1 text-on-surface-variant font-body-md text-body-md"><span class="material-symbols-outlined text-[18px] text-primary">graphic_eq</span><span>DJ ${e.dj}</span></div>` : (e.desc ? `<p class="font-body-md text-body-md text-on-surface-variant mt-1">${e.desc.slice(0,80)}</p>` : "")}
-            </div>
-            <div class="flex items-center justify-between p-3 rounded-lg bg-surface-container">
-              <div class="flex flex-col">
-                <span class="font-label-caps text-label-caps text-on-surface-variant">מחיר לחברי הקהילה (דרך האתר)</span>
-              </div>
-            </div>
-            <a href="/event?id=${e.id}" class="w-full h-12 rounded-lg ${i === 0 ? "bg-primary-container text-on-primary shadow-[0_4px_24px_rgba(255,87,8,0.4)]" : "bg-surface-container-highest text-on-surface hover:bg-surface-bright"} font-headline-sm text-headline-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
-              <span class="material-symbols-outlined text-[20px] ${i === 0 ? "" : "text-primary-container"}">how_to_reg</span>
-              <span>הרשמה למסיבה / איזון</span>
-            </a>
-          </div>
-        </article>
-      `).join("")
-      : `<div class="text-center py-10 text-on-surface-variant"><span class="material-symbols-outlined text-[40px] text-outline">local_fire_department</span><p class="mt-2">אין כרגע מסיבות פעילות.</p></div>`;
+          <h2 class="text-headline-md font-headline-md text-text-primary tracking-tight">${e.title}</h2>
+          <p class="text-body-sm font-body-sm text-text-secondary">${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 90)}</p>
+          <a class="mt-2 h-11 px-4 rounded-xl bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-lg text-label-lg shadow-md flex items-center justify-center gap-2" href="/event?id=${e.id}">
+            <span>פרטים וכרטיסים</span><span class="material-symbols-outlined text-[18px]">confirmation_number</span>
+          </a>
+        </div>
+      </article>`;
+    }
+    return `<article class="rounded-2xl overflow-hidden bg-surface-card shadow-md w-full min-w-0">
+      <div class="relative w-full bg-black">
+        ${favBtnHtml(e)}
+        <img class="w-full h-auto max-h-[50vh] object-contain mx-auto" src="${e.img}" alt="" onerror="this.closest('div').style.display='none'">
+      </div>
+      <div class="p-4 flex flex-col gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          ${e.category ? `<span class="max-w-full px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary font-medium truncate">${e.category}</span>` : ""}
+          ${(e.day || e.date) ? `<span class="text-label-sm font-label-sm text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">event</span>${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span>` : ""}
+        </div>
+        <h4 class="text-headline-sm font-headline-sm text-text-primary break-words">${e.title}</h4>
+        <p class="text-body-sm font-body-sm text-text-secondary break-words">${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 90)}</p>
+        <a class="mt-1 h-11 rounded-xl bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-lg text-label-lg shadow-md flex items-center justify-center gap-2" href="/event?id=${e.id}">
+          <span>פרטים והרשמה</span><span class="material-symbols-outlined text-[18px]">confirmation_number</span>
+        </a>
+      </div>
+    </article>`;
+  }
+
+  function render() {
+    const q = search.value.trim().toLowerCase();
+    const data = allEvents.filter(e =>
+      (!q || e.title.toLowerCase().includes(q)) &&
+      (!activeType || e.category === activeType) &&
+      (!city.value || e.city === city.value) &&
+      (!date.value || e.dateISO === date.value)
+    );
+    countEl.textContent = data.length;
+    box.innerHTML = data.length
+      ? data.map((e, i) => cardHtml(e, i === 0)).join("")
+      : `<p class="text-text-muted text-body-sm">לא נמצאו אירועים.</p>`;
     lpWireFavHearts(box);
-  } catch (err) {
-    countBadge.textContent = "";
-    box.innerHTML = `<p class="text-on-surface-variant text-center py-10">לא הצלחנו לטעון מסיבות כרגע.</p>`;
   }
 
   try {
-    const links = await window.LPData.loadSocialLinks();
-    const drawerBox = document.getElementById("drawerSocialLinks");
-    drawerBox.innerHTML = links.length
-      ? links.map(l => `<a href="${l.url}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[18px]">${ICONS[l.type] || "hub"}</span><span class="font-label-md text-label-md">${l.label}</span></div><span class="material-symbols-outlined text-[16px] text-on-surface-variant">arrow_back</span></a>`).join("")
-      : "";
-  } catch (err) {}
+    allEvents = await window.LPData.loadEvents();
+  } catch (err) {
+    box.innerHTML = `<p class="text-text-muted text-body-sm">לא הצלחנו לטעון אירועים כרגע.</p>`;
+  }
 
+  pills.forEach(p => p.addEventListener("click", () => {
+    pills.forEach(x => {
+      x.classList.remove("bg-primary-container", "text-on-primary-container", "shadow-md");
+      x.classList.add("bg-surface-container-high", "text-text-secondary");
+    });
+    p.classList.remove("bg-surface-container-high", "text-text-secondary");
+    p.classList.add("bg-primary-container", "text-on-primary-container", "shadow-md");
+    activeType = p.dataset.type;
+    render();
+  }));
+
+  [search, city, date].forEach(x => x.addEventListener("input", render));
+  reset.addEventListener("click", () => {
+    search.value = ""; city.value = ""; date.value = ""; activeType = "";
+    pills.forEach(x => {
+      x.classList.remove("bg-primary-container", "text-on-primary-container", "shadow-md");
+      x.classList.add("bg-surface-container-high", "text-text-secondary");
+    });
+    pills[0].classList.remove("bg-surface-container-high", "text-text-secondary");
+    pills[0].classList.add("bg-primary-container", "text-on-primary-container", "shadow-md");
+    render();
+  });
+
+  render();
   lpWireFavBell();
 });
 </script>
