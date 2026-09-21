@@ -434,7 +434,7 @@
 
 .unmatched-card--client {
   background: rgba(127, 29, 29, 0.2);
-  border: 1px solid rgba(220, 38, 38, 0.5);
+  border: 1px solid rgba(255, 87, 8, 0.5);
 }
 
 .unmatched-card--couple {
@@ -645,7 +645,7 @@
 
 .not-registered-card {
   background: rgba(127, 29, 29, 0.2);
-  border: 1px solid rgba(220, 38, 38, 0.5);
+  border: 1px solid rgba(255, 87, 8, 0.5);
   padding: 0.75rem;
   border-radius: 0.5rem;
   display: flex;
@@ -746,5 +746,5 @@
 }
 
 .not-registered-card__delete-btn:hover {
-  background: #991b1b;
+  background: #b23f00;
 }

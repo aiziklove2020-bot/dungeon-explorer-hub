@@ -6,7 +6,7 @@
   z-index: 1;
   isolation: isolate;
   margin-top: clamp(0.35rem, 1.2vmin, 1rem);
-  background: linear-gradient(to right, rgba(127, 29, 29, 0.9), rgba(153, 27, 27, 0.9), rgba(127, 29, 29, 0.9));
+  background: linear-gradient(to right, rgba(127, 29, 29, 0.9), rgba(178, 63, 0, 0.9), rgba(127, 29, 29, 0.9));
   border-top: 1px solid rgba(185, 28, 28, 0.5);
   border-bottom: 1px solid rgba(185, 28, 28, 0.5);
   backdrop-filter: blur(4px);
@@ -42,11 +42,11 @@
 .rss-badge {
   flex-shrink: 0;
   z-index: 1;
-  background: linear-gradient(to right, rgba(127, 29, 29, 0.9), rgba(153, 27, 27, 0.9));
+  background: linear-gradient(to right, rgba(127, 29, 29, 0.9), rgba(178, 63, 0, 0.9));
 }
 
 .rss-badge-text {
-  background-color: #dc2626;
+  background-color: #ff5708;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
   padding-top: 0.125rem;

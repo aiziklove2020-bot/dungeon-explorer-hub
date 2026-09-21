@@ -16,7 +16,7 @@
 }
 
 .workshops-title-red {
-  color: #dc2626;
+  color: #ff5708;
 }
 
 .workshops-subtitle {
@@ -120,12 +120,12 @@
 }
 
 .workshop-btn-primary {
-  background: #dc2626;
+  background: #ff5708;
   color: #fff;
 }
 
 .workshop-btn-primary:hover:not(:disabled) {
-  background: #ef4444;
+  background: #ff7a29;
 }
 
 .workshop-btn-outline {
@@ -244,16 +244,16 @@
 
 .workshops-guest-input:focus {
   outline: none;
-  border-color: #dc2626;
+  border-color: #ff5708;
 }
 
 .workshops-guest-input:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #ff7a29;
   outline-offset: 2px;
 }
 
 .workshops-guest-error {
-  color: #ef4444;
+  color: #ff7a29;
   font-size: 0.875rem;
   margin: 0;
 }

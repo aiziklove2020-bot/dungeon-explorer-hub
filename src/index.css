@@ -62,7 +62,7 @@ summary:focus-visible,
 [role="option"]:focus-visible,
 [tabindex="0"]:focus-visible,
 a.skip-to-content:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #ff7a29;
   outline-offset: 2px;
 }
 
@@ -87,7 +87,7 @@ a.skip-to-content:focus-visible {
   right: 0;
   z-index: 10002;
   padding: 0.75rem 1.25rem;
-  background: #dc2626;
+  background: #ff5708;
   color: #fff;
   font-weight: 700;
   font-size: 0.875rem;
@@ -227,7 +227,7 @@ html:has(.has-chat-route) body {
 @layer utilities {
   .logo-font {
     letter-spacing: -0.05em;
-    text-shadow: 0 0 30px rgba(204, 0, 0, 0.4);
+    text-shadow: 0 0 30px rgba(255, 87, 8, 0.4);
   }
   
   .english-sub {
@@ -243,6 +243,6 @@ html:has(.has-chat-route) body {
   }
   
   .hero-gradient {
-    background: radial-gradient(circle at center, rgba(204, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+    background: radial-gradient(circle at center, rgba(255, 87, 8, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
   }
 }

@@ -66,22 +66,22 @@
 
 .login-modal-input:focus {
   outline: none;
-  border-color: #dc2626;
+  border-color: #ff5708;
 }
 
 .login-modal-input:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid #ff7a29;
   outline-offset: 2px;
 }
 
 .login-modal-error {
-  color: #ef4444;
+  color: #ff7a29;
   font-size: 0.875rem;
   margin: 0;
 }
 
 .login-modal-submit {
-  background: #dc2626;
+  background: #ff5708;
   color: #fff;
   border: none;
   padding: 0.75rem 1rem;
@@ -92,7 +92,7 @@
 }
 
 .login-modal-submit:hover:not(:disabled) {
-  background: #ef4444;
+  background: #ff7a29;
 }
 
 .login-modal-submit:disabled {
