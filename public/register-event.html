@@ -99,94 +99,144 @@
 
     <form id="regForm" class="space-y-4">
       <div>
-        <label class="block text-xs font-bold text-text-secondary mb-1.5">סוג הרשמה</label>
-        <div class="relative">
-          <select name="registrationType" id="typeSelect" required
-            class="w-full appearance-none rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 pr-10 focus:border-primary-container focus:outline-none">
-            <option value="single-male-balance">סינגל מחפש איזון</option>
-            <option value="single-female-balance">סינגלית מחפשת איזון</option>
-            <option value="single-female-discount">סינגלית רוצה להירשם בהנחה</option>
-            <option value="couple">זוג המעוניין להירשם</option>
-          </select>
-          <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-muted text-[20px]">expand_more</span>
+        <label class="font-label-md text-label-md font-semibold text-on-surface block mb-2">סוג הרשמה ואיזון מגדרי</label>
+        <select name="registrationType" id="typeSelect" required class="sr-only">
+          <option value="single-male-balance">סינגל מחפש איזון</option>
+          <option value="single-female-balance">סינגלית מחפשת איזון</option>
+          <option value="single-female-discount">סינגלית רוצה להירשם בהנחה</option>
+          <option value="couple">זוג המעוניין להירשם</option>
+        </select>
+        <div class="grid grid-cols-2 gap-2" id="typeModeButtons">
+          <button type="button" data-value="couple" class="type-mode-btn p-3 rounded-lg bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm font-medium flex flex-col items-center gap-1 transition-all">
+            <span class="material-symbols-outlined text-[22px]">group</span><span>זוג בהרשמה משותפת</span>
+          </button>
+          <button type="button" data-value="single-male-balance" class="type-mode-btn p-3 rounded-lg bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm font-medium flex flex-col items-center gap-1 transition-all">
+            <span class="material-symbols-outlined text-[22px]">male</span><span>סינגל מחפש איזון</span>
+          </button>
+          <button type="button" data-value="single-female-balance" class="type-mode-btn p-3 rounded-lg bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm font-medium flex flex-col items-center gap-1 transition-all">
+            <span class="material-symbols-outlined text-[22px]">female</span><span>סינגלית מחפשת איזון</span>
+          </button>
+          <button type="button" data-value="single-female-discount" class="type-mode-btn p-3 rounded-lg bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm font-medium flex flex-col items-center gap-1 transition-all">
+            <span class="material-symbols-outlined text-[22px]">percent</span><span>סינגלית בהנחה מיוחדת</span>
+          </button>
         </div>
       </div>
 
-      <div id="singleFields" class="space-y-4">
+      <div id="singleFields" class="space-y-3 p-4 rounded-xl bg-surface-container-low">
+        <div class="flex items-center gap-2 text-primary mb-1">
+          <span class="material-symbols-outlined text-[22px]">badge</span>
+          <h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">פרטים אישיים</h4>
+        </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-text-secondary mb-1.5">שם מלא</label>
-            <input name="fullName" autocomplete="name" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
+            <label class="block text-xs font-bold text-text-secondary mb-1.5">שם מלא *</label>
+            <input name="fullName" autocomplete="name" required class="w-full px-3 py-2.5 rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container transition-all">
           </div>
           <div>
-            <label class="block text-xs font-bold text-text-secondary mb-1.5">טלפון</label>
-            <input name="phoneNumber" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none" dir="ltr">
+            <label class="block text-xs font-bold text-text-secondary mb-1.5">טלפון *</label>
+            <input name="phoneNumber" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel" required class="w-full px-3 py-2.5 rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container transition-all" dir="ltr">
           </div>
         </div>
         <div>
-          <label class="block text-xs font-bold text-text-secondary mb-1.5">טלגרם (אופציונלי)</label>
-          <input name="telegramUsername" placeholder="@username" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none" dir="ltr">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-bold text-text-secondary">כינוי טלגרם</label>
+            <span class="font-label-caps text-label-caps text-outline/80">אופציונלי</span>
+          </div>
+          <input name="telegramUsername" placeholder="@username" class="w-full px-3 py-2.5 rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container transition-all" dir="ltr">
         </div>
         <div id="pickupWrap" style="display:none">
-          <label class="block text-xs font-bold text-text-secondary mb-1.5">כתובת לאיסוף</label>
-          <input name="pickupAddress" placeholder="עיר / כתובת לאיסוף" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
-        </div>
-      </div>
-
-      <div id="coupleFields" style="display:none" class="space-y-4">
-        <div class="rounded-xl border border-white/10 p-4 space-y-3">
-          <p class="text-primary text-xs font-bold flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">man</span>פרטי הגבר</p>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-bold text-text-secondary mb-1.5">שם מלא</label>
-              <input name="maleFullName" autocomplete="name" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-text-secondary mb-1.5">טלפון</label>
-              <input name="malePhone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none" dir="ltr">
-            </div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-bold text-text-secondary">עיר / אזור מגורים לאיסוף (אופציונלי)</label>
+            <span class="px-2 py-0.5 rounded-full bg-tertiary-container/20 text-tertiary font-label-caps text-[10px]">לסינגליות בלבד</span>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-text-secondary mb-1.5">טלגרם (אופציונלי)</label>
-            <input name="maleTelegramUsername" placeholder="@username" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none" dir="ltr">
-          </div>
-        </div>
-        <div class="rounded-xl border border-white/10 p-4 space-y-3">
-          <p class="text-primary text-xs font-bold flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">woman</span>פרטי האישה</p>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-bold text-text-secondary mb-1.5">שם מלא</label>
-              <input name="femaleFullName" autocomplete="name" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-text-secondary mb-1.5">טלפון</label>
-              <input name="femalePhone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none" dir="ltr">
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-text-secondary mb-1.5">טלגרם (אופציונלי)</label>
-            <input name="femaleTelegramUsername" placeholder="@username" class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none" dir="ltr">
+          <div class="flex items-center px-3 py-2 rounded-lg bg-surface-container-lowest">
+            <span class="material-symbols-outlined text-outline text-[20px] ml-2">explore</span>
+            <input name="pickupAddress" placeholder="תל אביב, הרצליה, ראשון לציון..." class="w-full bg-transparent text-on-surface focus:outline-none">
           </div>
         </div>
       </div>
 
-      <label class="flex items-start gap-2.5 text-sm text-text-secondary cursor-pointer">
-        <input required type="checkbox" class="mt-0.5 w-4 h-4 accent-[#ff5708]"> אני מעל גיל 18 ומאשר/ת את תנאי ההשתתפות
+      <div id="coupleFields" style="display:none" class="space-y-3">
+        <div class="rounded-xl bg-surface-container-low p-4 space-y-3">
+          <p class="flex items-center gap-2 text-primary"><span class="material-symbols-outlined text-[22px]">man</span><span class="font-headline-sm text-headline-sm font-semibold text-on-surface">פרטי הגבר</span></p>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-text-secondary mb-1.5">שם מלא *</label>
+              <input name="maleFullName" autocomplete="name" class="w-full px-3 py-2.5 rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container transition-all">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-text-secondary mb-1.5">טלפון *</label>
+              <input name="malePhone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel" class="w-full px-3 py-2.5 rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container transition-all" dir="ltr">
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-bold text-text-secondary">כינוי טלגרם</label>
+              <span class="font-label-caps text-label-caps text-outline/80">אופציונלי</span>
+            </div>
+            <input name="maleTelegramUsername" placeholder="@username" class="w-full px-3 py-2.5 rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container transition-all" dir="ltr">
+          </div>
+        </div>
+        <div class="rounded-xl bg-surface-container-low p-4 space-y-3">
+          <p class="flex items-center gap-2 text-tertiary"><span class="material-symbols-outlined text-[22px]">woman</span><span class="font-headline-sm text-headline-sm font-semibold text-on-surface">פרטי האישה</span></p>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-text-secondary mb-1.5">שם מלא *</label>
+              <input name="femaleFullName" autocomplete="name" class="w-full px-3 py-2.5 rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container transition-all">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-text-secondary mb-1.5">טלפון *</label>
+              <input name="femalePhone" type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel" class="w-full px-3 py-2.5 rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container transition-all" dir="ltr">
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-bold text-text-secondary">כינוי טלגרם</label>
+              <span class="font-label-caps text-label-caps text-outline/80">אופציונלי</span>
+            </div>
+            <input name="femaleTelegramUsername" placeholder="@username" class="w-full px-3 py-2.5 rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container transition-all" dir="ltr">
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-surface-container-high border border-primary-container/40 flex flex-col gap-2.5 shadow-[0_0_12px_rgba(255,87,8,0.25)]">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 text-secondary">
+            <span class="material-symbols-outlined text-[22px]">door_front</span>
+            <span class="font-headline-sm text-headline-sm font-bold text-on-surface">הנחיות קריטיות בכניסה</span>
+          </div>
+          <span class="px-2.5 py-0.5 rounded-full bg-primary-container text-white font-label-caps text-[10px] font-bold">חשוב מאוד!</span>
+        </div>
+        <div class="p-3 rounded-lg bg-surface-container-lowest flex flex-col gap-2">
+          <p class="font-body-md text-body-md text-on-surface leading-relaxed">בכניסה לאירוע חובה להגיד: <strong class="text-secondary underline decoration-primary-container decoration-2 underline-offset-4">"הגעתי דרך חן ואיציק"</strong></p>
+          <div class="flex items-start gap-2 text-primary">
+            <span class="material-symbols-outlined text-[18px] shrink-0 mt-0.5">warning</span>
+            <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed"><strong class="text-primary font-bold">שימו לב:</strong> אם לא תגידו שהגעתם דרך חן ואיציק, לא תקבלו את ההנחה ותשלמו מחיר מלא בקופה!</p>
+          </div>
+        </div>
+      </div>
+
+      <label class="flex items-start gap-2.5 p-3 rounded-lg bg-surface-container-lowest text-sm text-text-secondary cursor-pointer">
+        <input required type="checkbox" class="mt-0.5 w-4 h-4 rounded accent-[#ff5708] shrink-0"> אני מעל גיל 18 ומאשר/ת את תנאי ההשתתפות, שמירה מוחלטת על פרטיות הקהילה ומרחב בטוח ומכבד
       </label>
 
-      <button type="submit" class="w-full rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] hover:brightness-110 text-white font-bold py-3.5 shadow-[0_4px_20px_rgba(255, 87, 8,0.35)]">שליחת הרשמה</button>
+      <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-primary-container to-secondary-container text-white font-headline-sm text-headline-sm font-bold py-4 flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(255,87,8,0.4)] active:scale-[0.98] transition-all">
+        <span>שליחת הרשמה למסיבה</span><span class="material-symbols-outlined text-[22px]">send</span>
+      </button>
       <button type="button" id="backToParties" class="w-full rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-text-primary font-bold py-3">חזרה לבחירת מסיבה</button>
+      <p class="text-center font-body-sm text-body-sm text-outline px-4">🔒 לאחר השליחה נציג (חן / איציק) יאשר את הרשמתכם וישלח מיקום מדויק ביום האירוע.</p>
     </form>
   </div>
 
-  <div id="regSuccess" style="display:none" class="text-center bg-surface-card border border-white/5 rounded-2xl p-8">
-    <div class="w-16 h-16 rounded-full bg-status-balanced/15 flex items-center justify-center mx-auto mb-4">
-      <span class="material-symbols-outlined text-[36px] text-status-balanced">check_circle</span>
+  <div id="regSuccess" style="display:none" class="text-center bg-surface-container-high rounded-2xl p-8 shadow-2xl">
+    <div class="w-16 h-16 rounded-full bg-primary-container/20 text-primary-container flex items-center justify-center mx-auto mb-4 shadow-[0_0_24px_rgba(255,87,8,0.5)]">
+      <span class="material-symbols-outlined text-[36px]">check_circle</span>
     </div>
-    <h2 class="font-headline-md text-headline-md text-text-primary">ההרשמה נשלחה!</h2>
-    <p class="text-text-secondary mt-2 mb-3">נציג שלנו ייצור איתך קשר לאישור סופי. נתראה במסיבה!</p>
-    <div id="successSummary" class="text-right bg-surface-container rounded-xl p-4 mb-5 space-y-1.5"></div>
-    <a class="inline-block rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold py-3 px-8" href="/">חזרה לדף הבית</a>
+    <h2 class="font-headline-md text-headline-md text-text-primary font-bold">ההרשמה נשלחה בהצלחה!</h2>
+    <p class="text-text-secondary mt-2 mb-3">נציג מטעמנו (חן או איציק) ייצור איתכם קשר בוואטסאפ לאישור סופי ומסירת הכתובת.</p>
+    <div id="successSummary" class="text-right bg-surface-container rounded-xl p-4 mb-4 space-y-1.5"></div>
+    <div class="w-full p-3 rounded-lg bg-surface-container text-secondary font-label-md text-label-md font-semibold mb-5">ניפגש ברחבה! 🥂</div>
+    <a class="inline-block rounded-xl bg-gradient-to-r from-primary-container to-secondary-container text-white font-bold py-3 px-8 shadow-[0_4px_24px_rgba(255,87,8,0.4)]" href="/">חזרה לדף הבית</a>
   </div>
 </main>
 
@@ -332,7 +382,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     coupleFields.style.display = isCouple ? "" : "none";
     singleFields.style.display = isCouple ? "none" : "";
     pickupWrap.style.display = (typeSelect.value === "single-female-discount" || typeSelect.value === "single-female-balance") ? "" : "none";
+
+    document.querySelectorAll("#typeModeButtons .type-mode-btn").forEach(btn => {
+      const active = btn.dataset.value === typeSelect.value;
+      btn.classList.toggle("bg-surface-container-highest", active);
+      btn.classList.toggle("text-primary", active);
+      btn.classList.toggle("font-semibold", active);
+      btn.classList.toggle("shadow-[0_0_12px_rgba(255,87,8,0.25)]", active);
+      btn.classList.toggle("bg-surface-container-low", !active);
+      btn.classList.toggle("text-on-surface-variant", !active);
+      btn.classList.toggle("font-medium", !active);
+    });
   });
+
+  document.querySelectorAll("#typeModeButtons .type-mode-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      typeSelect.value = btn.dataset.value;
+      typeSelect.dispatchEvent(new Event("change"));
+    });
+  });
+  typeSelect.dispatchEvent(new Event("change"));
 
   function showSuccess(party, pickupAddress) {
     const summary = document.getElementById("successSummary");
