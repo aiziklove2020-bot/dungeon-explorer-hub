@@ -153,6 +153,18 @@ const RegistrationForm = ({ onCancel, partyId }) => {
         </p>
       </div>
 
+      <div className="registration-step-tracker">
+        <div className={`registration-step-tracker-item ${step >= 1 ? 'registration-step-tracker-item-done' : ''}`}>
+          <span className="registration-step-tracker-badge">{step > 1 ? '✓' : '1'}</span>
+          <span className="registration-step-tracker-label">בחירת סוג</span>
+        </div>
+        <div className="registration-step-tracker-line" />
+        <div className={`registration-step-tracker-item ${step >= 2 ? 'registration-step-tracker-item-active' : ''}`}>
+          <span className="registration-step-tracker-badge">2</span>
+          <span className="registration-step-tracker-label">פרטים ואיזון</span>
+        </div>
+      </div>
+
       {step === 1 ? (
         <TypePicker
           registration={content.registration}
@@ -222,6 +234,13 @@ const RegistrationForm = ({ onCancel, partyId }) => {
               shakeTrigger={shakeTrigger}
               t={t}
             />
+
+            {content.about?.entryNote && (
+              <div className="registration-entry-note">
+                <div className="registration-entry-note-title">הנחיות כניסה לאירוע</div>
+                <p className="registration-entry-note-phrase">{content.about.entryNote}</p>
+              </div>
+            )}
 
             {hasTriedSubmit && !formValid && !loading && (
               <p className="registration-form-error registration-form-hint" role="alert">

@@ -23,6 +23,7 @@ function buildActiveParties(parties, retentionHours = DEFAULT_PARTY_RETENTION_HO
       name: p.title || '',
       description: p.description || '',
       partyType: p.partyType || 'internal',
+      img: p.img || '',
     }))
     // Chronological order — earliest upcoming party first.
     .sort((a, b) => {
