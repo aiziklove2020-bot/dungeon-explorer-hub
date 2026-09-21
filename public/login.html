@@ -66,8 +66,8 @@
     </div>
     <form class="relative flex flex-col gap-3" id="loginForm">
       <div>
-        <label class="block text-xs font-bold text-text-secondary mb-1.5">אימייל</label>
-        <input required type="email" name="email" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container">
+        <label class="block text-xs font-bold text-text-secondary mb-1.5">מספר טלפון</label>
+        <input required type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel" name="phone" dir="ltr" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container text-left">
       </div>
       <div>
         <label class="block text-xs font-bold text-text-secondary mb-1.5">סיסמה</label>
@@ -94,14 +94,14 @@
 
 <script src="assets/app.js?v=202609062118"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609102005";
+import "./assets/site-data.js?v=202609211530";
 document.getElementById("loginForm").addEventListener("submit", async e => {
   e.preventDefault();
   const f = new FormData(e.target);
   const btn = e.target.querySelector("button");
   btn.disabled = true;
   try {
-    const u = await window.LPData.login(f.get("email").trim().toLowerCase(), f.get("password"));
+    const u = await window.LPData.login(f.get("phone").replace(/\D/g, ""), f.get("password"));
     LP.setCurrent(u);
     toast("התחברת בהצלחה");
     setTimeout(() => location = "/profile", 700);

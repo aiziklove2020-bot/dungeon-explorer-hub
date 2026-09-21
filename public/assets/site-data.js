@@ -24701,7 +24701,7 @@ var HM = (e) => {
 		id: r.id,
 		...r.data()
 	};
-}, QM = async (e) => HM(await ZM(e)), $M = async (e, t, n) => {
+}, QM = async (e) => HM(await ZM(e)), normPhone_ = (e) => String(e || "").replace(/\D/g, ""), PHONE_RE_ = /^05\d{8}$/, getByPhoneRaw_ = async (e) => {	let t = normPhone_(e);	if (!t) return null;	let n = await k(D(T(H, PM), O("phone", "==", t)));	if (n.empty) return null;	let r = n.docs[0];	return { id: r.id, ...r.data() };}, getByPhone_ = async (e) => HM(await getByPhoneRaw_(e)), $M = async (e, t, n, ph) => {
 	if (!e?.trim() || !t) throw Error("כינוי וסיסמה נדרשים");
 	let r = UM(e), i = r.toLowerCase();
 	if (r.length < 2) throw Error("כינוי חייב להכיל לפחות 2 תווים");
@@ -24709,6 +24709,9 @@ var HM = (e) => {
 	if (YM.has(i)) throw Error("הכינוי הזה שמור — בחר כינוי אחר");
 	if (t.length < 4) throw Error("סיסמה חייבת להכיל לפחות 4 תווים");
 	if (await XM(r)) throw Error("הכינוי כבר תפוס, בחר כינוי אחר");
+	let cleanPhone_ = normPhone_(ph);
+	if (!PHONE_RE_.test(cleanPhone_)) throw Error("נא להזין מספר טלפון תקין (10 ספרות, מתחיל ב-05)");
+	if (await getByPhoneRaw_(cleanPhone_)) throw Error("מספר הטלפון הזה כבר רשום");
 	let a = "", o = "";
 	if (n && String(n).trim()) {
 		if (a = GM(n), o = a.toLowerCase(), !qM.test(o)) throw Error("כתובת אימייל לא תקינה");
@@ -24718,6 +24721,7 @@ var HM = (e) => {
 		nickname: r,
 		nicknameLower: i,
 		password: await ZA.hash(t, FM),
+		phone: cleanPhone_,
 		role: "user",
 		isBlocked: !1,
 		linkedUserId: null,
@@ -35105,23 +35109,23 @@ function zU(e) {
 async function BU(e, t, n, r) {
 	let i = zU(e);
 	if (i.length < 2) throw Error("השם קצר מדי — נא להזין לפחות 2 תווים (אותיות/ספרות)");
-	let a = await $M(i, n, t);
+	let a = await $M(i, n, void 0, t);
 	return r && await rN(a.id, { gender: r }).catch(() => {}), {
 		id: a.id,
 		name: a.nickname,
-		email: a.email || t,
+		phone: a.phone || t,
 		gender: r || null,
 		role: "user"
 	};
 }
 async function VU(e, t) {
-	let n = await QM(e).catch(() => null);
-	if (!n) throw Error("לא נמצא חשבון עם האימייל הזה");
+	let n = await getByPhone_(e).catch(() => null);
+	if (!n) throw Error("לא נמצא חשבון עם מספר הטלפון הזה");
 	let r = await eN(n.nickname, t);
 	return {
 		id: r.id,
 		name: r.nickname,
-		email: r.email || e,
+		phone: r.phone || e,
 		gender: n.gender || null,
 		role: "user"
 	};
