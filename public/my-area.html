@@ -71,37 +71,54 @@
   </div>
 
   <div id="area" style="display:none" class="flex flex-col gap-5">
-    <div class="flex items-center justify-between">
-      <p class="text-body-sm font-body-sm text-text-muted" dir="ltr" id="areaPhone"></p>
+    <div class="flex items-center justify-end">
       <button id="switchPhone" class="text-label-sm font-label-sm text-primary underline">להחליף מספר</button>
     </div>
 
-    <!-- profile photo + subscription -->
-    <div class="relative overflow-hidden rounded-xl bg-gradient-to-b from-surface-container-high via-surface-container to-surface-container-low p-4 shadow-[0_12px_32px_rgba(0,0,0,0.5)] flex items-center gap-4">
-      <div class="absolute -top-10 -left-10 w-36 h-36 rounded-full bg-secondary-container/15 blur-3xl pointer-events-none"></div>
-      <div class="relative shrink-0">
-        <div class="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-secondary-container via-primary-container to-secondary shadow-[0_0_16px_rgba(255,170,0,0.35)]">
-          <img id="profilePhoto" src="" alt="" class="w-full h-full rounded-full object-cover bg-surface-container-lowest" style="display:none">
-          <div id="profilePhotoPlaceholder" class="w-full h-full rounded-full bg-surface-container-lowest flex items-center justify-center">
-            <span class="material-symbols-outlined text-text-muted text-[26px]">person</span>
+    <!-- Identity card - phone-based verification, matching the community's real auth model -->
+    <div class="relative w-full rounded-2xl bg-surface-container p-4 shadow-2xl overflow-hidden border border-primary-container/30">
+      <div class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-secondary-container/15 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-primary-container/15 blur-2xl pointer-events-none"></div>
+      <div class="relative z-10 flex flex-col gap-3">
+        <div class="flex items-center justify-between border-b border-outline-variant/20 pb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-primary-container shadow-[0_0_8px_rgba(255,87,8,0.8)] animate-pulse"></span>
+            <span class="font-label-caps text-label-caps text-secondary font-bold tracking-wider">זיהוי חבר/ת קהילה • מסיבות ליברליות בישראל</span>
           </div>
         </div>
-        <button id="photoUploadBtn" class="absolute -bottom-1 -left-1 w-6 h-6 rounded-full bg-primary-container flex items-center justify-center shadow-md">
-          <span class="material-symbols-outlined text-[14px] text-on-primary">edit</span>
-        </button>
-        <input type="file" id="photoInput" accept="image/*" style="display:none">
-      </div>
-      <div class="relative flex-1 min-w-0">
-        <p class="text-label-sm font-label-sm text-text-muted mb-1">סטטוס מנוי</p>
-        <p id="subStatus" class="text-body-sm font-body-sm text-text-primary font-bold">בודק...</p>
-        <a href="/membership" class="text-label-sm font-label-sm text-primary underline">לרכישת מנוי</a>
+        <div class="flex items-center gap-4">
+          <div class="relative shrink-0">
+            <div class="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-secondary-container via-primary-container to-secondary shadow-[0_0_16px_rgba(255,170,0,0.35)]">
+              <img id="profilePhoto" src="" alt="" class="w-full h-full rounded-full object-cover bg-surface-container-lowest" style="display:none">
+              <div id="profilePhotoPlaceholder" class="w-full h-full rounded-full bg-surface-container-lowest flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-[26px]">phone_iphone</span>
+              </div>
+            </div>
+            <button id="photoUploadBtn" class="absolute -bottom-1 -left-1 w-6 h-6 rounded-full bg-primary-container flex items-center justify-center shadow-md">
+              <span class="material-symbols-outlined text-[14px] text-on-primary">edit</span>
+            </button>
+            <input type="file" id="photoInput" accept="image/*" style="display:none">
+          </div>
+          <div class="flex flex-col min-w-0">
+            <span class="font-headline-md text-headline-md text-on-surface font-bold" dir="ltr" id="areaPhone"></span>
+            <span class="font-body-sm text-body-sm text-secondary flex items-center gap-1.5 mt-0.5">
+              <span class="material-symbols-outlined text-[15px] text-emerald-400">verified</span>
+              זיהוי ואימות מבוסס טלפון
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between bg-surface-container-lowest/80 p-3 rounded-xl">
+          <span class="font-label-sm text-label-sm text-outline">סטטוס מנוי</span>
+          <p id="subStatus" class="text-body-sm font-body-sm text-on-surface font-bold">בודק...</p>
+        </div>
+        <a href="/membership" class="text-label-sm font-label-sm text-primary underline self-start">לרכישת מנוי</a>
       </div>
     </div>
 
     <!-- balance match -->
     <div>
       <div class="flex items-center gap-2 mb-2">
-        <span class="material-symbols-outlined text-primary-container text-[20px]" style="font-variation-settings: 'FILL' 1">favorite</span>
+        <span class="material-symbols-outlined text-primary-container text-[20px]" style="font-variation-settings: 'FILL' 1">handshake</span>
         <h2 class="font-headline-sm text-headline-sm text-text-primary font-bold">האיזון שלי</h2>
       </div>
       <div id="balanceMatch"></div>
@@ -123,7 +140,35 @@
         <h2 class="font-headline-sm text-headline-sm text-text-primary font-bold">המועדפים שלי</h2>
       </div>
       <p class="text-label-sm font-label-sm text-text-muted mb-2">מסיבות שסימנתם בלב בעמוד מסיבה או ברשימת האירועים.</p>
-      <div id="favorites" class="cards"></div>
+      <div id="favorites" class="flex flex-col gap-3"></div>
+    </div>
+
+    <!-- entry instructions (same standing community rule as on other pages) -->
+    <div class="relative w-full rounded-2xl bg-surface-container-high p-4 shadow-[0_0_30px_rgba(255,87,8,0.25)] overflow-hidden border border-primary-container/30">
+      <div class="absolute -top-10 -left-10 w-36 h-36 rounded-full bg-primary-container/25 blur-2xl pointer-events-none"></div>
+      <div class="relative z-10 flex flex-col gap-3">
+        <div class="flex items-center gap-2.5 pb-1 border-b border-outline-variant/20">
+          <div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary shadow-[0_0_12px_rgba(255,87,8,0.7)]">
+            <span class="material-symbols-outlined text-[20px]">priority_high</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-headline-sm text-headline-sm text-secondary font-bold">הוראות כניסה לסלקציה ולקופה</span>
+            <span class="font-label-caps text-label-caps text-primary-container tracking-wider font-bold uppercase">חובה לקרוא לפני ההגעה לשער</span>
+          </div>
+        </div>
+        <div class="relative flex items-start gap-3 p-3.5 rounded-xl bg-gradient-to-tr from-primary-container/20 to-secondary-container/15 border-2 border-primary-container/50 shadow-[0_0_20px_rgba(255,87,8,0.35)] overflow-hidden">
+          <div class="w-7 h-7 rounded-full bg-primary-container text-on-primary shadow-[0_0_8px_rgba(255,87,8,0.8)] flex items-center justify-center font-bold text-[14px] shrink-0 mt-0.5">!</div>
+          <div class="font-body-md text-body-md text-on-surface flex flex-col gap-2 w-full">
+            <span class="font-bold text-secondary-fixed text-body-sm flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary-container">warning</span>חובה לומר לסלקטור / לקופאי בקול ברור ובביטחון:</span>
+            <div class="py-2.5 px-3 rounded-lg bg-surface-container-lowest/90 border border-secondary/30 shadow-inner flex items-center justify-center">
+              <span class="font-headline-md text-headline-md text-secondary-fixed font-bold tracking-wide drop-shadow-[0_0_12px_rgba(255,87,8,0.5)]">"הגעתי דרך חן ואיציק"</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-error-container/30 border border-error/30 text-on-error-container text-body-sm">
+              <strong class="text-error font-bold">שימו לב:</strong> אם לא תגידו שהגעתם דרך חן ואיציק לא תקבלו את ההנחה ותשלמו מחיר מלא!
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -326,17 +371,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const favSet = new Set(currentFavoriteIds);
     box.innerHTML = events.map((e) => `
-      <article class="card" data-fav-card="${e.id}">
-        <div class="event-cover" style="background-image:url('${e.img || ""}')"></div>
-        <div class="card-body">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-            <h3 style="margin:0">${e.title || ""}</h3>
-            <button type="button" data-fav-toggle="${e.id}" style="background:none;border:none;padding:4px;cursor:pointer">
-              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' ${favSet.has(e.id) ? 1 : 0};color:${favSet.has(e.id) ? "#ff5708" : "#e5beb2"}">favorite</span>
+      <article class="bg-surface-container-high rounded-xl overflow-hidden shadow-md flex flex-col" data-fav-card="${e.id}">
+        <div class="relative h-28 w-full bg-surface-container-low">
+          <img class="w-full h-full object-cover" src="${e.img || ""}" alt="" onerror="this.style.display='none'">
+          <div class="absolute inset-0 bg-gradient-to-t from-surface-container-high via-surface-container-high/40 to-transparent"></div>
+        </div>
+        <div class="p-3 flex flex-col gap-2">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              ${e.category ? `<span class="inline-block max-w-full px-2 py-0.5 rounded text-xs font-medium bg-primary-container/20 text-primary-fixed-dim truncate mb-1">${e.category}</span>` : ""}
+              <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">${e.title || ""}</h3>
+              <p class="text-on-surface-variant text-body-sm mt-0.5">${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p>
+            </div>
+            <button type="button" data-fav-toggle="${e.id}" class="w-9 h-9 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary-container shadow-inner shrink-0">
+              <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' ${favSet.has(e.id) ? 1 : 0}">favorite</span>
             </button>
           </div>
-          <p>${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 40)}</p>
-          <a class="btn primary" href="/event?id=${e.id}">לפרטים</a>
+          <a href="/event?id=${e.id}" class="w-full text-center rounded-lg bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container font-bold text-sm py-2.5">לפרטים ולהרשמה</a>
         </div>
       </article>
     `).join("");
