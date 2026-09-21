@@ -48,22 +48,36 @@
   <a href="/store"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">storefront</span></span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/contact"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">call</span></span><span class="dr-tx">צור קשר</span></a>
  </nav>
 </aside><div class="scrim"></div>
-<main>
-<section class="auth-shell"><div class="auth-card">
-  <div class="logo-mini"><img src="assets/logo-new.png?v=202609072500"></div>
-  <div class="tabs"><a href="/login">כניסת משתמשים</a><a class="active" href="/advertiser-login">כניסת מפרסמים</a></div>
-  <div style="text-align:center;margin-bottom:6px">
-    <div style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:rgba(255,23,57,.12);border:1px solid #7c1828;font-size:24px;margin-bottom:10px">🎟</div>
-    <h2 style="margin:0 0 4px">אזור מפיקים ומפרסמים</h2>
-    <p style="color:#aaa;font-size:14px;margin:0">כניסה למערכת ניהול המסיבות והפרסומים שלך</p>
+<main class="max-w-md mx-auto px-4">
+<section class="min-h-[70vh] flex items-center justify-center py-8">
+  <div class="w-full relative overflow-hidden rounded-2xl bg-gradient-to-b from-surface-container-high via-surface-container to-surface-container-low p-5 shadow-[0_12px_32px_rgba(0,0,0,0.5)]">
+    <div class="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-primary-container/15 blur-3xl pointer-events-none"></div>
+    <div class="relative flex flex-col items-center text-center mb-5">
+      <div class="w-14 h-14 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container mb-3 shadow-[0_0_16px_rgba(255,87,8,0.3)]">
+        <span class="material-symbols-outlined text-[28px]">nightlife</span>
+      </div>
+      <h1 class="font-headline-md text-headline-md text-text-primary font-bold">אזור מפיקים ומפרסמים</h1>
+      <p class="text-text-secondary text-body-sm mt-1">כניסה למערכת ניהול המסיבות והפרסומים שלך</p>
+    </div>
+    <div class="relative grid grid-cols-2 bg-surface-container-lowest p-1 rounded-xl mb-5">
+      <a class="py-2.5 rounded-lg text-center text-label-md font-bold text-text-secondary" href="/login">כניסת משתמשים</a>
+      <a class="py-2.5 rounded-lg text-center text-label-md font-bold bg-primary-container text-on-primary shadow-md" href="/advertiser-login">כניסת מפרסמים</a>
+    </div>
+    <form class="relative flex flex-col gap-3" id="advLogin">
+      <div>
+        <label class="block text-xs font-bold text-text-secondary mb-1.5">טלפון עסקי</label>
+        <input required type="tel" name="phoneNumber" placeholder="050-0000000" autocomplete="tel" dir="ltr" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-text-secondary mb-1.5">סיסמה</label>
+        <input required type="password" name="password" placeholder="הזינו סיסמה" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container">
+      </div>
+      <button class="h-12 mt-1 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary font-label-lg text-label-lg font-bold shadow-[0_4px_20px_rgba(255,87,8,0.35)]">כניסה למערכת המפרסמים</button>
+    </form>
+    <p class="relative text-center text-text-secondary text-body-sm mt-4">מפיק חדש? <a class="text-primary font-bold underline" href="/advertiser-register">פתיחת חשבון מפרסם ←</a></p>
   </div>
-  <form class="form" id="advLogin" style="margin-top:14px">
-    <label>📞 טלפון עסקי<input required type="tel" name="phoneNumber" placeholder="050-0000000" autocomplete="tel" dir="ltr"></label>
-    <label>🔒 סיסמה<input required type="password" name="password" placeholder="הזינו סיסמה"></label>
-    <button class="btn primary full">כניסה למערכת המפרסמים</button>
-  </form>
-  <p style="text-align:center;color:#aaa;margin-top:16px">מפיק חדש? <a style="color:#ff5708;font-weight:700" href="/advertiser-register">פתיחת חשבון מפרסם ←</a></p>
-</div></section></main>
+</section>
+</main>
 <footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-new.png?v=202609072500" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
 
 <nav class="fixed bottom-0 inset-x-0 z-50 bg-surface-dim/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.6)]">

@@ -48,10 +48,37 @@
   <a href="/store"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">storefront</span></span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/contact"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">call</span></span><span class="dr-tx">צור קשר</span></a>
  </nav>
 </aside><div class="scrim"></div>
-<main>
-<section class="auth-shell"><div class="auth-card"><div class="logo-mini"><img src="assets/logo-new.png?v=202609072500"></div><div class="tabs"><a class="active" href="/login">כניסת משתמשים</a><a href="/advertiser-login">כניסת מפרסמים</a></div>
-<form class="form" id="loginForm"><label>אימייל<input required type="email" name="email"></label><label>סיסמה<input required type="password" name="password"></label><button class="btn primary full">כניסה</button></form>
-<p style="text-align:center;color:#aaa;margin-top:15px">אין משתמש? <a style="color:#ff5708" href="/register">הרשמה</a></p></div></section></main>
+<main class="max-w-md mx-auto px-4">
+<section class="min-h-[70vh] flex items-center justify-center py-8">
+  <div class="w-full relative overflow-hidden rounded-2xl bg-gradient-to-b from-surface-container-high via-surface-container to-surface-container-low p-5 shadow-[0_12px_32px_rgba(0,0,0,0.5)]">
+    <div class="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-primary-container/15 blur-3xl pointer-events-none"></div>
+    <div class="relative flex flex-col items-center text-center mb-5">
+      <div class="relative mb-3">
+        <div class="absolute -inset-1.5 bg-gradient-to-tr from-primary-container to-secondary-container rounded-full blur-lg opacity-60"></div>
+        <img src="icon-512.png" alt="LIBRAL PARTY" class="relative w-16 h-16 rounded-full object-contain bg-surface-container-lowest p-1.5 shadow-2xl">
+      </div>
+      <h1 class="font-headline-md text-headline-md text-text-primary font-bold">כניסת מנויים</h1>
+      <p class="text-text-secondary text-body-sm mt-1">התחברו כדי לגשת לאזור האישי שלכם</p>
+    </div>
+    <div class="relative grid grid-cols-2 bg-surface-container-lowest p-1 rounded-xl mb-5">
+      <a class="py-2.5 rounded-lg text-center text-label-md font-bold bg-primary-container text-on-primary shadow-md" href="/login">כניסת משתמשים</a>
+      <a class="py-2.5 rounded-lg text-center text-label-md font-bold text-text-secondary" href="/advertiser-login">כניסת מפרסמים</a>
+    </div>
+    <form class="relative flex flex-col gap-3" id="loginForm">
+      <div>
+        <label class="block text-xs font-bold text-text-secondary mb-1.5">אימייל</label>
+        <input required type="email" name="email" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-text-secondary mb-1.5">סיסמה</label>
+        <input required type="password" name="password" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container">
+      </div>
+      <button class="h-12 mt-1 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary font-label-lg text-label-lg font-bold shadow-[0_4px_20px_rgba(255,87,8,0.35)]">כניסה</button>
+    </form>
+    <p class="relative text-center text-text-secondary text-body-sm mt-4">אין לכם משתמש? <a class="text-primary font-bold underline" href="/register">הרשמה</a></p>
+  </div>
+</section>
+</main>
 <footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-new.png?v=202609072500" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
 
 <nav class="fixed bottom-0 inset-x-0 z-50 bg-surface-dim/90 backdrop-blur-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.6)]">
