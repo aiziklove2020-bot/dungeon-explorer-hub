@@ -320,6 +320,18 @@ const Home = () => {
                     loading={i < 2 ? 'eager' : 'lazy'}
                     decoding="async"
                   />
+                  <div className="event-image-overlay-top">
+                    <span className="event-badge-live">
+                      <span className="event-badge-live-dot" />
+                      הרשמה פתוחה
+                    </span>
+                  </div>
+                  <div className="event-image-overlay-bottom">
+                    <span className="event-date-pill">
+                      <Calendar size={14} />
+                      {ev.day} {ev.date} • {ev.time}
+                    </span>
+                  </div>
                 </div>
                 <div className="event-content">
                   <div className="event-meta">
