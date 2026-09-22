@@ -773,6 +773,17 @@ async function handleManualPost(req, res) {
  * from the public site's loadEvents(), so real traffic drives near-real-time
  * cleanup) and by this file's existing cron as a backstop. Safe to call
  * anytime — it only deletes docs already past their own stored expiration.
+ *
+ * Also deletes `users` docs that only ever existed as a one-time "day pass"
+ * — i.e. an admin explicitly approved them for a single party via the
+ * balance table's "one-time approval" button (createUserFromRegistration
+ * with tier: 'day' — see src/firebase/users.js), never a real annual
+ * subscriber. Scoped tightly to avoid touching anyone real:
+ *   - subscriptions.parties.tier === 'day' (never set for a 'year' member)
+ *   - their one-day pass has already lapsed (expiry in the past)
+ *   - no forumUsers doc links to them (linkedUserId) — a linked doc means
+ *     this is someone's actual community account's site-user record, so it
+ *     stays regardless of subscription tier.
  */
 async function handleCleanupExpiredParties(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -780,12 +791,45 @@ async function handleCleanupExpiredParties(req, res) {
     const admin = await initAdmin();
     const db = admin.firestore();
     const now = admin.firestore.Timestamp.now();
-    const snap = await db.collection('parties').where('expiration', '<=', now).get();
-    if (snap.empty) return res.status(200).json({ ok: true, deleted: 0 });
-    const batch = db.batch();
-    snap.docs.forEach((d) => batch.delete(d.ref));
-    await batch.commit();
-    return res.status(200).json({ ok: true, deleted: snap.size });
+    const nowIso = new Date().toISOString();
+
+    const partiesSnap = await db.collection('parties').where('expiration', '<=', now).get();
+    let deletedParties = 0;
+    if (!partiesSnap.empty) {
+      const batch = db.batch();
+      partiesSnap.docs.forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+      deletedParties = partiesSnap.size;
+    }
+
+    let deletedUsers = 0;
+    const dayPassSnap = await db.collection('users').where('subscriptions.parties.tier', '==', 'day').get();
+    const lapsed = dayPassSnap.docs.filter((d) => {
+      const expiry = d.data()?.subscriptions?.parties?.expiry;
+      return typeof expiry === 'string' && expiry <= nowIso;
+    });
+    if (lapsed.length > 0) {
+      // Firestore's `in` operator caps at 30 values per query — chunk so a
+      // large batch of lapsed day-passes still gets every id checked for a
+      // forum-account link, instead of silently skipping the check (and
+      // deleting) past the first 30.
+      const lapsedIds = lapsed.map((d) => d.id);
+      const linkedIds = new Set();
+      for (let i = 0; i < lapsedIds.length; i += 30) {
+        const chunk = lapsedIds.slice(i, i + 30);
+        const linkedSnap = await db.collection('forumUsers').where('linkedUserId', 'in', chunk).get();
+        linkedSnap.docs.forEach((d) => linkedIds.add(d.data()?.linkedUserId));
+      }
+      const toDelete = lapsed.filter((d) => !linkedIds.has(d.id));
+      if (toDelete.length > 0) {
+        const userBatch = db.batch();
+        toDelete.forEach((d) => userBatch.delete(d.ref));
+        await userBatch.commit();
+        deletedUsers = toDelete.length;
+      }
+    }
+
+    return res.status(200).json({ ok: true, deleted: deletedParties, deletedDayPassUsers: deletedUsers });
   } catch (err) {
     return res.status(200).json({ ok: false, deleted: 0, error: String(err?.message || err) });
   }
