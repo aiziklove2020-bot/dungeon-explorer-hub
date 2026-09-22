@@ -280,6 +280,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           </div>
         </div>`;
       }
+    } else if (regs.some((r) => String(r.registrationType || "").includes("balance"))) {
+      document.getElementById("matchSection").style.display = "";
+      document.getElementById("matchBox").innerHTML = `<div class="rounded-2xl p-5 text-center bg-surface-card border border-white/5">
+        <span class="material-symbols-outlined text-text-muted text-[28px] mb-2 block">hourglass_empty</span>
+        <p class="text-text-secondary text-sm">נרשמתם לאיזון מגדרי — ממתינים להתאמה. האיזון מתבצע ידנית ועשוי לקחת זמן.</p>
+      </div>`;
     } else {
       document.getElementById("matchSection").style.display = "none";
     }
