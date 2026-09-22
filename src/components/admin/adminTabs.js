@@ -10,7 +10,7 @@ export const adminTabs = [
   { id: 'parties',  label: 'מסיבות' },
   { id: 'users',    label: 'ניהול משתמשים' },
   { id: 'siteDesign', label: 'עיצוב האתר (לוגו/באנרים/פופאפ)' },
-  { id: 'forumUsers', label: 'משתמשי אתר' },
+  { id: 'forumUsers', label: 'מנויי האתר' },
   { id: 'subscriptions', label: 'ניהול מנויים' },
   { id: 'about',    label: 'אודות' },
   { id: 'contact',  label: 'צור קשר' },
