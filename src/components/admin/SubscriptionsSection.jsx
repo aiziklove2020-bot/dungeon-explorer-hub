@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Search, Download, RotateCcw, Plus } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { Search, Download, RotateCcw, Plus, Clock, Check, X } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import useAdminSection from '../../hooks/useAdminSection';
 import AdminLoader from './AdminLoader';
@@ -13,6 +13,7 @@ import {
   setSubscriptionExpiry,
   removeSubscription
 } from '../../firebase/subscriptions';
+import { getPendingSubscriptionRequests, resolveSubscriptionRequest } from '../../firebase/subscriptionRequests';
 import SubscriptionBadge from './SubscriptionBadge';
 import SubscriptionEditor from './SubscriptionEditor';
 import NewSubscriberModal from './NewSubscriberModal';
@@ -21,12 +22,45 @@ import RenewSubscriptionModal from './RenewSubscriptionModal';
 const SubscriptionsSection = ({ showSaved }) => {
   const { t } = useLanguage();
   const { data: users, loading, reload } = useAdminSection(getAllUsers);
-  
+
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'parties', 'exchangeParties'
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'active', 'gold', 'expiringSoon', 'expired'
   const [showNewSubscriber, setShowNewSubscriber] = useState(false);
+  const [newSubscriberPrefill, setNewSubscriberPrefill] = useState(null);
   const [renewingUser, setRenewingUser] = useState(null);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+
+  const loadPendingRequests = useCallback(async () => {
+    setLoadingRequests(true);
+    try {
+      const requests = await getPendingSubscriptionRequests();
+      setPendingRequests(requests);
+    } finally {
+      setLoadingRequests(false);
+    }
+  }, []);
+
+  useEffect(() => { loadPendingRequests(); }, [loadPendingRequests]);
+
+  const handleApproveRequest = (request) => {
+    const parts = String(request.fullName || '').trim().split(/\s+/);
+    setNewSubscriberPrefill({
+      requestId: request.id,
+      firstName: parts[0] || '',
+      lastName: parts.slice(1).join(' '),
+      phoneNumber: request.phoneNumber || '',
+    });
+    setShowNewSubscriber(true);
+  };
+
+  const handleDismissRequest = async (request) => {
+    if (!window.confirm(`להתעלם מהבקשה של "${request.fullName}"?`)) return;
+    await resolveSubscriptionRequest(request.id, 'dismissed');
+    await loadPendingRequests();
+    showSaved();
+  };
 
   const handleCreateSubscriber = async ({ firstName, lastName, phoneNumber, paymentMethod, expiryDate }) => {
     const fullName = `${firstName} ${lastName}`.trim();
@@ -37,7 +71,12 @@ const SubscriptionsSection = ({ showSaved }) => {
       method: paymentMethod,
       note: 'הפעלת מנוי חדש',
     });
+    if (newSubscriberPrefill?.requestId) {
+      await resolveSubscriptionRequest(newSubscriberPrefill.requestId, 'approved');
+      await loadPendingRequests();
+    }
     setShowNewSubscriber(false);
+    setNewSubscriberPrefill(null);
     reload();
     showSaved();
   };
@@ -288,6 +327,34 @@ const SubscriptionsSection = ({ showSaved }) => {
         </div>
       </div>
 
+      {!loadingRequests && pendingRequests.length > 0 && (
+        <div className="bg-amber-900/20 border border-amber-700/40 rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Clock size={16} className="text-amber-400" />
+            <h3 className="font-bold text-amber-300">ממתינים למנוי ({pendingRequests.length})</h3>
+          </div>
+          <div className="space-y-2">
+            {pendingRequests.map((req) => (
+              <div key={req.id} className="flex flex-wrap items-center justify-between gap-2 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-3">
+                <div>
+                  <p className="font-bold text-white">{req.fullName}</p>
+                  <PhoneLink phone={req.phoneNumber}>{req.phoneNumber}</PhoneLink>
+                  {req.note && <p className="text-[#94A3B8] text-xs mt-1">{req.note}</p>}
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => handleApproveRequest(req)} className="flex items-center gap-1 bg-[#ff5708] hover:bg-[#ff7a29] text-white px-3 py-1.5 rounded-lg font-bold text-xs">
+                    <Check size={12} /> אשר מנוי
+                  </button>
+                  <button onClick={() => handleDismissRequest(req)} className="flex items-center gap-1 bg-[#2a292e] hover:bg-[#353439] text-white px-3 py-1.5 rounded-lg font-bold text-xs">
+                    <X size={12} /> התעלם
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {!loading && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
@@ -422,7 +489,8 @@ const SubscriptionsSection = ({ showSaved }) => {
 
       {showNewSubscriber && (
         <NewSubscriberModal
-          onClose={() => setShowNewSubscriber(false)}
+          initialValues={newSubscriberPrefill}
+          onClose={() => { setShowNewSubscriber(false); setNewSubscriberPrefill(null); }}
           onSubmit={handleCreateSubscriber}
         />
       )}

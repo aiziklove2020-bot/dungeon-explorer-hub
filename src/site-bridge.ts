@@ -10,7 +10,8 @@ import { getActiveParties, registerToPartyNew, createParty, getAllParties, getPa
 import { getMyPersonalAreaProfile, updateMyProfilePhoto } from "./firebase/users";
 import { collection, query, where, getDocsFromServer } from "firebase/firestore";
 import { db } from "./firebase/config";
-import { sendRegistrationTelegram, sendManualPartyAnnouncement } from "./firebase/telegram";
+import { sendRegistrationTelegram, sendManualPartyAnnouncement, sendSubscriptionRequestTelegram } from "./firebase/telegram";
+import { createSubscriptionRequest } from "./firebase/subscriptionRequests";
 import { getSocialLinks, getRssFeeds, getContent } from "./firebase/settings";
 import { registerForumUser, loginForumUser, getForumUserByPhone, updateForumUser, getForumUserById, getMyLinkedPhoneNumber, changeMyPassword } from "./firebase/forumUsers";
 import {
@@ -327,6 +328,21 @@ async function registerForParty(partyId: string, data: {
   return result;
 }
 
+/**
+ * Public "I want to be a subscriber" request — name + phone only, no
+ * account or subscription created here. Shows up in the admin's "ניהול
+ * מנויים" pending queue, and best-effort pings Telegram too.
+ */
+async function requestSubscription(fullName: string, phoneNumber: string, note = "") {
+  const result = await createSubscriptionRequest(fullName, phoneNumber, note);
+  try {
+    await sendSubscriptionRequestTelegram({ fullName, phoneNumber, note }, "he");
+  } catch (err) {
+    // best-effort only
+  }
+  return result;
+}
+
 /** Real advertiser party publishing — writes straight to the live parties collection. */
 /**
  * Upload a party image straight from the browser (phone gallery/camera or a
@@ -580,6 +596,7 @@ async function loadNewsFeed() {
   deleteAdvertiserParty,
   publishPartyToTelegram,
   registerForParty,
+  requestSubscription,
   toggleFavorite,
   loadMyFavorites,
   loadFavoriteAlerts,

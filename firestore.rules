@@ -88,6 +88,19 @@ service cloud.firestore {
       allow write: if true;
     }
 
+    // ── Subscription requests (public "I want to subscribe" form) ──────
+    // No PII beyond name + phone; admin reviews the queue in "ניהול מנויים".
+    match /subscriptionRequests/{docId} {
+      allow read: if true;
+      // TODO(auth): restrict to isAdmin().
+      allow create: if hasAll(['fullName', 'phoneNumber', 'status'])
+                    && isNonEmpty('fullName') && maxLen('fullName', 100)
+                    && isNonEmpty('phoneNumber') && maxLen('phoneNumber', 20)
+                    && request.resource.data.status == 'pending';
+      allow update: if affectedOnly(['status', 'resolvedAt']);
+      allow delete: if false;
+    }
+
     // ── Advertisers (self-signup, admin-approved) ──────────────────────
     match /advertisers/{docId} {
       // Contains a bcrypt password hash — do not expose broadly once

@@ -11,7 +11,8 @@ export const MESSAGE_KEYS = {
   BALANCE_PUBLISH: 'balancePublish',
   MATCH_NOTIFICATION: 'matchNotification',
   NEW_PARTY: 'newParty',
-  NEW_EXTERNAL_PARTY: 'newExternalParty'
+  NEW_EXTERNAL_PARTY: 'newExternalParty',
+  SUBSCRIPTION_REQUEST: 'subscriptionRequest'
 };
 
 /** Registration type keys for per-type templates */
@@ -116,7 +117,8 @@ export const VARIABLES_REFERENCE = {
   },
   [MESSAGE_KEYS.MATCH_NOTIFICATION]: ['party.name', 'party.date', 'party.time', 'matchedPerson.fullName', 'matchedPerson.userName', 'matchedPerson.phoneNumber', 'matchedPerson.telegramUsername', 'matchedPerson.registrationType'],
   [MESSAGE_KEYS.NEW_PARTY]: ['party.name', 'party.title', 'party.date', 'party.time', 'party.day', 'party.dj', 'party.maleLimit', 'party.femaleLimit', 'party.description', 'party.imageURL', 'siteUrl', 'registerUrl'],
-  [MESSAGE_KEYS.NEW_EXTERNAL_PARTY]: ['party.name', 'party.title', 'party.date', 'party.time', 'party.day', 'party.dj', 'party.description', 'party.imageURL', 'siteUrl', 'partyUrl']
+  [MESSAGE_KEYS.NEW_EXTERNAL_PARTY]: ['party.name', 'party.title', 'party.date', 'party.time', 'party.day', 'party.dj', 'party.description', 'party.imageURL', 'siteUrl', 'partyUrl'],
+  [MESSAGE_KEYS.SUBSCRIPTION_REQUEST]: ['request.fullName', 'request.phoneNumber', 'request.note']
 };
 
 /**
@@ -296,6 +298,9 @@ const SAMPLE_PAYLOADS = {
   [MESSAGE_KEYS.NEW_EXTERNAL_PARTY]: () => ({
     party: { name: 'אירוע חיצוני לדוגמה', title: 'אירוע חיצוני לדוגמה', date: new Date(), time: '22:00', day: 'שישי', dj: 'DJ דוגמה', description: 'אירוע מיוחד' },
     partyUrl: 'https://example.com/register'
+  }),
+  [MESSAGE_KEYS.SUBSCRIPTION_REQUEST]: () => ({
+    request: { fullName: 'דנה כהן', phoneNumber: '052-1234567', note: '' }
   })
 };
 
@@ -320,6 +325,16 @@ const formatNewExternalPartyNotification = (party, partyUrl, language = 'he') =>
   if (party?.dj) msg += `\n<b>${t('telegram.dj')}:</b> ${party.dj}`;
   if (party?.description) msg += `\n${party.description}`;
   if (partyUrl) msg += `\n\n<b>${t('telegram.partyUrl') || 'קישור לאירוע'}:</b> ${partyUrl}`;
+  return msg;
+};
+
+/** Default format when no template for subscription request notification */
+const formatSubscriptionRequestNotification = (request, language = 'he') => {
+  const t = (key) => getTranslation(key, language);
+  const name = request?.fullName || '';
+  const phone = request?.phoneNumber || '';
+  let msg = `⚖️ <b>${t('telegram.subscriptionRequest') || 'בקשת מנוי חדשה'}</b>\n\n<b>${t('telegram.name')}:</b> ${name}\n<b>${t('telegram.phone')}:</b> ${phone}`;
+  if (request?.note) msg += `\n\n${request.note}`;
   return msg;
 };
 
@@ -376,6 +391,9 @@ export const buildMessagePreview = (messageKey, template, siteUrl = '', language
   }
   if (messageKey === MESSAGE_KEYS.MATCH_NOTIFICATION) {
     return formatBalanceMatchNotification(sampleData.matchedPerson, sampleData.party, language);
+  }
+  if (messageKey === MESSAGE_KEYS.SUBSCRIPTION_REQUEST) {
+    return formatSubscriptionRequestNotification(sampleData.request, language);
   }
   return '(No template)';
 };
@@ -889,3 +907,27 @@ export const sendNewExternalPartyTelegram = async (party, language = 'he') => {
   }
 };
 
+
+/**
+ * Send a "new subscription request" notification — someone asked to become
+ * a subscriber (name + phone, no account created). Admin then manually
+ * creates the subscription via "ניהול מנויים" once contacted.
+ */
+export const sendSubscriptionRequestTelegram = async (request, language = 'he') => {
+  try {
+    const config = await getTelegramConfigForMessage(MESSAGE_KEYS.SUBSCRIPTION_REQUEST);
+    if (!config?.enabled || !config.botToken || !config.chatIds?.length) return false;
+    const text = config.template?.trim()
+      ? replacePlaceholders(config.template, { request })
+      : formatSubscriptionRequestNotification(request, language);
+    const parseMode = config.parseMode || 'HTML';
+    let ok = true;
+    for (const cid of config.chatIds) {
+      const sent = await sendTelegramNotification(text, config.botToken, cid, parseMode);
+      if (!sent) ok = false;
+    }
+    return ok;
+  } catch {
+    return false;
+  }
+};

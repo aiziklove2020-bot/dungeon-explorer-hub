@@ -20799,7 +20799,8 @@ var Tk, J, Ek, Dk, Ok, kk, Ak, jk, Mk, Nk, Pk, Fk, Ik, Lk, Rk, zk, Bk, Vk, Hk, U
 		NEW_STORE_ORDER: "newStoreOrder",
 		NEW_WORKSHOP: "newWorkshop",
 		NEW_WORKSHOP_REGISTRATION: "newWorkshopRegistration",
-		NEW_EXTERNAL_PARTY: "newExternalParty"
+		NEW_EXTERNAL_PARTY: "newExternalParty",
+		SUBSCRIPTION_REQUEST: "subscriptionRequest"
 	}, Ek = {
 		DEFAULT: "template",
 		SINGLE_MALE_BALANCE: "templateSingleMaleBalance",
@@ -35184,6 +35185,28 @@ async function WU(e, t) {
 	} catch {}
 	return i;
 }
+async function requestSubscription_(e, t, n = "") {
+	let r = String(e || "").trim(), i = String(t || "").trim();
+	if (!r || !i) throw Error("נא למלא שם וטלפון");
+	let a = E(T(H, "subscriptionRequests"));
+	await $u(a, {
+		fullName: r,
+		phoneNumber: i,
+		note: String(n || "").trim(),
+		status: "pending",
+		createdAt: N.now()
+	});
+	try {
+		let e = await Pk(J.SUBSCRIPTION_REQUEST);
+		if (e?.enabled && e.botToken && e.chatIds?.length) {
+			let t = e.template?.trim() ? Fk(e.template, {
+				request: { fullName: r, phoneNumber: i, note: n }
+			}) : `⚖️ <b>בקשת מנוי חדשה</b>\n\n<b>שם:</b> ${r}\n<b>טלפון:</b> ${i}` + (n ? `\n\n${n}` : ""), o = e.parseMode || "HTML";
+			for (let n of e.chatIds) await Xk(t, e.botToken, n, o);
+		}
+	} catch {}
+	return { id: a.id };
+}
 async function GU() {
 	return (await hN().catch(() => ({ enabled: !1 })))?.enabled ? {
 		enabled: !0,
@@ -35404,6 +35427,7 @@ window.LPData = {
 	deleteAdvertiserParty: $U,
 	publishPartyToTelegram: eW,
 	registerForParty: WU,
+	requestSubscription: requestSubscription_,
 	toggleFavorite: aW,
 	loadMyFavorites: oW,
 	loadFavoriteAlerts: sW,
