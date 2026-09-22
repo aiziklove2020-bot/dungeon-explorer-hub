@@ -156,13 +156,11 @@ document.addEventListener("DOMContentLoaded",()=>{
  * heart buttons into the page (see events.html / index.html card templates).
  */
 function lpFavIdentity() {
+  // Favorites are a member-only feature — only a real logged-in account
+  // (LP.current()) counts, not the phone-only personal-area lookup
+  // (my-area.html), which has no password and isn't a subscriber login.
   const user = LP.current();
-  if (user) return user.id;
-  try {
-    return localStorage.getItem("lp_my_area_phone") || null;
-  } catch {
-    return null;
-  }
+  return user ? user.id : null;
 }
 
 async function lpWireFavHearts(container) {
