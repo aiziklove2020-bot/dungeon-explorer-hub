@@ -156,7 +156,7 @@ const AdminsSection = ({ showSaved }) => {
               <select
                 value={selectedUserId}
                 onChange={(e) => handleUserSelection(e.target.value)}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
                 required
               >
                 <option value="">{t('admin.admins.selectUserPlaceholder')}</option>
@@ -186,7 +186,7 @@ const AdminsSection = ({ showSaved }) => {
                   setAdminPassword(e.target.value);
                   setAddAdminError('');
                 }}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
                 placeholder={t('admin.admins.passwordPlaceholder')}
                 autoComplete="new-password"
                 minLength={4}
@@ -277,7 +277,7 @@ const AdminsSection = ({ showSaved }) => {
                         onClick={() => handleToggleAdminActive(admin.id, admin.isActive)}
                         className={`px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 ${
                           admin.isActive
-                            ? 'bg-[#e11d48] hover:bg-[#be0037] text-white'
+                            ? 'bg-[#ff5708] hover:bg-[#ff7a29] text-white'
                             : 'bg-green-600 hover:bg-green-500 text-white'
                         }`}
                       >

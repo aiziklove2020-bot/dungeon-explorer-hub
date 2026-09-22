@@ -5,22 +5,17 @@ import home from './locales/he/home';
 import pages from './locales/he/pages';
 import auth from './locales/he/auth';
 import registration from './locales/he/registration';
-import workshops from './locales/he/workshops';
 import admin from './locales/he/admin';
-import adminStore from './locales/he/adminStore';
 import adminTelegram from './locales/he/adminTelegram';
 import telegram from './locales/he/telegram';
 import supportChat from './locales/he/supportChat';
-import store from './locales/he/store';
 import editor from './locales/he/editor';
-import forum from './locales/he/forum';
 import blog from './locales/he/blog';
 import profile from './locales/he/profile';
 import messaging from './locales/he/messaging';
 import pwa from './locales/he/pwa';
 import time from './locales/he/time';
 import webhookLogs from './locales/he/webhookLogs';
-import liveChat from './locales/he/liveChat';
 
 const locales = {
   common,
@@ -28,22 +23,17 @@ const locales = {
   pages,
   auth,
   registration,
-  workshops,
   admin,
-  adminStore,
   adminTelegram,
   telegram,
   supportChat,
-  store,
   editor,
-  forum,
   blog,
   profile,
   messaging,
   pwa,
   time,
   webhookLogs,
-  liveChat,
 };
 
 describe('i18n locale aggregation (he)', () => {
@@ -90,25 +80,18 @@ describe('getTranslation', () => {
     ['about.title', 'pages'],
     ['auth.login', 'auth'],
     ['registration.successTitle', 'registration'],
-    ['workshops.title', 'workshops'],
     ['admin.editParty', 'admin'],
     ['admin.gitHistory.missingViteSecret', 'admin'],
-    ['admin.store.products', 'adminStore'],
     ['admin.telegram.bots', 'adminTelegram'],
     ['telegram.newRegistration', 'telegram'],
     ['supportChat.title', 'supportChat'],
-    ['store.title', 'store'],
     ['editor.spoiler', 'editor'],
-    ['forum.title', 'forum'],
     ['blog.title', 'blog'],
     ['profile.title', 'profile'],
     ['pm.title', 'messaging'],
     ['pwa.installTitle', 'pwa'],
     ['time.now', 'time'],
     ['webhookLogs.title', 'webhookLogs'],
-    ['chat.title', 'liveChat'],
-    ['chat.privateRoomLimitHint', 'liveChat'],
-    ['chat.channelSettings', 'liveChat'],
   ];
   for (const [key, domain] of samples) {
     it(`resolves ${key} (${domain}) to a non-placeholder value`, () => {

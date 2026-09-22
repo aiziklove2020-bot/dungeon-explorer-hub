@@ -68,6 +68,7 @@ export const getMyPersonalAreaProfile = async (phoneNumber) => {
 
   return {
     userId: user.id,
+    name: user.name || '',
     photoUrl: user.photoUrl || '',
     hasActiveSubscription: active,
     subscriptionMessage: partiesSub.isActive

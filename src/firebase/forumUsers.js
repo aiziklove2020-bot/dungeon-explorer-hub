@@ -83,6 +83,8 @@ const lowerNickname = (raw) => normalizeNickname(raw).toLowerCase();
 const normalizeEmail = (raw) => String(raw || '').trim();
 const lowerEmail = (raw) => normalizeEmail(raw).toLowerCase();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const normalizePhone = (raw) => String(raw || '').replace(/\D/g, '');
+const PHONE_RE = /^05\d{8}$/;
 // Only Unicode letters (Hebrew/Latin/etc.), digits, underscore and hyphen.
 // Excludes spaces, punctuation, emoji, control characters — these break
 // mention parsing (`@nick`), URL routing, and admin search.
@@ -147,7 +149,22 @@ export const getForumUserByEmail = async (email) => {
   return stripPassword(await _getForumUserByEmailRaw(email));
 };
 
-export const registerForumUser = async (nickname, password, email) => {
+const _getForumUserByPhoneRaw = async (phone) => {
+  const clean = normalizePhone(phone);
+  if (!clean) return null;
+  const q = query(collection(db, COL), where('phone', '==', clean));
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  const d = snap.docs[0];
+  return { id: d.id, ...d.data() };
+};
+
+export const getForumUserByPhone = async (phone) => {
+  return stripPassword(await _getForumUserByPhoneRaw(phone));
+};
+
+/** phone is now the required login identifier; email stays optional (contact only). */
+export const registerForumUser = async (nickname, password, phone, email) => {
   if (!nickname?.trim() || !password) throw new Error('כינוי וסיסמה נדרשים');
   const clean = normalizeNickname(nickname);
   const cleanLower = clean.toLowerCase();
@@ -162,6 +179,11 @@ export const registerForumUser = async (nickname, password, email) => {
 
   const existing = await _getForumUserByNicknameRaw(clean);
   if (existing) throw new Error('הכינוי כבר תפוס, בחר כינוי אחר');
+
+  const cleanPhone = normalizePhone(phone);
+  if (!PHONE_RE.test(cleanPhone)) throw new Error('נא להזין מספר טלפון תקין (10 ספרות, מתחיל ב-05)');
+  const phoneExisting = await _getForumUserByPhoneRaw(cleanPhone);
+  if (phoneExisting) throw new Error('מספר הטלפון הזה כבר רשום');
 
   let cleanEmail = '';
   let cleanEmailLower = '';
@@ -179,8 +201,14 @@ export const registerForumUser = async (nickname, password, email) => {
     nickname: clean,
     nicknameLower: cleanLower,
     password: hashed,
+    phone: cleanPhone,
     role: 'user',
     isBlocked: false,
+    // New self-registrations wait for an admin to approve them before they
+    // can log in (see loginForumUser) — `isApproved === false` specifically,
+    // never a bare falsy/missing check, so every account that existed
+    // before this field was introduced keeps working exactly as before.
+    isApproved: false,
     linkedUserId: null,
     createdAt: Timestamp.now()
   };
@@ -200,6 +228,7 @@ export const loginForumUser = async (nickname, password) => {
   const match = await bcrypt.compare(password, user.password);
   if (!match) throw new Error('סיסמה שגויה');
   if (user.isBlocked) throw new Error('המשתמש חסום');
+  if (user.isApproved === false) throw new Error('החשבון שלך ממתין לאישור מנהל, תוכל/י להתחבר לאחר שיאושר');
   // Lazy backfill of `nicknameLower` for legacy accounts so subsequent
   // case-insensitive lookups land on the indexed query path.
   const expectedLower = (user.nickname || '').toLowerCase();
@@ -318,6 +347,19 @@ export const blockForumUser = async (id) => {
 
 export const unblockForumUser = async (id) => {
   await updateDoc(doc(db, COL, id), { isBlocked: false });
+  invalidateForumUserCache(id);
+};
+
+export const approveForumUser = async (id) => {
+  await updateDoc(doc(db, COL, id), { isApproved: true });
+  invalidateForumUserCache(id);
+};
+
+/** Explicitly flags an account (including a legacy one predating this field
+ *  entirely) as not approved — the admin's way to override the "no field =
+ *  grandfathered in" default for a specific account. */
+export const revokeForumUserApproval = async (id) => {
+  await updateDoc(doc(db, COL, id), { isApproved: false });
   invalidateForumUserCache(id);
 };
 

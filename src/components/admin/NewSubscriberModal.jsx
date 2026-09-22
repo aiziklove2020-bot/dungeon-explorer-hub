@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { PAYMENT_METHODS } from '../../firebase/crm';
 
@@ -43,7 +44,7 @@ const NewSubscriberModal = ({ onClose, onSubmit }) => {
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
         className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-2xl w-full max-w-md p-4 md:p-6"
@@ -65,7 +66,7 @@ const NewSubscriberModal = ({ onClose, onSubmit }) => {
                 type="text"
                 value={form.firstName}
                 onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
                 required
               />
             </div>
@@ -75,7 +76,7 @@ const NewSubscriberModal = ({ onClose, onSubmit }) => {
                 type="text"
                 value={form.lastName}
                 onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
               />
             </div>
           </div>
@@ -88,7 +89,7 @@ const NewSubscriberModal = ({ onClose, onSubmit }) => {
               onChange={handlePhoneChange}
               placeholder="05XXXXXXXX"
               maxLength="10"
-              className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+              className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
               required
             />
           </div>
@@ -98,7 +99,7 @@ const NewSubscriberModal = ({ onClose, onSubmit }) => {
             <select
               value={form.paymentMethod}
               onChange={(e) => setForm((f) => ({ ...f, paymentMethod: e.target.value }))}
-              className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+              className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
             >
               {PAYMENT_METHODS.map((m) => (
                 <option key={m} value={m}>{m}</option>
@@ -112,7 +113,7 @@ const NewSubscriberModal = ({ onClose, onSubmit }) => {
               type="date"
               value={form.expiryDate}
               onChange={(e) => setForm((f) => ({ ...f, expiryDate: e.target.value }))}
-              className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+              className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
               required
             />
           </div>
@@ -123,7 +124,7 @@ const NewSubscriberModal = ({ onClose, onSubmit }) => {
             <button
               type="submit"
               disabled={saving}
-              className="bg-[#e11d48] hover:bg-[#be0037] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold"
+              className="bg-[#ff5708] hover:bg-[#ff7a29] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold"
             >
               {saving ? 'יוצר...' : 'צור מנוי'}
             </button>
@@ -133,7 +134,8 @@ const NewSubscriberModal = ({ onClose, onSubmit }) => {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

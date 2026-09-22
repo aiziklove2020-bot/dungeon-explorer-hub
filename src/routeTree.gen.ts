@@ -11,23 +11,18 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TicketsRouteImport } from './routes/tickets'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ShopRouteImport } from './routes/shop'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ForumIndexRouteImport } from './routes/forum/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as AdvertiserIndexRouteImport } from './routes/advertiser/index'
 import { Route as ForumVerifyEmailRouteImport } from './routes/forum/verify-email'
 import { Route as ForumResetPasswordRouteImport } from './routes/forum/reset-password'
 import { Route as BlogPostIdRouteImport } from './routes/blog/$postId'
 import { Route as AdvertiserRegisterRouteImport } from './routes/advertiser/register'
-import { Route as ForumSectionIdIndexRouteImport } from './routes/forum/$sectionId/index'
-import { Route as ForumSectionIdTopicIdRouteImport } from './routes/forum/$sectionId/$topicId'
 
 const TicketsRoute = TicketsRouteImport.update({
   id: '/tickets',
@@ -37,11 +32,6 @@ const TicketsRoute = TicketsRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ShopRoute = ShopRouteImport.update({
-  id: '/shop',
-  path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -59,11 +49,6 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -77,11 +62,6 @@ const AboutRoute = AboutRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForumIndexRoute = ForumIndexRouteImport.update({
-  id: '/forum/',
-  path: '/forum/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogIndexRoute = BlogIndexRouteImport.update({
@@ -114,26 +94,14 @@ const AdvertiserRegisterRoute = AdvertiserRegisterRouteImport.update({
   path: '/advertiser/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForumSectionIdIndexRoute = ForumSectionIdIndexRouteImport.update({
-  id: '/forum/$sectionId/',
-  path: '/forum/$sectionId/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForumSectionIdTopicIdRoute = ForumSectionIdTopicIdRouteImport.update({
-  id: '/forum/$sectionId/$topicId',
-  path: '/forum/$sectionId/$topicId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/chat': typeof ChatRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
   '/advertiser/register': typeof AdvertiserRegisterRoute
@@ -142,19 +110,14 @@ export interface FileRoutesByFullPath {
   '/forum/verify-email': typeof ForumVerifyEmailRoute
   '/advertiser/': typeof AdvertiserIndexRoute
   '/blog/': typeof BlogIndexRoute
-  '/forum/': typeof ForumIndexRoute
-  '/forum/$sectionId/$topicId': typeof ForumSectionIdTopicIdRoute
-  '/forum/$sectionId/': typeof ForumSectionIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/chat': typeof ChatRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
   '/advertiser/register': typeof AdvertiserRegisterRoute
@@ -163,20 +126,15 @@ export interface FileRoutesByTo {
   '/forum/verify-email': typeof ForumVerifyEmailRoute
   '/advertiser': typeof AdvertiserIndexRoute
   '/blog': typeof BlogIndexRoute
-  '/forum': typeof ForumIndexRoute
-  '/forum/$sectionId/$topicId': typeof ForumSectionIdTopicIdRoute
-  '/forum/$sectionId': typeof ForumSectionIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/chat': typeof ChatRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
   '/advertiser/register': typeof AdvertiserRegisterRoute
@@ -185,9 +143,6 @@ export interface FileRoutesById {
   '/forum/verify-email': typeof ForumVerifyEmailRoute
   '/advertiser/': typeof AdvertiserIndexRoute
   '/blog/': typeof BlogIndexRoute
-  '/forum/': typeof ForumIndexRoute
-  '/forum/$sectionId/$topicId': typeof ForumSectionIdTopicIdRoute
-  '/forum/$sectionId/': typeof ForumSectionIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -195,11 +150,9 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
-    | '/chat'
     | '/contact'
     | '/login'
     | '/register'
-    | '/shop'
     | '/sitemap.xml'
     | '/tickets'
     | '/advertiser/register'
@@ -208,19 +161,14 @@ export interface FileRouteTypes {
     | '/forum/verify-email'
     | '/advertiser/'
     | '/blog/'
-    | '/forum/'
-    | '/forum/$sectionId/$topicId'
-    | '/forum/$sectionId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/admin'
-    | '/chat'
     | '/contact'
     | '/login'
     | '/register'
-    | '/shop'
     | '/sitemap.xml'
     | '/tickets'
     | '/advertiser/register'
@@ -229,19 +177,14 @@ export interface FileRouteTypes {
     | '/forum/verify-email'
     | '/advertiser'
     | '/blog'
-    | '/forum'
-    | '/forum/$sectionId/$topicId'
-    | '/forum/$sectionId'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/admin'
-    | '/chat'
     | '/contact'
     | '/login'
     | '/register'
-    | '/shop'
     | '/sitemap.xml'
     | '/tickets'
     | '/advertiser/register'
@@ -250,20 +193,15 @@ export interface FileRouteTypes {
     | '/forum/verify-email'
     | '/advertiser/'
     | '/blog/'
-    | '/forum/'
-    | '/forum/$sectionId/$topicId'
-    | '/forum/$sectionId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
-  ChatRoute: typeof ChatRoute
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
-  ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TicketsRoute: typeof TicketsRoute
   AdvertiserRegisterRoute: typeof AdvertiserRegisterRoute
@@ -272,9 +210,6 @@ export interface RootRouteChildren {
   ForumVerifyEmailRoute: typeof ForumVerifyEmailRoute
   AdvertiserIndexRoute: typeof AdvertiserIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
-  ForumIndexRoute: typeof ForumIndexRoute
-  ForumSectionIdTopicIdRoute: typeof ForumSectionIdTopicIdRoute
-  ForumSectionIdIndexRoute: typeof ForumSectionIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -291,13 +226,6 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/shop': {
-      id: '/shop'
-      path: '/shop'
-      fullPath: '/shop'
-      preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -321,13 +249,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -347,13 +268,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forum/': {
-      id: '/forum/'
-      path: '/forum'
-      fullPath: '/forum/'
-      preLoaderRoute: typeof ForumIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/': {
@@ -398,20 +312,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdvertiserRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forum/$sectionId/': {
-      id: '/forum/$sectionId/'
-      path: '/forum/$sectionId'
-      fullPath: '/forum/$sectionId/'
-      preLoaderRoute: typeof ForumSectionIdIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forum/$sectionId/$topicId': {
-      id: '/forum/$sectionId/$topicId'
-      path: '/forum/$sectionId/$topicId'
-      fullPath: '/forum/$sectionId/$topicId'
-      preLoaderRoute: typeof ForumSectionIdTopicIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -419,11 +319,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
-  ChatRoute: ChatRoute,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
-  ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TicketsRoute: TicketsRoute,
   AdvertiserRegisterRoute: AdvertiserRegisterRoute,
@@ -432,9 +330,6 @@ const rootRouteChildren: RootRouteChildren = {
   ForumVerifyEmailRoute: ForumVerifyEmailRoute,
   AdvertiserIndexRoute: AdvertiserIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
-  ForumIndexRoute: ForumIndexRoute,
-  ForumSectionIdTopicIdRoute: ForumSectionIdTopicIdRoute,
-  ForumSectionIdIndexRoute: ForumSectionIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

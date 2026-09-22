@@ -110,22 +110,28 @@ document.addEventListener("DOMContentLoaded",()=>{
     if (label) label.textContent = displayName;
     el.title = "מחובר/ת בתור " + displayName;
     el.classList.add("connected");
-    if (!el.nextElementSibling?.hasAttribute("data-logout")) {
-      const logoutBtn = document.createElement("button");
-      logoutBtn.type = "button";
-      logoutBtn.setAttribute("data-logout", "1");
-      logoutBtn.title = "התנתקות";
-      logoutBtn.className = "logout-btn";
-      logoutBtn.textContent = "⏻";
-      logoutBtn.addEventListener("click", e => {
+  });
+
+  // Logout lives inside the drawer (a scrollable list) instead of the fixed
+  // header, so the header's icon cluster never grows/shifts when a user logs
+  // in — every header icon keeps the same spot on every page.
+  if (c && drawer && !drawer.querySelector("[data-logout]")) {
+    const nav = drawer.querySelector("nav");
+    if (nav) {
+      const logoutLink = document.createElement("a");
+      logoutLink.href = "#";
+      logoutLink.setAttribute("data-logout", "1");
+      logoutLink.innerHTML = '<span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">logout</span></span><span class="dr-tx">התנתקות</span>';
+      logoutLink.addEventListener("click", e => {
         e.preventDefault();
+        close();
         localStorage.removeItem("lp_current");
         toast("התנתקת בהצלחה");
         setTimeout(() => location.href = "index.html", 500);
       });
-      el.insertAdjacentElement("afterend", logoutBtn);
+      nav.appendChild(logoutLink);
     }
-  });
+  }
 
   document.querySelectorAll("[data-fav]").forEach(btn=>{
     let id=btn.dataset.fav, favs=LP.favorites();
@@ -150,13 +156,11 @@ document.addEventListener("DOMContentLoaded",()=>{
  * heart buttons into the page (see events.html / index.html card templates).
  */
 function lpFavIdentity() {
+  // Favorites are a member-only feature — only a real logged-in account
+  // (LP.current()) counts, not the phone-only personal-area lookup
+  // (my-area.html), which has no password and isn't a subscriber login.
   const user = LP.current();
-  if (user) return user.id;
-  try {
-    return localStorage.getItem("lp_my_area_phone") || null;
-  } catch {
-    return null;
-  }
+  return user ? user.id : null;
 }
 
 async function lpWireFavHearts(container) {
@@ -165,6 +169,21 @@ async function lpWireFavHearts(container) {
   if (buttons.length === 0) return;
   const identity = lpFavIdentity();
   const iconOf = (btn) => btn.querySelector(".material-symbols-outlined") || btn;
+
+  // Favorites are a subscriber-only feature — a forum login alone isn't
+  // enough (see toggleFavorite in site-bridge.ts). Hide the hearts entirely
+  // for anyone who isn't an active subscriber, rather than showing them a
+  // button that will just error out on click.
+  let isSubscriber = false;
+  if (identity && window.LPData?.loadMyForumPersonalArea) {
+    const area = await window.LPData.loadMyForumPersonalArea(identity).catch(() => null);
+    isSubscriber = !!area?.profile?.hasActiveSubscription;
+  }
+  if (!isSubscriber) {
+    buttons.forEach((btn) => { btn.style.display = "none"; });
+    return;
+  }
+
   let myFavIds = [];
   if (identity && window.LPData?.loadMyFavorites) {
     myFavIds = await window.LPData.loadMyFavorites(identity).catch(() => []);
@@ -177,8 +196,8 @@ async function lpWireFavHearts(container) {
       ev.preventDefault();
       const current = lpFavIdentity();
       if (!current) {
-        toast("הזינו מספר טלפון באזור האישי כדי לשמור מועדפים");
-        setTimeout(() => (location.href = "/my-area"), 900);
+        toast("יש להתחבר כמנוי כדי לשמור מועדפים");
+        setTimeout(() => (location.href = "/login"), 900);
         return;
       }
       const nowFav = icon.textContent === "favorite";
@@ -189,7 +208,7 @@ async function lpWireFavHearts(container) {
         toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
       } catch (err) {
         icon.textContent = nowFav ? "favorite" : "favorite_border"; // revert
-        toast("שגיאה בשמירת מועדף", "error");
+        toast(err?.message || "שגיאה בשמירת מועדף", "error");
       }
     });
   });

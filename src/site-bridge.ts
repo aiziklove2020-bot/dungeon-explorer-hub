@@ -12,7 +12,7 @@ import { collection, query, where, getDocsFromServer } from "firebase/firestore"
 import { db } from "./firebase/config";
 import { sendRegistrationTelegram, sendManualPartyAnnouncement } from "./firebase/telegram";
 import { getSocialLinks, getRssFeeds, getContent } from "./firebase/settings";
-import { registerForumUser, loginForumUser, getForumUserByEmail, updateForumUser, getForumUserById, getMyLinkedPhoneNumber, changeMyPassword } from "./firebase/forumUsers";
+import { registerForumUser, loginForumUser, getForumUserByPhone, updateForumUser, getForumUserById, getMyLinkedPhoneNumber, changeMyPassword } from "./firebase/forumUsers";
 import {
   getSessionId,
   sendSupportMessage,
@@ -20,10 +20,8 @@ import {
   subscribeToSupportMessages,
   fetchSupportMessages,
 } from "./firebase/supportChat";
-import { getStoreSettings, getProducts, createOrder } from "./firebase/store";
 import { uploadPartyImage } from "./firebase/storage";
 import { registerAdvertiser, authenticateAdvertiser } from "./firebase/advertisers";
-import { ensureMainRoom, subscribeMessages, sendChatMessage, joinRoom } from "./firebase/liveChat";
 import { addFavorite, removeFavorite, getFavoritePartyIds } from "./firebase/favorites";
 
 /** "יום שישי" from any Firestore/JS date shape; "" when unparseable. */
@@ -211,21 +209,36 @@ function sanitizeNickname(name: string): string {
     .replace(/[^\p{L}\p{N}_-]/gu, "");
 }
 
-/** Real registration: creates a forum user (the site's actual account system). */
-async function register(name: string, email: string, password: string, gender?: string) {
+/** Real registration: creates a forum user (the site's actual account system). Phone is the login identifier. */
+async function register(name: string, phone: string, password: string, gender?: string) {
   const nickname = sanitizeNickname(name);
   if (nickname.length < 2) throw new Error("השם קצר מדי — נא להזין לפחות 2 תווים (אותיות/ספרות)");
-  const user = await registerForumUser(nickname, password, email);
+  const user = await registerForumUser(nickname, password, phone);
   if (gender) await updateForumUser(user.id, { gender }).catch(() => {});
-  return { id: user.id, name: user.nickname, email: user.email || email, gender: gender || null, role: "user" };
+  return { id: user.id, name: user.nickname, phone: (user as any).phone || phone, gender: gender || null, role: "user", isApproved: (user as any).isApproved !== false };
 }
 
-/** Real login: looks up the account by email, then verifies via the real password check. */
-async function login(email: string, password: string) {
-  const found = await getForumUserByEmail(email).catch(() => null);
-  if (!found) throw new Error("לא נמצא חשבון עם האימייל הזה");
+/** Real login: looks up the account by phone, then verifies via the real password check. */
+async function login(phone: string, password: string) {
+  const found = await getForumUserByPhone(phone).catch(() => null);
+  if (!found) throw new Error("לא נמצא חשבון עם מספר הטלפון הזה");
   const user = await loginForumUser(found.nickname, password);
-  return { id: user.id, name: user.nickname, email: user.email || email, gender: (found as any).gender || null, role: "user" };
+  return { id: user.id, name: user.nickname, phone: (user as any).phone || phone, gender: (found as any).gender || null, role: "user" };
+}
+
+/**
+ * Re-checks a stored session against the account's current state — login()
+ * only gates the moment of signing in, so a session already sitting in
+ * localStorage (profile.html trusts LP.current() as-is, no re-fetch) would
+ * otherwise stay "logged in" forever even after an admin revokes approval
+ * or blocks the account later. Call this once when a protected page loads.
+ */
+async function checkMyAccountStatus(userId: string) {
+  const user = await getForumUserById(userId).catch(() => null) as any;
+  if (!user) return { valid: false, reason: "החשבון לא נמצא" };
+  if (user.isBlocked) return { valid: false, reason: "החשבון שלך נחסם" };
+  if (user.isApproved === false) return { valid: false, reason: "החשבון שלך ממתין לאישור מנהל" };
+  return { valid: true, reason: "" };
 }
 
 /**
@@ -312,77 +325,6 @@ async function registerForParty(partyId: string, data: {
   }
 
   return result;
-}
-
-/** Real store — products/orders managed in the admin panel's "חנות" section. */
-async function loadStore() {
-  const settings = await getStoreSettings().catch(() => ({ enabled: false }));
-  if (!(settings as any)?.enabled) return { enabled: false, products: [] };
-  const products = await getProducts(true).catch(() => []);
-  return {
-    enabled: true,
-    products: (products || []).map((p: any) => ({
-      id: p.id,
-      name: p.name || "",
-      description: p.description || "",
-      price: p.price || 0,
-      priceOnRequest: !!p.priceOnRequest,
-      images: p.images || [],
-      stock: p.stock ?? 0,
-      recommended: !!p.recommended,
-    })),
-  };
-}
-
-async function createStoreOrder(data: {
-  productId: string;
-  productName: string;
-  price: number;
-  quantity: number;
-  customerName: string;
-  customerPhone: string;
-  customerTelegram?: string;
-  notes?: string;
-}) {
-  const totalPrice = data.price * data.quantity;
-  return createOrder({
-    customerName: data.customerName,
-    customerPhone: data.customerPhone,
-    customerTelegram: data.customerTelegram || "",
-    items: [{ productId: data.productId, productName: data.productName, quantity: data.quantity, price: data.price }],
-    totalPrice,
-    discountApplied: 0,
-    finalPrice: totalPrice,
-    userType: "store",
-    notes: data.notes || "",
-  });
-}
-
-/**
- * Real community chat (the same rooms-based live chat as the old site),
- * scoped to the single main room. Requires a logged-in forum account —
- * window.LP.current() (set by register()/login() above) supplies the
- * nickname sendChatMessage needs for attribution.
- */
-function communityChat() {
-  let roomIdPromise: Promise<string> | null = null;
-  const getRoomId = () => {
-    if (!roomIdPromise) roomIdPromise = ensureMainRoom().then((r: any) => r.id);
-    return roomIdPromise;
-  };
-  return {
-    subscribe: async (cb: (messages: any[]) => void) => {
-      const roomId = await getRoomId();
-      return subscribeMessages(roomId, cb);
-    },
-    send: async (text: string, currentUser: { id: string; name: string }) => {
-      if (!currentUser) throw new Error("יש להתחבר כדי לשלוח הודעות בצ'אט");
-      const roomId = await getRoomId();
-      const forumUser = { id: currentUser.id, nickname: currentUser.name };
-      await joinRoom(roomId, forumUser, null).catch(() => {});
-      return sendChatMessage(roomId, forumUser, null, text);
-    },
-  };
 }
 
 /** Real advertiser party publishing — writes straight to the live parties collection. */
@@ -519,10 +461,21 @@ async function shareMyBalancePhone(partyId: string, femalePhone: string, shared:
   await setBalanceMatchPhoneShared(partyId, femalePhone, shared);
 }
 
-/** Real per-account favorites (requires a logged-in forum user — see login()/register() above). */
+/**
+ * Real per-account favorites — requires a logged-in forum user AND an active
+ * subscription. A forum account alone (self-registered nickname+phone+password)
+ * isn't a subscriber; only adding is gated so an existing favorite can always
+ * be removed even after a subscription lapses.
+ */
 async function toggleFavorite(userId: string, partyId: string, isFavorite: boolean) {
   if (!userId) throw new Error("יש להתחבר כדי לשמור מועדפים");
   if (isFavorite) {
+    const forumUser = await getForumUserById(userId).catch(() => null) as any;
+    const phone = forumUser?.phone;
+    const profile = phone ? await getMyPersonalAreaProfile(phone).catch(() => null) : null;
+    if (!profile?.hasActiveSubscription) {
+      throw new Error("סימון מועדפים זמין רק למנויים");
+    }
     await addFavorite(userId, partyId);
   } else {
     await removeFavorite(userId, partyId);
@@ -612,13 +565,11 @@ async function loadNewsFeed() {
   loadAbout,
   loadContact,
   supportChat,
-  loadStore,
-  createStoreOrder,
-  communityChat,
   registerAdvertiserAccount,
   loginAdvertiser,
   register,
   login,
+  checkMyAccountStatus,
   getMembershipStatus,
   updateMyProfile,
   uploadImage,

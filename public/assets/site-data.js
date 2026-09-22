@@ -23547,6 +23547,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 		let n = pj(t, "parties"), r = pj(t, "exchangeParties"), i = Sj(t);
 		return {
 			userId: t.id,
+			name: t.name || "",
 			photoUrl: t.photoUrl || "",
 			hasActiveSubscription: i,
 			subscriptionMessage: n.isActive ? n.message : r.isActive ? r.message : n.message
@@ -24610,7 +24611,8 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				date: e.date,
 				image: e.imageURL || "",
 				registrationType: a.registrationType,
-				status: s
+				status: s,
+				userName: a.fullName || a.userName || ""
 			});
 		}
 		return i;
@@ -24701,7 +24703,7 @@ var HM = (e) => {
 		id: r.id,
 		...r.data()
 	};
-}, QM = async (e) => HM(await ZM(e)), $M = async (e, t, n) => {
+}, QM = async (e) => HM(await ZM(e)), normPhone_ = (e) => String(e || "").replace(/\D/g, ""), PHONE_RE_ = /^05\d{8}$/, getByPhoneRaw_ = async (e) => {	let t = normPhone_(e);	if (!t) return null;	let n = await k(D(T(H, PM), O("phone", "==", t)));	if (n.empty) return null;	let r = n.docs[0];	return { id: r.id, ...r.data() };}, getByPhone_ = async (e) => HM(await getByPhoneRaw_(e)), $M = async (e, t, n, ph) => {
 	if (!e?.trim() || !t) throw Error("כינוי וסיסמה נדרשים");
 	let r = UM(e), i = r.toLowerCase();
 	if (r.length < 2) throw Error("כינוי חייב להכיל לפחות 2 תווים");
@@ -24709,6 +24711,9 @@ var HM = (e) => {
 	if (YM.has(i)) throw Error("הכינוי הזה שמור — בחר כינוי אחר");
 	if (t.length < 4) throw Error("סיסמה חייבת להכיל לפחות 4 תווים");
 	if (await XM(r)) throw Error("הכינוי כבר תפוס, בחר כינוי אחר");
+	let cleanPhone_ = normPhone_(ph);
+	if (!PHONE_RE_.test(cleanPhone_)) throw Error("נא להזין מספר טלפון תקין (10 ספרות, מתחיל ב-05)");
+	if (await getByPhoneRaw_(cleanPhone_)) throw Error("מספר הטלפון הזה כבר רשום");
 	let a = "", o = "";
 	if (n && String(n).trim()) {
 		if (a = GM(n), o = a.toLowerCase(), !qM.test(o)) throw Error("כתובת אימייל לא תקינה");
@@ -24718,8 +24723,10 @@ var HM = (e) => {
 		nickname: r,
 		nicknameLower: i,
 		password: await ZA.hash(t, FM),
+		phone: cleanPhone_,
 		role: "user",
 		isBlocked: !1,
+		isApproved: !1,
 		linkedUserId: null,
 		createdAt: N.now()
 	};
@@ -24733,6 +24740,7 @@ var HM = (e) => {
 	if (!n) throw Error("כינוי לא נמצא");
 	if (!await ZA.compare(t, n.password)) throw Error("סיסמה שגויה");
 	if (n.isBlocked) throw Error("המשתמש חסום");
+	if (n.isApproved === !1) throw Error("החשבון שלך ממתין לאישור מנהל, תוכל/י להתחבר לאחר שיאושר");
 	let r = (n.nickname || "").toLowerCase();
 	if (r && n.nicknameLower !== r) try {
 		await A(E(H, PM, n.id), { nicknameLower: r }), n.nicknameLower = r, BM(n.id);
@@ -35105,23 +35113,24 @@ function zU(e) {
 async function BU(e, t, n, r) {
 	let i = zU(e);
 	if (i.length < 2) throw Error("השם קצר מדי — נא להזין לפחות 2 תווים (אותיות/ספרות)");
-	let a = await $M(i, n, t);
+	let a = await $M(i, n, void 0, t);
 	return r && await rN(a.id, { gender: r }).catch(() => {}), {
 		id: a.id,
 		name: a.nickname,
-		email: a.email || t,
+		phone: a.phone || t,
 		gender: r || null,
-		role: "user"
+		role: "user",
+		isApproved: a.isApproved !== !1
 	};
 }
 async function VU(e, t) {
-	let n = await QM(e).catch(() => null);
-	if (!n) throw Error("לא נמצא חשבון עם האימייל הזה");
+	let n = await getByPhone_(e).catch(() => null);
+	if (!n) throw Error("לא נמצא חשבון עם מספר הטלפון הזה");
 	let r = await eN(n.nickname, t);
 	return {
 		id: r.id,
 		name: r.nickname,
-		email: r.email || e,
+		phone: r.phone || e,
 		gender: n.gender || null,
 		role: "user"
 	};
@@ -35131,6 +35140,13 @@ async function HU(e, t) {
 		phone: t.phone || "",
 		bio: t.bio || ""
 	});
+}
+async function checkMyAccountStatus_(e) {
+	let t = await tN(e).catch(() => null);
+	if (!t) return { valid: !1, reason: "החשבון לא נמצא" };
+	if (t.isBlocked) return { valid: !1, reason: "החשבון שלך נחסם" };
+	if (t.isApproved === !1) return { valid: !1, reason: "החשבון שלך ממתין לאישור מנהל" };
+	return { valid: !0, reason: "" };
 }
 async function UU(e, t) {
 	if (t === "female") return {
@@ -35306,7 +35322,11 @@ async function iW(e, t, n) {
 }
 async function aW(e, t, n) {
 	if (!e) throw Error("יש להתחבר כדי לשמור מועדפים");
-	n ? await SU(e, t) : await CU(e, t);
+	if (n) {
+		let r = await tN(e).catch(() => null), i = r?.phone, a = i ? await Oj(i).catch(() => null) : null;
+		if (!a?.hasActiveSubscription) throw Error("סימון מועדפים זמין רק למנויים");
+		await SU(e, t);
+	} else await CU(e, t);
 }
 async function oW(e) {
 	return e ? wU(e).catch(() => []) : [];
@@ -35373,6 +35393,7 @@ window.LPData = {
 	loginAdvertiser: nW,
 	register: BU,
 	login: VU,
+	checkMyAccountStatus: checkMyAccountStatus_,
 	getMembershipStatus: UU,
 	updateMyProfile: HU,
 	uploadImage: JU,
@@ -35396,7 +35417,7 @@ window.LPData = {
 function pW() {
 	if (document.getElementById("lpSupportChat")) return;
 	let e = document.createElement("div");
-	e.id = "lpSupportChat", e.innerHTML = "\n    <button id=\"lpSupportChatToggle\" aria-label=\"תמיכה\" style=\"position:fixed;left:16px;bottom:86px;z-index:300;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#e11d48,#be0037);border:0;color:#fff;box-shadow:0 10px 30px rgba(225,29,72,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s\" onmouseover=\"this.style.transform='scale(1.06)'\" onmouseout=\"this.style.transform='scale(1)'\">\n      <span class=\"material-symbols-outlined\" style=\"font-size:26px\">chat_bubble</span>\n    </button>\n    <div id=\"lpSupportChatPanel\" style=\"display:none;position:fixed;left:16px;bottom:150px;z-index:300;width:min(360px,calc(100vw - 32px));max-height:65vh;background:rgba(19,19,23,.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.55);overflow:hidden;flex-direction:column;font-family:'Inter',Arial,sans-serif\">\n      <div style=\"padding:14px 16px;background:linear-gradient(135deg,#e11d48,#be0037);display:flex;justify-content:space-between;align-items:center\">\n        <div style=\"display:flex;gap:10px;align-items:center\">\n          <div style=\"width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center\">\n            <span class=\"material-symbols-outlined\" style=\"font-size:19px;color:#fff\">support_agent</span>\n          </div>\n          <div>\n            <b style=\"font-size:15px;display:block;color:#fff\">צ'אט תמיכה</b>\n            <small style=\"font-size:11px;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:4px\"><span style=\"width:6px;height:6px;border-radius:50%;background:#35c76f;display:inline-block\"></span>מגיב בהקדם</small>\n          </div>\n        </div>\n        <div style=\"display:flex;gap:6px;align-items:center\">\n          <button id=\"lpSupportChatMin\" title=\"מזעור\" style=\"background:rgba(255,255,255,.16);border:0;color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center\"><span class=\"material-symbols-outlined\" style=\"font-size:17px\">remove</span></button>\n          <button id=\"lpSupportChatClose\" title=\"סגירה\" style=\"background:rgba(255,255,255,.16);border:0;color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center\"><span class=\"material-symbols-outlined\" style=\"font-size:17px\">close</span></button>\n        </div>\n      </div>\n\n      <div id=\"lpSupportChatGate\" style=\"padding:26px 20px;text-align:center\">\n        <div style=\"width:48px;height:48px;border-radius:50%;background:rgba(225,29,72,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 14px\">\n          <span class=\"material-symbols-outlined\" style=\"font-size:24px;color:#e11d48\">waving_hand</span>\n        </div>\n        <p style=\"margin:0 0 14px;font-size:14px;color:#e4e1e7\">הזן את שמך כדי להתחיל את הצ'אט</p>\n        <input id=\"lpSupportChatName\" placeholder=\"שם\" style=\"width:100%;box-sizing:border-box;text-align:center;margin-bottom:14px;background:#1f1f23;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;padding:12px;font-size:14px;outline:none\">\n        <button id=\"lpSupportChatStart\" style=\"width:100%;border:0;border-radius:12px;background:linear-gradient(135deg,#e11d48,#be0037);color:#fff;font-weight:700;padding:12px;cursor:pointer;font-size:14px\">התחל צ'אט</button>\n      </div>\n\n      <div id=\"lpSupportChatBody\" style=\"display:none;flex-direction:column;flex:1;min-height:0\">\n        <div id=\"lpSupportChatMsgs\" class=\"chat-window\" style=\"flex:1;overflow-y:auto;padding:12px;min-height:160px\"></div>\n        <div style=\"display:flex;gap:8px;padding:10px 12px;align-items:center\">\n          <input id=\"lpSupportChatInput\" placeholder=\"כתבו הודעה...\" style=\"flex:1;background:#1f1f23;border:1px solid rgba(255,255,255,.1);border-radius:999px;color:#fff;padding:10px 16px;font-size:14px;outline:none\">\n          <button id=\"lpSupportChatSend\" aria-label=\"שליחה\" style=\"flex-shrink:0;width:40px;height:40px;border-radius:50%;border:0;background:linear-gradient(135deg,#e11d48,#be0037);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center\">\n            <span class=\"material-symbols-outlined\" style=\"font-size:19px;transform:scaleX(-1)\">send</span>\n          </button>\n        </div>\n      </div>\n    </div>\n  ", document.body.appendChild(e);
+	e.id = "lpSupportChat", e.innerHTML = "\n    <button id=\"lpSupportChatToggle\" aria-label=\"תמיכה\" style=\"position:fixed;left:16px;bottom:86px;z-index:300;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#ff5708,#ff7a29);border:0;color:#fff;box-shadow:0 10px 30px rgba(255, 87, 8,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s\" onmouseover=\"this.style.transform='scale(1.06)'\" onmouseout=\"this.style.transform='scale(1)'\">\n      <span class=\"material-symbols-outlined\" style=\"font-size:26px\">chat_bubble</span>\n    </button>\n    <div id=\"lpSupportChatPanel\" style=\"display:none;position:fixed;left:16px;bottom:150px;z-index:300;width:min(360px,calc(100vw - 32px));max-height:65vh;background:rgba(19,19,23,.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.55);overflow:hidden;flex-direction:column;font-family:'Inter',Arial,sans-serif\">\n      <div style=\"padding:14px 16px;background:linear-gradient(135deg,#ff5708,#ff7a29);display:flex;justify-content:space-between;align-items:center\">\n        <div style=\"display:flex;gap:10px;align-items:center\">\n          <div style=\"width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center\">\n            <span class=\"material-symbols-outlined\" style=\"font-size:19px;color:#fff\">support_agent</span>\n          </div>\n          <div>\n            <b style=\"font-size:15px;display:block;color:#fff\">צ'אט תמיכה</b>\n            <small style=\"font-size:11px;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:4px\"><span style=\"width:6px;height:6px;border-radius:50%;background:#35c76f;display:inline-block\"></span>מגיב בהקדם</small>\n          </div>\n        </div>\n        <div style=\"display:flex;gap:6px;align-items:center\">\n          <button id=\"lpSupportChatMin\" title=\"מזעור\" style=\"background:rgba(255,255,255,.16);border:0;color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center\"><span class=\"material-symbols-outlined\" style=\"font-size:17px\">remove</span></button>\n          <button id=\"lpSupportChatClose\" title=\"סגירה\" style=\"background:rgba(255,255,255,.16);border:0;color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center\"><span class=\"material-symbols-outlined\" style=\"font-size:17px\">close</span></button>\n        </div>\n      </div>\n\n      <div id=\"lpSupportChatGate\" style=\"padding:26px 20px;text-align:center\">\n        <div style=\"width:48px;height:48px;border-radius:50%;background:rgba(255, 87, 8,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 14px\">\n          <span class=\"material-symbols-outlined\" style=\"font-size:24px;color:#ff5708\">waving_hand</span>\n        </div>\n        <p style=\"margin:0 0 14px;font-size:14px;color:#e4e1e7\">הזן את שמך כדי להתחיל את הצ'אט</p>\n        <input id=\"lpSupportChatName\" placeholder=\"שם\" style=\"width:100%;box-sizing:border-box;text-align:center;margin-bottom:14px;background:#1f1f23;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;padding:12px;font-size:14px;outline:none\">\n        <button id=\"lpSupportChatStart\" style=\"width:100%;border:0;border-radius:12px;background:linear-gradient(135deg,#ff5708,#ff7a29);color:#fff;font-weight:700;padding:12px;cursor:pointer;font-size:14px\">התחל צ'אט</button>\n      </div>\n\n      <div id=\"lpSupportChatBody\" style=\"display:none;flex-direction:column;flex:1;min-height:0\">\n        <div id=\"lpSupportChatMsgs\" class=\"chat-window\" style=\"flex:1;overflow-y:auto;padding:12px;min-height:160px\"></div>\n        <div style=\"display:flex;gap:8px;padding:10px 12px;align-items:center\">\n          <input id=\"lpSupportChatInput\" placeholder=\"כתבו הודעה...\" style=\"flex:1;background:#1f1f23;border:1px solid rgba(255,255,255,.1);border-radius:999px;color:#fff;padding:10px 16px;font-size:14px;outline:none\">\n          <button id=\"lpSupportChatSend\" aria-label=\"שליחה\" style=\"flex-shrink:0;width:40px;height:40px;border-radius:50%;border:0;background:linear-gradient(135deg,#ff5708,#ff7a29);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center\">\n            <span class=\"material-symbols-outlined\" style=\"font-size:19px;transform:scaleX(-1)\">send</span>\n          </button>\n        </div>\n      </div>\n    </div>\n  ", document.body.appendChild(e);
 	let t = e.querySelector("#lpSupportChatPanel"), n = e.querySelector("#lpSupportChatToggle"), r = e.querySelector("#lpSupportChatClose"), i = e.querySelector("#lpSupportChatMin"), a = e.querySelector("#lpSupportChatGate"), o = e.querySelector("#lpSupportChatName"), s = e.querySelector("#lpSupportChatStart"), c = e.querySelector("#lpSupportChatBody"), l = e.querySelector("#lpSupportChatMsgs"), u = e.querySelector("#lpSupportChatInput"), d = e.querySelector("#lpSupportChatSend"), f = LU(), p = !1, m = () => localStorage.getItem("lp_support_chat_name") || "", h = (e) => localStorage.setItem("lp_support_chat_name", e), g = () => window.LP?.current?.()?.name || m() || "אורח/ת", ee = (e) => {
 		l.innerHTML = e.map((e) => {
 			let t = e.role === "user", n = e.createdAt instanceof Date ? e.createdAt.toLocaleTimeString("he-IL", {

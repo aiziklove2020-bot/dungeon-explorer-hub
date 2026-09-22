@@ -13,8 +13,8 @@ import { logWarn } from '../utils/logger';
  * which is called by `ForumAuthProvider` after a successful forum login or
  * register, and cleared via `clearSiteUser` on forum logout.
  *
- * Downstream consumers (workshops auto-fill, store checkout pre-fill, party
- * `users` lookups, chat permissions) keep using the same `useSiteAuth()` hook
+ * Downstream consumers (party registration auto-fill, `users` lookups) keep
+ * using the same `useSiteAuth()` hook
  * and `siteUser` shape, so the migration is transparent for them. Forum-only
  * users (no linked phone profile) simply see no `siteUser` and fall back to
  * guest flows where applicable.
@@ -66,8 +66,8 @@ export function SiteAuthProvider({ children }) {
 
   /**
    * Mirror a forum user's linked party-registration into the site session so
-   * downstream surfaces (workshops, store, ChatRoomView's `siteUser` arg) see
-   * a populated profile without each one re-fetching `users/{linkedUserId}`.
+   * downstream surfaces see a populated profile without each one re-fetching
+   * `users/{linkedUserId}`.
    * Returns the stored snapshot (or null when there is no usable link).
    */
   const syncSiteUserFromLinkedUserId = useCallback(async (linkedUserId) => {

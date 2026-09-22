@@ -192,7 +192,7 @@ const DBLoggerSection = () => {
           </button>
           <button
             onClick={handleClear}
-            className="bg-[#e11d48] hover:bg-[#be0037] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+            className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
           >
             <Trash2 size={16} />
             נקה הכל

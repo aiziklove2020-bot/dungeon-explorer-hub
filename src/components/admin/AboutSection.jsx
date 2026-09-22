@@ -33,7 +33,7 @@ const AboutSection = ({ showSaved }) => {
               alert(t('admin.errorSaving'));
             }
           }}
-          className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 md:px-6 py-2 rounded-xl font-bold flex items-center gap-2 text-sm md:text-base w-full sm:w-auto justify-center"
+          className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 md:px-6 py-2 rounded-xl font-bold flex items-center gap-2 text-sm md:text-base w-full sm:w-auto justify-center"
         >
           <Save size={16} className="md:w-[18px] md:h-[18px]" /> {t('save')}
         </button>
@@ -46,7 +46,7 @@ const AboutSection = ({ showSaved }) => {
             type="text"
             value={aboutData.roleTitle}
             onChange={e => setAboutData({...aboutData, roleTitle: e.target.value})}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
         </div>
         <div className="space-y-1 text-right">
@@ -55,7 +55,7 @@ const AboutSection = ({ showSaved }) => {
             value={aboutData.roleText}
             onChange={e => setAboutData({...aboutData, roleText: e.target.value})}
             rows={4}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
         </div>
         <div className="space-y-1 text-right">
@@ -64,7 +64,7 @@ const AboutSection = ({ showSaved }) => {
             value={aboutData.roleSubtext}
             onChange={e => setAboutData({...aboutData, roleSubtext: e.target.value})}
             rows={3}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
         </div>
       </div>
@@ -81,7 +81,7 @@ const AboutSection = ({ showSaved }) => {
                 newCards[index] = { ...card, title: e.target.value };
                 setAboutData({...aboutData, infoCards: newCards});
               }}
-              className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right font-bold"
+              className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#ff5708] outline-none text-white text-right font-bold"
               placeholder={t('admin.title')}
             />
             <textarea
@@ -92,7 +92,7 @@ const AboutSection = ({ showSaved }) => {
                 setAboutData({...aboutData, infoCards: newCards});
               }}
               rows={3}
-              className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
+              className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#ff5708] outline-none text-white text-right"
               placeholder={t('admin.text')}
             />
           </div>
@@ -112,7 +112,7 @@ const AboutSection = ({ showSaved }) => {
                   newSteps[index] = { ...step, n: parseInt(e.target.value) };
                   setAboutData({...aboutData, steps: newSteps});
                 }}
-                className="w-16 bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-center font-bold"
+                className="w-16 bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#ff5708] outline-none text-white text-center font-bold"
               />
               <input
                 type="text"
@@ -122,7 +122,7 @@ const AboutSection = ({ showSaved }) => {
                   newSteps[index] = { ...step, t: e.target.value };
                   setAboutData({...aboutData, steps: newSteps});
                 }}
-                className="flex-1 bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right font-bold"
+                className="flex-1 bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#ff5708] outline-none text-white text-right font-bold"
                 placeholder={t('admin.title')}
               />
             </div>
@@ -134,7 +134,7 @@ const AboutSection = ({ showSaved }) => {
                 setAboutData({...aboutData, steps: newSteps});
               }}
               rows={2}
-              className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
+              className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 rounded-lg focus:border-[#ff5708] outline-none text-white text-right"
               placeholder={t('admin.description')}
             />
           </div>
@@ -145,7 +145,7 @@ const AboutSection = ({ showSaved }) => {
             type="text"
             value={aboutData.entryNote}
             onChange={e => setAboutData({...aboutData, entryNote: e.target.value})}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
         </div>
       </div>

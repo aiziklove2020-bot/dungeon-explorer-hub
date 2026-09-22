@@ -11,10 +11,6 @@ export const MESSAGE_KEYS = {
   BALANCE_PUBLISH: 'balancePublish',
   MATCH_NOTIFICATION: 'matchNotification',
   NEW_PARTY: 'newParty',
-  NEW_STORE_ITEM: 'newStoreItem',
-  NEW_STORE_ORDER: 'newStoreOrder',
-  NEW_WORKSHOP: 'newWorkshop',
-  NEW_WORKSHOP_REGISTRATION: 'newWorkshopRegistration',
   NEW_EXTERNAL_PARTY: 'newExternalParty'
 };
 
@@ -120,10 +116,6 @@ export const VARIABLES_REFERENCE = {
   },
   [MESSAGE_KEYS.MATCH_NOTIFICATION]: ['party.name', 'party.date', 'party.time', 'matchedPerson.fullName', 'matchedPerson.userName', 'matchedPerson.phoneNumber', 'matchedPerson.telegramUsername', 'matchedPerson.registrationType'],
   [MESSAGE_KEYS.NEW_PARTY]: ['party.name', 'party.title', 'party.date', 'party.time', 'party.day', 'party.dj', 'party.maleLimit', 'party.femaleLimit', 'party.description', 'party.imageURL', 'siteUrl', 'registerUrl'],
-  [MESSAGE_KEYS.NEW_STORE_ITEM]: ['item.name', 'item.description', 'item.price', 'item.id', 'item.stock', 'item.imageURL'],
-  [MESSAGE_KEYS.NEW_STORE_ORDER]: ['order.id', 'order.customerName', 'order.customerPhone', 'order.customerTelegram', 'order.finalPrice', 'order.itemsSummary', 'order.userType'],
-  [MESSAGE_KEYS.NEW_WORKSHOP]: ['workshop.title', 'workshop.description', 'workshop.instructor', 'workshop.price', 'workshop.date', 'workshop.duration', 'workshop.maxParticipants', 'workshop.imageUrl', 'siteUrl'],
-  [MESSAGE_KEYS.NEW_WORKSHOP_REGISTRATION]: ['workshop.title', 'workshop.instructor', 'workshop.date', 'workshop.duration', 'registration.userName', 'registration.phoneNumber', 'registration.registeredAt'],
   [MESSAGE_KEYS.NEW_EXTERNAL_PARTY]: ['party.name', 'party.title', 'party.date', 'party.time', 'party.day', 'party.dj', 'party.description', 'party.imageURL', 'siteUrl', 'partyUrl']
 };
 
@@ -301,27 +293,6 @@ const SAMPLE_PAYLOADS = {
   [MESSAGE_KEYS.NEW_PARTY]: () => ({
     party: { name: 'מסיבת דוגמה', title: 'מסיבת דוגמה', date: new Date(), time: '22:00', day: 'שישי', dj: 'DJ דוגמה', maleLimit: 10, femaleLimit: 10, description: 'ערב פתיחה' }
   }),
-  [MESSAGE_KEYS.NEW_STORE_ITEM]: () => ({
-    item: { name: 'חולצה שחורה', description: 'חולצה איכותית', price: 99, id: 'item1', stock: 20 }
-  }),
-  [MESSAGE_KEYS.NEW_STORE_ORDER]: () => ({
-    order: {
-      id: 'ord1',
-      customerName: 'דנה לוי',
-      customerPhone: '052-1234567',
-      customerTelegram: '@dana',
-      finalPrice: 198,
-      itemsSummary: 'חולצה שחורה x2',
-      userType: 'registered'
-    }
-  }),
-  [MESSAGE_KEYS.NEW_WORKSHOP]: () => ({
-    workshop: { title: 'סדנת דוגמה', description: 'תיאור הסדנא לדוגמה', instructor: 'מנחה דוגמה', price: 150, date: new Date(), duration: '3 שעות', maxParticipants: 20 }
-  }),
-  [MESSAGE_KEYS.NEW_WORKSHOP_REGISTRATION]: () => ({
-    workshop: { title: 'סדנת דוגמה', instructor: 'מנחה דוגמה', date: new Date(), duration: '3 שעות' },
-    registration: { userName: 'דנה לוי', phoneNumber: '052-1234567', registeredAt: new Date().toISOString() }
-  }),
   [MESSAGE_KEYS.NEW_EXTERNAL_PARTY]: () => ({
     party: { name: 'אירוע חיצוני לדוגמה', title: 'אירוע חיצוני לדוגמה', date: new Date(), time: '22:00', day: 'שישי', dj: 'DJ דוגמה', description: 'אירוע מיוחד' },
     partyUrl: 'https://example.com/register'
@@ -349,60 +320,6 @@ const formatNewExternalPartyNotification = (party, partyUrl, language = 'he') =>
   if (party?.dj) msg += `\n<b>${t('telegram.dj')}:</b> ${party.dj}`;
   if (party?.description) msg += `\n${party.description}`;
   if (partyUrl) msg += `\n\n<b>${t('telegram.partyUrl') || 'קישור לאירוע'}:</b> ${partyUrl}`;
-  return msg;
-};
-
-/** Default format when no template for new store item */
-const formatNewStoreItemNotification = (item, language = 'he') => {
-  const t = (key) => getTranslation(key, language);
-  const name = item?.name || '';
-  const price = item?.price != null ? (language === 'he' ? `₪${item.price}` : `${item.price} NIS`) : '';
-  return `🆕 <b>${t('telegram.newStoreItem') || 'פריט חדש בחנות'}</b>\n\n<b>${t('telegram.name')}:</b> ${name}${price ? `\n<b>${t('telegram.price')}:</b> ${price}` : ''}${item?.description ? `\n${item.description}` : ''}`;
-};
-
-/** Default format when no template for new store order */
-const formatNewStoreOrderNotification = (order, language = 'he') => {
-  const t = (key) => getTranslation(key, language);
-  const name = order?.customerName || '';
-  const phone = order?.customerPhone || '';
-  const telegram = order?.customerTelegram ? `@${String(order.customerTelegram).replace(/^@+/, '')}` : '';
-  const total = order?.finalPrice != null ? (language === 'he' ? `₪${order.finalPrice}` : `${order.finalPrice} NIS`) : '';
-  const summary = order?.itemsSummary || '';
-  return `🛒 <b>${t('telegram.newStoreOrder') || 'הזמנה חדשה מהחנות'}</b>\n\n<b>${t('telegram.name')}:</b> ${name}\n<b>${t('telegram.phone')}:</b> ${phone}${telegram ? `\n<b>${t('telegram.telegram')}:</b> ${telegram}` : ''}${total ? `\n<b>${t('telegram.total')}:</b> ${total}` : ''}${summary ? `\n${summary}` : ''}`;
-};
-
-/** Default format when no template for new workshop */
-const formatNewWorkshopNotification = (workshop, language = 'he') => {
-  const t = (key) => getTranslation(key, language);
-  const title = workshop?.title || '';
-  const dateVal = workshop?.date && (workshop.date?.toDate ? workshop.date.toDate() : new Date(workshop.date));
-  const dateStr = dateVal && !isNaN(dateVal.getTime()) ? dateVal.toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : '';
-  const instructor = workshop?.instructor || '';
-  const duration = workshop?.duration || '';
-  const price = workshop?.price != null ? (language === 'he' ? `₪${workshop.price}` : `${workshop.price} NIS`) : '';
-  const max = workshop?.maxParticipants != null ? String(workshop.maxParticipants) : '';
-  let msg = `📚 <b>${t('telegram.newWorkshop') || 'נפתחה סדנא חדשה'}</b>\n\n<b>${t('telegram.workshopTitle') || 'סדנא'}:</b> ${title}`;
-  if (dateStr) msg += `\n<b>${t('telegram.date')}:</b> ${dateStr}`;
-  if (instructor) msg += `\n<b>${t('telegram.workshopInstructor') || 'מדריך/ה'}:</b> ${instructor}`;
-  if (duration) msg += `\n<b>${t('telegram.workshopDuration') || 'משך'}:</b> ${duration}`;
-  if (price) msg += `\n<b>${t('telegram.price')}:</b> ${price}`;
-  if (max) msg += `\n<b>${t('telegram.workshopMaxParticipants') || 'מקומות'}:</b> ${max}`;
-  const description = workshop?.description || '';
-  if (description) msg += `\n\n${description}`;
-  return msg;
-};
-
-/** Default format when no template for new workshop registration */
-const formatNewWorkshopRegistrationNotification = (workshop, registration, language = 'he') => {
-  const t = (key) => getTranslation(key, language);
-  const title = workshop?.title || '';
-  const dateVal = workshop?.date && (workshop.date?.toDate ? workshop.date.toDate() : new Date(workshop.date));
-  const dateStr = dateVal && !isNaN(dateVal.getTime()) ? dateVal.toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
-  const name = registration?.userName || '';
-  const phone = registration?.phoneNumber || '';
-  let msg = `📝 <b>${t('telegram.newWorkshopRegistration') || 'רישום חדש לסדנא'}</b>\n\n<b>${t('telegram.workshopTitle') || 'סדנא'}:</b> ${title}`;
-  if (dateStr) msg += `\n<b>${t('telegram.date')}:</b> ${dateStr}`;
-  msg += `\n<b>${t('telegram.name')}:</b> ${name}\n<b>${t('telegram.phone')}:</b> ${phone}`;
   return msg;
 };
 
@@ -440,28 +357,6 @@ export const buildMessagePreview = (messageKey, template, siteUrl = '', language
       return replacePlaceholders(tpl, { party: partyForTemplate, siteUrl: previewSiteUrl, registerUrl: previewSiteUrl });
     }
     return formatNewPartyNotification(sampleData.party, language, siteUrl || SITE_URL);
-  }
-  if (messageKey === MESSAGE_KEYS.NEW_STORE_ITEM) {
-    const sampleData = SAMPLE_PAYLOADS[MESSAGE_KEYS.NEW_STORE_ITEM]();
-    if (tpl && String(tpl).trim()) return replacePlaceholders(tpl, sampleData);
-    return formatNewStoreItemNotification(sampleData.item, language);
-  }
-  if (messageKey === MESSAGE_KEYS.NEW_STORE_ORDER) {
-    const sampleData = SAMPLE_PAYLOADS[MESSAGE_KEYS.NEW_STORE_ORDER]();
-    if (tpl && String(tpl).trim()) return replacePlaceholders(tpl, sampleData);
-    return formatNewStoreOrderNotification(sampleData.order, language);
-  }
-  if (messageKey === MESSAGE_KEYS.NEW_WORKSHOP) {
-    const sampleData = SAMPLE_PAYLOADS[MESSAGE_KEYS.NEW_WORKSHOP]();
-    const workshopForTemplate = { ...sampleData.workshop, date: formatDateOnly(sampleData.workshop?.date, language) };
-    if (tpl && String(tpl).trim()) return replacePlaceholders(tpl, { workshop: workshopForTemplate, siteUrl: siteUrl || 'https://example.com' });
-    return formatNewWorkshopNotification(sampleData.workshop, language);
-  }
-  if (messageKey === MESSAGE_KEYS.NEW_WORKSHOP_REGISTRATION) {
-    const sampleData = SAMPLE_PAYLOADS[MESSAGE_KEYS.NEW_WORKSHOP_REGISTRATION]();
-    const workshopForTemplate = { ...sampleData.workshop, date: formatDateOnly(sampleData.workshop?.date, language) };
-    if (tpl && String(tpl).trim()) return replacePlaceholders(tpl, { workshop: workshopForTemplate, registration: sampleData.registration });
-    return formatNewWorkshopRegistrationNotification(sampleData.workshop, sampleData.registration, language);
   }
   if (messageKey === MESSAGE_KEYS.NEW_EXTERNAL_PARTY) {
     const sampleData = SAMPLE_PAYLOADS[MESSAGE_KEYS.NEW_EXTERNAL_PARTY]();
@@ -884,128 +779,6 @@ export const sendNewPartyTelegram = async (party, language = 'he') => {
         const sent = await sendTelegramNotification(text, config.botToken, cid, parseMode);
         if (!sent) ok = false;
       }
-    }
-    return ok;
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Send new store item notification to configured channels. Call after addProduct.
- * If item has an image (images[0] or imageURL), sends the image via sendPhoto with caption; otherwise text only.
- * Caption is built without the image URL; if sendPhoto fails, falls back to text-only.
- */
-export const sendNewStoreItemTelegram = async (item, language = 'he') => {
-  try {
-    const config = await getTelegramConfigForMessage(MESSAGE_KEYS.NEW_STORE_ITEM);
-    if (!config?.enabled || !config.botToken || !config.chatIds?.length) return false;
-    const firstImageUrl = item?.images?.[0] && String(item.images[0]).trim().startsWith('http')
-      ? String(item.images[0]).trim()
-      : (item?.imageURL && String(item.imageURL).trim().startsWith('http') ? String(item.imageURL).trim() : null);
-    const itemForTemplate = { ...item, imageURL: firstImageUrl || '' };
-    const itemForCaption = firstImageUrl ? { ...itemForTemplate, imageURL: '' } : itemForTemplate;
-    let text = config.template?.trim()
-      ? replacePlaceholders(config.template, { item: itemForCaption })
-      : formatNewStoreItemNotification(item, language);
-    text = (text || '').replace(/\n{3,}/g, '\n\n').trim();
-    const parseMode = config.parseMode || 'HTML';
-    let ok = true;
-    for (const cid of config.chatIds) {
-      if (firstImageUrl) {
-        const sent = await sendTelegramPhoto(config.botToken, cid, firstImageUrl, text, parseMode);
-        if (!sent) {
-          const fallback = await sendTelegramNotification(text, config.botToken, cid, parseMode);
-          if (!fallback) ok = false;
-        }
-      } else {
-        const sent = await sendTelegramNotification(text, config.botToken, cid, parseMode);
-        if (!sent) ok = false;
-      }
-    }
-    return ok;
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Send new store order notification to configured channels. Call after createOrder.
- * order should have: customerName, customerPhone, customerTelegram, finalPrice, itemsSummary, id, userType.
- */
-export const sendNewStoreOrderTelegram = async (order, language = 'he') => {
-  try {
-    const config = await getTelegramConfigForMessage(MESSAGE_KEYS.NEW_STORE_ORDER);
-    if (!config?.enabled || !config.botToken || !config.chatIds?.length) return false;
-    const orderForTemplate = { ...order, customerTelegram: order.customerTelegram ? (String(order.customerTelegram).startsWith('@') ? order.customerTelegram : '@' + order.customerTelegram) : order.customerTelegram };
-    const text = config.template?.trim()
-      ? replacePlaceholders(config.template, { order: orderForTemplate })
-      : formatNewStoreOrderNotification(order, language);
-    let ok = true;
-    for (const cid of config.chatIds) {
-      const sent = await sendTelegramNotification(text, config.botToken, cid, config.parseMode || 'HTML');
-      if (!sent) ok = false;
-    }
-    return ok;
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Send new workshop notification to configured channels. Call after createWorkshop.
- * If workshop has imageUrl (public HTTPS), sends the image via sendPhoto with caption; otherwise text only.
- */
-export const sendNewWorkshopTelegram = async (workshop, language = 'he') => {
-  try {
-    const config = await getTelegramConfigForMessage(MESSAGE_KEYS.NEW_WORKSHOP);
-    if (!config?.enabled || !config.botToken || !config.chatIds?.length) return false;
-    const siteUrl = config.siteUrl || SITE_URL;
-    const workshopForTemplate = { ...workshop, date: formatDateOnly(workshop?.date, language) };
-    const imageUrl = workshop?.imageUrl && String(workshop.imageUrl).trim().startsWith('http') ? String(workshop.imageUrl).trim() : null;
-    const workshopForCaption = imageUrl ? { ...workshopForTemplate, imageUrl: '' } : workshopForTemplate;
-    let text = config.template?.trim()
-      ? replacePlaceholders(config.template, { workshop: workshopForCaption, siteUrl })
-      : formatNewWorkshopNotification(workshop, language);
-    text = (text || '').replace(/\n{3,}/g, '\n\n').trim();
-    const parseMode = config.parseMode || 'HTML';
-    let ok = true;
-    for (const cid of config.chatIds) {
-      if (imageUrl) {
-        const sent = await sendTelegramPhoto(config.botToken, cid, imageUrl, text, parseMode);
-        if (!sent) {
-          const fallback = await sendTelegramNotification(text, config.botToken, cid, parseMode);
-          if (!fallback) ok = false;
-        }
-      } else {
-        const sent = await sendTelegramNotification(text, config.botToken, cid, parseMode);
-        if (!sent) ok = false;
-      }
-    }
-    return ok;
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Send new workshop registration notification to configured channels. Call after registerToWorkshop.
- * workshop: { title, instructor?, date?, duration?, ... }
- * registration: { userName, phoneNumber, ... }
- */
-export const sendNewWorkshopRegistrationTelegram = async (workshop, registration, language = 'he') => {
-  try {
-    const config = await getTelegramConfigForMessage(MESSAGE_KEYS.NEW_WORKSHOP_REGISTRATION);
-    if (!config?.enabled || !config.botToken || !config.chatIds?.length) return false;
-    const workshopForTemplate = { ...workshop, date: formatDateOnly(workshop?.date, language) };
-    const text = config.template?.trim()
-      ? replacePlaceholders(config.template, { workshop: workshopForTemplate, registration })
-      : formatNewWorkshopRegistrationNotification(workshop, registration, language);
-    const parseMode = config.parseMode || 'HTML';
-    let ok = true;
-    for (const cid of config.chatIds) {
-      const sent = await sendTelegramNotification(text, config.botToken, cid, parseMode);
-      if (!sent) ok = false;
     }
     return ok;
   } catch {

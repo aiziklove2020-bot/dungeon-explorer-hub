@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { RotateCcw, Search, Shield, ShieldOff, Ban, CheckCircle, Trash2, KeyRound, Mail, MailCheck, MessageSquareOff, Link2, Scale, XCircle } from 'lucide-react';
+import { RotateCcw, Search, Shield, ShieldOff, Ban, CheckCircle, Trash2, KeyRound, Mail, MailCheck, Link2, XCircle } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminLoader from './AdminLoader';
 import PhoneLink from '../PhoneLink';
 import { getAllUsers } from '../../firebase/users';
 import {
   getAllForumUsers,
+  approveForumUser,
+  revokeForumUserApproval,
   blockForumUser,
   unblockForumUser,
   setForumUserRole,
@@ -16,9 +18,7 @@ import {
   setForumUserEmail,
   adminMarkForumEmailVerified,
   backfillForumNicknameLower,
-  updateForumUser,
 } from '../../firebase/forumUsers';
-import { purgeForumUserFromChat } from '../../firebase/liveChat';
 
 /**
  * Fully independent from the site/subscriptions user list (UsersSection):
@@ -64,6 +64,23 @@ const ForumUsersSection = ({ showSaved }) => {
     } catch (err) { alert(err.message || 'שגיאה'); }
   };
 
+  const handleApproveUser = async (fu) => {
+    try {
+      await approveForumUser(fu.id);
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleRevokeApproval = async (fu) => {
+    if (!window.confirm(`לבטל את האישור של "${fu.nickname}"? הוא לא יוכל להתחבר עד שתאשר אותו מחדש.`)) return;
+    try {
+      await revokeForumUserApproval(fu.id);
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
   const handleToggleRole = async (fu) => {
     try {
       const newRole = fu.role === 'forumAdmin' ? 'user' : 'forumAdmin';
@@ -76,21 +93,8 @@ const ForumUsersSection = ({ showSaved }) => {
   const handleDelete = async (fu) => {
     if (!window.confirm(`למחוק משתמש פורום "${fu.nickname}"?`)) return;
     try {
-      try {
-        await purgeForumUserFromChat(fu.id, { hardDeleteMessages: true });
-      } catch (chatErr) {
-        console.warn('purgeForumUserFromChat failed; continuing with deleteForumUser:', chatErr?.message);
-      }
       await deleteForumUser(fu.id);
       await load();
-      showSaved();
-    } catch (err) { alert(err.message || 'שגיאה'); }
-  };
-
-  const handleKickFromChat = async (fu) => {
-    if (!window.confirm(`להוציא את "${fu.nickname}" מהצ'אט? המשתמש יוסר מכל החדרים. אם ייכנס שוב — יתווסף אוטומטית לצ'אט הראשי.`)) return;
-    try {
-      await purgeForumUserFromChat(fu.id, { hardDeleteMessages: false });
       showSaved();
     } catch (err) { alert(err.message || 'שגיאה'); }
   };
@@ -123,24 +127,6 @@ const ForumUsersSection = ({ showSaved }) => {
     if (!window.confirm('לסמן ידנית את האימייל כמאומת?')) return;
     try {
       await adminMarkForumEmailVerified(fu.id);
-      await load();
-      showSaved();
-    } catch (err) { alert(err.message || 'שגיאה'); }
-  };
-
-  const handleApproveBalance = async (fu, days) => {
-    const expiry = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
-    try {
-      await updateForumUser(fu.id, { subscriptionExpiry: expiry });
-      await load();
-      showSaved();
-    } catch (err) { alert(err.message || 'שגיאה'); }
-  };
-
-  const handleRevokeBalance = async (fu) => {
-    if (!window.confirm(`לבטל את אישור האיזון המגדרי של "${fu.nickname}"?`)) return;
-    try {
-      await updateForumUser(fu.id, { subscriptionExpiry: null });
       await load();
       showSaved();
     } catch (err) { alert(err.message || 'שגיאה'); }
@@ -186,7 +172,10 @@ const ForumUsersSection = ({ showSaved }) => {
       if (!/^[\p{L}\p{N}_-]+$/u.test(cleanNick)) { alert('כינוי יכול להכיל אותיות, ספרות, מקף וקו תחתון בלבד'); return; }
       const makeAdmin = window.confirm('להפוך את המשתמש למנהל פורום?');
       const tempPassword = Math.random().toString(36).slice(-8);
-      const newUser = await registerForumUser(cleanNick, tempPassword);
+      const newUser = await registerForumUser(cleanNick, tempPassword, siteUser.phoneNumber);
+      // The admin is the one creating this account, so it doesn't need to
+      // sit in the same pending-approval queue as a public self-registration.
+      await approveForumUser(newUser.id);
       await linkForumUserToSiteUser(newUser.id, siteUser.id);
       await setForumUserPasswordWithReset(newUser.id, tempPassword);
       if (makeAdmin) await setForumUserRole(newUser.id, 'forumAdmin');
@@ -210,7 +199,10 @@ const ForumUsersSection = ({ showSaved }) => {
     if (roleFilter === 'unlinked' && fu.linkedUserId) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
-    return (fu.nickname || '').toLowerCase().includes(q) || (fu.email || '').toLowerCase().includes(q);
+    const qDigits = searchQuery.replace(/\D/g, '');
+    return (fu.nickname || '').toLowerCase().includes(q)
+      || (fu.email || '').toLowerCase().includes(q)
+      || (qDigits.length > 0 && (fu.phone || '').includes(qDigits));
   });
 
   return (
@@ -218,11 +210,11 @@ const ForumUsersSection = ({ showSaved }) => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-xl md:text-2xl font-bold">משתמשי פורום</h2>
+            <h2 className="text-xl md:text-2xl font-bold">חשבונות כניסה לאתר</h2>
             <span className="px-2.5 py-1 rounded-full bg-[#1f1f23] text-[#94A3B8] text-xs font-bold">{forumUsers.length}</span>
           </div>
           <p className="text-xs text-[#94A3B8] mt-1">
-            חשבונות פורום (כינוי + סיסמה) — מערכת נפרדת לגמרי ממשתמשי האתר/מנויים ב"ניהול משתמשים". קישור לחשבון אתר מוצג כאן רק לצורך התמצאות.
+            כאן מנהלים רק את היכולת להתחבר לאתר (כינוי + סיסמה, אישור/חסימה/הרשאות). זה לא קובע אם למישהו יש מנוי — מנוי מנוהל אך ורק ב"ניהול מנויים". "מקושר למשתמש אתר" למטה מראה לאיזו רשומת מנוי/הרשמה (אם קיימת) החשבון הזה שייך.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -247,7 +239,7 @@ const ForumUsersSection = ({ showSaved }) => {
             onChange={(e) => setLinkSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && runLinkSearch()}
             placeholder="חפש לפי שם או טלפון..."
-            className="flex-1 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-xl focus:border-[#e11d48] outline-none text-white text-right text-sm"
+            className="flex-1 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-xl focus:border-[#ff5708] outline-none text-white text-right text-sm"
           />
           <button onClick={runLinkSearch} className="bg-[#2a292e] hover:bg-[#353439] text-white px-4 rounded-xl font-bold text-sm">
             <Search size={16} />
@@ -276,7 +268,7 @@ const ForumUsersSection = ({ showSaved }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="חיפוש לפי כינוי או אימייל..."
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
@@ -313,8 +305,17 @@ const ForumUsersSection = ({ showSaved }) => {
                   {fu.isBlocked && (
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#93000a]">חסום</span>
                   )}
+                  {fu.isApproved === false && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-600">ממתין לאישור</span>
+                  )}
                 </div>
 
+                {fu.phone && (
+                  <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
+                    <span className="text-[#94A3B8] font-bold">טלפון:</span>
+                    <PhoneLink phone={fu.phone}>{fu.phone}</PhoneLink>
+                  </div>
+                )}
                 <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
                   <Mail size={12} className="text-[#94A3B8]" />
                   {fu.email ? (
@@ -338,40 +339,23 @@ const ForumUsersSection = ({ showSaved }) => {
                   {fu.gender && <span> · מגדר: {fu.gender === 'female' ? 'אישה' : 'גבר'}</span>}
                 </p>
 
-                {fu.gender === 'female' ? (
-                  <div className="mb-3 px-3 py-2 rounded-lg bg-emerald-900/30 border border-emerald-800 text-emerald-300 text-xs font-bold">
-                    ⚖️ מנוי זהב אוטומטי — נשים פטורות מאישור איזון
-                  </div>
-                ) : (
-                  <div className="mb-3 px-3 py-2 rounded-lg bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] text-xs">
-                    ⚖️ איזון מגדרי:{' '}
-                    {fu.subscriptionExpiry && new Date(fu.subscriptionExpiry).getTime() > Date.now() ? (
-                      <span className="text-emerald-400 font-bold">מאושר עד {new Date(fu.subscriptionExpiry).toLocaleDateString('he-IL')}</span>
-                    ) : (
-                      <span className="text-[#94A3B8]">לא מאושר</span>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {fu.gender !== 'female' && (
-                    <>
-                      <button onClick={() => handleApproveBalance(fu, 1)} className="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
-                        <Scale size={11} /> אשר איזון ליום אחד
-                      </button>
-                      <button onClick={() => handleApproveBalance(fu, 365)} className="flex items-center gap-1 bg-emerald-800 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
-                        <Scale size={11} /> אשר איזון לשנה
-                      </button>
-                      {fu.subscriptionExpiry && (
-                        <button onClick={() => handleRevokeBalance(fu)} className="flex items-center gap-1 bg-[#93000a]/60 hover:bg-[#be0037] text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
-                          <XCircle size={11} /> בטל אישור
-                        </button>
-                      )}
-                    </>
-                  )}
-                </div>
-
                 <div className="flex flex-wrap gap-2">
+                  {fu.isApproved === false ? (
+                    <button
+                      onClick={() => handleApproveUser(fu)}
+                      className="flex items-center gap-1 bg-gradient-to-l from-[#ff5708] to-[#ff7a29] hover:brightness-110 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
+                    >
+                      <CheckCircle size={11} /> אשר משתמש
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleRevokeApproval(fu)}
+                      className="flex items-center gap-1 bg-[#2a292e] hover:bg-[#353439] text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
+                      title={fu.isApproved === true ? '' : 'חשבון ישן — נחשב מאושר כברירת מחדל, אין שדה מפורש'}
+                    >
+                      <XCircle size={11} /> בטל אישור
+                    </button>
+                  )}
                   <button
                     onClick={() => handleToggleRole(fu)}
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors ${fu.role === 'forumAdmin' ? 'bg-[#2a292e] hover:bg-[#353439] text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'}`}
@@ -397,13 +381,6 @@ const ForumUsersSection = ({ showSaved }) => {
                       <MailCheck size={11} /> סמן כמאומת
                     </button>
                   )}
-                  <button
-                    onClick={() => handleKickFromChat(fu)}
-                    className="flex items-center gap-1 bg-amber-700 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
-                    title="יוסר מכל חדרי הצ'אט; אם ייכנס שוב — יתווסף אוטומטית לצ'אט הראשי."
-                  >
-                    <MessageSquareOff size={11} /> הוצא מהצ'אט
-                  </button>
                   <button onClick={() => handleDelete(fu)} className="flex items-center gap-1 bg-[#93000a]/60 hover:bg-[#be0037] text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
                     <Trash2 size={11} /> מחק חשבון פורום
                   </button>

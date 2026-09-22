@@ -32,7 +32,7 @@ const ForumEmailVerify = () => {
           // Pull the freshly verified user doc into context so the rest of
           // the app sees emailVerified=true without requiring a hard reload.
           refreshForumUser?.().catch(() => {});
-          setTimeout(() => navigate({ to: '/forum', replace: true }), 2200);
+          setTimeout(() => navigate({ to: '/', replace: true }), 2200);
           return;
         }
         if (resp.status === 410) {
@@ -88,7 +88,7 @@ const ForumEmailVerify = () => {
         {(status === 'expired' || status === 'invalid' || status === 'error') && (
           <button
             type="button"
-            onClick={() => navigate({ to: '/forum', replace: true })}
+            onClick={() => navigate({ to: '/', replace: true })}
             style={{
               marginTop: '1.5rem',
               padding: '0.6rem 1.25rem',

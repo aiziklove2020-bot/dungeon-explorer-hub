@@ -327,15 +327,6 @@ export const registerToPartyNew = async (partyId, registrationData) => {
       createUserFromRegistration(registration, 'registered', 'year').catch(() => {});
     }
 
-    // "אישור אוטומטי לזוגות מאומתים" — the male half of a couple whose
-    // partner already has a real account normally still needs the admin to
-    // manually click "אישור למסיבה זו בלבד" (see RegistrationItem). When the
-    // party has this quick-control enabled, do that same one-party-only
-    // approval automatically instead of waiting on the admin.
-    if (autoApproved && finalGender === 'male' && !userId) {
-      createUserFromRegistration(registration, 'registered', 'day').catch(() => {});
-    }
-
     // Registration notifications are sent only from RegistrationForm to the
     // registration channel (getRegistrationSettings). Matching channel is not used here.
     return registration;
@@ -1613,6 +1604,7 @@ export const getMyRegistrations = async (phoneNumber) => {
       image: party.imageURL || '',
       registrationType: myReg.registrationType,
       status,
+      userName: myReg.fullName || myReg.userName || '',
     });
   }
 

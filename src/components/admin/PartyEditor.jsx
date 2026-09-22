@@ -144,7 +144,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             type="text"
             value={formData.name}
             onChange={e => setFormData(prev => ({...prev, name: e.target.value}))}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
             required
           />
         </div>
@@ -154,7 +154,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             type="text"
             value={formData.title}
             onChange={e => setFormData(prev => ({...prev, title: e.target.value}))}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
         </div>
         <div className="space-y-1 text-right">
@@ -163,7 +163,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             type="date"
             value={formData.date}
             onChange={e => setFormData(prev => ({...prev, date: e.target.value}))}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
             required
           />
         </div>
@@ -173,7 +173,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             type="text"
             value={formData.day}
             readOnly
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right opacity-70 cursor-not-allowed"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right opacity-70 cursor-not-allowed"
           />
         </div>
         <div className="space-y-1 text-right">
@@ -182,7 +182,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             type="text"
             value={formData.time}
             onChange={e => setFormData(prev => ({...prev, time: e.target.value}))}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
             placeholder="22:00"
           />
         </div>
@@ -192,7 +192,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             type="text"
             value={formData.dj}
             onChange={e => setFormData(prev => ({...prev, dj: e.target.value}))}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
         </div>
         {!formData.whatsappNumber?.trim() && (
@@ -203,7 +203,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
                 type="number"
                 value={formData.maleLimit}
                 onChange={e => setFormData(prev => ({...prev, maleLimit: parseInt(e.target.value) || 0}))}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
                 min="0"
               />
             </div>
@@ -213,7 +213,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
                 type="number"
                 value={formData.femaleLimit}
                 onChange={e => setFormData(prev => ({...prev, femaleLimit: parseInt(e.target.value) || 0}))}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
                 min="0"
               />
             </div>
@@ -224,7 +224,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           <select
             value={formData.partyType}
             onChange={e => setFormData(prev => ({...prev, partyType: e.target.value}))}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
             required
           >
             <option value="internal">{t('admin.internal')}</option>
@@ -240,7 +240,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           <select
             value={formData.category}
             onChange={e => setFormData(prev => ({...prev, category: e.target.value}))}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           >
             <option value="">— זיהוי אוטומטי מהטקסט —</option>
             <option value="חילופי זוגות">חילופי זוגות</option>
@@ -257,7 +257,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           <select
             value={formData.city}
             onChange={e => setFormData(prev => ({...prev, city: e.target.value}))}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           >
             <option value="">— זיהוי אוטומטי מהכותרת —</option>
             <option value="אום אל-פחם">אום אל-פחם</option>
@@ -360,7 +360,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           value={formData.description}
           onChange={e => setFormData(prev => ({...prev, description: e.target.value}))}
           rows={3}
-          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
         />
         <p className="text-[#94A3B8] text-xs mt-1">
           לא להזין מספר טלפון בתיאור — יש שדה וואטסאפ ייעודי למטה.
@@ -380,7 +380,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             type="text"
             value={formData.registrationLink}
             onChange={e => setFormData(prev => ({...prev, registrationLink: e.target.value}))}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
             placeholder="https://..."
             required={formData.partyType === 'external'}
           />
@@ -395,7 +395,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           type="tel"
           value={formData.whatsappNumber}
           onChange={e => setFormData(prev => ({...prev, whatsappNumber: e.target.value}))}
-          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           placeholder="050-1234567"
           dir="ltr"
         />
@@ -407,7 +407,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 md:px-6 py-2 rounded-xl font-bold text-sm md:text-base w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 md:px-6 py-2 rounded-xl font-bold text-sm md:text-base w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSaving ? (
             <>

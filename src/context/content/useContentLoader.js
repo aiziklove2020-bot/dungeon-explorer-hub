@@ -38,8 +38,6 @@ export function useContentLoader() {
         externalEvents: data.externalEvents || [],
         labels: data.labels || {},
         store: data.store || {},
-        storeEnabled: data.storeEnabled,
-        activeWorkshopsCount: data.activeWorkshopsCount,
         rssFeeds: data.rssFeeds || [],
       });
       setContent(merged);

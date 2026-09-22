@@ -81,7 +81,7 @@ const GitHistorySection = () => {
       </div>
 
       {error && (
-        <div className="bg-[#93000a]/30 border border-[#e11d48]/30 p-3 rounded-lg text-[#ffb4ab] text-sm">
+        <div className="bg-[#93000a]/30 border border-[#ff5708]/30 p-3 rounded-lg text-[#ffb4ab] text-sm">
           {error}
         </div>
       )}

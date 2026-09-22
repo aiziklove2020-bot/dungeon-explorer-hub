@@ -1,15 +1,14 @@
 import { useState, useTransition, useEffect, useRef } from 'react';
 import {
   ChevronDown, ChevronUp, Heart, PartyPopper, Users, Palette, UserCog, CreditCard,
-  Info, Phone, Link2, ShoppingBag, GraduationCap, MessageCircle, Flag, Trash2,
+  Info, Phone, Link2, Trash2,
   ShieldCheck, Megaphone, Rss, Send, Database, FileClock, GitBranch, ShieldCheck as ShieldIcon, Lock,
 } from 'lucide-react';
 
 const TAB_ICONS = {
   matching: Heart, parties: PartyPopper, users: Users, siteDesign: Palette,
   forumUsers: UserCog, subscriptions: CreditCard, about: Info, contact: Phone,
-  links: Link2, store: ShoppingBag, workshops: GraduationCap, liveChat: MessageCircle,
-  chatReports: Flag, deleteRequests: Trash2, admins: ShieldCheck, advertisers: Megaphone,
+  links: Link2, deleteRequests: Trash2, admins: ShieldCheck, advertisers: Megaphone,
   rss: Rss, telegram: Send, db: Database, dbLogger: FileClock, gitHistory: GitBranch,
 };
 import { useNavigate } from '@tanstack/react-router';
@@ -29,14 +28,10 @@ import LinksSection from '../components/admin/LinksSection';
 import AdminsSection from '../components/admin/AdminsSection';
 import AdvertisersSection from '../components/admin/AdvertisersSection';
 import TelegramSection from '../components/admin/TelegramSection';
-import StoreSection from '../components/admin/StoreSection';
-import WorkshopsSection from '../components/admin/WorkshopsSection';
 import DBLoggerSection from '../components/admin/DBLoggerSection';
 import DBSection from '../components/admin/DBSection';
 import GitHistorySection from '../components/admin/GitHistorySection';
 import ForumUsersSection from '../components/admin/ForumUsersSection';
-import LiveChatSection from '../components/admin/LiveChatSection';
-import ChatReportsSection from '../components/admin/ChatReportsSection';
 import DeleteRequestsSection from '../components/admin/DeleteRequestsSection';
 import SubscriptionsSection from '../components/admin/SubscriptionsSection';
 import SiteDesignSection from '../components/admin/SiteDesignSection';
@@ -238,7 +233,7 @@ const Admin = () => {
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#10B981' }} />
                 <span className="text-xs" style={{ color: '#e4e1e7' }}>מצב מאובטח</span>
               </div>
-              <Lock size={14} style={{ color: '#e11d48' }} />
+              <Lock size={14} style={{ color: '#ff5708' }} />
             </div>
           </div>
           <nav className="flex flex-col gap-0.5 px-3 mt-2 pb-4">
@@ -251,7 +246,7 @@ const Admin = () => {
                   onClick={() => startTransition(() => setActiveSection(tab.id))}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-bold transition-colors text-right"
                   style={active
-                    ? { background: 'linear-gradient(135deg,#e11d48,#be0037)', color: '#fff' }
+                    ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff' }
                     : { background: 'transparent', color: '#a9a9b2' }}
                 >
                   <Icon size={18} />
@@ -277,7 +272,7 @@ const Admin = () => {
                   onClick={() => startTransition(() => setActiveSection(tab.id))}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-bold transition-colors text-right"
                   style={active
-                    ? { background: 'linear-gradient(135deg,#e11d48,#be0037)', color: '#fff' }
+                    ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff' }
                     : { background: 'transparent', color: '#7a7a82' }}
                 >
                   <Icon size={18} />
@@ -315,7 +310,7 @@ const Admin = () => {
               className="shrink-0 px-4 py-2 text-xs md:text-sm font-bold transition-all whitespace-nowrap touch-manipulation"
               style={
                 activeSection === tab.id
-                  ? { background: 'linear-gradient(135deg,#e11d48,#be0037)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
+                  ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
                   : { background: 'transparent', color: '#a9a9b2', borderRadius: 999, border: '1px solid #2d2d34' }
               }
             >
@@ -342,7 +337,7 @@ const Admin = () => {
                 className="shrink-0 px-4 py-2 text-xs md:text-sm font-bold transition-all whitespace-nowrap touch-manipulation"
                 style={
                   activeSection === tab.id
-                    ? { background: 'linear-gradient(135deg,#e11d48,#be0037)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
+                    ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
                     : { background: 'transparent', color: '#7a7a82', borderRadius: 999, border: '1px solid #2d2d34' }
                 }
               >
@@ -360,13 +355,9 @@ const Admin = () => {
           {activeSection === 'contact'   && <ContactSection showSaved={showSaved} />}
           {activeSection === 'matching'  && <MatchesSection showSaved={showSaved} />}
           {activeSection === 'links'     && <LinksSection showSaved={showSaved} />}
-          {activeSection === 'store'     && <StoreSection showSaved={showSaved} />}
-          {activeSection === 'workshops' && <WorkshopsSection showSaved={showSaved} />}
           {activeSection === 'db'        && <DBSection />}
           {activeSection === 'dbLogger'  && <DBLoggerSection />}
           {activeSection === 'forumUsers' && <ForumUsersSection showSaved={showSaved} />}
-          {activeSection === 'liveChat'  && <LiveChatSection showSaved={showSaved} />}
-          {activeSection === 'chatReports' && <ChatReportsSection showSaved={showSaved} />}
           {activeSection === 'deleteRequests' && <DeleteRequestsSection showSaved={showSaved} />}
           {activeSection === 'users'     && <UsersSection showSaved={showSaved} />}
           {activeSection === 'subscriptions' && <SubscriptionsSection showSaved={showSaved} />}

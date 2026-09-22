@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { RotateCcw, Download, Users, Send, MessageCircle, X } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useContent } from '../../context/ContentContext';
@@ -606,14 +607,14 @@ const MatchesSection = ({ showSaved }) => {
           <div className="flex flex-wrap gap-2 min-w-0">
             <button
               onClick={loadActiveParties}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold flex items-center gap-1.5 sm:gap-2 text-xs sm:text-base shrink-0"
+              className="bg-[#2a292e] hover:bg-[#353439] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold flex items-center gap-1.5 sm:gap-2 text-xs sm:text-base shrink-0"
             >
               <RotateCcw size={14} className="sm:w-4 sm:h-4 shrink-0" /> <span className="whitespace-nowrap">{t('admin.refresh')}</span>
             </button>
             {Object.keys(partyBalances).length > 0 && (
               <button
                 onClick={exportAllBalancesToXLSX}
-                className="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold flex items-center gap-1.5 sm:gap-2 text-xs sm:text-base shrink-0"
+                className="bg-[#ff4994] hover:bg-[#e0397f] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold flex items-center gap-1.5 sm:gap-2 text-xs sm:text-base shrink-0"
               >
                 <Download size={14} className="sm:w-4 sm:h-4 shrink-0" /> <span className="whitespace-nowrap">הורד XLSX</span>
               </button>
@@ -640,7 +641,7 @@ const MatchesSection = ({ showSaved }) => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h4 className="text-lg font-bold">{party.name}</h4>
-                      <span className="px-2 py-1 rounded text-xs font-bold bg-[#e11d48]">
+                      <span className="px-2 py-1 rounded text-xs font-bold bg-[#ff5708]">
                         {t('admin.internalParty')}
                       </span>
                       {partyBalance.length > 0 && (
@@ -665,7 +666,7 @@ const MatchesSection = ({ showSaved }) => {
                     <button
                       onClick={() => handleCreateBalance(party)}
                       disabled={creatingBalance === party.id || !party.registrations || party.registrations.length === 0}
-                      className="bg-blue-600 hover:bg-blue-500 disabled:bg-[#2a292e] disabled:opacity-50 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
+                      className="bg-[#353439] hover:bg-[#404049] disabled:bg-[#2a292e] disabled:opacity-50 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
                     >
                       {creatingBalance === party.id ? (
                         <Loader size="small" />
@@ -678,7 +679,7 @@ const MatchesSection = ({ showSaved }) => {
                     {partyBalance.length > 0 && (
                       <button
                         onClick={() => exportBalanceToXLSX(party.id, party.name || party.title)}
-                        className="bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
+                        className="bg-[#ff4994] hover:bg-[#e0397f] text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
                       >
                         <Download size={16} /> הורד XLSX
                       </button>
@@ -696,7 +697,7 @@ const MatchesSection = ({ showSaved }) => {
                       type="button"
                       onClick={() => handlePublishPartyToTelegram(party)}
                       disabled={publishingToTelegramPartyId === party.id || publishingToTelegramPartyId !== null}
-                      className="bg-green-600 hover:bg-green-500 disabled:bg-[#2a292e] disabled:opacity-50 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
+                      className="bg-gradient-to-l from-[#ff5708] to-[#ff7a29] hover:brightness-110 disabled:bg-[#2a292e] disabled:opacity-50 disabled:bg-none text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
                     >
                       {publishingToTelegramPartyId === party.id ? (
                         <Loader size="small" />
@@ -750,7 +751,7 @@ const MatchesSection = ({ showSaved }) => {
         )}
       </div>
 
-      {whatsappPickerParty && (
+      {whatsappPickerParty && createPortal(
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={closeWhatsappPicker}>
           <div
             className="bg-[#121218] border border-white/10 rounded-2xl p-6 w-full max-w-md space-y-4"
@@ -837,7 +838,8 @@ const MatchesSection = ({ showSaved }) => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

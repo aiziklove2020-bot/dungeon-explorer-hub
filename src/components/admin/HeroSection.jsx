@@ -25,7 +25,7 @@ const HeroSection = ({ showSaved }) => {
               alert(t('admin.errorSaving'));
             }
           }}
-          className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 md:px-6 py-2 rounded-xl font-bold flex items-center gap-2 text-sm md:text-base w-full sm:w-auto justify-center"
+          className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 md:px-6 py-2 rounded-xl font-bold flex items-center gap-2 text-sm md:text-base w-full sm:w-auto justify-center"
         >
           <Save size={16} className="md:w-[18px] md:h-[18px]" /> {t('save')}
         </button>
@@ -37,7 +37,7 @@ const HeroSection = ({ showSaved }) => {
             type="text"
             value={heroData.titleHebrew}
             onChange={e => setHeroData({...heroData, titleHebrew: e.target.value})}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
         </div>
         <div className="space-y-1 text-right">
@@ -46,7 +46,7 @@ const HeroSection = ({ showSaved }) => {
             type="text"
             value={heroData.titleEnglish}
             onChange={e => setHeroData({...heroData, titleEnglish: e.target.value})}
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
         </div>
       </div>
@@ -56,7 +56,7 @@ const HeroSection = ({ showSaved }) => {
           type="text"
           value={heroData.subtitle}
           onChange={e => setHeroData({...heroData, subtitle: e.target.value})}
-          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
         />
       </div>
       <div className="space-y-1 text-right">
@@ -65,7 +65,7 @@ const HeroSection = ({ showSaved }) => {
           type="text"
           value={heroData.tagline}
           onChange={e => setHeroData({...heroData, tagline: e.target.value})}
-          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+          className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
         />
       </div>
     </div>

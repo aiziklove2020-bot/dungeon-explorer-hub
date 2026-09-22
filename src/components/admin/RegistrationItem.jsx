@@ -132,7 +132,7 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
           {onRemoveFromParty && partyId && (
             <button
               onClick={() => onRemoveFromParty(partyId, registration)}
-              className="bg-[#e11d48] hover:bg-[#be0037] text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1"
+              className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1"
               title={t('confirmRemoveUser')}
             >
               <Trash2 size={12} />

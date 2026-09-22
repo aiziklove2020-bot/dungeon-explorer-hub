@@ -117,7 +117,7 @@ async function renderCouplesForEvent(eventId, targetEl) {
     const box = document.createElement("div");
     box.style.cssText = "margin-top:14px;padding:14px 16px;border:1px solid #7c1828;border-radius:14px;background:rgba(255,23,57,.08)";
     const title = document.createElement("p");
-    title.style.cssText = "margin:0 0 12px;font-size:16px;font-weight:800;color:#e11d48";
+    title.style.cssText = "margin:0 0 12px;font-size:16px;font-weight:800;color:#ff5708";
     title.textContent = `זוגות רשומים (${confirmed.length})`;
     box.appendChild(title);
 

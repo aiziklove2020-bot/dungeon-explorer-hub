@@ -276,7 +276,7 @@ const SubscriptionsSection = ({ showSaved }) => {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => setShowNewSubscriber(true)} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
+          <button onClick={() => setShowNewSubscriber(true)} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
             <Plus size={14} /> מנוי חדש
           </button>
           <button onClick={reload} className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
@@ -313,19 +313,19 @@ const SubscriptionsSection = ({ showSaved }) => {
       <div className="flex gap-2 border-b border-[rgba(255,255,255,0.08)] pb-4">
         <button
           onClick={() => setActiveTab('all')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'all' ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'all' ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
         >
           כל המנויים
         </button>
         <button
           onClick={() => setActiveTab('parties')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'parties' ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'parties' ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
         >
           מנויי מסיבות
         </button>
         <button
           onClick={() => setActiveTab('exchangeParties')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'exchangeParties' ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'exchangeParties' ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
         >
           מנויי מסיבות חילופים
         </button>
@@ -340,7 +340,7 @@ const SubscriptionsSection = ({ showSaved }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="חיפוש לפי שם או טלפון..."
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
@@ -383,7 +383,7 @@ const SubscriptionsSection = ({ showSaved }) => {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <strong className="text-lg text-white">{u.name}</strong>
-                        {u.level === 'admin' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#e11d48]">Admin</span>}
+                        {u.level === 'admin' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#ff5708]">Admin</span>}
                         {u.level === 'blocked' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#93000a]">Blocked</span>}
                       </div>
                       <div className="text-sm text-[#a9a9b2] flex gap-3">

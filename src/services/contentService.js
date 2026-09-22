@@ -378,8 +378,6 @@ const loadFromFirestore = async () => {
     externalEvents,
     labels: contentData?.labels || {},
     store: contentData?.store || {},
-    storeEnabled: contentData?.storeEnabled ?? false,
-    activeWorkshopsCount: contentData?.activeWorkshopsCount ?? 0,
     rssFeeds: Array.isArray(rssFeedsList) ? rssFeedsList.filter(f => f.enabled !== false) : [],
     partyRetentionHours,
   };
