@@ -25,7 +25,12 @@ document.getElementById("go").addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ subscriptions: [SUBSCRIPTION], title: "בדיקת מערכת", body: "בדיקה מהדף החי", url: "/my-area" })
     });
-    const json = await res.json().catch(() => ({ parseError: true, raw: await res.text().catch(()=>"") }));
+    let json;
+    try {
+      json = await res.json();
+    } catch {
+      json = { parseError: true, raw: await res.text().catch(() => "") };
+    }
     out.textContent = "HTTP " + res.status + "\n" + JSON.stringify(json, null, 2);
   } catch (err) {
     out.textContent = "שגיאת רשת: " + String(err);
