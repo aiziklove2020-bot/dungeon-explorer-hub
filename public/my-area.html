@@ -353,8 +353,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  async function renderFavorites(phone, currentFavoriteIds) {
+  async function renderFavorites(phone, currentFavoriteIds, hasActiveSubscription) {
     const box = document.getElementById("favorites");
+    if (!hasActiveSubscription) {
+      box.innerHTML = `<div class="rounded-xl bg-surface-card p-5 shadow-md text-center flex flex-col items-center gap-2">
+        <span class="material-symbols-outlined text-text-muted text-[32px]">lock</span>
+        <p class="text-text-secondary text-body-sm">סימון מסיבות כמועדפות זמין רק למנויים. רכשו מנוי (גם ליום אחד מספיק) כדי לשמור מסיבות למעקב.</p>
+        <a href="/membership" class="mt-1 h-11 px-6 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-md text-label-md shadow-md flex items-center">לרכישת מנוי</a>
+      </div>`;
+      return;
+    }
     if (!currentFavoriteIds || currentFavoriteIds.length === 0) {
       box.innerHTML = `<div class="rounded-xl bg-surface-card p-4 shadow-md text-center text-text-muted text-body-sm">
         עדיין לא סימנתם מסיבות כמועדפות. לחצו על הלב בעמוד מסיבה או ברשימת המסיבות כדי לסמן.
@@ -464,7 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderRegistrations(data.registrations);
       renderBalanceMatch(data.balanceMatch, !!(data.profile && data.profile.hasActiveSubscription));
       const favIds = (data.favorites || []).map((e) => e.id);
-      await renderFavorites(phone, favIds);
+      await renderFavorites(phone, favIds, !!(data.profile && data.profile.hasActiveSubscription));
     } catch (err) {
       document.getElementById("registrations").innerHTML = `<p class="text-text-muted text-body-sm text-center">לא הצלחנו לטעון כרגע, נסו שוב מאוחר יותר.</p>`;
     }
