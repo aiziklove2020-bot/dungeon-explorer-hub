@@ -24043,13 +24043,43 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				needsPublish: !0,
 				...r ? { expiration: r } : {}
 			}, o = E(T(H, iM));
-			return await $u(o, a), await q("activeParties"), {
-				id: o.id,
-				...a
-			};
+			await $u(o, a), await q("activeParties");
+			let created = { id: o.id, ...a };
+			notifyPrivilegedSubscribersOfNewParty_(created);
+			return created;
 		} catch (e) {
 			throw e;
 		}
+	}, notifyPrivilegedSubscribersOfNewParty_ = async (party) => {
+		try {
+			let subsSnap = await k(T(H, "pushSubscriptions")),
+				phones = [...new Set(subsSnap.docs.map((d) => d.data().phone).filter(Boolean))];
+			if (!phones.length) return;
+			let title = "🎉 מסיבה חדשה!",
+				body = (party?.name || party?.title || "מסיבה חדשה") + " נוספה לאתר",
+				url = party?.id ? `/event?id=${party.id}` : "/events";
+			await Promise.all(phones.map(async (phone) => {
+				let user = await Ej(phone).catch(() => null);
+				if (!user) return;
+				let s1 = pj(user, "parties"), s2 = pj(user, "exchangeParties"),
+					priv = s1.isActive && (s1.tier === "year" || s1.tier === "gold") || s2.isActive && (s2.tier === "year" || s2.tier === "gold");
+				if (!priv) return;
+				let subsQuery = D(T(H, "pushSubscriptions"), O("phone", "==", phone)),
+					subs = (await k(subsQuery)).docs.map((d) => ({ id: d.id, ...d.data() }));
+				if (!subs.length) return;
+				let res = await fetch("/api/send-push", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						subscriptions: subs.map((s) => ({ id: s.id, endpoint: s.endpoint, keys: s.keys })),
+						title,
+						body,
+						url
+					})
+				}).then((r) => r.json()).catch(() => null);
+				res?.deadIds?.length && await Promise.all(res.deadIds.map((id) => ed(E(T(H, "pushSubscriptions"), id)).catch(() => {})));
+			}));
+		} catch {}
 	}, oM = nk, sM = async () => (await k(T(H, iM))).docs.map((e) => {
 		let t = e.data();
 		return {
