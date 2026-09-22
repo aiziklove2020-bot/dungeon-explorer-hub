@@ -204,6 +204,11 @@ export const registerForumUser = async (nickname, password, phone, email) => {
     phone: cleanPhone,
     role: 'user',
     isBlocked: false,
+    // New self-registrations wait for an admin to approve them before they
+    // can log in (see loginForumUser) — `isApproved === false` specifically,
+    // never a bare falsy/missing check, so every account that existed
+    // before this field was introduced keeps working exactly as before.
+    isApproved: false,
     linkedUserId: null,
     createdAt: Timestamp.now()
   };
@@ -223,6 +228,7 @@ export const loginForumUser = async (nickname, password) => {
   const match = await bcrypt.compare(password, user.password);
   if (!match) throw new Error('סיסמה שגויה');
   if (user.isBlocked) throw new Error('המשתמש חסום');
+  if (user.isApproved === false) throw new Error('החשבון שלך ממתין לאישור מנהל, תוכל/י להתחבר לאחר שיאושר');
   // Lazy backfill of `nicknameLower` for legacy accounts so subsequent
   // case-insensitive lookups land on the indexed query path.
   const expectedLower = (user.nickname || '').toLowerCase();
@@ -341,6 +347,11 @@ export const blockForumUser = async (id) => {
 
 export const unblockForumUser = async (id) => {
   await updateDoc(doc(db, COL, id), { isBlocked: false });
+  invalidateForumUserCache(id);
+};
+
+export const approveForumUser = async (id) => {
+  await updateDoc(doc(db, COL, id), { isApproved: true });
   invalidateForumUserCache(id);
 };
 

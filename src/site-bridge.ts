@@ -217,7 +217,7 @@ async function register(name: string, phone: string, password: string, gender?: 
   if (nickname.length < 2) throw new Error("השם קצר מדי — נא להזין לפחות 2 תווים (אותיות/ספרות)");
   const user = await registerForumUser(nickname, password, phone);
   if (gender) await updateForumUser(user.id, { gender }).catch(() => {});
-  return { id: user.id, name: user.nickname, phone: (user as any).phone || phone, gender: gender || null, role: "user" };
+  return { id: user.id, name: user.nickname, phone: (user as any).phone || phone, gender: gender || null, role: "user", isApproved: (user as any).isApproved !== false };
 }
 
 /** Real login: looks up the account by phone, then verifies via the real password check. */

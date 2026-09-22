@@ -6,6 +6,7 @@ import PhoneLink from '../PhoneLink';
 import { getAllUsers } from '../../firebase/users';
 import {
   getAllForumUsers,
+  approveForumUser,
   blockForumUser,
   unblockForumUser,
   setForumUserRole,
@@ -59,6 +60,14 @@ const ForumUsersSection = ({ showSaved }) => {
   const handleToggleBlock = async (fu) => {
     try {
       if (fu.isBlocked) { await unblockForumUser(fu.id); } else { await blockForumUser(fu.id); }
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleApproveUser = async (fu) => {
+    try {
+      await approveForumUser(fu.id);
       await load();
       showSaved();
     } catch (err) { alert(err.message || 'שגיאה'); }
@@ -187,6 +196,9 @@ const ForumUsersSection = ({ showSaved }) => {
       const makeAdmin = window.confirm('להפוך את המשתמש למנהל פורום?');
       const tempPassword = Math.random().toString(36).slice(-8);
       const newUser = await registerForumUser(cleanNick, tempPassword, siteUser.phoneNumber);
+      // The admin is the one creating this account, so it doesn't need to
+      // sit in the same pending-approval queue as a public self-registration.
+      await approveForumUser(newUser.id);
       await linkForumUserToSiteUser(newUser.id, siteUser.id);
       await setForumUserPasswordWithReset(newUser.id, tempPassword);
       if (makeAdmin) await setForumUserRole(newUser.id, 'forumAdmin');
@@ -313,6 +325,9 @@ const ForumUsersSection = ({ showSaved }) => {
                   {fu.isBlocked && (
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#93000a]">חסום</span>
                   )}
+                  {fu.isApproved === false && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-600">ממתין לאישור</span>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
@@ -372,6 +387,14 @@ const ForumUsersSection = ({ showSaved }) => {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                  {fu.isApproved === false && (
+                    <button
+                      onClick={() => handleApproveUser(fu)}
+                      className="flex items-center gap-1 bg-gradient-to-l from-[#ff5708] to-[#ff7a29] hover:brightness-110 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
+                    >
+                      <CheckCircle size={11} /> אשר משתמש
+                    </button>
+                  )}
                   <button
                     onClick={() => handleToggleRole(fu)}
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors ${fu.role === 'forumAdmin' ? 'bg-[#2a292e] hover:bg-[#353439] text-white' : 'bg-purple-600 hover:bg-purple-500 text-white'}`}

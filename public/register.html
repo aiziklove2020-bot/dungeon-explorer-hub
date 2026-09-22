@@ -111,7 +111,7 @@
 
 <script src="assets/app.js?v=202609062118"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609211530";
+import "./assets/site-data.js?v=202609221200";
 document.getElementById("registerForm").addEventListener("submit", async e => {
   e.preventDefault();
   const f = new FormData(e.target);
@@ -122,9 +122,14 @@ document.getElementById("registerForm").addEventListener("submit", async e => {
   btn.disabled = true;
   try {
     const u = await window.LPData.register(f.get("name"), phone, p, f.get("gender"));
-    LP.setCurrent(u);
-    toast("ההרשמה הושלמה — ברוכים הבאים, " + u.name);
-    setTimeout(() => location = "/profile", 900);
+    if (u.isApproved === false) {
+      toast("ההרשמה נשלחה! החשבון ממתין לאישור מנהל, תוכלו להתחבר לאחר שיאושר");
+      e.target.reset();
+    } else {
+      LP.setCurrent(u);
+      toast("ההרשמה הושלמה — ברוכים הבאים, " + u.name);
+      setTimeout(() => location = "/profile", 900);
+    }
   } catch (err) {
     toast(err.message || "שגיאה בהרשמה", "error");
   } finally {

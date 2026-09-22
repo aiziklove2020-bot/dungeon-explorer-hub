@@ -24724,6 +24724,7 @@ var HM = (e) => {
 		phone: cleanPhone_,
 		role: "user",
 		isBlocked: !1,
+		isApproved: !1,
 		linkedUserId: null,
 		createdAt: N.now()
 	};
@@ -24737,6 +24738,7 @@ var HM = (e) => {
 	if (!n) throw Error("כינוי לא נמצא");
 	if (!await ZA.compare(t, n.password)) throw Error("סיסמה שגויה");
 	if (n.isBlocked) throw Error("המשתמש חסום");
+	if (n.isApproved === !1) throw Error("החשבון שלך ממתין לאישור מנהל, תוכל/י להתחבר לאחר שיאושר");
 	let r = (n.nickname || "").toLowerCase();
 	if (r && n.nicknameLower !== r) try {
 		await A(E(H, PM, n.id), { nicknameLower: r }), n.nicknameLower = r, BM(n.id);
@@ -35115,7 +35117,8 @@ async function BU(e, t, n, r) {
 		name: a.nickname,
 		phone: a.phone || t,
 		gender: r || null,
-		role: "user"
+		role: "user",
+		isApproved: a.isApproved !== !1
 	};
 }
 async function VU(e, t) {
