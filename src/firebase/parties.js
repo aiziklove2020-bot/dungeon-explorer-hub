@@ -1544,6 +1544,9 @@ export const getMyBalanceMatch = async (phoneNumber) => {
           matchName: m.femaleName || '',
           matchPhone: m.phoneShared ? (m.femalePhone || '') : '',
           femalePhone: m.femalePhone || '', // needed as the entry's own key, not shown to the man
+          // A manually-created match is an admin's explicit one-off exception —
+          // it must reveal regardless of the viewer's subscription tier.
+          matchType: m.matchType === 'manual' ? 'manual' : 'balance',
         };
       }
       if (femaleMatches) {
@@ -1560,6 +1563,7 @@ export const getMyBalanceMatch = async (phoneNumber) => {
           matchPhone: m.malePhone || '',
           phoneShared: !!m.phoneShared,
           femalePhone: m.femalePhone || '',
+          matchType: m.matchType === 'manual' ? 'manual' : 'balance',
         };
       }
     }
