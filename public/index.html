@@ -169,27 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     </button>`;
   }
 
-  function cardHtml(e, featured) {
-    if (featured) {
-      return `<article class="relative w-full rounded-2xl overflow-hidden bg-surface-card shadow-2xl">
-        <div class="relative w-full bg-black">
-          ${favBtnHtml(e)}
-          <img class="w-full h-auto max-h-[70vh] object-contain mx-auto" src="${e.img}" alt="">
-        </div>
-        <div class="p-4 flex flex-col gap-2">
-          <div class="flex items-center gap-2 flex-wrap">
-            ${e.category ? `<span class="text-label-sm font-label-sm text-primary px-2 py-0.5 rounded bg-primary-container/15 font-semibold">${e.category}</span>` : ""}
-            ${e.city ? `<span class="text-label-sm font-label-sm text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_on</span>${e.city}</span>` : ""}
-            ${(e.day || e.date) ? `<span class="text-label-sm font-label-sm text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">event</span>${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span>` : ""}
-          </div>
-          <h2 class="text-headline-md font-headline-md text-text-primary tracking-tight">${e.title}</h2>
-          <p class="text-body-sm font-body-sm text-text-secondary">${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 90)}</p>
-          <a class="mt-2 h-11 px-4 rounded-xl bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-lg text-label-lg shadow-md flex items-center justify-center gap-2" href="/event?id=${e.id}">
-            <span>פרטים וכרטיסים</span><span class="material-symbols-outlined text-[18px]">confirmation_number</span>
-          </a>
-        </div>
-      </article>`;
-    }
+  function cardHtml(e) {
     return `<article class="rounded-2xl overflow-hidden bg-surface-card shadow-md w-full min-w-0">
       <div class="relative w-full h-36 bg-black">
         ${favBtnHtml(e)}
@@ -252,7 +232,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const pieces = [];
       let bannerCount = 0;
       data.forEach((e, i) => {
-        pieces.push(cardHtml(e, i === 0));
+        pieces.push(cardHtml(e));
         // A banner after every 2 cards, never trailing the very last one.
         if (i % 2 === 1 && i < data.length - 1) {
           pieces.push(bannerCount % 2 === 0 ? memberBannerHtml() : advertiserBannerHtml());
