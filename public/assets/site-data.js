@@ -23545,12 +23545,13 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 	}, Oj = async (e) => {
 		let t = await Ej(XE(e) || e);
 		if (!t) return null;
-		let n = pj(t, "parties"), r = pj(t, "exchangeParties"), i = Sj(t);
+		let n = pj(t, "parties"), r = pj(t, "exchangeParties"), i = Sj(t), s = n.isActive && (n.tier === "year" || n.tier === "gold") || r.isActive && (r.tier === "year" || r.tier === "gold");
 		return {
 			userId: t.id,
 			name: t.name || "",
 			photoUrl: t.photoUrl || "",
 			hasActiveSubscription: i,
+			isPrivilegedSubscriber: s,
 			subscriptionMessage: n.isActive ? n.message : r.isActive ? r.message : n.message
 		};
 	}, kj = async (e, t) => {
@@ -35207,6 +35208,18 @@ async function requestSubscription_(e, t, n = "") {
 	} catch {}
 	return { id: a.id };
 }
+async function registerPushSubscription_(e, t) {
+	let n = XE(e) || e;
+	if (!n || !t?.endpoint) throw Error("נתונים חסרים לרישום התראות");
+	let r = btoa(unescape(encodeURIComponent(t.endpoint))).replace(/[^a-zA-Z0-9]/g, "").slice(0, 300);
+	await $u(E(T(H, "pushSubscriptions"), r), {
+		phone: n,
+		endpoint: t.endpoint,
+		keys: t.keys || null,
+		updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+	});
+	return { id: r };
+}
 async function GU() {
 	return (await hN().catch(() => ({ enabled: !1 })))?.enabled ? {
 		enabled: !0,
@@ -35347,7 +35360,7 @@ async function aW(e, t, n) {
 	if (!e) throw Error("יש להתחבר כדי לשמור מועדפים");
 	if (n) {
 		let r = await tN(e).catch(() => null), i = r?.phone, a = i ? await Oj(i).catch(() => null) : null;
-		if (!a?.hasActiveSubscription) throw Error("סימון מועדפים זמין רק למנויים");
+		if (!a?.isPrivilegedSubscriber) throw Error("סימון מועדפים זמין רק למנויים שנתיים");
 		await SU(e, t);
 	} else await CU(e, t);
 }
@@ -35436,7 +35449,8 @@ window.LPData = {
 	loadMyPersonalArea: cW,
 	uploadMyProfilePhoto: lW,
 	loadMyForumPersonalArea: dW,
-	changeMyForumPassword: uW
+	changeMyForumPassword: uW,
+	registerPushSubscription: registerPushSubscription_
 };
 function pW() {
 	if (document.getElementById("lpSupportChat")) return;

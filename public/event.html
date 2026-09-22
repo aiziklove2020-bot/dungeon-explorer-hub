@@ -67,9 +67,9 @@
 </nav>
 
 
-<script src="assets/app.js?v=202609062118"></script>
+<script src="assets/app.js?v=202609221638"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609221614";
+import "./assets/site-data.js?v=202609221638";
 document.addEventListener("DOMContentLoaded", async () => {
  const id = new URLSearchParams(location.search).get("id");
  const events = await window.LPData.loadEvents().catch(() => []);
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
  let isSubscriber = false;
  if (currentUser) {
    const area = await window.LPData.loadMyForumPersonalArea(currentUser.id).catch(() => null);
-   isSubscriber = !!area?.profile?.hasActiveSubscription;
+   isSubscriber = !!area?.profile?.isPrivilegedSubscriber;
    savedNow = (await window.LPData.loadMyFavorites(currentUser.id).catch(() => [])).includes(favId);
  }
  if (!isSubscriber) {

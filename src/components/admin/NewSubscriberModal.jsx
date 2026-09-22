@@ -22,6 +22,7 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
     phoneNumber: initialValues?.phoneNumber || '',
     paymentMethod: PAYMENT_METHODS[0],
     expiryDate: todayPlusYear(),
+    tier: 'year',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -116,10 +117,18 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
           <div>
             <label className="text-xs uppercase font-bold text-[#94A3B8]">תאריך תפוגה *</label>
             <div className="flex gap-2 mb-2">
-              <button type="button" onClick={() => setForm((f) => ({ ...f, expiryDate: todayPlusDay() }))} className="flex-1 bg-[#1f1f23] hover:bg-[#2a292e] border border-[rgba(255,255,255,0.08)] text-white py-2 rounded-lg font-bold text-xs">
+              <button
+                type="button"
+                onClick={() => setForm((f) => ({ ...f, expiryDate: todayPlusDay(), tier: 'day' }))}
+                className={`flex-1 border py-2 rounded-lg font-bold text-xs ${form.tier === 'day' ? 'bg-[#ff5708] border-[#ff5708] text-white' : 'bg-[#1f1f23] hover:bg-[#2a292e] border-[rgba(255,255,255,0.08)] text-white'}`}
+              >
                 מנוי יומי
               </button>
-              <button type="button" onClick={() => setForm((f) => ({ ...f, expiryDate: todayPlusYear() }))} className="flex-1 bg-[#1f1f23] hover:bg-[#2a292e] border border-[rgba(255,255,255,0.08)] text-white py-2 rounded-lg font-bold text-xs">
+              <button
+                type="button"
+                onClick={() => setForm((f) => ({ ...f, expiryDate: todayPlusYear(), tier: 'year' }))}
+                className={`flex-1 border py-2 rounded-lg font-bold text-xs ${form.tier === 'year' ? 'bg-[#ff5708] border-[#ff5708] text-white' : 'bg-[#1f1f23] hover:bg-[#2a292e] border-[rgba(255,255,255,0.08)] text-white'}`}
+              >
                 מנוי שנתי
               </button>
             </div>

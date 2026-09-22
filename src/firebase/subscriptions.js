@@ -177,6 +177,7 @@ export const getSubscription = (user, kind) => {
       tier: 'gold',
       isGold: true,
       isActive: true,
+      isPrivileged: true,
       isExpired: false,
       isExpiringSoon: false,
       expiry: null,
@@ -197,6 +198,7 @@ export const getSubscription = (user, kind) => {
       tier: raw.tier || null,
       isGold: false,
       isActive: false,
+      isPrivileged: false,
       isExpired: true,
       isExpiringSoon: false,
       expiry: null,
@@ -221,6 +223,7 @@ export const getSubscription = (user, kind) => {
     tier: raw.tier || null,
     isGold: false,
     isActive: !isExpired,
+    isPrivileged: !isExpired && raw.tier === 'year',
     isExpired,
     isExpiringSoon,
     expiry: expiryDate.toISOString(),
@@ -384,11 +387,13 @@ export const addOrExtendSubscription = async (userId, kind, tier) => {
 };
 
 /**
- * Set an explicit expiry date for a kind. Tier is auto-classified: gold when
+ * Set an explicit expiry date for a kind. Pass `explicitTier` when the caller
+ * knows the real tier being granted (e.g. an admin picking "יומי"/"שנתי") —
+ * it always wins. Without it, tier is auto-classified: gold when
  * `expiryDate` is null/undefined, otherwise we keep the previous tier (or fall
  * back to `year` for a brand-new subscription).
  */
-export const setSubscriptionExpiry = async (userId, kind, expiryDate) => {
+export const setSubscriptionExpiry = async (userId, kind, expiryDate, explicitTier) => {
   if (!SUBSCRIPTION_KINDS[kind]) throw new Error(`Unknown subscription kind: ${kind}`);
 
   const userData = await loadUserOrThrow(userId);
@@ -407,7 +412,9 @@ export const setSubscriptionExpiry = async (userId, kind, expiryDate) => {
   } else {
     const iso = toIso(expiryDate);
     if (!iso) throw new Error('Invalid expiry date');
-    const tier = prev?.tier && prev.tier !== 'gold' ? prev.tier : 'year';
+    const tier = SUBSCRIPTION_TIER_IDS.includes(explicitTier)
+      ? explicitTier
+      : (prev?.tier && prev.tier !== 'gold' ? prev.tier : 'year');
     next = {
       tier,
       expiry: iso,
@@ -452,4 +459,15 @@ export const removeSubscription = async (userId, kind) => {
 export const hasAnyActiveSubscription = (user) => {
   const normalized = normalizeUserSubscriptions(user);
   return SUBSCRIPTION_KIND_IDS.some((kind) => getSubscription(normalized, kind).isActive);
+};
+
+/**
+ * Convenience: does this user hold a *privileged* subscription (yearly, or
+ * the perpetual gold tier)? Day-tier subscriptions are active but not
+ * privileged — features like favorites/match-reveal/photo-upload require
+ * this, not just `hasAnyActiveSubscription`.
+ */
+export const hasAnyPrivilegedSubscription = (user) => {
+  const normalized = normalizeUserSubscriptions(user);
+  return SUBSCRIPTION_KIND_IDS.some((kind) => getSubscription(normalized, kind).isPrivileged);
 };

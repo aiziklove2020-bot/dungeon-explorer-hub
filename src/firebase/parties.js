@@ -17,6 +17,7 @@ import {
 import { db } from './config';
 import { normalizeIsraeliPhone } from '../utils/phone';
 import { sendBalanceMatchNotification } from './telegram';
+import { sendPushToPhone } from './pushSubscriptions';
 import { isUserBlocked, createUserFromRegistration } from './users';
 import { getActiveParties as getActivePartiesFromDataAccess, getBalanceMatches as getBalanceMatchesFromDataAccess, getPartyById as getPartyByIdFromDataAccess, getUserByPhone, invalidateCache } from './dataAccess';
 import {
@@ -1443,6 +1444,18 @@ export const linkClientRegistrationsToUser = async (phoneNumber, userId, userDat
 
 export const saveBalanceMatches = async (partyId, balanceMatches) => {
   const partyRef = doc(db, PARTIES_COLLECTION, partyId);
+
+  // Diff against what's currently stored so a push only fires for pairs
+  // that are newly matched by this save, not on every subsequent edit of
+  // an already-matched pair (e.g. an admin fixing an unrelated match).
+  const prevSnap = await getDoc(partyRef);
+  const prevMatches = prevSnap.exists() ? (prevSnap.data().balanceMatches || []) : [];
+  const wasMatchedPair = (m) =>
+    prevMatches.some((p) => p.isMatched && !p.isCouple && p.malePhone === m.malePhone && p.femalePhone === m.femalePhone);
+  const newlyMatched = (balanceMatches || []).filter(
+    (m) => m.isMatched && !m.isCouple && m.malePhone && m.femalePhone && !wasMatchedPair(m)
+  );
+
   await updateDoc(partyRef, {
     balanceMatches: balanceMatches,
     balanceUpdatedAt: Timestamp.now()
@@ -1467,6 +1480,21 @@ export const saveBalanceMatches = async (partyId, balanceMatches) => {
   await invalidateCache(`party_${partyId}`); // Clear partyById cache
   await invalidateCache(`balanceMatches_${partyId}`);
   await invalidateCache('activeParties_all'); // Clear all parties cache
+
+  // Best-effort mobile push to both sides of every newly-matched pair —
+  // never let a push failure surface as a "match save failed" error.
+  for (const m of newlyMatched) {
+    sendPushToPhone(m.malePhone, {
+      title: '🎉 יש לכם התאמת איזון!',
+      body: 'מצאנו לכם התאמה למסיבה. היכנסו לאזור האישי לפרטים.',
+      url: '/my-area',
+    }).catch(() => {});
+    sendPushToPhone(m.femalePhone, {
+      title: '🎉 יש לכם התאמת איזון!',
+      body: 'מצאנו לכם התאמה למסיבה. היכנסו לאזור האישי לפרטים.',
+      url: '/my-area',
+    }).catch(() => {});
+  }
 };
 
 // Re-export from dataAccess for backward compatibility
