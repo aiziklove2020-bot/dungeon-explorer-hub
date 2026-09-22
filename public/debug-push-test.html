@@ -1,0 +1,35 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>בדיקת פוש</title>
+<style>
+  body{background:#0e0e10;color:#e5e1e4;font-family:-apple-system,sans-serif;padding:20px;direction:rtl}
+  button{height:52px;width:100%;border-radius:14px;border:none;background:linear-gradient(135deg,#ff5708,#ffaa00);color:#fff;font-size:1rem;font-weight:800}
+  pre{background:#18181b;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;white-space:pre-wrap;word-break:break-word;direction:ltr;text-align:left;font-size:.8rem;margin-top:16px}
+</style>
+</head><body>
+<h2>בדיקת שליחת פוש (מהאתר עצמו)</h2>
+<button id="go">שלח בדיקה ל-0587000873</button>
+<pre id="out">לחץ על הכפתור...</pre>
+<script>
+const SUBSCRIPTION = {
+  id: "aHR0cHM6Ly93ZWIucHVzaC5hcHBsZS5jb20vUUNSTnIzWWNYaENGMFI4V2haQzdmZ3dZd21ac2N2WlRrTWJTOGxILVVRNnVHUHZ0VWZBbUpza1g5NDdrOXUydnFBYWlwTFhhZHA3UEhURXc5dXJ5Y3V3S3ZpLUhDa2M5b0k0b1BaLVUyRm9UVVRDeUg4aUUxTEhSZjNVWEE3OHduczNVVW1Xc05vbkpJYmkzU3I5WFBNVDhUWWhvaFo5TVFHRGhMSEliYjhF",
+  endpoint: "https://web.push.apple.com/QCRNr3YcXhCF0R8WhZC7fgwYwmZscvZTkMbS8lH-UQ6uGPvtUfAmJskX947k9u2vqAaipLXadp7PHTEw9urycuwKvi-HCkc9oI4oPZ-U2FoTUTCyH8iE1LHRf3UXA78wns3UUmWsNonJIbi3Sr9XPMT8TYhohZ9MQGDhLHIbb8E",
+  keys: { p256dh: "BEmMOtW-5vrNdhfTvHS2Xybg_whNsTO-fE_1_WDwXBlNaShPiCtrvaCHGOjwGIoyIe3zwrAhnrJhqLHRmMNImSc", auth: "Xln0DCjlgBoSXIyAqNeuPQ" }
+};
+document.getElementById("go").addEventListener("click", async () => {
+  const out = document.getElementById("out");
+  out.textContent = "שולח...";
+  try {
+    const res = await fetch("/api/send-push", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subscriptions: [SUBSCRIPTION], title: "בדיקת מערכת", body: "בדיקה מהדף החי", url: "/my-area" })
+    });
+    const json = await res.json().catch(() => ({ parseError: true, raw: await res.text().catch(()=>"") }));
+    out.textContent = "HTTP " + res.status + "\n" + JSON.stringify(json, null, 2);
+  } catch (err) {
+    out.textContent = "שגיאת רשת: " + String(err);
+  }
+});
+</script>
+</body></html>
