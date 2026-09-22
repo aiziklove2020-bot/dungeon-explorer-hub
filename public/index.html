@@ -145,8 +145,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const box = document.getElementById("socialIcons");
       box.innerHTML = ORDER.filter((t) => byType[t]).map((t) => {
         const l = byType[t];
-        return `<a href="${l.url}" target="_blank" rel="noopener noreferrer" aria-label="${l.label}" title="${l.label}" class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-text-secondary hover:text-primary hover:bg-surface-container-highest transition-colors">
-          ${BRAND_SVG[t]}
+        return `<a href="${l.url}" target="_blank" rel="noopener noreferrer" aria-label="${l.label}" title="${l.label}" class="flex flex-col items-center gap-1 text-text-secondary hover:text-primary transition-colors">
+          <span class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center hover:bg-surface-container-highest transition-colors">${BRAND_SVG[t]}</span>
+          <span class="text-[10px] font-bold">${l.label}</span>
         </a>`;
       }).join("");
     } catch {}
