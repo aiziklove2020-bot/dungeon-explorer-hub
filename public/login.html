@@ -49,31 +49,47 @@
  </nav>
 </aside><div class="scrim"></div>
 <main class="max-w-md mx-auto px-4">
-<section class="min-h-[70vh] flex items-center justify-center py-8">
-  <div class="w-full relative overflow-hidden rounded-2xl bg-gradient-to-b from-surface-container-high via-surface-container to-surface-container-low p-5 shadow-[0_12px_32px_rgba(0,0,0,0.5)]">
+<section class="flex flex-col items-center py-8">
+  <div class="relative flex flex-col items-center text-center">
+    <div class="relative mb-1">
+      <div class="absolute -inset-2 bg-gradient-to-tr from-primary-container to-secondary-container rounded-2xl blur-lg opacity-60"></div>
+      <img src="assets/logo-stacked.png?v=202609221" alt="LIBRAL PARTY" class="relative w-28 h-auto object-contain rounded-2xl bg-surface-container-lowest p-2.5 shadow-2xl">
+    </div>
+    <span class="relative -mt-2 px-3 py-1 rounded-full bg-gradient-to-l from-primary-container to-secondary-container text-on-primary font-label-sm text-label-sm font-bold shadow-md tracking-wide">LIVE PASS</span>
+    <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-text-primary font-extrabold mt-4">מסיבות ליברליות בישראל</h1>
+    <p class="text-secondary font-bold text-body-md mt-2 px-2">חיבור. תשוקה. חיי לילה. – איזון מושלם בין זוגות וקצב</p>
+    <p class="text-text-secondary text-body-sm mt-1">כניסה לעולם המסיבות וההטבות הבלעדיות בישראל</p>
+  </div>
+
+  <div class="relative w-full grid grid-cols-2 gap-2 mt-6">
+    <a href="/advertiser-login" class="py-3 rounded-xl text-center text-label-md font-bold border border-white/10 bg-surface-container-high text-text-secondary flex items-center justify-center gap-1.5">
+      <span class="material-symbols-outlined text-[18px]">campaign</span>כניסת מפרסמים
+    </a>
+    <a href="/login" class="py-3 rounded-xl text-center text-label-md font-bold bg-gradient-to-l from-primary-container to-secondary-container text-on-primary shadow-[0_4px_20px_rgba(255,87,8,0.35)] flex items-center justify-center gap-1.5">
+      <span class="material-symbols-outlined text-[18px]">sell</span>כניסת מנויים
+    </a>
+  </div>
+
+  <div class="w-full relative overflow-hidden rounded-2xl bg-gradient-to-b from-surface-container-high via-surface-container to-surface-container-low p-5 shadow-[0_12px_32px_rgba(0,0,0,0.5)] mt-4">
     <div class="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-primary-container/15 blur-3xl pointer-events-none"></div>
-    <div class="relative flex flex-col items-center text-center mb-5">
-      <div class="relative mb-3">
-        <div class="absolute -inset-1.5 bg-gradient-to-tr from-primary-container to-secondary-container rounded-full blur-lg opacity-60"></div>
-        <img src="icon-512.png" alt="LIBRAL PARTY" class="relative w-16 h-16 rounded-full object-contain bg-surface-container-lowest p-1.5 shadow-2xl">
-      </div>
-      <h1 class="font-headline-md text-headline-md text-text-primary font-bold">כניסת מנויים</h1>
-      <p class="text-text-secondary text-body-sm mt-1">התחברו כדי לגשת לאזור האישי שלכם</p>
-    </div>
-    <div class="relative grid grid-cols-2 bg-surface-container-lowest p-1 rounded-xl mb-5">
-      <a class="py-2.5 rounded-lg text-center text-label-md font-bold bg-primary-container text-on-primary shadow-md" href="/login">כניסת משתמשים</a>
-      <a class="py-2.5 rounded-lg text-center text-label-md font-bold text-text-secondary" href="/advertiser-login">כניסת מפרסמים</a>
-    </div>
     <form class="relative flex flex-col gap-3" id="loginForm">
       <div>
-        <label class="block text-xs font-bold text-text-secondary mb-1.5">מספר טלפון</label>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-xs font-bold text-text-secondary">מספר טלפון</label>
+          <span class="text-[10px] text-text-muted" dir="ltr">פורמט: 05X-XXXXXXX</span>
+        </div>
         <input required type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel" name="phone" dir="ltr" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container text-left">
       </div>
       <div>
-        <label class="block text-xs font-bold text-text-secondary mb-1.5">סיסמה</label>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-xs font-bold text-text-secondary">סיסמה אישית</label>
+          <a href="/contact" class="text-[11px] text-primary underline">שכחת סיסמה?</a>
+        </div>
         <input required type="password" name="password" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container">
       </div>
-      <button class="h-12 mt-1 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary font-label-lg text-label-lg font-bold shadow-[0_4px_20px_rgba(255,87,8,0.35)]">כניסה</button>
+      <button class="h-12 mt-1 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary font-label-lg text-label-lg font-bold shadow-[0_4px_20px_rgba(255,87,8,0.35)] flex items-center justify-center gap-1.5">
+        <span class="material-symbols-outlined text-[18px]">arrow_back</span>התחברות לאזור האישי
+      </button>
     </form>
     <p class="relative text-center text-text-secondary text-body-sm mt-4">אין לכם משתמש? <a class="text-primary font-bold underline" href="/register">הרשמה</a></p>
   </div>
