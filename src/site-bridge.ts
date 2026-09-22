@@ -461,10 +461,21 @@ async function shareMyBalancePhone(partyId: string, femalePhone: string, shared:
   await setBalanceMatchPhoneShared(partyId, femalePhone, shared);
 }
 
-/** Real per-account favorites (requires a logged-in forum user — see login()/register() above). */
+/**
+ * Real per-account favorites — requires a logged-in forum user AND an active
+ * subscription. A forum account alone (self-registered nickname+phone+password)
+ * isn't a subscriber; only adding is gated so an existing favorite can always
+ * be removed even after a subscription lapses.
+ */
 async function toggleFavorite(userId: string, partyId: string, isFavorite: boolean) {
   if (!userId) throw new Error("יש להתחבר כדי לשמור מועדפים");
   if (isFavorite) {
+    const forumUser = await getForumUserById(userId).catch(() => null) as any;
+    const phone = forumUser?.phone;
+    const profile = phone ? await getMyPersonalAreaProfile(phone).catch(() => null) : null;
+    if (!profile?.hasActiveSubscription) {
+      throw new Error("סימון מועדפים זמין רק למנויים");
+    }
     await addFavorite(userId, partyId);
   } else {
     await removeFavorite(userId, partyId);

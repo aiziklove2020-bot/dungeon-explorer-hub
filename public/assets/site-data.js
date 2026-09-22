@@ -35320,7 +35320,11 @@ async function iW(e, t, n) {
 }
 async function aW(e, t, n) {
 	if (!e) throw Error("יש להתחבר כדי לשמור מועדפים");
-	n ? await SU(e, t) : await CU(e, t);
+	if (n) {
+		let r = await tN(e).catch(() => null), i = r?.phone, a = i ? await Oj(i).catch(() => null) : null;
+		if (!a?.hasActiveSubscription) throw Error("סימון מועדפים זמין רק למנויים");
+		await SU(e, t);
+	} else await CU(e, t);
 }
 async function oW(e) {
 	return e ? wU(e).catch(() => []) : [];

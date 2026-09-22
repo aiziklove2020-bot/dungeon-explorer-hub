@@ -181,8 +181,8 @@ async function lpWireFavHearts(container) {
       ev.preventDefault();
       const current = lpFavIdentity();
       if (!current) {
-        toast("הזינו מספר טלפון באזור האישי כדי לשמור מועדפים");
-        setTimeout(() => (location.href = "/my-area"), 900);
+        toast("יש להתחבר כמנוי כדי לשמור מועדפים");
+        setTimeout(() => (location.href = "/login"), 900);
         return;
       }
       const nowFav = icon.textContent === "favorite";
@@ -193,7 +193,7 @@ async function lpWireFavHearts(container) {
         toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
       } catch (err) {
         icon.textContent = nowFav ? "favorite" : "favorite_border"; // revert
-        toast("שגיאה בשמירת מועדף", "error");
+        toast(err?.message || "שגיאה בשמירת מועדף", "error");
       }
     });
   });
