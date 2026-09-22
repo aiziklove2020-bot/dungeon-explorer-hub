@@ -149,7 +149,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
               />
             </div>
             {passwordSetupError && (
-              <p id={setupErrorId} className="text-sm text-right" style={{ color: '#e11d48' }} role="alert">{passwordSetupError}</p>
+              <p id={setupErrorId} className="text-sm text-right" style={{ color: '#ff5708' }} role="alert">{passwordSetupError}</p>
             )}
             <button
               type="submit"
@@ -226,7 +226,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
               aria-describedby={passwordError ? passwordErrorId : undefined}
             />
             {passwordError && (
-              <p id={passwordErrorId} className="text-sm text-right mt-1" style={{ color: '#e11d48' }} role="alert">{passwordError}</p>
+              <p id={passwordErrorId} className="text-sm text-right mt-1" style={{ color: '#ff5708' }} role="alert">{passwordError}</p>
             )}
           </div>
           <button
@@ -235,7 +235,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
             aria-disabled={loading}
             className="w-full text-white font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
             style={{
-              background: 'linear-gradient(135deg,#e11d48,#be0037)',
+              background: 'linear-gradient(135deg,#ff5708,#ff7a29)',
               borderRadius: 15,
               minHeight: 54,
             }}

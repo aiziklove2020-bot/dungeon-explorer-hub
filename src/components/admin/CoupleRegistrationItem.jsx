@@ -45,7 +45,7 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
             {onRemoveFromParty && partyId && (
               <button
                 onClick={() => onRemoveFromParty(partyId, maleReg)}
-                className="bg-[#e11d48] hover:bg-[#be0037] text-white px-2 py-1 rounded text-[10px] font-bold"
+                className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-2 py-1 rounded text-[10px] font-bold"
                 title={t('confirmRemoveUser')}
               >
                 <Trash2 size={10} /> {t('admin.remove')}
@@ -92,7 +92,7 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
             {onRemoveFromParty && partyId && (
               <button
                 onClick={() => onRemoveFromParty(partyId, femaleReg)}
-                className="bg-[#e11d48] hover:bg-[#be0037] text-white px-2 py-1 rounded text-[10px] font-bold"
+                className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-2 py-1 rounded text-[10px] font-bold"
                 title={t('confirmRemoveUser')}
               >
                 <Trash2 size={10} /> {t('admin.remove')}

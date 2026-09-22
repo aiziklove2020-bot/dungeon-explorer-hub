@@ -108,7 +108,7 @@ const AdvertisersSection = ({ showSaved }) => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="חיפוש לפי שם עסק, איש קשר או טלפון..."
-                className="w-full bg-[#121218] rounded-xl pr-9 pl-3 py-2 text-white placeholder:text-[#94A3B8] outline-none focus:ring-1 focus:ring-[#e11d48]"
+                className="w-full bg-[#121218] rounded-xl pr-9 pl-3 py-2 text-white placeholder:text-[#94A3B8] outline-none focus:ring-1 focus:ring-[#ff5708]"
               />
             </div>
             <div className="flex items-center gap-1.5 overflow-x-auto">
@@ -118,7 +118,7 @@ const AdvertisersSection = ({ showSaved }) => {
                   type="button"
                   onClick={() => setStatusFilter(f.id)}
                   className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap"
-                  style={statusFilter === f.id ? { background: '#e11d48', color: '#fff' } : { background: '#121218', color: '#a9a9b2' }}
+                  style={statusFilter === f.id ? { background: '#ff5708', color: '#fff' } : { background: '#121218', color: '#a9a9b2' }}
                 >
                   {f.label}
                 </button>

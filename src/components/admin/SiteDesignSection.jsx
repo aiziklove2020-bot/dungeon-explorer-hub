@@ -96,7 +96,7 @@ const SiteDesignSection = ({ showSaved }) => {
         {heroImageUrl && (
           <img src={heroImageUrl} alt="באנר ראשי" className="w-full max-w-md rounded-xl object-cover bg-[#1f1f23]" />
         )}
-        <label className="inline-block cursor-pointer bg-[#e11d48] hover:bg-[#be0037] text-white font-bold px-4 py-2 rounded-xl text-sm">
+        <label className="inline-block cursor-pointer bg-[#ff5708] hover:bg-[#ff7a29] text-white font-bold px-4 py-2 rounded-xl text-sm">
           {uploadingHero ? 'מעלה...' : 'העלה תמונת באנר חדשה'}
           <input
             type="file"
@@ -116,7 +116,7 @@ const SiteDesignSection = ({ showSaved }) => {
           {logoUrl && (
             <img src={logoUrl} alt="לוגו" className="h-16 w-auto object-contain rounded bg-[#1f1f23] p-2" />
           )}
-          <label className="cursor-pointer bg-[#e11d48] hover:bg-[#be0037] text-white font-bold px-4 py-2 rounded-xl text-sm">
+          <label className="cursor-pointer bg-[#ff5708] hover:bg-[#ff7a29] text-white font-bold px-4 py-2 rounded-xl text-sm">
             {uploadingLogo ? 'מעלה...' : 'העלה לוגו קטן חדש'}
             <input
               type="file"
@@ -136,7 +136,7 @@ const SiteDesignSection = ({ showSaved }) => {
           <button
             type="button"
             onClick={() => saveBanners([...banners, emptyBanner()])}
-            className="flex items-center gap-1 bg-[#e11d48] hover:bg-[#be0037] text-white font-bold px-3 py-2 rounded-xl text-sm"
+            className="flex items-center gap-1 bg-[#ff5708] hover:bg-[#ff7a29] text-white font-bold px-3 py-2 rounded-xl text-sm"
           >
             <Plus size={16} /> הוסף באנר
           </button>

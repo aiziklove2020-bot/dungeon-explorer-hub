@@ -124,10 +124,10 @@ const BlogAdminSection = ({ showSaved }) => {
                       value={editCommentContent}
                       onChange={(e) => setEditCommentContent(e.target.value)}
                       rows={4}
-                      className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
+                      className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
                     />
                     <div className="flex gap-2">
-                      <button onClick={saveEditComment} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
+                      <button onClick={saveEditComment} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
                       <button onClick={() => setEditingCommentId(null)} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
                     </div>
                   </div>
@@ -170,7 +170,7 @@ const BlogAdminSection = ({ showSaved }) => {
                     type="text"
                     value={editPostForm.title}
                     onChange={(e) => setEditPostForm({ ...editPostForm, title: e.target.value })}
-                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
+                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
                   />
                   <div className="flex flex-wrap items-center gap-2">
                     <SpoilerWrapButton
@@ -184,10 +184,10 @@ const BlogAdminSection = ({ showSaved }) => {
                     value={editPostForm.content}
                     onChange={(e) => setEditPostForm({ ...editPostForm, content: e.target.value })}
                     rows={5}
-                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
+                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
                   />
                   <div className="flex gap-2">
-                    <button onClick={saveEditPost} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
+                    <button onClick={saveEditPost} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
                     <button onClick={() => setEditingPostId(null)} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
                   </div>
                 </div>

@@ -202,7 +202,7 @@ const LinksSection = ({ showSaved }) => {
                 alert(t('saveError'));
               }
             }}
-            className="bg-[#e11d48] hover:bg-[#be0037] text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
+            className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
           >
             <Save size={18} /> {t('saveAll')}
           </button>
@@ -219,7 +219,7 @@ const LinksSection = ({ showSaved }) => {
                 type="url"
                 value={whatsappGroupsData.men || ''}
                 onChange={e => setWhatsappGroupsData({...whatsappGroupsData, men: e.target.value})}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
                 placeholder="https://chat.whatsapp.com/..."
               />
             </div>
@@ -229,7 +229,7 @@ const LinksSection = ({ showSaved }) => {
                 type="url"
                 value={whatsappGroupsData.women || ''}
                 onChange={e => setWhatsappGroupsData({...whatsappGroupsData, women: e.target.value})}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
                 placeholder="https://chat.whatsapp.com/..."
               />
             </div>
@@ -250,7 +250,7 @@ const LinksSection = ({ showSaved }) => {
                     newLinks[index] = { ...link, label: e.target.value };
                     setSocialLinksData(newLinks);
                   }}
-                  className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-3 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
+                  className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-3 rounded-lg focus:border-[#ff5708] outline-none text-white text-right"
                   placeholder="Instagram, Facebook, etc."
                 />
               </div>
@@ -264,7 +264,7 @@ const LinksSection = ({ showSaved }) => {
                     newLinks[index] = { ...link, url: e.target.value };
                     setSocialLinksData(newLinks);
                   }}
-                  className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-3 rounded-lg focus:border-[#e11d48] outline-none text-white text-right"
+                  className="w-full bg-[#121218] border border-[rgba(255,255,255,0.08)] p-3 rounded-lg focus:border-[#ff5708] outline-none text-white text-right"
                   placeholder="https://..."
                 />
               </div>
@@ -294,7 +294,7 @@ const LinksSection = ({ showSaved }) => {
               </button>
               <button
                 onClick={() => setShowTelegramForm(!showTelegramForm)}
-                className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold text-sm"
+                className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-2 rounded-xl font-bold text-sm"
               >
                 {showTelegramForm ? t('admin.cancel') : t('admin.manageSettings')}
               </button>
@@ -308,7 +308,7 @@ const LinksSection = ({ showSaved }) => {
                   type="text"
                   value={telegramSettings.botToken || ''}
                   onChange={handleBotTokenChange}
-                  className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                  className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
                   placeholder="Enter Bot Token from @BotFather"
                 />
                 {botInfo && (
@@ -331,7 +331,7 @@ const LinksSection = ({ showSaved }) => {
                   type="text"
                   value={telegramSettings.chatId || ''}
                   onChange={(e) => setTelegramSettings({ ...telegramSettings, chatId: e.target.value })}
-                  className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                  className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
                   placeholder="Enter Chat ID (number or @username)"
                 />
                 <p className="text-[#94A3B8] text-xs mt-1">
@@ -347,7 +347,7 @@ const LinksSection = ({ showSaved }) => {
                 />
                 <label>{t('admin.enableTelegramNotifications')}</label>
               </div>
-              <button type="submit" className="bg-[#e11d48] hover:bg-[#be0037] text-white px-6 py-2 rounded-xl font-bold">
+              <button type="submit" className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-6 py-2 rounded-xl font-bold">
                 {t('save') || 'שמור'}
               </button>
             </form>

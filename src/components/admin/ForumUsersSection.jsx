@@ -247,7 +247,7 @@ const ForumUsersSection = ({ showSaved }) => {
             onChange={(e) => setLinkSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && runLinkSearch()}
             placeholder="חפש לפי שם או טלפון..."
-            className="flex-1 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-xl focus:border-[#e11d48] outline-none text-white text-right text-sm"
+            className="flex-1 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-xl focus:border-[#ff5708] outline-none text-white text-right text-sm"
           />
           <button onClick={runLinkSearch} className="bg-[#2a292e] hover:bg-[#353439] text-white px-4 rounded-xl font-bold text-sm">
             <Search size={16} />
@@ -276,7 +276,7 @@ const ForumUsersSection = ({ showSaved }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="חיפוש לפי כינוי או אימייל..."
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">

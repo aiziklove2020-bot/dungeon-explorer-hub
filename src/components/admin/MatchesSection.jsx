@@ -640,7 +640,7 @@ const MatchesSection = ({ showSaved }) => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <h4 className="text-lg font-bold">{party.name}</h4>
-                      <span className="px-2 py-1 rounded text-xs font-bold bg-[#e11d48]">
+                      <span className="px-2 py-1 rounded text-xs font-bold bg-[#ff5708]">
                         {t('admin.internalParty')}
                       </span>
                       {partyBalance.length > 0 && (

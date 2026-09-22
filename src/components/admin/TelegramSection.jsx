@@ -390,7 +390,7 @@ const TelegramSection = ({ showSaved }) => {
     }
   };
 
-  const inputCls = 'w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right';
+  const inputCls = 'w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right';
   const labelCls = 'block text-xs uppercase font-bold text-[#94A3B8] mb-1';
 
   if (loading) {
@@ -422,7 +422,7 @@ const TelegramSection = ({ showSaved }) => {
             type="button"
             onClick={() => setActivePanel(panel)}
             className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 ${
-              activePanel === panel ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'
+              activePanel === panel ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'
             }`}
           >
             {panel === 'bots' && t('admin.telegram.bots')}
@@ -474,7 +474,7 @@ const TelegramSection = ({ showSaved }) => {
                 autoComplete="off"
               />
             </div>
-            <button type="button" onClick={addBot} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
+            <button type="button" onClick={addBot} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
               <Plus size={16} /> {t('admin.telegram.addBot')}
             </button>
           </div>
@@ -547,7 +547,7 @@ const TelegramSection = ({ showSaved }) => {
                 dir="ltr"
               />
             </div>
-            <button type="button" onClick={addChannel} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
+            <button type="button" onClick={addChannel} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
               <Plus size={16} /> {t('admin.telegram.addChannel')}
             </button>
           </div>
@@ -825,7 +825,7 @@ const TelegramSection = ({ showSaved }) => {
                                 key={key}
                                 type="button"
                                 onClick={() => setRegistrationTemplateTab(key)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold ${registrationTemplateTab === key ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold ${registrationTemplateTab === key ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
                               >
                                 {getRegistrationTypeLabel(t, key)}
                               </button>
@@ -869,7 +869,7 @@ const TelegramSection = ({ showSaved }) => {
                                 key={key}
                                 type="button"
                                 onClick={() => setBalancePublishCaseTab(key)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold ${balancePublishCaseTab === key ? 'bg-[#e11d48] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold ${balancePublishCaseTab === key ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
                               >
                                 {getBalancePublishCaseLabel(t, key)}
                               </button>
@@ -1075,7 +1075,7 @@ const TelegramSection = ({ showSaved }) => {
                   ? 'bg-green-900/40 text-green-300 border border-green-700'
                   : sendMsgResult.type === 'partial'
                     ? 'bg-amber-900/40 text-amber-300 border border-amber-700'
-                    : 'bg-[#93000a]/40 text-[#ffdada] border border-[#e11d48]'
+                    : 'bg-[#93000a]/40 text-[#ffdada] border border-[#ff5708]'
               }`}
             >
               {sendMsgResult.text}
@@ -1086,7 +1086,7 @@ const TelegramSection = ({ showSaved }) => {
             type="button"
             onClick={handleSendMessage}
             disabled={sendingMsg}
-            className="bg-[#e11d48] hover:bg-[#be0037] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
+            className="bg-[#ff5708] hover:bg-[#ff7a29] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
           >
             <Send size={16} />
             {sendingMsg ? t('admin.telegram.sending') : t('admin.telegram.sendNow')}
@@ -1096,7 +1096,7 @@ const TelegramSection = ({ showSaved }) => {
 
       {activePanel !== 'sendMessage' && (
         <form onSubmit={handleSave} className="pt-4 border-t border-[rgba(255,255,255,0.08)]">
-          <button type="submit" disabled={saving} className="bg-[#e11d48] hover:bg-[#be0037] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
+          <button type="submit" disabled={saving} className="bg-[#ff5708] hover:bg-[#ff7a29] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
             <Send size={16} /> {saving ? t('saving') : t('save')}
           </button>
         </form>

@@ -231,7 +231,7 @@ const WorkshopsSection = ({ showSaved }) => {
         <button
           type="button"
           onClick={openAdd}
-          className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2"
+          className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2"
         >
           <Plus size={18} />
           {t('workshops.add')}
@@ -345,7 +345,7 @@ const WorkshopsSection = ({ showSaved }) => {
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold disabled:opacity-50"
+                  className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-2 rounded-xl font-bold disabled:opacity-50"
                 >
                   {saving ? t('uploading') : t('save')}
                 </button>

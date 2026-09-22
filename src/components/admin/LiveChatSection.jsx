@@ -105,7 +105,7 @@ const LiveChatSection = ({ showSaved }) => {
       <button
         type="button"
         onClick={handleSave}
-        className="bg-[#e11d48] hover:bg-[#be0037] text-white font-bold px-6 py-2 rounded-xl"
+        className="bg-[#ff5708] hover:bg-[#ff7a29] text-white font-bold px-6 py-2 rounded-xl"
       >
         {t('admin.save') || 'שמור'}
       </button>

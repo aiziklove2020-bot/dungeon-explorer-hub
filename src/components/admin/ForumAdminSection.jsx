@@ -220,10 +220,10 @@ const ForumAdminSection = ({ showSaved }) => {
                       value={editReplyContent}
                       onChange={(e) => setEditReplyContent(e.target.value)}
                       rows={4}
-                      className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
+                      className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
                     />
                     <div className="flex gap-2">
-                      <button onClick={saveEditReply} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
+                      <button onClick={saveEditReply} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
                       <button onClick={() => setEditingReplyId(null)} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
                     </div>
                   </div>
@@ -235,7 +235,7 @@ const ForumAdminSection = ({ showSaved }) => {
                       {reply.editedAt && <span className="text-yellow-600"> (נערך)</span>}
                     </p>
                     {reply.quotedContent && (
-                      <div className="border-r-2 border-[#e11d48] bg-[#1f1f23]/50 rounded px-3 py-2 mb-2 text-xs">
+                      <div className="border-r-2 border-[#ff5708] bg-[#1f1f23]/50 rounded px-3 py-2 mb-2 text-xs">
                         <span className="font-bold text-[#e4e1e7]">{reply.quotedAuthorName}:</span>
                         <RichQuotePreview content={reply.quotedContent} className="text-[11px] mt-1" />
                       </div>
@@ -276,7 +276,7 @@ const ForumAdminSection = ({ showSaved }) => {
                       type="text"
                       value={editTopicForm.title}
                       onChange={(e) => setEditTopicForm({ ...editTopicForm, title: e.target.value })}
-                      className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
+                      className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
                     />
                     <div className="flex flex-wrap items-center gap-2">
                       <SpoilerWrapButton
@@ -290,10 +290,10 @@ const ForumAdminSection = ({ showSaved }) => {
                       value={editTopicForm.content}
                       onChange={(e) => setEditTopicForm({ ...editTopicForm, content: e.target.value })}
                       rows={4}
-                      className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
+                      className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
                     />
                     <div className="flex gap-2">
-                      <button onClick={saveEditTopic} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
+                      <button onClick={saveEditTopic} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
                       <button onClick={() => setEditingTopicId(null)} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
                     </div>
                   </div>
@@ -354,7 +354,7 @@ const ForumAdminSection = ({ showSaved }) => {
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder="שם המדור"
-            className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
+            className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
             required
           />
           <input
@@ -362,10 +362,10 @@ const ForumAdminSection = ({ showSaved }) => {
             value={newDesc}
             onChange={(e) => setNewDesc(e.target.value)}
             placeholder="תיאור (אופציונלי)"
-            className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
+            className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
           />
         </div>
-        <button type="submit" className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-1">
+        <button type="submit" className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-1">
           <Plus size={16} /> הוסף מדור
         </button>
       </form>
@@ -383,16 +383,16 @@ const ForumAdminSection = ({ showSaved }) => {
                     type="text"
                     value={editSectionForm.title}
                     onChange={(e) => setEditSectionForm({ ...editSectionForm, title: e.target.value })}
-                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
+                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
                   />
                   <input
                     type="text"
                     value={editSectionForm.description}
                     onChange={(e) => setEditSectionForm({ ...editSectionForm, description: e.target.value })}
-                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#e11d48] outline-none text-right"
+                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
                   />
                   <div className="flex gap-2">
-                    <button onClick={saveEditSection} className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
+                    <button onClick={saveEditSection} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
                     <button onClick={() => setEditingSectionId(null)} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
                   </div>
                 </div>

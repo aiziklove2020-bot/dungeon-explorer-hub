@@ -32,7 +32,7 @@ const AdminHeader = ({
           <img src="/assets/logo-new.png" alt="" style={{ width: 68, height: 'auto', objectFit: 'contain', flexShrink: 0 }} />
           <div className="min-w-0">
             <h1 className="truncate" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 700, fontSize: 17, lineHeight: 1.25 }}>
-              LIBRAL PARTY <span style={{ color: '#e11d48' }}>ניהול</span>
+              LIBRAL PARTY <span style={{ color: '#ff5708' }}>ניהול</span>
             </h1>
             <p className="truncate" style={{ color: '#a9a9b2', fontSize: 12 }}>{t('admin.panelSubtitle')}</p>
           </div>
@@ -40,7 +40,7 @@ const AdminHeader = ({
         <button
           onClick={onLogout}
           className="text-white text-sm font-bold flex items-center gap-2 shrink-0"
-          style={{ background: 'transparent', border: '1px solid #e11d48', borderRadius: 15, padding: '8px 14px' }}
+          style={{ background: 'transparent', border: '1px solid #ff5708', borderRadius: 15, padding: '8px 14px' }}
         >
           <X size={16} /> {t('admin.logout')}
         </button>

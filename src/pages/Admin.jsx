@@ -238,7 +238,7 @@ const Admin = () => {
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#10B981' }} />
                 <span className="text-xs" style={{ color: '#e4e1e7' }}>מצב מאובטח</span>
               </div>
-              <Lock size={14} style={{ color: '#e11d48' }} />
+              <Lock size={14} style={{ color: '#ff5708' }} />
             </div>
           </div>
           <nav className="flex flex-col gap-0.5 px-3 mt-2 pb-4">
@@ -251,7 +251,7 @@ const Admin = () => {
                   onClick={() => startTransition(() => setActiveSection(tab.id))}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-bold transition-colors text-right"
                   style={active
-                    ? { background: 'linear-gradient(135deg,#e11d48,#be0037)', color: '#fff' }
+                    ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff' }
                     : { background: 'transparent', color: '#a9a9b2' }}
                 >
                   <Icon size={18} />
@@ -277,7 +277,7 @@ const Admin = () => {
                   onClick={() => startTransition(() => setActiveSection(tab.id))}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-bold transition-colors text-right"
                   style={active
-                    ? { background: 'linear-gradient(135deg,#e11d48,#be0037)', color: '#fff' }
+                    ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff' }
                     : { background: 'transparent', color: '#7a7a82' }}
                 >
                   <Icon size={18} />
@@ -315,7 +315,7 @@ const Admin = () => {
               className="shrink-0 px-4 py-2 text-xs md:text-sm font-bold transition-all whitespace-nowrap touch-manipulation"
               style={
                 activeSection === tab.id
-                  ? { background: 'linear-gradient(135deg,#e11d48,#be0037)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
+                  ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
                   : { background: 'transparent', color: '#a9a9b2', borderRadius: 999, border: '1px solid #2d2d34' }
               }
             >
@@ -342,7 +342,7 @@ const Admin = () => {
                 className="shrink-0 px-4 py-2 text-xs md:text-sm font-bold transition-all whitespace-nowrap touch-manipulation"
                 style={
                   activeSection === tab.id
-                    ? { background: 'linear-gradient(135deg,#e11d48,#be0037)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
+                    ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
                     : { background: 'transparent', color: '#7a7a82', borderRadius: 999, border: '1px solid #2d2d34' }
                 }
               >

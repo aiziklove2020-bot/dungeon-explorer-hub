@@ -84,13 +84,13 @@ const RssSection = ({ showSaved }) => {
             max={300}
             value={tickerSpeed}
             onChange={e => setTickerSpeed(parseInt(e.target.value, 10) || 60)}
-            className="w-24 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+            className="w-24 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
           />
           <span className="text-[#94A3B8] text-sm">{t('admin.rssSpeedSeconds')}</span>
           <button
             onClick={saveTickerSpeed}
             disabled={tickerSpeedSaving}
-            className="bg-[#e11d48] hover:bg-[#be0037] disabled:opacity-50 text-white px-4 py-2 rounded-xl font-bold"
+            className="bg-[#ff5708] hover:bg-[#ff7a29] disabled:opacity-50 text-white px-4 py-2 rounded-xl font-bold"
           >
             {tickerSpeedSaving ? t('admin.saving') : t('admin.save')}
           </button>
@@ -109,7 +109,7 @@ const RssSection = ({ showSaved }) => {
                 value={rssFeedForm.text}
                 onChange={e => setRssFeedForm({ ...rssFeedForm, text: e.target.value })}
                 rows={4}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
                 placeholder={t('admin.enterRssText')}
                 required
               />
@@ -121,7 +121,7 @@ const RssSection = ({ showSaved }) => {
                   type="number"
                   value={rssFeedForm.order}
                   onChange={e => setRssFeedForm({ ...rssFeedForm, order: parseInt(e.target.value) || 0 })}
-                  className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                  className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
                   min="0"
                 />
               </div>
@@ -156,7 +156,7 @@ const RssSection = ({ showSaved }) => {
                     alert(`${t('admin.errorSavingFeed')}: ${error.message}`);
                   }
                 }}
-                className="bg-[#e11d48] hover:bg-[#be0037] text-white px-6 py-2 rounded-xl font-bold"
+                className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-6 py-2 rounded-xl font-bold"
               >
                 {t('admin.save')}
               </button>
@@ -200,7 +200,7 @@ const RssSection = ({ showSaved }) => {
                       setEditingRssFeed(feed);
                       setRssFeedForm({ text: feed.text, enabled: feed.enabled !== false, order: feed.order || 0 });
                     }}
-                    className="bg-[#e11d48] hover:bg-[#be0037] text-white px-4 py-2 rounded-xl font-bold text-sm"
+                    className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-2 rounded-xl font-bold text-sm"
                   >
                     {t('admin.edit')}
                   </button>

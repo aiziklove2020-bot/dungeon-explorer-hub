@@ -90,7 +90,7 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
             {/* Basic profile */}
             <div className="bg-[#1f1f23]/60 border border-[rgba(255,255,255,0.08)] rounded-xl p-3 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`px-2 py-1 rounded text-xs font-bold ${user.level === 'admin' ? 'bg-[#e11d48]' : user.level === 'gold' ? 'bg-yellow-600' : user.level === 'registered' ? 'bg-green-600' : user.level === 'blocked' ? 'bg-[#93000a]' : 'bg-[#353439]'}`}>
+                <span className={`px-2 py-1 rounded text-xs font-bold ${user.level === 'admin' ? 'bg-[#ff5708]' : user.level === 'gold' ? 'bg-yellow-600' : user.level === 'registered' ? 'bg-green-600' : user.level === 'blocked' ? 'bg-[#93000a]' : 'bg-[#353439]'}`}>
                   {user.level}
                 </span>
                 <span className={`px-2 py-1 rounded text-xs font-bold ${user.gender === 'male' ? 'bg-blue-600' : user.gender === 'female' ? 'bg-pink-600' : 'bg-[#353439]'}`}>
@@ -120,7 +120,7 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
               <select
                 value={crm.source}
                 onChange={(e) => handleSourceChange(e.target.value)}
-                className="w-full mt-1 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#e11d48] outline-none text-white text-right"
+                className="w-full mt-1 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
               >
                 <option value="">לא צוין</option>
                 {CRM_SOURCES.map((s) => (
@@ -133,7 +133,7 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
                 onChange={(e) => setCrm((c) => ({ ...c, sourceNote: e.target.value }))}
                 onBlur={handleSourceNoteBlur}
                 placeholder="פרטים נוספים (למשל: שם החבר שהמליץ)"
-                className="w-full mt-2 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-xl focus:border-[#e11d48] outline-none text-white text-right text-sm"
+                className="w-full mt-2 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-xl focus:border-[#ff5708] outline-none text-white text-right text-sm"
               />
               {savingSource && <p className="text-xs text-[#94A3B8] mt-1">שומר...</p>}
             </div>
@@ -198,7 +198,7 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
                 <button
                   type="submit"
                   disabled={addingPayment}
-                  className="col-span-2 bg-[#e11d48] hover:bg-[#be0037] disabled:opacity-50 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-1.5"
+                  className="col-span-2 bg-[#ff5708] hover:bg-[#ff7a29] disabled:opacity-50 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-1.5"
                 >
                   <Plus size={16} /> הוסף תשלום
                 </button>
