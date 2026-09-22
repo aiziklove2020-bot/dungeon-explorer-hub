@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RotateCcw, Search, Shield, ShieldOff, Ban, CheckCircle, Trash2, KeyRound, Mail, MailCheck, Link2, Scale, XCircle } from 'lucide-react';
+import { RotateCcw, Search, Shield, ShieldOff, Ban, CheckCircle, Trash2, KeyRound, Mail, MailCheck, Link2, XCircle } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminLoader from './AdminLoader';
 import PhoneLink from '../PhoneLink';
@@ -18,7 +18,6 @@ import {
   setForumUserEmail,
   adminMarkForumEmailVerified,
   backfillForumNicknameLower,
-  updateForumUser,
 } from '../../firebase/forumUsers';
 
 /**
@@ -133,24 +132,6 @@ const ForumUsersSection = ({ showSaved }) => {
     } catch (err) { alert(err.message || 'שגיאה'); }
   };
 
-  const handleApproveBalance = async (fu, days) => {
-    const expiry = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
-    try {
-      await updateForumUser(fu.id, { subscriptionExpiry: expiry });
-      await load();
-      showSaved();
-    } catch (err) { alert(err.message || 'שגיאה'); }
-  };
-
-  const handleRevokeBalance = async (fu) => {
-    if (!window.confirm(`לבטל את אישור האיזון המגדרי של "${fu.nickname}"?`)) return;
-    try {
-      await updateForumUser(fu.id, { subscriptionExpiry: null });
-      await load();
-      showSaved();
-    } catch (err) { alert(err.message || 'שגיאה'); }
-  };
-
   const handleBackfill = async () => {
     if (backfilling) return;
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -229,11 +210,11 @@ const ForumUsersSection = ({ showSaved }) => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-xl md:text-2xl font-bold">משתמשי פורום</h2>
+            <h2 className="text-xl md:text-2xl font-bold">חשבונות כניסה לאתר</h2>
             <span className="px-2.5 py-1 rounded-full bg-[#1f1f23] text-[#94A3B8] text-xs font-bold">{forumUsers.length}</span>
           </div>
           <p className="text-xs text-[#94A3B8] mt-1">
-            חשבונות פורום (כינוי + סיסמה) — מערכת נפרדת לגמרי ממשתמשי האתר/מנויים ב"ניהול משתמשים". קישור לחשבון אתר מוצג כאן רק לצורך התמצאות.
+            כאן מנהלים רק את היכולת להתחבר לאתר (כינוי + סיסמה, אישור/חסימה/הרשאות). זה לא קובע אם למישהו יש מנוי — מנוי מנוהל אך ורק ב"ניהול מנויים". "מקושר למשתמש אתר" למטה מראה לאיזו רשומת מנוי/הרשמה (אם קיימת) החשבון הזה שייך.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -357,39 +338,6 @@ const ForumUsersSection = ({ showSaved }) => {
                     : 'לא מקושר לחשבון אתר'}
                   {fu.gender && <span> · מגדר: {fu.gender === 'female' ? 'אישה' : 'גבר'}</span>}
                 </p>
-
-                {fu.gender === 'female' ? (
-                  <div className="mb-3 px-3 py-2 rounded-lg bg-emerald-900/30 border border-emerald-800 text-emerald-300 text-xs font-bold">
-                    ⚖️ מנוי זהב אוטומטי — נשים פטורות מאישור איזון
-                  </div>
-                ) : (
-                  <div className="mb-3 px-3 py-2 rounded-lg bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] text-xs">
-                    ⚖️ איזון מגדרי:{' '}
-                    {fu.subscriptionExpiry && new Date(fu.subscriptionExpiry).getTime() > Date.now() ? (
-                      <span className="text-emerald-400 font-bold">מאושר עד {new Date(fu.subscriptionExpiry).toLocaleDateString('he-IL')}</span>
-                    ) : (
-                      <span className="text-[#94A3B8]">לא מאושר</span>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {fu.gender !== 'female' && (
-                    <>
-                      <button onClick={() => handleApproveBalance(fu, 1)} className="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
-                        <Scale size={11} /> אשר איזון ליום אחד
-                      </button>
-                      <button onClick={() => handleApproveBalance(fu, 365)} className="flex items-center gap-1 bg-emerald-800 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
-                        <Scale size={11} /> אשר איזון לשנה
-                      </button>
-                      {fu.subscriptionExpiry && (
-                        <button onClick={() => handleRevokeBalance(fu)} className="flex items-center gap-1 bg-[#93000a]/60 hover:bg-[#be0037] text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
-                          <XCircle size={11} /> בטל אישור
-                        </button>
-                      )}
-                    </>
-                  )}
-                </div>
 
                 <div className="flex flex-wrap gap-2">
                   {fu.isApproved === false ? (
