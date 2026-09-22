@@ -209,22 +209,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function memberBannerHtml() {
-    return `<div class="relative overflow-hidden rounded-2xl p-4 flex items-center justify-between gap-3" style="background:linear-gradient(135deg,rgba(255,87,8,.18),rgba(255,170,0,.12));border:1px solid rgba(255,87,8,.35)">
-      <div class="min-w-0">
-        <p class="text-text-primary font-bold text-sm">🔥 רוצים גישה מלאה ואיזון מגדרי?</p>
+    return `<div class="relative overflow-hidden rounded-2xl p-4 flex items-center gap-3" style="background:linear-gradient(135deg,rgba(255,87,8,.2),rgba(255,170,0,.1));border:1px solid rgba(255,87,8,.4)">
+      <div class="absolute -top-8 -left-8 w-28 h-28 rounded-full bg-primary-container/25 blur-2xl pointer-events-none"></div>
+      <div class="relative shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background:rgba(255,87,8,.18);border:1px solid rgba(255,87,8,.45);box-shadow:0 0 16px rgba(255,87,8,.35)">
+        <span class="material-symbols-outlined text-primary text-[24px]">workspace_premium</span>
+      </div>
+      <div class="relative min-w-0 flex-1">
+        <p class="text-text-primary font-bold text-sm">רוצים גישה מלאה ואיזון מגדרי?</p>
         <p class="text-text-secondary text-xs mt-0.5">הצטרפו כמנויים ותיהנו מהטבות בלעדיות</p>
       </div>
-      <a href="/register" class="shrink-0 rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold text-xs py-2 px-3 whitespace-nowrap">הצטרפות</a>
+      <a href="/register" class="relative shrink-0 rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold text-xs py-2 px-3 whitespace-nowrap shadow-md">הצטרפות</a>
     </div>`;
   }
 
   function advertiserBannerHtml() {
-    return `<div class="relative overflow-hidden rounded-2xl p-4 flex items-center justify-between gap-3" style="background:linear-gradient(135deg,rgba(255,73,148,.16),rgba(255,170,0,.10));border:1px solid rgba(255,73,148,.35)">
-      <div class="min-w-0">
-        <p class="text-text-primary font-bold text-sm">📣 מפיקים מסיבה?</p>
+    return `<div class="relative overflow-hidden rounded-2xl p-4 flex items-center gap-3" style="background:linear-gradient(135deg,rgba(255,73,148,.18),rgba(255,170,0,.08));border:1px solid rgba(255,73,148,.4)">
+      <div class="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-[#ff4994]/20 blur-2xl pointer-events-none"></div>
+      <div class="relative shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background:rgba(255,73,148,.18);border:1px solid rgba(255,73,148,.45);box-shadow:0 0 16px rgba(255,73,148,.35)">
+        <span class="material-symbols-outlined text-[24px]" style="color:#ff4994">campaign</span>
+      </div>
+      <div class="relative min-w-0 flex-1">
+        <p class="text-text-primary font-bold text-sm">מפיקים מסיבה?</p>
         <p class="text-text-secondary text-xs mt-0.5">פרסמו אותה אצלנו ותגיעו לקהילה שלנו</p>
       </div>
-      <a href="/advertiser-register" class="shrink-0 rounded-xl bg-gradient-to-l from-[#ff4994] to-[#ff7a29] text-white font-bold text-xs py-2 px-3 whitespace-nowrap">לפרטים</a>
+      <a href="/advertiser-register" class="relative shrink-0 rounded-xl bg-gradient-to-l from-[#ff4994] to-[#ff7a29] text-white font-bold text-xs py-2 px-3 whitespace-nowrap shadow-md">לפרטים</a>
     </div>`;
   }
 
@@ -244,9 +252,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       let bannerCount = 0;
       data.forEach((e, i) => {
         pieces.push(cardHtml(e, i === 0));
-        // A banner after every 2 non-featured cards (skip right after the
-        // single featured one, and never trail the very last card).
-        if (i > 0 && (i - 1) % 2 === 1 && i < data.length - 1) {
+        // A banner after every 2 cards, never trailing the very last one.
+        if (i % 2 === 1 && i < data.length - 1) {
           pieces.push(bannerCount % 2 === 0 ? memberBannerHtml() : advertiserBannerHtml());
           bannerCount++;
         }
