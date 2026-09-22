@@ -208,8 +208,8 @@ export function ForumAuthProvider({ children }) {
   const forumLogout = useCallback(() => {
     localStorage.removeItem(FORUM_USER_KEY);
     setForumUser(null);
-    // The derived site session is owned by the forum login — clear it so the
-    // workshops/store auto-fill doesn't keep showing the old phone profile to
+    // The derived site session is owned by the forum login — clear it so
+    // registration auto-fill doesn't keep showing the old phone profile to
     // whoever opens the browser next.
     clearSiteUser();
   }, [clearSiteUser]);

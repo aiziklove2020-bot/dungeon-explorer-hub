@@ -68,8 +68,6 @@ export const defaultContent = {
   },
   labels: {},
   store: {},
-  storeEnabled: false,
-  activeWorkshopsCount: 0,
   rssFeeds: [],
   // How long a party stays visible on the public site after its labeled date.
   // Configurable on the admin Parties tab; baked into content.json at publish.
@@ -107,8 +105,6 @@ export function mergeWithDefaults(saved) {
     whatsappGroups: saved.whatsappGroups || defaultContent.whatsappGroups,
     labels: saved.labels || defaultContent.labels,
     store: saved.store || defaultContent.store,
-    storeEnabled: saved.storeEnabled ?? defaultContent.storeEnabled,
-    activeWorkshopsCount: saved.activeWorkshopsCount ?? defaultContent.activeWorkshopsCount,
     rssFeeds: saved.rssFeeds || defaultContent.rssFeeds,
     partyRetentionHours: saved.partyRetentionHours ?? defaultContent.partyRetentionHours
   };

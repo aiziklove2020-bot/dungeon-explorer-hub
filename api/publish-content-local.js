@@ -59,14 +59,12 @@ export default async function handler(req, res) {
   const db = admin.firestore();
 
   try {
-    const [contentDoc, registrationDoc, socialLinksDoc, whatsappDoc, partiesSnap, storeSettingsDoc, workshopsSnap, rssFeedsSnap, partySettingsDoc] = await Promise.all([
+    const [contentDoc, registrationDoc, socialLinksDoc, whatsappDoc, partiesSnap, rssFeedsSnap, partySettingsDoc] = await Promise.all([
       db.collection('settings').doc('content').get(),
       db.collection('settings').doc('registrationSettings').get(),
       db.collection('settings').doc('socialLinks').get(),
       db.collection('settings').doc('whatsappGroups').get(),
       db.collection('parties').where('status', '==', 'active').get(),
-      db.collection('settings').doc('store').get(),
-      db.collection('workshops').get(),
       db.collection('rssFeeds').get(),
       db.collection('settings').doc('partySettings').get()
     ]);
@@ -75,11 +73,9 @@ export default async function handler(req, res) {
     const registration = registrationDoc.exists ? registrationDoc.data() : {};
     const socialLinksData = socialLinksDoc.exists ? socialLinksDoc.data() : {};
     const whatsappGroups = whatsappDoc.exists ? whatsappDoc.data() : { men: '', women: '' };
-    const storeEnabled = storeSettingsDoc.exists ? (storeSettingsDoc.data()?.enabled === true) : false;
     const partyRetentionHours = normalizeRetentionHours(
       partySettingsDoc.exists ? partySettingsDoc.data()?.retentionHours : DEFAULT_PARTY_RETENTION_HOURS
     );
-    const activeWorkshopsCount = workshopsSnap.docs.filter(d => d.data().active !== false).length;
     const rssFeeds = rssFeedsSnap.docs
       .map(d => ({ id: d.id, ...d.data() }))
       .filter(f => f.enabled !== false)
@@ -163,8 +159,6 @@ export default async function handler(req, res) {
       externalEvents,
       labels: contentData.labels || {},
       store: contentData.store || {},
-      storeEnabled,
-      activeWorkshopsCount,
       rssFeeds,
       partyRetentionHours
     };

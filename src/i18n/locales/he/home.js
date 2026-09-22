@@ -2,8 +2,6 @@
 
 export default {
   'home.registerButton': 'הרשמה למסיבה הקרובה',
-  'home.storeButton': 'מעבר לחנות',
-  'home.workshopsButton': 'רישום לסדנאות',
   'home.internalParties': 'מסיבות השבוע',
   'home.externalParties': 'מסיבות חיצוניות',
   'home.registerTo': 'רישום ל',

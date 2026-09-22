@@ -75,10 +75,6 @@ export default {
   'admin.telegram.msgNewRegistration': 'רישום חדש',
   'admin.telegram.msgBalancePublish': 'פרסום איזון',
   'admin.telegram.msgNewParty': 'מסיבה חדשה נוספה',
-  'admin.telegram.msgNewStoreItem': 'מוצר חדש בחנות',
-  'admin.telegram.msgNewStoreOrder': 'הזמנה חדשה בחנות',
-  'admin.telegram.msgNewWorkshop': 'סדנא חדשה נפתחה',
-  'admin.telegram.msgNewWorkshopRegistration': 'רישום חדש לסדנא',
   'admin.telegram.msgNewExternalParty': 'אירוע חיצוני חדש',
   'admin.telegram.msgMatchNotification': 'הודעת התאמה (הודעה פרטית למשתמש)',
 

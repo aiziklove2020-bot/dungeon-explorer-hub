@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import {
-  User, Users, Ticket, Calendar, Clock, Music, ShoppingCart,
+  User, Users, Ticket, Calendar, Clock, Music,
   ClipboardList, ClipboardCheck
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaTelegram, FaWhatsapp } from 'react-icons/fa';
@@ -12,7 +12,6 @@ import Loader from '../components/Loader';
 import SEO from '../components/SEO';
 import EditableContent from '../components/EditableContent';
 import EditableLabel from '../components/EditableLabel';
-import { getActiveWorkshops } from '../firebase/workshops';
 import { sanitizeExternalUrl } from '../utils/externalUrl';
 import {
   ISRAEL_TZ,
@@ -131,28 +130,21 @@ const Home = () => {
   const { content, isInitialized, contentLoadError, reloadContent } = useContent();
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [workshopsEnabled, setWorkshopsEnabled] = useState((content.activeWorkshopsCount ?? 0) > 0);
   // Re-evaluate expiration while the tab stays open (parties drop off at midnight IL).
   const [, setExpiryTick] = useState(0);
-
-  useEffect(() => {
-    getActiveWorkshops().then(list => setWorkshopsEnabled(list.length > 0)).catch(() => {});
-  }, []);
 
   useEffect(() => {
     const id = setInterval(() => setExpiryTick((n) => n + 1), 60_000);
     return () => clearInterval(id);
   }, []);
 
-  // storeEnabled comes from content.json (set at publish time) — no Firestore reads needed
-  const storeEnabled = content.storeEnabled ?? false;
 
   const partyRetentionHours = content.partyRetentionHours ?? DEFAULT_PARTY_RETENTION_HOURS;
   const visibleEvents = (content.events || []).filter(ev => !isPartyExpired(ev, partyRetentionHours));
   const visibleExternalEvents = (content.externalEvents || []).filter(ev => !isPartyExpired(ev, partyRetentionHours));
   const getEventKey = (ev, index) => ev?.id || `${ev?.date || 'date'}-${ev?.title || 'event'}-${index}`;
 
-  const defaultDescription = 'מדברים BDSM - קהילה, אירועים, הרשמה למסיבות וסדנאות. Talking BDSM - community, events, party registration and workshops.';
+  const defaultDescription = 'מדברים BDSM - קהילה, אירועים, הרשמה למסיבות. Talking BDSM - community, events, party registration.';
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const webSiteStructuredData = {
     '@context': 'https://schema.org',
@@ -266,32 +258,13 @@ const Home = () => {
 
       <div className="hero-below-section">
         <RSSFeedTicker />
-        {storeEnabled && (
-          <div className="hero-shop-below-rss">
-            <button onClick={() => navigate({ to: '/store' })} className="hero-store-btn">
-              <ShoppingCart size={20} className="hero-store-btn-icon" /> <span className="hero-store-btn-text"><EditableLabel translationKey="home.storeButton" /></span>
-            </button>
-          </div>
-        )}
       </div>
 
-      {((visibleEvents.length > 0) || storeEnabled || workshopsEnabled) && (
+      {visibleEvents.length > 0 && (
         <div className="hero-cta-buttons">
-          {visibleEvents.length > 0 && (
-            <button onClick={() => navigate({ to: '/register' })} className="hero-register-btn">
-              <Ticket size={20} className="hero-register-btn-icon" /> <span className="hero-register-btn-text"><EditableLabel translationKey="home.registerButton" /></span>
-            </button>
-          )}
-          {workshopsEnabled && (
-            <button onClick={() => navigate({ to: '/workshops' })} className="hero-workshops-btn">
-              <ClipboardList size={20} className="hero-workshops-btn-icon" /> <span className="hero-workshops-btn-text"><EditableLabel translationKey="home.workshopsButton" fallback="רישום לסדנאות" /></span>
-            </button>
-          )}
-          {storeEnabled && (
-            <button onClick={() => navigate({ to: '/store' })} className="hero-store-btn">
-              <ShoppingCart size={20} className="hero-store-btn-icon" /> <span className="hero-store-btn-text"><EditableLabel translationKey="home.storeButton" /></span>
-            </button>
-          )}
+          <button onClick={() => navigate({ to: '/register' })} className="hero-register-btn">
+            <Ticket size={20} className="hero-register-btn-icon" /> <span className="hero-register-btn-text"><EditableLabel translationKey="home.registerButton" /></span>
+          </button>
         </div>
       )}
 

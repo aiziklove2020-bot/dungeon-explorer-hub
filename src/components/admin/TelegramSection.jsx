@@ -7,17 +7,13 @@ import { getBotInfo, MESSAGE_KEYS, REGISTRATION_TYPE_KEYS, BALANCE_PUBLISH_TYPE_
 import { getAllAdvertisers } from '../../firebase/advertisers';
 import { Plus, Trash2, Edit2, ChevronDown, ChevronRight, Send, Eye, Mail } from 'lucide-react';
 
-const BUILT_IN_MESSAGE_KEYS = [MESSAGE_KEYS.REGISTRATION, MESSAGE_KEYS.BALANCE_PUBLISH, MESSAGE_KEYS.NEW_PARTY, MESSAGE_KEYS.NEW_EXTERNAL_PARTY, MESSAGE_KEYS.NEW_STORE_ITEM, MESSAGE_KEYS.NEW_STORE_ORDER, MESSAGE_KEYS.NEW_WORKSHOP, MESSAGE_KEYS.NEW_WORKSHOP_REGISTRATION];
+const BUILT_IN_MESSAGE_KEYS = [MESSAGE_KEYS.REGISTRATION, MESSAGE_KEYS.BALANCE_PUBLISH, MESSAGE_KEYS.NEW_PARTY, MESSAGE_KEYS.NEW_EXTERNAL_PARTY];
 
 const getDefaultMessageName = (t, key) => {
   const names = {
     [MESSAGE_KEYS.REGISTRATION]: t('admin.telegram.msgNewRegistration'),
     [MESSAGE_KEYS.BALANCE_PUBLISH]: t('admin.telegram.msgBalancePublish'),
     [MESSAGE_KEYS.NEW_PARTY]: t('admin.telegram.msgNewParty'),
-    [MESSAGE_KEYS.NEW_STORE_ITEM]: t('admin.telegram.msgNewStoreItem'),
-    [MESSAGE_KEYS.NEW_STORE_ORDER]: t('admin.telegram.msgNewStoreOrder'),
-    [MESSAGE_KEYS.NEW_WORKSHOP]: t('admin.telegram.msgNewWorkshop'),
-    [MESSAGE_KEYS.NEW_WORKSHOP_REGISTRATION]: t('admin.telegram.msgNewWorkshopRegistration'),
     [MESSAGE_KEYS.NEW_EXTERNAL_PARTY]: t('admin.telegram.msgNewExternalParty')
   };
   return names[key] || key;
