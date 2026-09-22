@@ -62,10 +62,10 @@ const SubscriptionsSection = ({ showSaved }) => {
     showSaved();
   };
 
-  const handleCreateSubscriber = async ({ firstName, lastName, phoneNumber, paymentMethod, expiryDate }) => {
+  const handleCreateSubscriber = async ({ firstName, lastName, phoneNumber, paymentMethod, expiryDate, tier }) => {
     const fullName = `${firstName} ${lastName}`.trim();
     const user = await createUser(phoneNumber, fullName, 'male');
-    await setSubscriptionExpiry(user.id, 'parties', new Date(`${expiryDate}T00:00:00.000Z`));
+    await setSubscriptionExpiry(user.id, 'parties', new Date(`${expiryDate}T00:00:00.000Z`), tier);
     await addPaymentRecord(user.id, {
       date: new Date().toISOString().split('T')[0],
       method: paymentMethod,

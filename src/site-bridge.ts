@@ -489,8 +489,8 @@ async function toggleFavorite(userId: string, partyId: string, isFavorite: boole
     const forumUser = await getForumUserById(userId).catch(() => null) as any;
     const phone = forumUser?.phone;
     const profile = phone ? await getMyPersonalAreaProfile(phone).catch(() => null) : null;
-    if (!profile?.hasActiveSubscription) {
-      throw new Error("סימון מועדפים זמין רק למנויים");
+    if (!profile?.isPrivilegedSubscriber) {
+      throw new Error("סימון מועדפים זמין רק למנויים שנתיים");
     }
     await addFavorite(userId, partyId);
   } else {

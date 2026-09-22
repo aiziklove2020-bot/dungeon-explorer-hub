@@ -19,6 +19,7 @@ import {
   removeSubscription,
   getSubscription,
   hasAnyActiveSubscription,
+  hasAnyPrivilegedSubscription,
 } from './subscriptions';
 
 const USERS_COLLECTION = 'users';
@@ -65,12 +66,14 @@ export const getMyPersonalAreaProfile = async (phoneNumber) => {
   const partiesSub = getSubscription(user, 'parties');
   const exchangeSub = getSubscription(user, 'exchangeParties');
   const active = hasAnyActiveSubscription(user);
+  const privileged = hasAnyPrivilegedSubscription(user);
 
   return {
     userId: user.id,
     name: user.name || '',
     photoUrl: user.photoUrl || '',
     hasActiveSubscription: active,
+    isPrivilegedSubscriber: privileged,
     subscriptionMessage: partiesSub.isActive
       ? partiesSub.message
       : exchangeSub.isActive

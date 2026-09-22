@@ -23545,12 +23545,13 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 	}, Oj = async (e) => {
 		let t = await Ej(XE(e) || e);
 		if (!t) return null;
-		let n = pj(t, "parties"), r = pj(t, "exchangeParties"), i = Sj(t);
+		let n = pj(t, "parties"), r = pj(t, "exchangeParties"), i = Sj(t), s = n.isActive && (n.tier === "year" || n.tier === "gold") || r.isActive && (r.tier === "year" || r.tier === "gold");
 		return {
 			userId: t.id,
 			name: t.name || "",
 			photoUrl: t.photoUrl || "",
 			hasActiveSubscription: i,
+			isPrivilegedSubscriber: s,
 			subscriptionMessage: n.isActive ? n.message : r.isActive ? r.message : n.message
 		};
 	}, kj = async (e, t) => {
@@ -35347,7 +35348,7 @@ async function aW(e, t, n) {
 	if (!e) throw Error("יש להתחבר כדי לשמור מועדפים");
 	if (n) {
 		let r = await tN(e).catch(() => null), i = r?.phone, a = i ? await Oj(i).catch(() => null) : null;
-		if (!a?.hasActiveSubscription) throw Error("סימון מועדפים זמין רק למנויים");
+		if (!a?.isPrivilegedSubscriber) throw Error("סימון מועדפים זמין רק למנויים שנתיים");
 		await SU(e, t);
 	} else await CU(e, t);
 }

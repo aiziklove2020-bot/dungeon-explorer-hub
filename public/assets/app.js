@@ -177,7 +177,7 @@ async function lpWireFavHearts(container) {
   let isSubscriber = false;
   if (identity && window.LPData?.loadMyForumPersonalArea) {
     const area = await window.LPData.loadMyForumPersonalArea(identity).catch(() => null);
-    isSubscriber = !!area?.profile?.hasActiveSubscription;
+    isSubscriber = !!area?.profile?.isPrivilegedSubscriber;
   }
   if (!isSubscriber) {
     buttons.forEach((btn) => { btn.style.display = "none"; });
