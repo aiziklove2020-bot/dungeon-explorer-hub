@@ -99,7 +99,25 @@ const BalanceTables = ({
     
     checkUsersInTable();
   }, [party.registrations, allUsersMap]);
-  
+
+  // Registrants can upload a profile photo from their personal area
+  // (my-area.html); look it up the same way usersInTable does, by
+  // normalized phone against the preloaded allUsersMap.
+  const getPhotoUrl = (phoneNumber) => {
+    if (!phoneNumber || !allUsersMap) return '';
+    const normalized = normalizeIsraeliPhone(phoneNumber) || phoneNumber;
+    const user = allUsersMap.get(phoneNumber) || allUsersMap.get(normalized);
+    return user?.photoUrl || '';
+  };
+
+  const PersonAvatar = ({ phoneNumber, emoji, className }) => {
+    const photoUrl = getPhotoUrl(phoneNumber);
+    if (photoUrl) {
+      return <img src={photoUrl} alt="" className={`person-avatar-img ${className || ''}`} />;
+    }
+    return <span className={className}>{emoji}</span>;
+  };
+
   // The public registration form's "couple" option registers each partner
   // as their own single-type record (needed to get correct gender and
   // real database entries — see register-event.html), linked purely by
@@ -453,7 +471,7 @@ const BalanceTables = ({
                   <div className="matched-pair__content">
                     <div className="person-card person-card--male">
                       <div className="person-card__header">
-                        <span className="person-card__icon person-card__icon--male">👨</span>
+                        <PersonAvatar phoneNumber={pair.male.phoneNumber} emoji="👨" className="person-card__icon person-card__icon--male" />
                         <strong className={`person-card__name ${isEntered ? 'person-card__name--entered' : ''}`}>
                           {pair.male.fullName || pair.male.userName || '-'}
                         </strong>
@@ -528,7 +546,7 @@ const BalanceTables = ({
                     
                     <div className="person-card person-card--female">
                       <div className="person-card__header">
-                        <span className="person-card__icon person-card__icon--female">👩</span>
+                        <PersonAvatar phoneNumber={pair.female.phoneNumber} emoji="👩" className="person-card__icon person-card__icon--female" />
                         <strong className={`person-card__name ${isEntered ? 'person-card__name--entered' : ''}`}>
                           {pair.female.fullName || pair.female.userName || '-'}
                         </strong>
@@ -627,6 +645,7 @@ const BalanceTables = ({
                       <div className="unmatched-card__content">
                         <div className="unmatched-card__info">
                           <div className="unmatched-card__header">
+                            <PersonAvatar phoneNumber={man.phoneNumber} emoji="👨" className="unmatched-card__icon" />
                             <strong className={`unmatched-card__name ${
                               isManClient ? 'unmatched-card__name--client' : ''
                             }`}>{man.fullName || man.userName || '-'}</strong>
@@ -691,6 +710,7 @@ const BalanceTables = ({
                       <div className="unmatched-card__content">
                         <div className="unmatched-card__info">
                           <div className="unmatched-card__header">
+                            <PersonAvatar phoneNumber={woman.phoneNumber} emoji="👩" className="unmatched-card__icon" />
                             <strong className={`unmatched-card__name ${
                               isWomanClient ? 'unmatched-card__name--client' : ''
                             }`}>{woman.fullName || woman.userName || '-'}</strong>
