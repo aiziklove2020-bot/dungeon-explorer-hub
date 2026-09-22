@@ -191,7 +191,7 @@
 
 <script src="assets/app.js?v=202609221638"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609221638";
+import "./assets/site-data.js?v=202609221812";
 
 const STORAGE_KEY = "lp_my_area_phone";
 
@@ -279,7 +279,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const glowStyle = "background:linear-gradient(135deg,rgba(255, 87, 8,.18),rgba(255, 170, 0,.12));border:2px solid #ff5708;box-shadow:0 0 24px rgba(255, 87, 8,.25)";
 
-    if (!hasActiveSubscription) {
+    // A manually-created match (admin one-off) always reveals, regardless
+    // of the viewer's subscription tier — only the algorithmic pairing is
+    // gated behind a yearly subscription.
+    if (!hasActiveSubscription && match.matchType !== "manual") {
       box.innerHTML = `<div class="rounded-xl p-5 flex flex-col items-center text-center gap-2" style="${glowStyle}">
         <span class="material-symbols-outlined text-primary text-[32px]">lock</span>
         <p class="text-text-primary text-body-sm font-bold">🎉 יש לכם התאמת איזון!</p>

@@ -24576,7 +24576,8 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 					role: "male",
 					matchName: n.femaleName || "",
 					matchPhone: n.phoneShared && n.femalePhone || "",
-					femalePhone: n.femalePhone || ""
+					femalePhone: n.femalePhone || "",
+					matchType: n.matchType === "manual" ? "manual" : "balance"
 				};
 				if (i) return {
 					partyId: e.id,
@@ -24585,7 +24586,8 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 					matchName: n.maleName || "",
 					matchPhone: n.malePhone || "",
 					phoneShared: !!n.phoneShared,
-					femalePhone: n.femalePhone || ""
+					femalePhone: n.femalePhone || "",
+					matchType: n.matchType === "manual" ? "manual" : "balance"
 				};
 			}
 		}
