@@ -23547,6 +23547,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 		let n = pj(t, "parties"), r = pj(t, "exchangeParties"), i = Sj(t);
 		return {
 			userId: t.id,
+			name: t.name || "",
 			photoUrl: t.photoUrl || "",
 			hasActiveSubscription: i,
 			subscriptionMessage: n.isActive ? n.message : r.isActive ? r.message : n.message

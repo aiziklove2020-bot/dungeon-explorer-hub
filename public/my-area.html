@@ -100,7 +100,8 @@
             <input type="file" id="photoInput" accept="image/*" style="display:none">
           </div>
           <div class="flex flex-col min-w-0">
-            <span class="font-headline-md text-headline-md text-on-surface font-bold" dir="ltr" id="areaPhone"></span>
+            <span class="font-headline-md text-headline-md text-on-surface font-bold truncate" id="areaName" style="display:none"></span>
+            <span class="font-body-md text-body-md text-on-surface font-bold" dir="ltr" id="areaPhone"></span>
             <span class="font-body-sm text-body-sm text-secondary flex items-center gap-1.5 mt-0.5">
               <span class="material-symbols-outlined text-[15px] text-emerald-400">verified</span>
               זיהוי ואימות מבוסס טלפון
@@ -186,7 +187,7 @@
 
 <script src="assets/app.js?v=202609062118"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609221107";
+import "./assets/site-data.js?v=202609221111";
 
 const STORAGE_KEY = "lp_my_area_phone";
 
@@ -460,6 +461,15 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("profilePhoto").src = data.profile.photoUrl;
           document.getElementById("profilePhoto").style.display = "block";
           document.getElementById("profilePhotoPlaceholder").style.display = "none";
+        }
+        const areaNameEl = document.getElementById("areaName");
+        if (data.profile.name) {
+          areaNameEl.textContent = data.profile.name;
+          areaNameEl.style.display = "";
+          areaPhone.className = "font-body-md text-body-md text-on-surface font-bold";
+        } else {
+          areaNameEl.style.display = "none";
+          areaPhone.className = "font-headline-md text-headline-md text-on-surface font-bold";
         }
         document.getElementById("subStatus").textContent = data.profile.hasActiveSubscription
           ? "מנוי פעיל"
