@@ -111,7 +111,7 @@
           <span class="font-label-sm text-label-sm text-outline">סטטוס מנוי</span>
           <p id="subStatus" class="text-body-sm font-body-sm text-on-surface font-bold">בודק...</p>
         </div>
-        <a href="/membership" class="text-label-sm font-label-sm text-primary underline self-start">לרכישת מנוי</a>
+        <a href="/membership" id="subCta" style="display:none" class="text-label-sm font-label-sm text-primary underline self-start">אין לכם מנוי עדיין — רוצים להיות מנויים? לחצו כאן</a>
       </div>
     </div>
 
@@ -464,8 +464,10 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("subStatus").textContent = data.profile.hasActiveSubscription
           ? "מנוי פעיל"
           : "אין מנוי פעיל";
+        document.getElementById("subCta").style.display = data.profile.hasActiveSubscription ? "none" : "";
       } else {
         document.getElementById("subStatus").textContent = "טרם נמצא רישום עם המספר הזה";
+        document.getElementById("subCta").style.display = "";
       }
       wirePhotoUpload(phone, !!(data.profile && data.profile.hasActiveSubscription));
 
