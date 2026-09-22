@@ -190,23 +190,42 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
       </article>`;
     }
-    return `<article class="rounded-2xl overflow-hidden bg-surface-card shadow-md w-full min-w-0">
-      <div class="relative w-full bg-black">
-        ${favBtnHtml(e)}
-        <img class="w-full h-auto max-h-[50vh] object-contain mx-auto" src="${e.img}" alt="" onerror="this.closest('div').style.display='none'">
+    return `<article class="rounded-xl overflow-hidden bg-surface-card shadow-md w-full min-w-0 flex items-center gap-3 p-2">
+      <div class="relative w-16 h-16 rounded-lg overflow-hidden bg-black flex-shrink-0">
+        <img class="w-full h-full object-cover" src="${e.img}" alt="" onerror="this.style.display='none'">
       </div>
-      <div class="p-4 flex flex-col gap-2">
-        <div class="flex items-center gap-2 flex-wrap">
-          ${e.category ? `<span class="max-w-full px-2 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary font-medium truncate">${e.category}</span>` : ""}
-          ${(e.day || e.date) ? `<span class="text-label-sm font-label-sm text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">event</span>${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span>` : ""}
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
+          ${e.category ? `<span class="max-w-full px-1.5 py-0.5 rounded text-[10px] font-bold bg-surface-container-high text-primary truncate">${e.category}</span>` : ""}
+          ${(e.day || e.date) ? `<span class="text-[10px] font-bold text-text-muted truncate">${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span>` : ""}
         </div>
-        <h4 class="text-headline-sm font-headline-sm text-text-primary break-words">${e.title}</h4>
-        <p class="text-body-sm font-body-sm text-text-secondary break-words">${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 90)}</p>
-        <a class="mt-1 h-11 rounded-xl bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-lg text-label-lg shadow-md flex items-center justify-center gap-2" href="/event?id=${e.id}">
-          <span>פרטים והרשמה</span><span class="material-symbols-outlined text-[18px]">confirmation_number</span>
-        </a>
+        <h4 class="text-body-md font-bold text-text-primary truncate">${e.title}</h4>
+        <p class="text-label-sm font-label-sm text-text-secondary truncate">${e.dj ? "DJ " + e.dj : (e.desc || "").slice(0, 60)}</p>
       </div>
+      <a class="shrink-0 w-9 h-9 rounded-full bg-gradient-to-l from-primary-container to-secondary-container flex items-center justify-center shadow-md" href="/event?id=${e.id}" aria-label="פרטים והרשמה">
+        <span class="material-symbols-outlined text-on-primary-container text-[20px]">arrow_back</span>
+      </a>
     </article>`;
+  }
+
+  function memberBannerHtml() {
+    return `<div class="relative overflow-hidden rounded-2xl p-4 flex items-center justify-between gap-3" style="background:linear-gradient(135deg,rgba(255,87,8,.18),rgba(255,170,0,.12));border:1px solid rgba(255,87,8,.35)">
+      <div class="min-w-0">
+        <p class="text-text-primary font-bold text-sm">🔥 רוצים גישה מלאה ואיזון מגדרי?</p>
+        <p class="text-text-secondary text-xs mt-0.5">הצטרפו כמנויים ותיהנו מהטבות בלעדיות</p>
+      </div>
+      <a href="/register" class="shrink-0 rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold text-xs py-2 px-3 whitespace-nowrap">הצטרפות</a>
+    </div>`;
+  }
+
+  function advertiserBannerHtml() {
+    return `<div class="relative overflow-hidden rounded-2xl p-4 flex items-center justify-between gap-3" style="background:linear-gradient(135deg,rgba(255,73,148,.16),rgba(255,170,0,.10));border:1px solid rgba(255,73,148,.35)">
+      <div class="min-w-0">
+        <p class="text-text-primary font-bold text-sm">📣 מפיקים מסיבה?</p>
+        <p class="text-text-secondary text-xs mt-0.5">פרסמו אותה אצלנו ותגיעו לקהילה שלנו</p>
+      </div>
+      <a href="/advertiser-register" class="shrink-0 rounded-xl bg-gradient-to-l from-[#ff4994] to-[#ff7a29] text-white font-bold text-xs py-2 px-3 whitespace-nowrap">לפרטים</a>
+    </div>`;
   }
 
   function render() {
@@ -218,9 +237,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       (!date.value || e.dateISO === date.value)
     );
     countEl.textContent = data.length;
-    box.innerHTML = data.length
-      ? data.map((e, i) => cardHtml(e, i === 0)).join("")
-      : `<p class="text-text-muted text-body-sm">לא נמצאו אירועים.</p>`;
+    if (!data.length) {
+      box.innerHTML = `<p class="text-text-muted text-body-sm">לא נמצאו אירועים.</p>`;
+    } else {
+      const pieces = [];
+      let bannerCount = 0;
+      data.forEach((e, i) => {
+        pieces.push(cardHtml(e, i === 0));
+        // A banner after every 2 non-featured cards (skip right after the
+        // single featured one, and never trail the very last card).
+        if (i > 0 && (i - 1) % 2 === 1 && i < data.length - 1) {
+          pieces.push(bannerCount % 2 === 0 ? memberBannerHtml() : advertiserBannerHtml());
+          bannerCount++;
+        }
+      });
+      box.innerHTML = pieces.join("");
+    }
     lpWireFavHearts(box);
   }
 
