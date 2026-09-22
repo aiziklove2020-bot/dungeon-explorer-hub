@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { PAYMENT_METHODS } from '../../firebase/crm';
 
@@ -43,7 +44,7 @@ const NewSubscriberModal = ({ onClose, onSubmit }) => {
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
         className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-2xl w-full max-w-md p-4 md:p-6"
@@ -133,7 +134,8 @@ const NewSubscriberModal = ({ onClose, onSubmit }) => {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Trash2, Plus } from 'lucide-react';
 import { getUserCrm, setUserSource, addPaymentRecord, deletePaymentRecord, CRM_SOURCES, PAYMENT_METHODS } from '../../firebase/crm';
 import AdminLoader from './AdminLoader';
@@ -69,7 +70,7 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
 
   const sortedPayments = [...crm.payments].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
         className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-4 md:p-6"
@@ -207,7 +208,8 @@ const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

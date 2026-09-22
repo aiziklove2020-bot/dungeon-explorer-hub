@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { RotateCcw, Download, Users, Send, MessageCircle, X } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useContent } from '../../context/ContentContext';
@@ -750,7 +751,7 @@ const MatchesSection = ({ showSaved }) => {
         )}
       </div>
 
-      {whatsappPickerParty && (
+      {whatsappPickerParty && createPortal(
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={closeWhatsappPicker}>
           <div
             className="bg-[#121218] border border-white/10 rounded-2xl p-6 w-full max-w-md space-y-4"
@@ -837,7 +838,8 @@ const MatchesSection = ({ showSaved }) => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
