@@ -1,6 +1,8 @@
 import { collection, doc, setDoc, getDocs, deleteDoc, query, where } from 'firebase/firestore';
 import { db } from './config';
 import { normalizeIsraeliPhone } from '../utils/phone';
+import { getUserByPhone } from './dataAccess';
+import { hasAnyPrivilegedSubscription } from './subscriptions';
 
 const COLLECTION = 'pushSubscriptions';
 
@@ -36,6 +38,12 @@ export const deletePushSubscription = async (id) => {
   await deleteDoc(doc(db, COLLECTION, id));
 };
 
+/** Every registered device across every phone — used to fan a notification out to all subscribers. */
+const getAllPushSubscriptions = async () => {
+  const snap = await getDocs(collection(db, COLLECTION));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
 /**
  * Best-effort: notify every device registered for a phone number via a
  * Vercel serverless relay (browsers can't send Web Push directly — that
@@ -60,6 +68,32 @@ export const sendPushToPhone = async (phoneNumber, { title, body, url } = {}) =>
     if (res?.deadIds?.length) {
       await Promise.all(res.deadIds.map((id) => deletePushSubscription(id).catch(() => {})));
     }
+  } catch {
+    // best-effort — swallow
+  }
+};
+
+/**
+ * Notify every subscriber with an active *privileged* (yearly/gold)
+ * subscription and a registered device about a new party. Best-effort and
+ * fire-and-forget by design — a push failure must never block or delay
+ * party creation itself.
+ */
+export const notifyPrivilegedSubscribersOfNewParty = async (party) => {
+  try {
+    const subs = await getAllPushSubscriptions();
+    const phones = [...new Set(subs.map((s) => s.phone).filter(Boolean))];
+    if (!phones.length) return;
+
+    const title = '🎉 מסיבה חדשה!';
+    const body = `${party?.name || party?.title || 'מסיבה חדשה'} נוספה לאתר`;
+    const url = party?.id ? `/event?id=${party.id}` : '/events';
+
+    await Promise.all(phones.map(async (phone) => {
+      const user = await getUserByPhone(phone).catch(() => null);
+      if (!user || !hasAnyPrivilegedSubscription(user)) return;
+      await sendPushToPhone(phone, { title, body, url });
+    }));
   } catch {
     // best-effort — swallow
   }
