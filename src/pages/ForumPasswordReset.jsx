@@ -40,7 +40,7 @@ const ForumPasswordReset = () => {
       });
       if (resp.ok) {
         setStatus('success');
-        setTimeout(() => navigate({ to: '/forum', replace: true }), 2200);
+        setTimeout(() => navigate({ to: '/', replace: true }), 2200);
         return;
       }
       const data = await resp.json().catch(() => ({}));

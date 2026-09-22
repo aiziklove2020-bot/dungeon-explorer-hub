@@ -13,10 +13,8 @@ const STATIC_ENTRIES: SitemapEntry[] = [
   { path: "/", changefreq: "daily", priority: "1.0" },
   { path: "/about", changefreq: "monthly", priority: "0.8" },
   { path: "/register", changefreq: "weekly", priority: "0.9" },
-  { path: "/shop", changefreq: "weekly", priority: "0.7" },
   { path: "/tickets", changefreq: "weekly", priority: "0.7" },
   { path: "/blog", changefreq: "weekly", priority: "0.7" },
-  { path: "/forum", changefreq: "daily", priority: "0.6" },
   { path: "/contact", changefreq: "monthly", priority: "0.5" },
 ];
 

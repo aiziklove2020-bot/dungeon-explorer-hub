@@ -1,15 +1,14 @@
 import { useState, useTransition, useEffect, useRef } from 'react';
 import {
   ChevronDown, ChevronUp, Heart, PartyPopper, Users, Palette, UserCog, CreditCard,
-  Info, Phone, Link2, ShoppingBag, GraduationCap, MessageCircle, Flag, Trash2,
+  Info, Phone, Link2, Trash2,
   ShieldCheck, Megaphone, Rss, Send, Database, FileClock, GitBranch, ShieldCheck as ShieldIcon, Lock,
 } from 'lucide-react';
 
 const TAB_ICONS = {
   matching: Heart, parties: PartyPopper, users: Users, siteDesign: Palette,
   forumUsers: UserCog, subscriptions: CreditCard, about: Info, contact: Phone,
-  links: Link2, store: ShoppingBag, workshops: GraduationCap, liveChat: MessageCircle,
-  chatReports: Flag, deleteRequests: Trash2, admins: ShieldCheck, advertisers: Megaphone,
+  links: Link2, deleteRequests: Trash2, admins: ShieldCheck, advertisers: Megaphone,
   rss: Rss, telegram: Send, db: Database, dbLogger: FileClock, gitHistory: GitBranch,
 };
 import { useNavigate } from '@tanstack/react-router';
@@ -29,14 +28,10 @@ import LinksSection from '../components/admin/LinksSection';
 import AdminsSection from '../components/admin/AdminsSection';
 import AdvertisersSection from '../components/admin/AdvertisersSection';
 import TelegramSection from '../components/admin/TelegramSection';
-import StoreSection from '../components/admin/StoreSection';
-import WorkshopsSection from '../components/admin/WorkshopsSection';
 import DBLoggerSection from '../components/admin/DBLoggerSection';
 import DBSection from '../components/admin/DBSection';
 import GitHistorySection from '../components/admin/GitHistorySection';
 import ForumUsersSection from '../components/admin/ForumUsersSection';
-import LiveChatSection from '../components/admin/LiveChatSection';
-import ChatReportsSection from '../components/admin/ChatReportsSection';
 import DeleteRequestsSection from '../components/admin/DeleteRequestsSection';
 import SubscriptionsSection from '../components/admin/SubscriptionsSection';
 import SiteDesignSection from '../components/admin/SiteDesignSection';
@@ -360,13 +355,9 @@ const Admin = () => {
           {activeSection === 'contact'   && <ContactSection showSaved={showSaved} />}
           {activeSection === 'matching'  && <MatchesSection showSaved={showSaved} />}
           {activeSection === 'links'     && <LinksSection showSaved={showSaved} />}
-          {activeSection === 'store'     && <StoreSection showSaved={showSaved} />}
-          {activeSection === 'workshops' && <WorkshopsSection showSaved={showSaved} />}
           {activeSection === 'db'        && <DBSection />}
           {activeSection === 'dbLogger'  && <DBLoggerSection />}
           {activeSection === 'forumUsers' && <ForumUsersSection showSaved={showSaved} />}
-          {activeSection === 'liveChat'  && <LiveChatSection showSaved={showSaved} />}
-          {activeSection === 'chatReports' && <ChatReportsSection showSaved={showSaved} />}
           {activeSection === 'deleteRequests' && <DeleteRequestsSection showSaved={showSaved} />}
           {activeSection === 'users'     && <UsersSection showSaved={showSaved} />}
           {activeSection === 'subscriptions' && <SubscriptionsSection showSaved={showSaved} />}

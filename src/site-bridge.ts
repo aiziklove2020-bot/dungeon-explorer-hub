@@ -20,10 +20,8 @@ import {
   subscribeToSupportMessages,
   fetchSupportMessages,
 } from "./firebase/supportChat";
-import { getStoreSettings, getProducts, createOrder } from "./firebase/store";
 import { uploadPartyImage } from "./firebase/storage";
 import { registerAdvertiser, authenticateAdvertiser } from "./firebase/advertisers";
-import { ensureMainRoom, subscribeMessages, sendChatMessage, joinRoom } from "./firebase/liveChat";
 import { addFavorite, removeFavorite, getFavoritePartyIds } from "./firebase/favorites";
 
 /** "יום שישי" from any Firestore/JS date shape; "" when unparseable. */
@@ -329,77 +327,6 @@ async function registerForParty(partyId: string, data: {
   return result;
 }
 
-/** Real store — products/orders managed in the admin panel's "חנות" section. */
-async function loadStore() {
-  const settings = await getStoreSettings().catch(() => ({ enabled: false }));
-  if (!(settings as any)?.enabled) return { enabled: false, products: [] };
-  const products = await getProducts(true).catch(() => []);
-  return {
-    enabled: true,
-    products: (products || []).map((p: any) => ({
-      id: p.id,
-      name: p.name || "",
-      description: p.description || "",
-      price: p.price || 0,
-      priceOnRequest: !!p.priceOnRequest,
-      images: p.images || [],
-      stock: p.stock ?? 0,
-      recommended: !!p.recommended,
-    })),
-  };
-}
-
-async function createStoreOrder(data: {
-  productId: string;
-  productName: string;
-  price: number;
-  quantity: number;
-  customerName: string;
-  customerPhone: string;
-  customerTelegram?: string;
-  notes?: string;
-}) {
-  const totalPrice = data.price * data.quantity;
-  return createOrder({
-    customerName: data.customerName,
-    customerPhone: data.customerPhone,
-    customerTelegram: data.customerTelegram || "",
-    items: [{ productId: data.productId, productName: data.productName, quantity: data.quantity, price: data.price }],
-    totalPrice,
-    discountApplied: 0,
-    finalPrice: totalPrice,
-    userType: "store",
-    notes: data.notes || "",
-  });
-}
-
-/**
- * Real community chat (the same rooms-based live chat as the old site),
- * scoped to the single main room. Requires a logged-in forum account —
- * window.LP.current() (set by register()/login() above) supplies the
- * nickname sendChatMessage needs for attribution.
- */
-function communityChat() {
-  let roomIdPromise: Promise<string> | null = null;
-  const getRoomId = () => {
-    if (!roomIdPromise) roomIdPromise = ensureMainRoom().then((r: any) => r.id);
-    return roomIdPromise;
-  };
-  return {
-    subscribe: async (cb: (messages: any[]) => void) => {
-      const roomId = await getRoomId();
-      return subscribeMessages(roomId, cb);
-    },
-    send: async (text: string, currentUser: { id: string; name: string }) => {
-      if (!currentUser) throw new Error("יש להתחבר כדי לשלוח הודעות בצ'אט");
-      const roomId = await getRoomId();
-      const forumUser = { id: currentUser.id, nickname: currentUser.name };
-      await joinRoom(roomId, forumUser, null).catch(() => {});
-      return sendChatMessage(roomId, forumUser, null, text);
-    },
-  };
-}
-
 /** Real advertiser party publishing — writes straight to the live parties collection. */
 /**
  * Upload a party image straight from the browser (phone gallery/camera or a
@@ -627,9 +554,6 @@ async function loadNewsFeed() {
   loadAbout,
   loadContact,
   supportChat,
-  loadStore,
-  createStoreOrder,
-  communityChat,
   registerAdvertiserAccount,
   loginAdvertiser,
   register,
