@@ -133,7 +133,12 @@ async function initAdmin() {
 
 function isCronAuthorized(req) {
   const secret = process.env.CRON_SECRET;
-  if (!secret) return true; // lenient if unset, matches requireAdminApiSecret's pattern
+  // Fail CLOSED when unset — this gate exists specifically so a bare GET to
+  // this URL from outside Vercel can't trigger a real broadcast to every
+  // channel. Vercel automatically attaches `Authorization: Bearer
+  // ${CRON_SECRET}` to its own scheduled cron requests once the env var is
+  // set, so setting it doesn't require touching vercel.json.
+  if (!secret) return false;
   const auth = req.headers?.authorization || '';
   return auth === `Bearer ${secret}`;
 }
