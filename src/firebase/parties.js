@@ -17,7 +17,7 @@ import {
 import { db } from './config';
 import { normalizeIsraeliPhone } from '../utils/phone';
 import { sendBalanceMatchNotification } from './telegram';
-import { isUserBlocked, createUserFromRegistration } from './users';
+import { isUserBlocked } from './users';
 import { getActiveParties as getActivePartiesFromDataAccess, getBalanceMatches as getBalanceMatchesFromDataAccess, getPartyById as getPartyByIdFromDataAccess, getUserByPhone, invalidateCache } from './dataAccess';
 import {
   DEFAULT_PARTY_RETENTION_HOURS,
@@ -319,22 +319,13 @@ export const registerToPartyNew = async (partyId, registrationData) => {
     await invalidateCache(`party_${partyId}`); // Clear partyById cache
     await invalidateCache('activeParties'); // Clear all parties cache
 
-    // Women get free full access automatically (see getSubscription's
-    // gender bypass) — provision the account right here instead of making
-    // an admin click "צור משתמש" for every single female registrant.
-    // Best-effort: a failure here shouldn't fail the registration itself.
-    if (finalGender === 'female' && !userId) {
-      createUserFromRegistration(registration, 'registered', 'year').catch(() => {});
-    }
-
-    // "אישור אוטומטי לזוגות מאומתים" — the male half of a couple whose
-    // partner already has a real account normally still needs the admin to
-    // manually click "אישור למסיבה זו בלבד" (see RegistrationItem). When the
-    // party has this quick-control enabled, do that same one-party-only
-    // approval automatically instead of waiting on the admin.
-    if (autoApproved && finalGender === 'male' && !userId) {
-      createUserFromRegistration(registration, 'registered', 'day').catch(() => {});
-    }
+    // No automatic account creation on registration, for anyone — a new
+    // registrant (male, female, or a "verified couple") always waits as a
+    // plain pending registration until the admin reviews the notification
+    // and explicitly approves them (the "צור משתמש" / "אישור למסיבה זו
+    // בלבד" / "מנוי מלא לשנה" buttons in the balance table). `autoApproved`
+    // above is kept as party-level display info only; it no longer creates
+    // an account on its own.
 
     // Registration notifications are sent only from RegistrationForm to the
     // registration channel (getRegistrationSettings). Matching channel is not used here.
@@ -456,9 +447,8 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
     await updateDoc(partyRef, { registrations: [...updated, femaleReg] });
     await invalidateCache(`party_${partyId}`);
     await invalidateCache('activeParties');
-    // Women get free full access automatically — provision the account
-    // here instead of requiring a manual admin click. Best-effort.
-    createUserFromRegistration(femaleReg, 'registered', 'year').catch(() => {});
+    // No automatic account creation — stays a pending registration until
+    // the admin explicitly approves (see registerToParty for the same rule).
     return { male: updatedMale, female: femaleReg };
   }
 
@@ -482,7 +472,6 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
     await updateDoc(partyRef, { registrations: [...updated, maleReg] });
     await invalidateCache(`party_${partyId}`);
     await invalidateCache('activeParties');
-    createUserFromRegistration(updatedFemale, 'registered', 'year').catch(() => {});
     return { male: maleReg, female: updatedFemale };
   }
 
@@ -503,7 +492,6 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
   });
   await invalidateCache(`party_${partyId}`);
   await invalidateCache('activeParties');
-  createUserFromRegistration(femaleReg, 'registered', 'year').catch(() => {});
   return { male: maleReg, female: femaleReg };
 };
 

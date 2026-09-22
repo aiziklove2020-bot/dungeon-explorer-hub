@@ -412,12 +412,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function wirePhotoUpload(phone, hasProfile) {
+  function wirePhotoUpload(phone, hasActiveSubscription) {
     const btn = document.getElementById("photoUploadBtn");
     const input = document.getElementById("photoInput");
     btn.addEventListener("click", () => {
-      if (!hasProfile) {
-        toast("התמונה תישמר לאחר הרשמה למסיבה עם המספר הזה", "error");
+      if (!hasActiveSubscription) {
+        toast("העלאת תמונה זמינה למנויים בלבד", "error");
         return;
       }
       input.click();
@@ -459,7 +459,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         document.getElementById("subStatus").textContent = "טרם נמצא רישום עם המספר הזה";
       }
-      wirePhotoUpload(phone, !!data.profile);
+      wirePhotoUpload(phone, !!(data.profile && data.profile.hasActiveSubscription));
 
       renderRegistrations(data.registrations);
       renderBalanceMatch(data.balanceMatch, !!(data.profile && data.profile.hasActiveSubscription));
