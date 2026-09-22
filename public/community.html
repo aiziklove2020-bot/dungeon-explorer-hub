@@ -14,7 +14,6 @@
 <style>
   @layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;background:#131315}}
   .stitch-page::-webkit-scrollbar{display:none}
-  #chatBox{max-height:360px;overflow-y:auto}
 </style>
 </head><body class="stitch-page bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
 
@@ -40,8 +39,8 @@
  <div class="drawer-head"><img src="assets/logo-new.png?v=202609220510" alt="LIBRAL PARTY" class="drawer-logo-img"><button data-close class="dr-close" aria-label="סגור"><span class="material-symbols-outlined">close</span></button></div>
  <nav>
   <a href="/"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">home</span></span><span class="dr-tx">בית</span></a><a href="/about"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">info</span></span><span class="dr-tx">אודות</span></a><a href="/calendar"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">calendar_month</span></span><span class="dr-tx">לוח אירועים</span></a>
-  <a href="/favorites"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">favorite</span></span><span class="dr-tx">המועדפים שלי</span></a><a href="/my-area"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">האזור האישי שלי</span></a><a href="/news"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">campaign</span></span><span class="dr-tx">חדשות ועדכונים</span></a><a href="/advertiser-login"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">confirmation_number</span></span><span class="dr-tx">כניסת מפרסמים</span></a><a href="/community"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">forum</span></span><span class="dr-tx">קהילה / צ׳אט</span></a>
-  <a href="/store"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">storefront</span></span><span class="dr-tx">חנות</span></a><a href="/profile"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/gallery"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">photo_library</span></span><span class="dr-tx">גלריה</span></a><a href="/contact"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">call</span></span><span class="dr-tx">צור קשר</span></a>
+  <a href="/favorites"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">favorite</span></span><span class="dr-tx">המועדפים שלי</span></a><a href="/my-area"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">האזור האישי שלי</span></a><a href="/news"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">campaign</span></span><span class="dr-tx">חדשות ועדכונים</span></a><a href="/advertiser-login"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">confirmation_number</span></span><span class="dr-tx">כניסת מפרסמים</span></a><a href="/community"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">forum</span></span><span class="dr-tx">קהילה</span></a>
+  <a href="/profile"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">account_circle</span></span><span class="dr-tx">כניסה / הרשמה</span></a><a href="/gallery"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">photo_library</span></span><span class="dr-tx">גלריה</span></a><a href="/contact"><span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">call</span></span><span class="dr-tx">צור קשר</span></a>
  </nav>
 </aside><div class="scrim"></div>
 
@@ -153,25 +152,6 @@
   <p class="text-text-muted text-body-sm max-w-xs">הצטרפות לקהילת מסיבות ליברליות בישראל מותנית בשמירה על ערכי הכבוד והמרחב האישי. אירועים מיועדים לגילאי 24+ בלבד.</p>
 </div>
 
-<!-- Live community chat (real) -->
-<section class="rounded-xl bg-surface-card p-4 shadow-md flex flex-col gap-3" id="chatPanel">
-  <div class="flex items-center gap-2">
-    <span class="material-symbols-outlined text-primary text-[22px]">forum</span>
-    <h2 class="text-text-primary text-headline-sm font-headline-sm">צ'אט הקהילה</h2>
-  </div>
-  <div id="chatLoggedOut" style="display:none" class="text-center py-6 flex flex-col items-center gap-3">
-    <p class="text-text-secondary text-body-sm font-body-sm">צריך להיות מחוברים לאתר כדי לגשת לצ'אט.</p>
-    <a class="px-5 py-2.5 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md" href="/login">כניסה / הרשמה</a>
-  </div>
-  <div id="chatLoggedIn" style="display:none" class="flex flex-col gap-3">
-    <div id="chatBox" class="flex flex-col gap-2 p-2 rounded-lg bg-surface-container-low"><p class="text-text-muted text-body-sm text-center">טוען הודעות...</p></div>
-    <div class="flex items-center gap-2">
-      <input class="flex-1 bg-surface-container rounded-lg px-3 py-2 text-text-primary placeholder:text-text-muted outline-none" id="chatInput" placeholder="כתבו הודעה...">
-      <button class="px-4 py-2 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md" id="sendChat">שליחה</button>
-    </div>
-  </div>
-</section>
-
 <!-- Ethics & safety pillars -->
 <section class="flex flex-col gap-3">
   <div class="flex items-center justify-between">
@@ -232,10 +212,6 @@ const CHANNEL_STYLE = {
   instagram: { icon: "play_circle", iconBg: "bg-surface-container-high text-tertiary", cta: "לצפייה בסטורי" },
 };
 document.addEventListener("DOMContentLoaded", async () => {
-  const currentUser = LP.current();
-  const isLoggedIn = !!currentUser;
-  document.getElementById(isLoggedIn ? "chatLoggedIn" : "chatLoggedOut").style.display = "";
-
   const box = document.getElementById("socialLinksBox");
   try {
     const links = await window.LPData.loadSocialLinks();
@@ -265,52 +241,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     box.innerHTML = `<div class="rounded-xl bg-surface-container-low p-4 shadow-md text-center text-text-secondary text-body-sm">לא הצלחנו לטעון את הרשתות החברתיות</div>`;
   }
-
-  if (!isLoggedIn) return;
-
-  const chatBox = document.getElementById("chatBox");
-  const chat = window.LPData.communityChat();
-
-  const render = (messages) => {
-    const ordered = [...messages].reverse();
-    chatBox.innerHTML = ordered.length
-      ? ordered.map((m) => {
-          const own = m.authorId === currentUser.id;
-          const time = m.createdAt instanceof Date ? m.createdAt.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" }) : "";
-          return `<div class="flex flex-col ${own ? "items-end" : "items-start"} gap-0.5">
-            <span class="text-label-sm font-label-sm text-text-muted">${(m.authorNickname || "משתמש/ת")}</span>
-            <div class="max-w-[80%] px-3 py-2 rounded-xl ${own ? "bg-primary-container text-on-primary-container" : "bg-surface-container-high text-text-primary"} text-body-sm font-body-sm"></div>
-            <span class="text-[10px] text-text-muted">${time}</span>
-          </div>`;
-        }).join("")
-      : `<p class="text-text-muted text-body-sm text-center">אין עדיין הודעות. תהיו הראשונים לכתוב!</p>`;
-    [...chatBox.children].forEach((el, i) => {
-      const bubble = el.querySelector ? el.querySelector("div") : null;
-      if (bubble) bubble.textContent = ordered[i].text || "";
-    });
-    chatBox.scrollTop = chatBox.scrollHeight;
-  };
-
-  try {
-    await chat.subscribe(render);
-  } catch (err) {
-    chatBox.innerHTML = `<p class="text-text-muted text-body-sm text-center">לא הצלחנו לטעון את הצ'אט כרגע.</p>`;
-  }
-
-  const input = document.getElementById("chatInput");
-  const sendBtn = document.getElementById("sendChat");
-  const send = async () => {
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = "";
-    try {
-      await chat.send(text, currentUser);
-    } catch (err) {
-      toast(err.message || "שגיאה בשליחת ההודעה", "error");
-    }
-  };
-  sendBtn.addEventListener("click", send);
-  input.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 });
 </script>
 </body></html>
