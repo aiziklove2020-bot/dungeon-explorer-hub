@@ -35208,6 +35208,18 @@ async function requestSubscription_(e, t, n = "") {
 	} catch {}
 	return { id: a.id };
 }
+async function registerPushSubscription_(e, t) {
+	let n = XE(e) || e;
+	if (!n || !t?.endpoint) throw Error("נתונים חסרים לרישום התראות");
+	let r = btoa(unescape(encodeURIComponent(t.endpoint))).replace(/[^a-zA-Z0-9]/g, "").slice(0, 300);
+	await $u(E(T(H, "pushSubscriptions"), r), {
+		phone: n,
+		endpoint: t.endpoint,
+		keys: t.keys || null,
+		updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+	});
+	return { id: r };
+}
 async function GU() {
 	return (await hN().catch(() => ({ enabled: !1 })))?.enabled ? {
 		enabled: !0,
@@ -35437,7 +35449,8 @@ window.LPData = {
 	loadMyPersonalArea: cW,
 	uploadMyProfilePhoto: lW,
 	loadMyForumPersonalArea: dW,
-	changeMyForumPassword: uW
+	changeMyForumPassword: uW,
+	registerPushSubscription: registerPushSubscription_
 };
 function pW() {
 	if (document.getElementById("lpSupportChat")) return;

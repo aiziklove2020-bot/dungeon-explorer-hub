@@ -253,3 +253,48 @@ async function lpWireFavBell() {
   });
 }
 window.lpWireFavBell = lpWireFavBell;
+
+/**
+ * Mobile push notifications (balance-match alerts etc.) — works while the
+ * site/app is fully closed, on Android Chrome and on iOS Safari **only**
+ * when the site was added to the home screen first (iOS doesn't support
+ * push in a regular browser tab, only in an installed PWA, iOS 16.4+).
+ */
+const LP_VAPID_PUBLIC_KEY = "BEKO6poc32JAn1MYTdwdvzRve1BRIwZ85AgtEUQe_JqWLTYal5sdwJK-TossqFQzWmnE9Hoj0nxRQtA4nMjTb7Y";
+
+function lpUrlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+}
+
+function lpIsIosNotInstalled() {
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  return isIos && !isStandalone;
+}
+
+// Returns "ok" | "ios-not-installed" | "unsupported" | "denied" | "error"
+async function lpEnablePushNotifications(phone) {
+  if (lpIsIosNotInstalled()) return "ios-not-installed";
+  if (!("serviceWorker" in navigator) || !("PushManager" in window) || !phone) return "unsupported";
+  try {
+    const reg = await navigator.serviceWorker.register("/sw.js");
+    await navigator.serviceWorker.ready;
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") return "denied";
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: lpUrlBase64ToUint8Array(LP_VAPID_PUBLIC_KEY),
+      });
+    }
+    await window.LPData.registerPushSubscription(phone, sub.toJSON());
+    return "ok";
+  } catch (err) {
+    return "error";
+  }
+}
+window.lpEnablePushNotifications = lpEnablePushNotifications;

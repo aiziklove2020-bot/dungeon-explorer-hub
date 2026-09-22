@@ -24,6 +24,7 @@ import {
 import { uploadPartyImage } from "./firebase/storage";
 import { registerAdvertiser, authenticateAdvertiser } from "./firebase/advertisers";
 import { addFavorite, removeFavorite, getFavoritePartyIds } from "./firebase/favorites";
+import { savePushSubscription } from "./firebase/pushSubscriptions";
 
 /** "יום שישי" from any Firestore/JS date shape; "" when unparseable. */
 function hebrewDayFromDate(d: any): string {
@@ -343,6 +344,11 @@ async function requestSubscription(fullName: string, phoneNumber: string, note =
   return result;
 }
 
+/** Registers a Web Push subscription against the phone number so we can notify this device even when the site is closed. */
+async function registerPushSubscription(phoneNumber: string, subscription: any) {
+  return savePushSubscription(phoneNumber, subscription);
+}
+
 /** Real advertiser party publishing — writes straight to the live parties collection. */
 /**
  * Upload a party image straight from the browser (phone gallery/camera or a
@@ -606,6 +612,7 @@ async function loadNewsFeed() {
   uploadMyProfilePhoto,
   loadMyForumPersonalArea,
   changeMyForumPassword,
+  registerPushSubscription,
 };
 
 /**

@@ -101,6 +101,17 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ── Web Push subscriptions (balance-match / party alerts to mobile) ─
+    match /pushSubscriptions/{docId} {
+      allow read: if true;
+      // doc id is derived from the endpoint, so re-subscribing the same
+      // device is a Firestore "update" (doc already exists), not "create".
+      allow create, update: if hasAll(['phone', 'endpoint'])
+                    && isNonEmpty('phone') && maxLen('phone', 20)
+                    && isNonEmpty('endpoint') && maxLen('endpoint', 500);
+      allow delete: if true;
+    }
+
     // ── Advertisers (self-signup, admin-approved) ──────────────────────
     match /advertisers/{docId} {
       // Contains a bcrypt password hash — do not expose broadly once
