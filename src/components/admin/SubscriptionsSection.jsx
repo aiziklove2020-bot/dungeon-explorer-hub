@@ -18,6 +18,14 @@ import SubscriptionBadge from './SubscriptionBadge';
 import SubscriptionEditor from './SubscriptionEditor';
 import NewSubscriberModal from './NewSubscriberModal';
 import RenewSubscriptionModal from './RenewSubscriptionModal';
+import UserCrmModal from './UserCrmModal';
+
+/** Most recent payment entry (by date, falling back to array order), or null. */
+const lastPayment = (u) => {
+  const payments = u.crm?.payments;
+  if (!Array.isArray(payments) || payments.length === 0) return null;
+  return [...payments].sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
+};
 
 const SubscriptionsSection = ({ showSaved }) => {
   const { t } = useLanguage();
@@ -29,6 +37,7 @@ const SubscriptionsSection = ({ showSaved }) => {
   const [showNewSubscriber, setShowNewSubscriber] = useState(false);
   const [newSubscriberPrefill, setNewSubscriberPrefill] = useState(null);
   const [renewingUser, setRenewingUser] = useState(null);
+  const [crmUserId, setCrmUserId] = useState(null);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(true);
 
@@ -445,26 +454,43 @@ const SubscriptionsSection = ({ showSaved }) => {
                 <span className="text-xs font-normal text-[#64748B]">({group.users.length})</span>
               </h3>
               <div className="space-y-3">
-                {group.users.map(u => (
+                {group.users.map(u => {
+                  const payment = lastPayment(u);
+                  return (
                   <div key={u.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <strong className="text-lg text-white">{u.name}</strong>
-                        {u.level === 'admin' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#ff5708]">Admin</span>}
-                        {u.level === 'blocked' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#93000a]">Blocked</span>}
-                      </div>
-                      <div className="text-sm text-[#a9a9b2] flex gap-3">
-                        <span><PhoneLink phone={u.phoneNumber}>{u.phoneNumber}</PhoneLink></span>
-                        {u.telegramUsername && <span>@{u.telegramUsername}</span>}
-                      </div>
+                    <div className="flex items-start gap-3 min-w-0">
+                      {u.photoUrl ? (
+                        <img src={u.photoUrl} alt="" className="w-11 h-11 rounded-full object-cover shrink-0 border border-[rgba(255,255,255,0.08)]" />
+                      ) : (
+                        <div className="w-11 h-11 rounded-full bg-[#2a292e] flex items-center justify-center shrink-0 text-[#a9a9b2] font-bold text-lg">
+                          {(u.name || '?').trim().charAt(0)}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <strong className="text-lg text-white">{u.name}</strong>
+                          {u.level === 'admin' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#ff5708]">Admin</span>}
+                          {u.level === 'blocked' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#93000a]">Blocked</span>}
+                        </div>
+                        <div className="text-sm text-[#a9a9b2] flex gap-3">
+                          <span><PhoneLink phone={u.phoneNumber}>{u.phoneNumber}</PhoneLink></span>
+                          {u.telegramUsername && <span>@{u.telegramUsername}</span>}
+                        </div>
 
-                      <div className="mt-3 flex flex-col gap-1.5">
-                        {(activeTab === 'all' || activeTab === 'parties') && u.subs.parties.exists && (
-                          <SubscriptionBadge user={u} kind="parties" />
-                        )}
-                        {(activeTab === 'all' || activeTab === 'exchangeParties') && u.subs.exchangeParties.exists && (
-                          <SubscriptionBadge user={u} kind="exchangeParties" />
-                        )}
+                        <div className="mt-3 flex flex-col gap-1.5">
+                          {(activeTab === 'all' || activeTab === 'parties') && u.subs.parties.exists && (
+                            <SubscriptionBadge user={u} kind="parties" />
+                          )}
+                          {(activeTab === 'all' || activeTab === 'exchangeParties') && u.subs.exchangeParties.exists && (
+                            <SubscriptionBadge user={u} kind="exchangeParties" />
+                          )}
+                        </div>
+
+                        <div className="mt-1.5 text-xs text-[#94A3B8]">
+                          {payment
+                            ? <>💳 שולם: <span className="text-[#e5e1e4]">{payment.method}</span>{payment.date ? ` · ${new Date(payment.date).toLocaleDateString('he-IL')}` : ''}</>
+                            : <span className="opacity-70">אין תשלום רשום</span>}
+                        </div>
                       </div>
                     </div>
 
@@ -477,10 +503,17 @@ const SubscriptionsSection = ({ showSaved }) => {
                           🔄 חידוש מנוי
                         </button>
                       )}
+                      <button
+                        onClick={() => setCrmUserId(u.id)}
+                        className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm"
+                      >
+                        💼 CRM ותשלומים
+                      </button>
                       <SubscriptionEditor onAction={(kind, action, payload) => handleAction(u.id, kind, action, payload)} />
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -502,6 +535,18 @@ const SubscriptionsSection = ({ showSaved }) => {
           onSubmit={handleRenewSubscription}
         />
       )}
+
+      {crmUserId && (() => {
+        const crmUser = users.find((u) => u.id === crmUserId);
+        if (!crmUser) return null;
+        return (
+          <UserCrmModal
+            user={crmUser}
+            onClose={() => setCrmUserId(null)}
+            onSubscriptionAction={(kind, action, payload) => handleAction(crmUser.id, kind, action, payload)}
+          />
+        );
+      })()}
     </div>
   );
 };
