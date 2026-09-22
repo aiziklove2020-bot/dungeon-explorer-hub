@@ -76,6 +76,7 @@ export default {
   'admin.telegram.msgBalancePublish': 'פרסום איזון',
   'admin.telegram.msgNewParty': 'מסיבה חדשה נוספה',
   'admin.telegram.msgNewExternalParty': 'אירוע חיצוני חדש',
+  'admin.telegram.msgSubscriptionRequest': 'בקשת מנוי חדשה',
   'admin.telegram.msgMatchNotification': 'הודעת התאמה (הודעה פרטית למשתמש)',
 
   // Registration-type labels (select options)

@@ -9,11 +9,17 @@ const todayPlusYear = () => {
   return d.toISOString().split('T')[0];
 };
 
-const NewSubscriberModal = ({ onClose, onSubmit }) => {
+const todayPlusDay = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().split('T')[0];
+};
+
+const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    phoneNumber: '',
+    firstName: initialValues?.firstName || '',
+    lastName: initialValues?.lastName || '',
+    phoneNumber: initialValues?.phoneNumber || '',
     paymentMethod: PAYMENT_METHODS[0],
     expiryDate: todayPlusYear(),
   });
@@ -109,6 +115,14 @@ const NewSubscriberModal = ({ onClose, onSubmit }) => {
 
           <div>
             <label className="text-xs uppercase font-bold text-[#94A3B8]">תאריך תפוגה *</label>
+            <div className="flex gap-2 mb-2">
+              <button type="button" onClick={() => setForm((f) => ({ ...f, expiryDate: todayPlusDay() }))} className="flex-1 bg-[#1f1f23] hover:bg-[#2a292e] border border-[rgba(255,255,255,0.08)] text-white py-2 rounded-lg font-bold text-xs">
+                מנוי יומי
+              </button>
+              <button type="button" onClick={() => setForm((f) => ({ ...f, expiryDate: todayPlusYear() }))} className="flex-1 bg-[#1f1f23] hover:bg-[#2a292e] border border-[rgba(255,255,255,0.08)] text-white py-2 rounded-lg font-bold text-xs">
+                מנוי שנתי
+              </button>
+            </div>
             <input
               type="date"
               value={form.expiryDate}
