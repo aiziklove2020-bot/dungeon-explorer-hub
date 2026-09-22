@@ -35139,6 +35139,13 @@ async function HU(e, t) {
 		bio: t.bio || ""
 	});
 }
+async function checkMyAccountStatus_(e) {
+	let t = await tN(e).catch(() => null);
+	if (!t) return { valid: !1, reason: "החשבון לא נמצא" };
+	if (t.isBlocked) return { valid: !1, reason: "החשבון שלך נחסם" };
+	if (t.isApproved === !1) return { valid: !1, reason: "החשבון שלך ממתין לאישור מנהל" };
+	return { valid: !0, reason: "" };
+}
 async function UU(e, t) {
 	if (t === "female") return {
 		active: !0,
@@ -35380,6 +35387,7 @@ window.LPData = {
 	loginAdvertiser: nW,
 	register: BU,
 	login: VU,
+	checkMyAccountStatus: checkMyAccountStatus_,
 	getMembershipStatus: UU,
 	updateMyProfile: HU,
 	uploadImage: JU,

@@ -229,6 +229,21 @@ async function login(phone: string, password: string) {
 }
 
 /**
+ * Re-checks a stored session against the account's current state — login()
+ * only gates the moment of signing in, so a session already sitting in
+ * localStorage (profile.html trusts LP.current() as-is, no re-fetch) would
+ * otherwise stay "logged in" forever even after an admin revokes approval
+ * or blocks the account later. Call this once when a protected page loads.
+ */
+async function checkMyAccountStatus(userId: string) {
+  const user = await getForumUserById(userId).catch(() => null) as any;
+  if (!user) return { valid: false, reason: "החשבון לא נמצא" };
+  if (user.isBlocked) return { valid: false, reason: "החשבון שלך נחסם" };
+  if (user.isApproved === false) return { valid: false, reason: "החשבון שלך ממתין לאישור מנהל" };
+  return { valid: true, reason: "" };
+}
+
+/**
  * Membership status shown on the personal area (profile.html).
  * Women get unconditional gold status (free, no expiry) per site policy.
  * Men's status is whatever an admin set on their forum account (subscriptionExpiry) —
@@ -619,6 +634,7 @@ async function loadNewsFeed() {
   loginAdvertiser,
   register,
   login,
+  checkMyAccountStatus,
   getMembershipStatus,
   updateMyProfile,
   uploadImage,

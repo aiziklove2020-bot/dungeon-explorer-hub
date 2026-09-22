@@ -147,10 +147,17 @@
 
 <script src="assets/app.js?v=202609062118"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609221200";
+import "./assets/site-data.js?v=202609221230";
 document.addEventListener("DOMContentLoaded", async () => {
   const u = LP.current();
   if (!u) { location = "/login"; return; }
+  const status = await window.LPData.checkMyAccountStatus(u.id).catch(() => ({ valid: true }));
+  if (!status.valid) {
+    localStorage.removeItem("lp_current");
+    toast(status.reason || "החשבון שלך אינו פעיל", "error");
+    setTimeout(() => location = "/login", 900);
+    return;
+  }
   document.getElementById("pageLoader").style.display = "flex";
   document.getElementById("pname").textContent = u.name;
   document.getElementById("pemail").textContent = u.phone;
