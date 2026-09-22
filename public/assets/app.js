@@ -110,22 +110,28 @@ document.addEventListener("DOMContentLoaded",()=>{
     if (label) label.textContent = displayName;
     el.title = "מחובר/ת בתור " + displayName;
     el.classList.add("connected");
-    if (!el.nextElementSibling?.hasAttribute("data-logout")) {
-      const logoutBtn = document.createElement("button");
-      logoutBtn.type = "button";
-      logoutBtn.setAttribute("data-logout", "1");
-      logoutBtn.title = "התנתקות";
-      logoutBtn.className = "logout-btn";
-      logoutBtn.textContent = "⏻";
-      logoutBtn.addEventListener("click", e => {
+  });
+
+  // Logout lives inside the drawer (a scrollable list) instead of the fixed
+  // header, so the header's icon cluster never grows/shifts when a user logs
+  // in — every header icon keeps the same spot on every page.
+  if (c && drawer && !drawer.querySelector("[data-logout]")) {
+    const nav = drawer.querySelector("nav");
+    if (nav) {
+      const logoutLink = document.createElement("a");
+      logoutLink.href = "#";
+      logoutLink.setAttribute("data-logout", "1");
+      logoutLink.innerHTML = '<span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">logout</span></span><span class="dr-tx">התנתקות</span>';
+      logoutLink.addEventListener("click", e => {
         e.preventDefault();
+        close();
         localStorage.removeItem("lp_current");
         toast("התנתקת בהצלחה");
         setTimeout(() => location.href = "index.html", 500);
       });
-      el.insertAdjacentElement("afterend", logoutBtn);
+      nav.appendChild(logoutLink);
     }
-  });
+  }
 
   document.querySelectorAll("[data-fav]").forEach(btn=>{
     let id=btn.dataset.fav, favs=LP.favorites();
