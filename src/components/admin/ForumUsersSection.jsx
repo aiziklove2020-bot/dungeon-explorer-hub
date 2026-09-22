@@ -7,6 +7,7 @@ import { getAllUsers } from '../../firebase/users';
 import {
   getAllForumUsers,
   approveForumUser,
+  revokeForumUserApproval,
   blockForumUser,
   unblockForumUser,
   setForumUserRole,
@@ -68,6 +69,15 @@ const ForumUsersSection = ({ showSaved }) => {
   const handleApproveUser = async (fu) => {
     try {
       await approveForumUser(fu.id);
+      await load();
+      showSaved();
+    } catch (err) { alert(err.message || 'שגיאה'); }
+  };
+
+  const handleRevokeApproval = async (fu) => {
+    if (!window.confirm(`לבטל את האישור של "${fu.nickname}"? הוא לא יוכל להתחבר עד שתאשר אותו מחדש.`)) return;
+    try {
+      await revokeForumUserApproval(fu.id);
       await load();
       showSaved();
     } catch (err) { alert(err.message || 'שגיאה'); }
@@ -387,12 +397,20 @@ const ForumUsersSection = ({ showSaved }) => {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {fu.isApproved === false && (
+                  {fu.isApproved === false ? (
                     <button
                       onClick={() => handleApproveUser(fu)}
                       className="flex items-center gap-1 bg-gradient-to-l from-[#ff5708] to-[#ff7a29] hover:brightness-110 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
                     >
                       <CheckCircle size={11} /> אשר משתמש
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleRevokeApproval(fu)}
+                      className="flex items-center gap-1 bg-[#2a292e] hover:bg-[#353439] text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
+                      title={fu.isApproved === true ? '' : 'חשבון ישן — נחשב מאושר כברירת מחדל, אין שדה מפורש'}
+                    >
+                      <XCircle size={11} /> בטל אישור
                     </button>
                   )}
                   <button

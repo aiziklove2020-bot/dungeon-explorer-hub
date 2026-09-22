@@ -355,6 +355,14 @@ export const approveForumUser = async (id) => {
   invalidateForumUserCache(id);
 };
 
+/** Explicitly flags an account (including a legacy one predating this field
+ *  entirely) as not approved — the admin's way to override the "no field =
+ *  grandfathered in" default for a specific account. */
+export const revokeForumUserApproval = async (id) => {
+  await updateDoc(doc(db, COL, id), { isApproved: false });
+  invalidateForumUserCache(id);
+};
+
 export const linkForumUserToSiteUser = async (forumUserId, siteUserId) => {
   // Enforce "one forumUser per site user". Unlinking (siteUserId == null) is
   // always allowed; linking is rejected if some OTHER forumUser already
