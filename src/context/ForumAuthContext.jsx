@@ -1,11 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { registerForumUser, loginForumUser, getForumUserById, linkForumUserToSiteUser, completeForumPasswordReset, getForumUserBySiteUserId } from '../firebase/forumUsers';
-import { signInForumForChatFirebase, signOutChatFirebase } from '../firebase/chatForumAuth';
-import { restoreSupabaseChatSessionFromStorage, signInForumForSupabaseChat, signOutSupabaseChat } from '../supabase/chat/authBridge';
 import { useSiteAuth } from './AuthContext';
 import { createUser, getUserByPhone } from '../firebase/users';
 import { logError, logWarn } from '../utils/logger';
-import { isSupabaseChatBackend } from '../chat/backend';
 
 const FORUM_USER_KEY = 'forumUser';
 const ForumAuthContext = createContext(null);
@@ -15,20 +12,6 @@ export function useForumAuth() {
 }
 
 export function ForumAuthProvider({ children }) {
-  const signInForumForChatBackend = useCallback(async (nickname, password) => {
-    if (isSupabaseChatBackend()) {
-      return signInForumForSupabaseChat(nickname, password);
-    }
-    return signInForumForChatFirebase(nickname, password);
-  }, []);
-
-  const signOutForumForChatBackend = useCallback(async () => {
-    if (isSupabaseChatBackend()) {
-      return signOutSupabaseChat();
-    }
-    return signOutChatFirebase();
-  }, []);
-
   const { siteUser, syncSiteUserFromLinkedUserId, clearSiteUser } = useSiteAuth();
   const [forumUser, setForumUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -61,9 +44,6 @@ export function ForumAuthProvider({ children }) {
             const fresh = await getForumUserById(parsed.id);
             if (fresh && !fresh.isBlocked && !fresh.mustResetPassword) {
               await autoLink(fresh);
-              if (isSupabaseChatBackend()) {
-                await restoreSupabaseChatSessionFromStorage();
-              }
               // On cold start, derive the site session from the forum link.
               // This used to happen lazily via phone-login; now that the
               // forum is the only login, the linked party profile (when it
@@ -108,23 +88,11 @@ export function ForumAuthProvider({ children }) {
     if (user.linkedUserId) {
       await syncSiteUserFromLinkedUserId(user.linkedUserId);
     }
-    // Chat backend sign-in is best-effort. A failure here (transient JWT
-    // bridge error, Supabase env misconfiguration, eventual consistency on
-    // a freshly-created user, etc.) used to throw and abort forum login,
-    // leaving the user with a registered account but an unusable client.
-    // Forum login is the source of truth; chat is a secondary feature, so
-    // we degrade gracefully — the chat surface will simply be unavailable
-    // until the next successful sign-in. Underlying error is already
-    // logged by signInForumForSupabaseChat for diagnosis.
-    const chatOk = await signInForumForChatBackend(nickname, password);
-    if (isSupabaseChatBackend() && !chatOk) {
-      logWarn('ForumAuth.login.chatSignInFailed', { nickname });
-    }
     const safe = { id: user.id, nickname: user.nickname, role: user.role, isBlocked: user.isBlocked };
     localStorage.setItem(FORUM_USER_KEY, JSON.stringify(safe));
     setForumUser(user);
     return user;
-  }, [autoLink, signInForumForChatBackend, syncSiteUserFromLinkedUserId]);
+  }, [autoLink, syncSiteUserFromLinkedUserId]);
 
   /** Verify the temporary password, set the user-chosen new one, then complete login.
    * Called by ForumLoginModal after `forumLogin` throws PASSWORD_RESET_REQUIRED. */
@@ -230,18 +198,12 @@ export function ForumAuthProvider({ children }) {
       requestForumEmailVerification({ forumUserId: user.id }).catch(() => {});
     }
 
-    // Chat backend sign-in is best-effort (see forumLogin for rationale).
-    const chatOk = await signInForumForChatBackend(user.nickname, password);
-    if (isSupabaseChatBackend() && !chatOk) {
-      logWarn('ForumAuth.register.chatSignInFailed', { nickname: user.nickname });
-    }
-
     const safe = { id: user.id, nickname: user.nickname, role: user.role, isBlocked: user.isBlocked };
     localStorage.setItem(FORUM_USER_KEY, JSON.stringify(safe));
     setForumUser(user);
 
     return user;
-  }, [autoLink, signInForumForChatBackend, siteUser, syncSiteUserFromLinkedUserId, requestForumEmailVerification]);
+  }, [autoLink, siteUser, syncSiteUserFromLinkedUserId, requestForumEmailVerification]);
 
   const forumLogout = useCallback(() => {
     localStorage.removeItem(FORUM_USER_KEY);
@@ -250,8 +212,7 @@ export function ForumAuthProvider({ children }) {
     // workshops/store auto-fill doesn't keep showing the old phone profile to
     // whoever opens the browser next.
     clearSiteUser();
-    void signOutForumForChatBackend();
-  }, [signOutForumForChatBackend, clearSiteUser]);
+  }, [clearSiteUser]);
 
   /** Re-fetch the current forum user doc and update context state. Called after
    *  flows that mutate the user record outside of the context (admin tools,
