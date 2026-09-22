@@ -232,7 +232,10 @@ const ForumUsersSection = ({ showSaved }) => {
     if (roleFilter === 'unlinked' && fu.linkedUserId) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
-    return (fu.nickname || '').toLowerCase().includes(q) || (fu.email || '').toLowerCase().includes(q);
+    const qDigits = searchQuery.replace(/\D/g, '');
+    return (fu.nickname || '').toLowerCase().includes(q)
+      || (fu.email || '').toLowerCase().includes(q)
+      || (qDigits.length > 0 && (fu.phone || '').includes(qDigits));
   });
 
   return (
@@ -340,6 +343,12 @@ const ForumUsersSection = ({ showSaved }) => {
                   )}
                 </div>
 
+                {fu.phone && (
+                  <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
+                    <span className="text-[#94A3B8] font-bold">טלפון:</span>
+                    <PhoneLink phone={fu.phone}>{fu.phone}</PhoneLink>
+                  </div>
+                )}
                 <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
                   <Mail size={12} className="text-[#94A3B8]" />
                   {fu.email ? (
