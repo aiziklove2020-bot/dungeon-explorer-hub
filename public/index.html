@@ -79,7 +79,7 @@
 <section class="relative px-4 pt-4 pb-2 flex flex-col items-center text-center overflow-hidden">
   <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-72 bg-primary-container/20 rounded-full blur-[90px] pointer-events-none"></div>
   <img alt="LIBRAL PARTY - מסיבות ליברליות בישראל" class="relative w-56 sm:w-64 h-auto object-contain drop-shadow-[0_0_20px_rgba(255,87,8,0.5)] mb-1.5" src="assets/logo-stacked.png?v=202609221">
-  <span class="relative font-label-caps text-label-caps text-secondary-fixed-dim">חיבור. איזון. חיי לילה.</span>
+  <div id="socialIcons" class="relative flex items-center justify-center gap-3"></div>
 </section>
 
 <section class="px-4 pt-2 pb-3 flex flex-col gap-3">
@@ -131,6 +131,26 @@
 <script type="module">
 import "./assets/site-data.js?v=202609221230";
 document.addEventListener("DOMContentLoaded", async () => {
+  (async () => {
+    const ORDER = [
+      { type: "facebook", icon: "public" },
+      { type: "whatsapp", icon: "chat" },
+      { type: "telegramGroup", icon: "groups" },
+      { type: "telegramChannel", icon: "send" },
+    ];
+    try {
+      const links = await window.LPData.loadSocialLinks();
+      const byType = Object.fromEntries(links.map((l) => [l.type, l]));
+      const box = document.getElementById("socialIcons");
+      box.innerHTML = ORDER.filter((o) => byType[o.type]).map((o) => {
+        const l = byType[o.type];
+        return `<a href="${l.url}" target="_blank" rel="noopener noreferrer" aria-label="${l.label}" title="${l.label}" class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-text-secondary hover:text-primary hover:bg-surface-container-highest transition-colors">
+          <span class="material-symbols-outlined text-[20px]">${o.icon}</span>
+        </a>`;
+      }).join("");
+    } catch {}
+  })();
+
   const box = document.getElementById("dynamicEvents");
   const search = document.getElementById("search");
   const city = document.getElementById("city");
