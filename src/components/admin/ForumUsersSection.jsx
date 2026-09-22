@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RotateCcw, Search, Shield, ShieldOff, Ban, CheckCircle, Trash2, KeyRound, Mail, MailCheck, MessageSquareOff, Link2, Scale, XCircle } from 'lucide-react';
+import { RotateCcw, Search, Shield, ShieldOff, Ban, CheckCircle, Trash2, KeyRound, Mail, MailCheck, Link2, Scale, XCircle } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminLoader from './AdminLoader';
 import PhoneLink from '../PhoneLink';
@@ -20,7 +20,6 @@ import {
   backfillForumNicknameLower,
   updateForumUser,
 } from '../../firebase/forumUsers';
-import { purgeForumUserFromChat } from '../../firebase/liveChat';
 
 /**
  * Fully independent from the site/subscriptions user list (UsersSection):
@@ -95,21 +94,8 @@ const ForumUsersSection = ({ showSaved }) => {
   const handleDelete = async (fu) => {
     if (!window.confirm(`למחוק משתמש פורום "${fu.nickname}"?`)) return;
     try {
-      try {
-        await purgeForumUserFromChat(fu.id, { hardDeleteMessages: true });
-      } catch (chatErr) {
-        console.warn('purgeForumUserFromChat failed; continuing with deleteForumUser:', chatErr?.message);
-      }
       await deleteForumUser(fu.id);
       await load();
-      showSaved();
-    } catch (err) { alert(err.message || 'שגיאה'); }
-  };
-
-  const handleKickFromChat = async (fu) => {
-    if (!window.confirm(`להוציא את "${fu.nickname}" מהצ'אט? המשתמש יוסר מכל החדרים. אם ייכנס שוב — יתווסף אוטומטית לצ'אט הראשי.`)) return;
-    try {
-      await purgeForumUserFromChat(fu.id, { hardDeleteMessages: false });
       showSaved();
     } catch (err) { alert(err.message || 'שגיאה'); }
   };
@@ -447,13 +433,6 @@ const ForumUsersSection = ({ showSaved }) => {
                       <MailCheck size={11} /> סמן כמאומת
                     </button>
                   )}
-                  <button
-                    onClick={() => handleKickFromChat(fu)}
-                    className="flex items-center gap-1 bg-amber-700 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
-                    title="יוסר מכל חדרי הצ'אט; אם ייכנס שוב — יתווסף אוטומטית לצ'אט הראשי."
-                  >
-                    <MessageSquareOff size={11} /> הוצא מהצ'אט
-                  </button>
                   <button onClick={() => handleDelete(fu)} className="flex items-center gap-1 bg-[#93000a]/60 hover:bg-[#be0037] text-white px-2.5 py-1 rounded-lg font-bold text-[11px]">
                     <Trash2 size={11} /> מחק חשבון פורום
                   </button>

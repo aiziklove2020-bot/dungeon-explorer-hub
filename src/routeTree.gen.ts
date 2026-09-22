@@ -11,11 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TicketsRouteImport } from './routes/tickets'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ShopRouteImport } from './routes/shop'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -36,11 +34,6 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ShopRoute = ShopRouteImport.update({
-  id: '/shop',
-  path: '/shop',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -54,11 +47,6 @@ const LoginRoute = LoginRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -111,11 +99,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/chat': typeof ChatRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
   '/advertiser/register': typeof AdvertiserRegisterRoute
@@ -129,11 +115,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/chat': typeof ChatRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
   '/advertiser/register': typeof AdvertiserRegisterRoute
@@ -148,11 +132,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/chat': typeof ChatRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
   '/advertiser/register': typeof AdvertiserRegisterRoute
@@ -168,11 +150,9 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
-    | '/chat'
     | '/contact'
     | '/login'
     | '/register'
-    | '/shop'
     | '/sitemap.xml'
     | '/tickets'
     | '/advertiser/register'
@@ -186,11 +166,9 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
-    | '/chat'
     | '/contact'
     | '/login'
     | '/register'
-    | '/shop'
     | '/sitemap.xml'
     | '/tickets'
     | '/advertiser/register'
@@ -204,11 +182,9 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
-    | '/chat'
     | '/contact'
     | '/login'
     | '/register'
-    | '/shop'
     | '/sitemap.xml'
     | '/tickets'
     | '/advertiser/register'
@@ -223,11 +199,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
-  ChatRoute: typeof ChatRoute
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
-  ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TicketsRoute: typeof TicketsRoute
   AdvertiserRegisterRoute: typeof AdvertiserRegisterRoute
@@ -254,13 +228,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/shop': {
-      id: '/shop'
-      path: '/shop'
-      fullPath: '/shop'
-      preLoaderRoute: typeof ShopRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -280,13 +247,6 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -359,11 +319,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
-  ChatRoute: ChatRoute,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
-  ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TicketsRoute: TicketsRoute,
   AdvertiserRegisterRoute: AdvertiserRegisterRoute,
