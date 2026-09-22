@@ -169,6 +169,21 @@ async function lpWireFavHearts(container) {
   if (buttons.length === 0) return;
   const identity = lpFavIdentity();
   const iconOf = (btn) => btn.querySelector(".material-symbols-outlined") || btn;
+
+  // Favorites are a subscriber-only feature — a forum login alone isn't
+  // enough (see toggleFavorite in site-bridge.ts). Hide the hearts entirely
+  // for anyone who isn't an active subscriber, rather than showing them a
+  // button that will just error out on click.
+  let isSubscriber = false;
+  if (identity && window.LPData?.loadMyForumPersonalArea) {
+    const area = await window.LPData.loadMyForumPersonalArea(identity).catch(() => null);
+    isSubscriber = !!area?.profile?.hasActiveSubscription;
+  }
+  if (!isSubscriber) {
+    buttons.forEach((btn) => { btn.style.display = "none"; });
+    return;
+  }
+
   let myFavIds = [];
   if (identity && window.LPData?.loadMyFavorites) {
     myFavIds = await window.LPData.loadMyFavorites(identity).catch(() => []);

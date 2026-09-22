@@ -111,36 +111,38 @@ document.addEventListener("DOMContentLoaded", async () => {
      </button>
    </div>
  </div>`;
- // Real per-account favorite (requires login — see app.js's lpWireFavHearts).
- // Wired directly since this button is injected after the async LPData
- // fetch, missing app.js's own DOMContentLoaded pass.
+ // Real per-account favorite — subscriber-only (requires an active
+ // subscription, not just a forum login — see toggleFavorite in
+ // site-bridge.ts). Wired directly since this button is injected after
+ // the async LPData fetch, missing app.js's own DOMContentLoaded pass.
  const favBtn = document.getElementById("favBtn");
  const favId = e.id;
  const favLabel = (saved) => `<span class="material-symbols-outlined text-[18px]">${saved ? "favorite" : "favorite_border"}</span>${saved ? "נשמר במועדפים" : "שמירה למועדפים"}`;
  const currentUser = LP.current();
  let savedNow = false;
+ let isSubscriber = false;
  if (currentUser) {
+   const area = await window.LPData.loadMyForumPersonalArea(currentUser.id).catch(() => null);
+   isSubscriber = !!area?.profile?.hasActiveSubscription;
    savedNow = (await window.LPData.loadMyFavorites(currentUser.id).catch(() => [])).includes(favId);
  }
- favBtn.innerHTML = favLabel(savedNow);
- favBtn.addEventListener("click", async () => {
-   const user = LP.current();
-   if (!user) {
-     toast("צריך להתחבר כדי לשמור מועדפים");
-     setTimeout(() => (location.href = "/login"), 900);
-     return;
-   }
-   const next = !savedNow;
-   favBtn.innerHTML = favLabel(next);
-   try {
-     await window.LPData.toggleFavorite(user.id, favId, next);
-     savedNow = next;
-     toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
-   } catch (err) {
-     favBtn.innerHTML = favLabel(savedNow);
-     toast("שגיאה בשמירת מועדף", "error");
-   }
- });
+ if (!isSubscriber) {
+   favBtn.style.display = "none";
+ } else {
+   favBtn.innerHTML = favLabel(savedNow);
+   favBtn.addEventListener("click", async () => {
+     const next = !savedNow;
+     favBtn.innerHTML = favLabel(next);
+     try {
+       await window.LPData.toggleFavorite(currentUser.id, favId, next);
+       savedNow = next;
+       toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
+     } catch (err) {
+       favBtn.innerHTML = favLabel(savedNow);
+       toast(err?.message || "שגיאה בשמירת מועדף", "error");
+     }
+   });
+ }
  lpWireFavBell();
 });
 </script>
