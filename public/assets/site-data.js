@@ -24610,7 +24610,8 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				date: e.date,
 				image: e.imageURL || "",
 				registrationType: a.registrationType,
-				status: s
+				status: s,
+				userName: a.fullName || a.userName || ""
 			});
 		}
 		return i;

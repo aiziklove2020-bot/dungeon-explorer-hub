@@ -186,7 +186,7 @@
 
 <script src="assets/app.js?v=202609062118"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609220955";
+import "./assets/site-data.js?v=202609221107";
 
 const STORAGE_KEY = "lp_my_area_phone";
 
@@ -254,6 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         <div class="min-w-0 flex-1">
           <h3 class="text-body-md font-body-md text-text-primary font-bold truncate">${r.partyName || ""}</h3>
+          ${r.userName ? `<p class="text-label-sm font-label-sm text-text-secondary truncate">נרשמת בשם ${r.userName}</p>` : ""}
           <p class="text-label-sm font-label-sm text-text-muted">${formatDate(r.date)}</p>
         </div>
         <span class="status-chip ${s.cls}" style="flex-shrink:0"><span class="material-symbols-outlined text-[14px]">${s.icon}</span>${s.text}</span>

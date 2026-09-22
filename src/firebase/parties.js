@@ -1604,6 +1604,7 @@ export const getMyRegistrations = async (phoneNumber) => {
       image: party.imageURL || '',
       registrationType: myReg.registrationType,
       status,
+      userName: myReg.fullName || myReg.userName || '',
     });
   }
 
