@@ -108,7 +108,7 @@ document.getElementById("subRequestForm").addEventListener("submit", async e => 
   const btn = e.target.querySelector("button");
   btn.disabled = true;
   try {
-    await import("./assets/site-data.js?v=202609231530");
+    await import("./assets/site-data.js?v=202609232010");
     await window.LPData.requestSubscription(f.get("fullName"), phone, f.get("note") || "");
     document.getElementById("requestForm").style.display = "none";
     document.getElementById("requestSuccess").style.display = "";

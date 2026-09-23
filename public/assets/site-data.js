@@ -35232,15 +35232,11 @@ async function requestSubscription_(e, t, n = "") {
 		status: "pending",
 		createdAt: N.now()
 	});
-	try {
-		let e = await Pk(J.SUBSCRIPTION_REQUEST);
-		if (e?.enabled && e.botToken && e.chatIds?.length) {
-			let t = e.template?.trim() ? Fk(e.template, {
-				request: { fullName: r, phoneNumber: i, note: n }
-			}) : `⚖️ <b>בקשת מנוי חדשה</b>\n\n<b>שם:</b> ${r}\n<b>טלפון:</b> ${i}` + (n ? `\n\n${n}` : ""), o = e.parseMode || "HTML";
-			for (let n of e.chatIds) await Xk(t, e.botToken, n, o);
-		}
-	} catch {}
+	fetch("/api/support-chat-send", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ job: "subscription-request", name: r, phone: i, note: n })
+	}).catch(() => {});
 	return { id: a.id };
 }
 async function registerPushSubscription_(e, t) {
