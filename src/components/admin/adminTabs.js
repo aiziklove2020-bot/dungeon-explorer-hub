@@ -8,10 +8,12 @@ export const adminTabs = [
   // then the parties being balanced, then the people.
   { id: 'matching', label: 'התאמות' },
   { id: 'parties',  label: 'מסיבות' },
-  { id: 'users',    label: 'ניהול משתמשים' },
   { id: 'siteDesign', label: 'עיצוב האתר (לוגו/באנרים/פופאפ)' },
   { id: 'forumUsers', label: 'מנויי האתר' },
-  { id: 'subscriptions', label: 'ניהול מנויים' },
+  // Single unified place for everyone on the site — merged with the old
+  // "ניהול משתמשים" tab, which was just a different filter over the exact
+  // same `users` collection and confused the admin (two tabs, one dataset).
+  { id: 'subscriptions', label: 'ניהול משתמשים ומנויים' },
   { id: 'about',    label: 'אודות' },
   { id: 'contact',  label: 'צור קשר' },
   { id: 'links',    label: 'קישורים וקבוצות' },

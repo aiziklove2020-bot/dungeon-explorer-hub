@@ -159,7 +159,7 @@ export const createUser = async (phoneNumber, name, gender) => {
 
 /**
  * Legacy entrypoint for changing a user's "level". Preserved so existing
- * callers (UsersSection legacy buttons, balance tables, party flows) keep
+ * callers (SubscriptionsSection legacy buttons, balance tables, party flows) keep
  * working unchanged. Internally this now operates on `subscriptions.parties`
  * and lets the subscriptions module recompute the derived `level`.
  *

@@ -21,7 +21,7 @@ import {
 } from '../../firebase/forumUsers';
 
 /**
- * Fully independent from the site/subscriptions user list (UsersSection):
+ * Fully independent from the site/subscriptions user list (SubscriptionsSection):
  * forum accounts are a separate identity system, and mixing their
  * management inline into the site-user cards made it impossible to tell
  * which controls affected which system. This section owns forum accounts

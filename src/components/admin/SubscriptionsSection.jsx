@@ -1,10 +1,19 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Search, Download, RotateCcw, Plus, Clock, Check, X } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { Search, Download, Upload, RotateCcw, Plus, Clock, Check, X, UserCog } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import useAdminSection from '../../hooks/useAdminSection';
 import AdminLoader from './AdminLoader';
+import Loader from '../Loader';
 import PhoneLink from '../PhoneLink';
-import { createUser, getAllUsers } from '../../firebase/users';
+import {
+  createUser,
+  getAllUsers,
+  updateUserLevel,
+  updateUserDetails,
+  deleteUser,
+  importUsers
+} from '../../firebase/users';
+import { getActiveParties, adminRemoveUserFromParty, getBalanceMatches, saveBalanceMatches } from '../../firebase/parties';
 import { addPaymentRecord, PAYMENT_METHODS } from '../../firebase/crm';
 import {
   SUBSCRIPTION_KINDS,
@@ -34,10 +43,15 @@ const SubscriptionsSection = ({ showSaved }) => {
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'parties', 'exchangeParties'
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'active', 'gold', 'expiringSoon', 'expired'
+  const [typeFilter, setTypeFilter] = useState(''); // '', 'male', 'female', 'blocked', 'admin'
   const [showNewSubscriber, setShowNewSubscriber] = useState(false);
   const [newSubscriberPrefill, setNewSubscriberPrefill] = useState(null);
   const [renewingUser, setRenewingUser] = useState(null);
   const [crmUserId, setCrmUserId] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editUserForm, setEditUserForm] = useState({ name: '', phoneNumber: '', gender: '', telegramUsername: '' });
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef(null);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(true);
 
@@ -103,6 +117,120 @@ const SubscriptionsSection = ({ showSaved }) => {
     showSaved();
   };
 
+  const toDateInputValue = (value) => {
+    if (!value) return '';
+    if (value?.seconds) return new Date(value.seconds * 1000).toISOString().split('T')[0];
+    if (value instanceof Date) return value.toISOString().split('T')[0];
+    if (typeof value === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+      const d = new Date(value);
+      if (!Number.isNaN(d.getTime())) return d.toISOString().split('T')[0];
+    }
+    return '';
+  };
+
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+    setEditUserForm({
+      name: user.name || '',
+      phoneNumber: user.phoneNumber || '',
+      gender: user.gender || '',
+      telegramUsername: user.telegramUsername || '',
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUser(null);
+    setEditUserForm({ name: '', phoneNumber: '', gender: '', telegramUsername: '' });
+  };
+
+  const handlePhoneChange = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 0 && !value.startsWith('0')) value = '0' + value;
+    if (value.length > 10) value = value.substring(0, 10);
+    setEditUserForm((f) => ({ ...f, phoneNumber: value }));
+  };
+
+  const handleSaveUser = async (e) => {
+    e.preventDefault();
+    if (!editingUser?.id) return;
+    try {
+      await updateUserDetails(editingUser.id, {
+        name: editUserForm.name,
+        phoneNumber: editUserForm.phoneNumber,
+        gender: editUserForm.gender,
+        telegramUsername: editUserForm.telegramUsername || null,
+      });
+      setEditingUser(null);
+      reload();
+      showSaved();
+    } catch (error) {
+      window.alert(`שגיאה בשמירת המשתמש: ${error.message}`);
+    }
+  };
+
+  // Blocking removes the user from every party they're currently registered
+  // to (and any balance match they're part of) — mirrors what used to live
+  // in the separate "ניהול משתמשים" tab before it merged into this one.
+  const handleUpdateUserLevel = async (userId, newLevel) => {
+    try {
+      if (newLevel === 'blocked') {
+        const user = users.find((u) => u.id === userId);
+        if (user?.phoneNumber) {
+          const parties = await getActiveParties();
+          const partiesWithUser = parties.filter((party) =>
+            party.registrations?.some((reg) => reg.phoneNumber === user.phoneNumber || reg.userId === userId)
+          );
+          for (const party of partiesWithUser) {
+            await adminRemoveUserFromParty(party.id, user.phoneNumber);
+            const balanceMatches = party.balanceMatches?.length ? party.balanceMatches : await getBalanceMatches(party.id);
+            if (balanceMatches?.length) {
+              const updatedBalance = balanceMatches.filter(
+                (match) => match.malePhone !== user.phoneNumber && match.femalePhone !== user.phoneNumber
+              );
+              await saveBalanceMatches(party.id, updatedBalance);
+            }
+          }
+        }
+      }
+      await updateUserLevel(userId, newLevel);
+      reload();
+      showSaved();
+    } catch (error) {
+      window.alert(`הפעולה נכשלה: ${error.message || error}`);
+    }
+  };
+
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`למחוק את "${userName}" לצמיתות?`)) return;
+    try {
+      await deleteUser(userId);
+      reload();
+      showSaved();
+    } catch (error) {
+      window.alert(`הפעולה נכשלה: ${error.message || error}`);
+    }
+  };
+
+  const handleImportUsers = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      setImporting(true);
+      const importData = JSON.parse(await file.text());
+      if (!Array.isArray(importData)) throw new Error('פורמט לא תקין: מצופה מערך משתמשים');
+      const result = await importUsers(importData);
+      window.alert(`ייבוא הצליח: ${result.imported} משתמשים יובאו, ${result.skipped} דולגו (כבר קיימים)`);
+      reload();
+      showSaved();
+    } catch (error) {
+      window.alert(`שגיאה בייבוא: ${error.message}`);
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleAction = async (userId, kind, action, payload) => {
     try {
       if (action === 'extend') {
@@ -136,12 +264,18 @@ const SubscriptionsSection = ({ showSaved }) => {
         }
       };
     }).filter(user => {
-      // Base filter: must have at least one subscription history/record 
-      // (even if expired) for the selected tab
+      // "all" now means literally every user on the site (subscriber or
+      // not) — the two specific-kind tabs still narrow to people who hold
+      // that particular subscription, since "show me only מסיבות subscribers"
+      // is a real, distinct question from "show me everyone".
       if (activeTab === 'parties' && !user.subs.parties.exists) return false;
       if (activeTab === 'exchangeParties' && !user.subs.exchangeParties.exists) return false;
-      if (activeTab === 'all' && !user.subs.parties.exists && !user.subs.exchangeParties.exists) return false;
-      
+
+      if (typeFilter === 'male' && user.gender !== 'male') return false;
+      if (typeFilter === 'female' && user.gender !== 'female') return false;
+      if (typeFilter === 'blocked' && user.level !== 'blocked') return false;
+      if (typeFilter === 'admin' && user.level !== 'admin') return false;
+
       // Status filter
       if (filterStatus !== 'all') {
         const checkStatus = (info) => {
@@ -172,13 +306,15 @@ const SubscriptionsSection = ({ showSaved }) => {
 
       return true;
     });
-  }, [users, activeTab, filterStatus, searchQuery]);
+  }, [users, activeTab, filterStatus, typeFilter, searchQuery]);
 
   // Group + sort so it's obvious at a glance who holds which tier — the
   // admin's actual complaint was "I can't tell who has a year vs a month, and
-  // I can't tell subscribers apart from plain registered site users" (this
-  // list already only shows users with an actual parties/exchangeParties
-  // subscription record, never plain registered accounts).
+  // I can't tell subscribers apart from plain registered site users". This
+  // is now the single list of everyone on the site, so a "ללא מנוי" group
+  // holds plain registrants (registered for a party, never became a
+  // subscriber) right alongside real subscribers, instead of them being
+  // invisible here and scattered across a separate tab.
   const TIER_GROUPS = [
     { id: 'gold', label: '⭐ זהב' },
     { id: 'year', label: '📅 שנה' },
@@ -187,10 +323,11 @@ const SubscriptionsSection = ({ showSaved }) => {
     { id: 'day', label: '🌓 יום אחד' },
     { id: 'expired', label: '⛔ פג תוקף' },
     { id: 'other', label: 'אחר' },
+    { id: 'none', label: '👤 ללא מנוי (רשום בלבד)' },
   ];
 
   const groupOf = (info) => {
-    if (!info.exists) return null;
+    if (!info.exists) return 'none';
     if (info.isGold) return 'gold';
     if (info.isExpired) return 'expired';
     if (info.tier && TIER_GROUPS.some(g => g.id === info.tier)) return info.tier;
@@ -318,9 +455,9 @@ const SubscriptionsSection = ({ showSaved }) => {
       {/* Header & Main Tabs */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div>
-          <h2 className="text-xl md:text-2xl font-bold">{t('admin.subscriptions') || 'ניהול מנויים'}</h2>
+          <h2 className="text-xl md:text-2xl font-bold">{t('admin.subscriptions') || 'ניהול משתמשים ומנויים'}</h2>
           <p className="text-xs text-[#94A3B8] mt-1">
-            כאן מוצגים רק משתמשים עם מנוי בתשלום (מסיבות / מסיבות חילופים), מקובצים לפי סוג המנוי. משתמש שרק רשום לאתר בלי מנוי — זה עניין נפרד, ומופיע ב"ניהול משתמשים" ולא כאן.
+            מקום אחד לכולם: מנויים בתשלום (מקובצים לפי סוג/תוקף) וגם מי שרק נרשם לאתר בלי מנוי (בקבוצת "ללא מנוי" למטה). כרטיס אחד לכל משתמש — מנוי, תמונה, תשלום אחרון, חסימה, עריכה.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -333,6 +470,15 @@ const SubscriptionsSection = ({ showSaved }) => {
           <button onClick={handleExport} disabled={processedUsers.length === 0} className="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
             <Download size={14} /> ייצא CSV
           </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+            className="bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm"
+          >
+            {importing ? <Loader size="small" /> : <Upload size={14} />}
+            ייבא JSON
+          </button>
+          <input ref={fileInputRef} type="file" accept=".json" onChange={handleImportUsers} className="hidden" />
         </div>
       </div>
 
@@ -365,13 +511,17 @@ const SubscriptionsSection = ({ showSaved }) => {
       )}
 
       {!loading && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
           <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
-            <p className="text-[#94A3B8] text-xs font-bold">סה״כ רשומות</p>
+            <p className="text-[#94A3B8] text-xs font-bold">כלל המשתמשים באתר</p>
+            <p className="text-2xl font-bold mt-1">{users?.length || 0}</p>
+          </div>
+          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <p className="text-[#94A3B8] text-xs font-bold">מנויים (סה״כ)</p>
             <p className="text-2xl font-bold mt-1">{stats.total}</p>
           </div>
           <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
-            <p className="text-[#94A3B8] text-xs font-bold">פעילים</p>
+            <p className="text-[#94A3B8] text-xs font-bold">מנויים פעילים</p>
             <p className="text-2xl font-bold mt-1" style={{ color: '#10B981' }}>{stats.active}</p>
           </div>
           <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
@@ -379,8 +529,12 @@ const SubscriptionsSection = ({ showSaved }) => {
             <p className="text-2xl font-bold mt-1" style={{ color: '#f59e0b' }}>{stats.gold}</p>
           </div>
           <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
-            <p className="text-[#94A3B8] text-xs font-bold">פגים</p>
+            <p className="text-[#94A3B8] text-xs font-bold">מנויים שפגו</p>
             <p className="text-2xl font-bold mt-1" style={{ color: '#ffb4ab' }}>{stats.expired}</p>
+          </div>
+          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <p className="text-[#94A3B8] text-xs font-bold">חסומים</p>
+            <p className="text-2xl font-bold mt-1" style={{ color: '#ff5a72' }}>{users?.filter(u => u.level === 'blocked').length || 0}</p>
           </div>
         </div>
       )}
@@ -391,7 +545,7 @@ const SubscriptionsSection = ({ showSaved }) => {
           onClick={() => setActiveTab('all')}
           className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'all' ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
         >
-          כל המנויים
+          כולם
         </button>
         <button
           onClick={() => setActiveTab('parties')}
@@ -438,6 +592,24 @@ const SubscriptionsSection = ({ showSaved }) => {
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-[#94A3B8] text-sm font-bold">סוג:</span>
+        {[{ id: '', label: 'הכל', color: 'bg-[#ff5708]' },
+          { id: 'male', label: 'גברים', color: 'bg-blue-600' },
+          { id: 'female', label: 'נשים', color: 'bg-pink-600' },
+          { id: 'blocked', label: 'חסומים', color: 'bg-[#93000a]' },
+          { id: 'admin', label: 'מנהלים', color: 'bg-[#ff5708]' },
+        ].map(f => (
+          <button
+            key={f.id || 'none'}
+            onClick={() => setTypeFilter(f.id)}
+            className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${typeFilter === f.id ? f.color + ' text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
       {/* List */}
       {loading ? (
         <AdminLoader />
@@ -456,6 +628,39 @@ const SubscriptionsSection = ({ showSaved }) => {
               <div className="space-y-3">
                 {group.users.map(u => {
                   const payment = lastPayment(u);
+                  if (editingUser?.id === u.id) {
+                    return (
+                      <form key={u.id} onSubmit={handleSaveUser} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-xs uppercase font-bold text-[#94A3B8]">שם מלא *</label>
+                            <input type="text" value={editUserForm.name} onChange={(e) => setEditUserForm((f) => ({ ...f, name: e.target.value }))} className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right" required />
+                          </div>
+                          <div>
+                            <label className="text-xs uppercase font-bold text-[#94A3B8]">מספר טלפון *</label>
+                            <input type="tel" value={editUserForm.phoneNumber} onChange={handlePhoneChange} placeholder="05XXXXXXXX" maxLength="10" className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right" required />
+                          </div>
+                          <div>
+                            <label className="text-xs uppercase font-bold text-[#94A3B8]">מין</label>
+                            <select value={editUserForm.gender} onChange={(e) => setEditUserForm((f) => ({ ...f, gender: e.target.value }))} className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right">
+                              <option value="">בחר מין</option>
+                              <option value="male">זכר</option>
+                              <option value="female">נקבה</option>
+                              <option value="notDefined">לא מוגדר</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-xs uppercase font-bold text-[#94A3B8]">טלגרם</label>
+                            <input type="text" value={editUserForm.telegramUsername || ''} onChange={(e) => setEditUserForm((f) => ({ ...f, telegramUsername: e.target.value.replace(/^@+/g, '') }))} placeholder="username (ללא @)" className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right" />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button type="submit" className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-6 py-2 rounded-xl font-bold">שמור</button>
+                          <button type="button" onClick={handleCancelEdit} className="bg-[#2a292e] hover:bg-[#353439] text-white px-6 py-2 rounded-xl font-bold">ביטול</button>
+                        </div>
+                      </form>
+                    );
+                  }
                   return (
                   <div key={u.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div className="flex items-start gap-3 min-w-0">
@@ -508,6 +713,24 @@ const SubscriptionsSection = ({ showSaved }) => {
                         className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm"
                       >
                         💼 CRM ותשלומים
+                      </button>
+                      <button
+                        onClick={() => handleEditUser(u)}
+                        className="bg-[#2a292e] hover:bg-[#353439] text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm"
+                      >
+                        ✏️ ערוך
+                      </button>
+                      {u.level === 'blocked' ? (
+                        <button onClick={() => handleUpdateUserLevel(u.id, 'regular')} className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm">
+                          בטל חסימה
+                        </button>
+                      ) : (
+                        <button onClick={() => handleUpdateUserLevel(u.id, 'blocked')} className="bg-[#93000a] hover:bg-[#be0037] text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm">
+                          🚫 חסום
+                        </button>
+                      )}
+                      <button onClick={() => handleDeleteUser(u.id, u.name)} className="bg-[#93000a] hover:bg-[#be0037] text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm">
+                        🗑️ מחק
                       </button>
                       <SubscriptionEditor onAction={(kind, action, payload) => handleAction(u.id, kind, action, payload)} />
                     </div>

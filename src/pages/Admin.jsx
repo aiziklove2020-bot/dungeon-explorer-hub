@@ -20,7 +20,6 @@ import AdminHeader from '../components/admin/AdminHeader';
 import { adminTabs } from '../components/admin/adminTabs';
 import PartiesSection from '../components/admin/PartiesSection';
 import MatchesSection from '../components/admin/MatchesSection';
-import UsersSection from '../components/admin/UsersSection';
 import RssSection from '../components/admin/RssSection';
 import AboutSection from '../components/admin/AboutSection';
 import ContactSection from '../components/admin/ContactSection';
@@ -359,7 +358,6 @@ const Admin = () => {
           {activeSection === 'dbLogger'  && <DBLoggerSection />}
           {activeSection === 'forumUsers' && <ForumUsersSection showSaved={showSaved} />}
           {activeSection === 'deleteRequests' && <DeleteRequestsSection showSaved={showSaved} />}
-          {activeSection === 'users'     && <UsersSection showSaved={showSaved} />}
           {activeSection === 'subscriptions' && <SubscriptionsSection showSaved={showSaved} />}
           {activeSection === 'admins'    && <AdminsSection showSaved={showSaved} />}
           {activeSection === 'advertisers' && <AdvertisersSection showSaved={showSaved} />}
