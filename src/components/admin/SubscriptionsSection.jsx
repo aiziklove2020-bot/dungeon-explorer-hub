@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { Search, Download, Upload, RotateCcw, Plus, Clock, Check, X, UserCog } from 'lucide-react';
+import { Search, Download, Upload, RotateCcw, Plus, Clock, Check, X, UserCog, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import useAdminSection from '../../hooks/useAdminSection';
 import AdminLoader from './AdminLoader';
@@ -22,7 +22,7 @@ import {
   setSubscriptionExpiry,
   removeSubscription
 } from '../../firebase/subscriptions';
-import { getPendingSubscriptionRequests, resolveSubscriptionRequest } from '../../firebase/subscriptionRequests';
+import { getPendingSubscriptionRequests, resolveSubscriptionRequest, deleteSubscriptionRequest } from '../../firebase/subscriptionRequests';
 import SubscriptionBadge from './SubscriptionBadge';
 import SubscriptionEditor from './SubscriptionEditor';
 import NewSubscriberModal from './NewSubscriberModal';
@@ -81,6 +81,13 @@ const SubscriptionsSection = ({ showSaved }) => {
   const handleDismissRequest = async (request) => {
     if (!window.confirm(`להתעלם מהבקשה של "${request.fullName}"?`)) return;
     await resolveSubscriptionRequest(request.id, 'dismissed');
+    await loadPendingRequests();
+    showSaved();
+  };
+
+  const handleDeleteRequest = async (request) => {
+    if (!window.confirm(`למחוק לצמיתות את הבקשה של "${request.fullName}"? לא ניתן לשחזר.`)) return;
+    await deleteSubscriptionRequest(request.id);
     await loadPendingRequests();
     showSaved();
   };
@@ -502,6 +509,9 @@ const SubscriptionsSection = ({ showSaved }) => {
                   </button>
                   <button onClick={() => handleDismissRequest(req)} className="flex items-center gap-1 bg-[#2a292e] hover:bg-[#353439] text-white px-3 py-1.5 rounded-lg font-bold text-xs">
                     <X size={12} /> התעלם
+                  </button>
+                  <button onClick={() => handleDeleteRequest(req)} className="flex items-center gap-1 bg-red-900/40 hover:bg-red-900/60 text-red-300 px-3 py-1.5 rounded-lg font-bold text-xs">
+                    <Trash2 size={12} /> מחק
                   </button>
                 </div>
               </div>
