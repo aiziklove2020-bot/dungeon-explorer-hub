@@ -59,7 +59,7 @@
           <img src="icon-512.png" alt="LIBRAL PARTY" class="relative w-16 h-16 rounded-full object-contain bg-surface-container-lowest p-1.5 shadow-2xl">
         </div>
         <h1 class="font-headline-md text-headline-md text-text-primary font-bold">בקשה להצטרפות כמנוי</h1>
-        <p class="text-text-secondary text-body-sm mt-1">מלאו שם וטלפון ואנחנו ניצור איתכם קשר. פתיחת חשבון אתר וחיבור המנוי מתבצעים ידנית על ידי צוות הקהילה.</p>
+        <p class="text-text-secondary text-body-sm mt-1">מלאו את הפרטים ובחרו סיסמה לחשבון שלכם. חיבור המנוי עצמו (התשלום/התוקף) מתבצע ידנית על ידי צוות הקהילה לאחר יצירת קשר.</p>
       </div>
       <form class="relative flex flex-col gap-3" id="subRequestForm">
         <div>
@@ -69,6 +69,14 @@
         <div>
           <label class="block text-xs font-bold text-text-secondary mb-1.5">מספר טלפון</label>
           <input required type="tel" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="050-0000000" autocomplete="tel" name="phone" dir="ltr" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container text-left">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-text-secondary mb-1.5">בחרו סיסמה</label>
+          <input required type="password" minlength="4" autocomplete="new-password" name="password" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-text-secondary mb-1.5">אימות סיסמה</label>
+          <input required type="password" minlength="4" autocomplete="new-password" name="confirmPassword" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container">
         </div>
         <div>
           <label class="block text-xs font-bold text-text-secondary mb-1.5">הערה (לא חובה)</label>
@@ -81,7 +89,7 @@
     <div id="requestSuccess" style="display:none" class="relative flex flex-col items-center text-center gap-3 py-4">
       <span class="material-symbols-outlined text-primary text-[48px]">check_circle</span>
       <h1 class="font-headline-md text-headline-md text-text-primary font-bold">הבקשה נשלחה!</h1>
-      <p class="text-text-secondary text-body-sm">ניצור איתכם קשר בהקדם לגבי המנוי.</p>
+      <p id="requestSuccessMsg" class="text-text-secondary text-body-sm">החשבון שלכם נוצר עם הסיסמה שבחרתם. ניצור איתכם קשר בהקדם לגבי המנוי, ולאחר האישור תוכלו להתחבר.</p>
       <a href="/" class="mt-2 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary font-label-lg text-label-lg font-bold shadow-[0_4px_20px_rgba(255,87,8,0.35)] px-6 py-3">חזרה לדף הבית</a>
     </div>
   </div>
@@ -104,12 +112,42 @@
 document.getElementById("subRequestForm").addEventListener("submit", async e => {
   e.preventDefault();
   const f = new FormData(e.target);
+  const fullName = f.get("fullName");
   const phone = f.get("phone").replace(/\D/g, "");
+  const password = f.get("password");
+  const confirmPassword = f.get("confirmPassword");
   const btn = e.target.querySelector("button");
+
+  if (password !== confirmPassword) {
+    toast("הסיסמאות לא תואמות", "error");
+    return;
+  }
+
   btn.disabled = true;
   try {
     await import("./assets/site-data.js?v=202609232010");
-    await window.LPData.requestSubscription(f.get("fullName"), phone, f.get("note") || "");
+
+    // Create the person's own login account with the password they chose.
+    // The nickname is derived from their name and isn't shown to them — on a
+    // rare collision with an existing nickname, retry once with a random
+    // suffix rather than failing the whole signup over an internal detail.
+    let accountMsg = "החשבון שלכם נוצר עם הסיסמה שבחרתם. ניצור איתכם קשר בהקדם לגבי המנוי, ולאחר האישור תוכלו להתחבר.";
+    try {
+      await window.LPData.register(fullName, phone, password);
+    } catch (err) {
+      if (err.message?.includes("כבר תפוס")) {
+        await window.LPData.register(`${fullName} ${Math.floor(1000 + Math.random() * 9000)}`, phone, password);
+      } else if (err.message?.includes("כבר רשום")) {
+        // A login account already exists for this phone — don't block the
+        // subscription request over it, just point them at the existing one.
+        accountMsg = "כבר קיים חשבון עם מספר הטלפון הזה — אפשר להתחבר איתו. ניצור איתכם קשר בהקדם לגבי המנוי.";
+      } else {
+        throw err;
+      }
+    }
+
+    await window.LPData.requestSubscription(fullName, phone, f.get("note") || "");
+    document.getElementById("requestSuccessMsg").textContent = accountMsg;
     document.getElementById("requestForm").style.display = "none";
     document.getElementById("requestSuccess").style.display = "";
   } catch (err) {

@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { PAYMENT_METHODS } from '../../firebase/crm';
+import { getForumUserByPhone } from '../../firebase/forumUsers';
 
 const todayPlusYear = () => {
   const d = new Date();
@@ -34,6 +35,23 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  // If the visitor already self-registered a login account with their own
+  // chosen password (the public "בקשה להצטרפות" form) before an admin got to
+  // approving them, we should approve/link *that* account instead of
+  // offering to create a second one and overwrite their password.
+  const [existingLoginAccount, setExistingLoginAccount] = useState(undefined); // undefined=checking, null=none
+  useEffect(() => {
+    let cancelled = false;
+    setExistingLoginAccount(undefined);
+    if (form.phoneNumber.length !== 10) { setExistingLoginAccount(null); return; }
+    getForumUserByPhone(form.phoneNumber).then((fu) => {
+      if (cancelled) return;
+      setExistingLoginAccount(fu || null);
+      if (fu) setCreateLogin(true); // default to approving/linking their self-chosen account
+    }).catch(() => { if (!cancelled) setExistingLoginAccount(null); });
+    return () => { cancelled = true; };
+  }, [form.phoneNumber]);
+
   const handlePhoneChange = (e) => {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length > 0 && !value.startsWith('0')) value = '0' + value;
@@ -49,16 +67,16 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
       setError('נא למלא שם פרטי, טלפון ותאריך תפוגה');
       return;
     }
-    if (createLogin) {
+    if (createLogin && !existingLoginAccount) {
       if (!loginNickname.trim()) { setError('נא לבחור כינוי לחשבון הכניסה'); return; }
       if (loginPassword.length < 4) { setError('סיסמה חייבת להכיל לפחות 4 תווים'); return; }
     }
     setSaving(true);
     try {
-      await onSubmit({
-        ...form,
-        login: createLogin ? { nickname: loginNickname.trim(), password: loginPassword } : null,
-      });
+      const login = !createLogin ? null
+        : existingLoginAccount ? { mode: 'link-existing', forumUserId: existingLoginAccount.id }
+        : { mode: 'create', nickname: loginNickname.trim(), password: loginPassword };
+      await onSubmit({ ...form, login });
     } catch (err) {
       setError(err.message || 'שגיאה ביצירת המנוי');
     } finally {
@@ -170,44 +188,58 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
           </div>
 
           <div className="border-t border-[rgba(255,255,255,0.08)] pt-3">
-            <label className="flex items-center gap-2 text-sm font-bold text-white cursor-pointer">
-              <input
-                type="checkbox"
-                checked={createLogin}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setCreateLogin(checked);
-                  if (checked && !loginNickname) {
-                    setLoginNickname((form.firstName || '').replace(/\s+/g, '_').slice(0, 30));
-                  }
-                }}
-                className="w-4 h-4"
-              />
-              🔑 גם ליצור לו חשבון כניסה לאתר (כינוי + סיסמה)
-            </label>
-            {createLogin && (
-              <div className="grid grid-cols-2 gap-3 mt-3">
-                <div>
-                  <label className="text-xs uppercase font-bold text-[#94A3B8]">כינוי *</label>
+            {existingLoginAccount ? (
+              <label className="flex items-center gap-2 text-sm font-bold text-white cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={createLogin}
+                  onChange={(e) => setCreateLogin(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                🔑 למספר הזה כבר יש חשבון כניסה עצמאי (כינוי: {existingLoginAccount.nickname}) — לאשר אותו ולקשר למנוי
+              </label>
+            ) : (
+              <>
+                <label className="flex items-center gap-2 text-sm font-bold text-white cursor-pointer">
                   <input
-                    type="text"
-                    value={loginNickname}
-                    onChange={(e) => setLoginNickname(e.target.value)}
-                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+                    type="checkbox"
+                    checked={createLogin}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setCreateLogin(checked);
+                      if (checked && !loginNickname) {
+                        setLoginNickname((form.firstName || '').replace(/\s+/g, '_').slice(0, 30));
+                      }
+                    }}
+                    className="w-4 h-4"
                   />
-                </div>
-                <div>
-                  <label className="text-xs uppercase font-bold text-[#94A3B8]">סיסמה זמנית *</label>
-                  <input
-                    type="text"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder="לפחות 4 תווים"
-                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
-                  />
-                </div>
-                <p className="col-span-2 text-xs text-[#94A3B8]">המנוי יחויב לבחור סיסמה משלו בהתחברות הראשונה.</p>
-              </div>
+                  🔑 גם ליצור לו חשבון כניסה לאתר (כינוי + סיסמה)
+                </label>
+                {createLogin && (
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                      <label className="text-xs uppercase font-bold text-[#94A3B8]">כינוי *</label>
+                      <input
+                        type="text"
+                        value={loginNickname}
+                        onChange={(e) => setLoginNickname(e.target.value)}
+                        className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs uppercase font-bold text-[#94A3B8]">סיסמה זמנית *</label>
+                      <input
+                        type="text"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        placeholder="לפחות 4 תווים"
+                        className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+                      />
+                    </div>
+                    <p className="col-span-2 text-xs text-[#94A3B8]">המנוי יחויב לבחור סיסמה משלו בהתחברות הראשונה.</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

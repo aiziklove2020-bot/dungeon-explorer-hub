@@ -128,7 +128,14 @@ const SubscriptionsSection = ({ showSaved }) => {
       method: paymentMethod,
       note: 'הפעלת מנוי חדש',
     });
-    if (login?.nickname && login?.password) {
+    if (login?.mode === 'link-existing') {
+      // The visitor self-registered with their own password through the
+      // public form — approve and link that account rather than creating a
+      // second one that would overwrite the password they chose.
+      await approveForumUser(login.forumUserId);
+      await linkForumUserToSiteUser(login.forumUserId, user.id);
+      await loadLoginAccounts();
+    } else if (login?.mode === 'create' && login?.nickname && login?.password) {
       const created = await registerForumUser(login.nickname, login.password, phoneNumber);
       await approveForumUser(created.id);
       await linkForumUserToSiteUser(created.id, user.id);
