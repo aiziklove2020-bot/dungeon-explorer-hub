@@ -37,7 +37,8 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!form.firstName.trim() || !form.phoneNumber || !form.expiryDate) {
+    // Gold is lifetime — no expiry date to fill in, that's the whole point.
+    if (!form.firstName.trim() || !form.phoneNumber || (form.tier !== 'gold' && !form.expiryDate)) {
       setError('נא למלא שם פרטי, טלפון ותאריך תפוגה');
       return;
     }
@@ -115,7 +116,7 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
           </div>
 
           <div>
-            <label className="text-xs uppercase font-bold text-[#94A3B8]">תאריך תפוגה *</label>
+            <label className="text-xs uppercase font-bold text-[#94A3B8]">תאריך תפוגה {form.tier !== 'gold' && '*'}</label>
             <div className="flex gap-2 mb-2">
               <button
                 type="button"
@@ -131,14 +132,27 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
               >
                 מנוי שנתי
               </button>
+              <button
+                type="button"
+                onClick={() => setForm((f) => ({ ...f, expiryDate: '', tier: 'gold' }))}
+                className={`flex-1 border py-2 rounded-lg font-bold text-xs ${form.tier === 'gold' ? 'bg-yellow-500 border-yellow-500 text-black' : 'bg-[#1f1f23] hover:bg-[#2a292e] border-[rgba(255,255,255,0.08)] text-yellow-400'}`}
+              >
+                ⭐ זהב (לכל החיים)
+              </button>
             </div>
-            <input
-              type="date"
-              value={form.expiryDate}
-              onChange={(e) => setForm((f) => ({ ...f, expiryDate: e.target.value }))}
-              className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
-              required
-            />
+            {form.tier === 'gold' ? (
+              <p className="text-xs text-yellow-400/80 p-3 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl">
+                מנוי זהב — ללא הגבלת זמן, לעולם לא פג תוקף. אין צורך בתאריך תפוגה.
+              </p>
+            ) : (
+              <input
+                type="date"
+                value={form.expiryDate}
+                onChange={(e) => setForm((f) => ({ ...f, expiryDate: e.target.value }))}
+                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+                required
+              />
+            )}
           </div>
 
           {error && <p className="text-[#ffb4ab] text-sm">{error}</p>}
