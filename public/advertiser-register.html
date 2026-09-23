@@ -66,13 +66,13 @@
 
 <script src="assets/app.js?v=202609221638"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609221848";
 document.getElementById("advReg").addEventListener("submit", async e => {
   e.preventDefault();
   const f = new FormData(e.target);
   const btn = e.target.querySelector("button");
   btn.disabled = true;
   try {
+    await import("./assets/site-data.js?v=202609221848");
     await window.LPData.registerAdvertiserAccount({
       businessName: f.get("businessName"),
       contactName: f.get("contactName"),

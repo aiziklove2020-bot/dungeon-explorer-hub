@@ -69,8 +69,13 @@
 
 <script src="assets/app.js?v=202609221638"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609221848";
 document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await import("./assets/site-data.js?v=202609221848");
+  } catch (err) {
+    console.error("site-data.js failed to load:", err);
+    return;
+  }
  const id = new URLSearchParams(location.search).get("id");
  const events = await window.LPData.loadEvents().catch(() => []);
  const e = events.find(x => String(x.id) === String(id)) || events[0];

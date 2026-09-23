@@ -109,13 +109,13 @@
 
 <script src="assets/app.js?v=202609221638"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609221848";
 document.getElementById("advLogin").addEventListener("submit", async e => {
   e.preventDefault();
   const f = new FormData(e.target);
   const btn = e.target.querySelector("button");
   btn.disabled = true;
   try {
+    await import("./assets/site-data.js?v=202609221848");
     const u = await window.LPData.loginAdvertiser(f.get("phoneNumber"), f.get("password"));
     LP.setCurrent(u);
     toast("ברוכים הבאים למערכת המפרסמים");

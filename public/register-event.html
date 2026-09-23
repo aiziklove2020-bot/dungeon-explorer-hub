@@ -263,8 +263,6 @@
 
 <script src="assets/app.js?v=202609221638"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609221848";
-
 // window.LPData.registerForParty only dedupes by logged-in userId, not by
 // phone number — this form is anonymous (no login), so without this check
 // the same person could submit repeatedly to the same party.
@@ -300,6 +298,12 @@ async function isPhoneAlreadyRegistered(partyId, phoneNumber) {
 let selectedParty = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await import("./assets/site-data.js?v=202609221848");
+  } catch (err) {
+    console.error("site-data.js failed to load:", err);
+    return;
+  }
   const picker = document.getElementById("partyPicker");
   const step1 = document.getElementById("regStep1");
   const step2 = document.getElementById("regStep2");
