@@ -3,7 +3,7 @@
  * account or subscription created automatically. Admin reviews the queue
  * in "ניהול מנויים" and decides the tier (day/year) when approving.
  */
-import { collection, doc, addDoc, getDocs, updateDoc, query, where, Timestamp } from 'firebase/firestore';
+import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc, query, where, Timestamp } from 'firebase/firestore';
 import { db } from './config';
 
 const COLLECTION = 'subscriptionRequests';
@@ -32,4 +32,8 @@ export const getPendingSubscriptionRequests = async () => {
 
 export const resolveSubscriptionRequest = async (requestId, status) => {
   await updateDoc(doc(db, COLLECTION, requestId), { status, resolvedAt: Timestamp.now() });
+};
+
+export const deleteSubscriptionRequest = async (requestId) => {
+  await deleteDoc(doc(db, COLLECTION, requestId));
 };
