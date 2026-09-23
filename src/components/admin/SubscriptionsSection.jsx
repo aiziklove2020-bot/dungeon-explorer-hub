@@ -120,7 +120,9 @@ const SubscriptionsSection = ({ showSaved }) => {
   const handleCreateSubscriber = async ({ firstName, lastName, phoneNumber, paymentMethod, expiryDate, tier }) => {
     const fullName = `${firstName} ${lastName}`.trim();
     const user = await createUser(phoneNumber, fullName, 'male');
-    await setSubscriptionExpiry(user.id, 'parties', new Date(`${expiryDate}T00:00:00.000Z`), tier);
+    // Gold has no expiry date — pass null so setSubscriptionExpiry treats it
+    // as the unlimited/lifetime tier instead of parsing an empty date string.
+    await setSubscriptionExpiry(user.id, 'parties', tier === 'gold' ? null : new Date(`${expiryDate}T00:00:00.000Z`), tier);
     await addPaymentRecord(user.id, {
       date: new Date().toISOString().split('T')[0],
       method: paymentMethod,
