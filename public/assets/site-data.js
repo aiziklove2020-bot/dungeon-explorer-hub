@@ -24025,32 +24025,8 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 		if (!n) return null;
 		let r = Date.parse(n);
 		return Number.isFinite(r) ? N.fromMillis(r) : null;
-	}, iM = "parties", aM = async (e) => {
-		try {
-			let t = e.date;
-			if (typeof t == "string") {
-				let e = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
-				t = e ? new Date(Number(e[1]), Number(e[2]) - 1, Number(e[3]), 0, 0, 0, 0) : new Date(t);
-			} else t && t.toDate && (t = t.toDate());
-			let n = await nM(), r = rM(t, n), i = e.day || (t instanceof Date && !Number.isNaN(t.getTime()) ? t.toLocaleDateString("he-IL", { weekday: "long" }) : ""), a = {
-				...e,
-				day: i,
-				date: N.fromDate(t),
-				createdAt: N.now(),
-				registrations: e.registrations || [],
-				status: e.status || "active",
-				partyType: e.partyType || "internal",
-				needsPublish: !0,
-				...r ? { expiration: r } : {}
-			}, o = E(T(H, iM));
-			await $u(o, a), await q("activeParties");
-			let created = { id: o.id, ...a };
-			notifyPrivilegedSubscribersOfNewParty_(created);
-			return created;
-		} catch (e) {
-			throw e;
-		}
-	}, notifyPrivilegedSubscribersOfNewParty_ = async (party) => {
+	}, iM = "parties";
+	async function notifyPrivilegedSubscribersOfNewParty_(party) {
 		try {
 			let subsSnap = await k(T(H, "pushSubscriptions")),
 				phones = [...new Set(subsSnap.docs.map((d) => d.data().phone).filter(Boolean))];
@@ -24080,7 +24056,34 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				res?.deadIds?.length && await Promise.all(res.deadIds.map((id) => ed(E(T(H, "pushSubscriptions"), id)).catch(() => {})));
 			}));
 		} catch {}
-	}, oM = nk, sM = async () => (await k(T(H, iM))).docs.map((e) => {
+	}
+	aM = async (e) => {
+		try {
+			let t = e.date;
+			if (typeof t == "string") {
+				let e = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
+				t = e ? new Date(Number(e[1]), Number(e[2]) - 1, Number(e[3]), 0, 0, 0, 0) : new Date(t);
+			} else t && t.toDate && (t = t.toDate());
+			let n = await nM(), r = rM(t, n), i = e.day || (t instanceof Date && !Number.isNaN(t.getTime()) ? t.toLocaleDateString("he-IL", { weekday: "long" }) : ""), a = {
+				...e,
+				day: i,
+				date: N.fromDate(t),
+				createdAt: N.now(),
+				registrations: e.registrations || [],
+				status: e.status || "active",
+				partyType: e.partyType || "internal",
+				needsPublish: !0,
+				...r ? { expiration: r } : {}
+			}, o = E(T(H, iM));
+			await $u(o, a), await q("activeParties");
+			let created = { id: o.id, ...a };
+			notifyPrivilegedSubscribersOfNewParty_(created);
+			return created;
+		} catch (e) {
+			throw e;
+		}
+	};
+	oM = nk, sM = async () => (await k(T(H, iM))).docs.map((e) => {
 		let t = e.data();
 		return {
 			id: e.id,
