@@ -57,7 +57,7 @@ const Admin = () => {
       setIsAuthenticated(true);
     }
   }, []);
-  const [activeSection, setActiveSection] = useState('parties');
+  const [activeSection, setActiveSection] = useState('subscriptions');
   // Advanced tools (DB backup, DB read-log, git history) are real working
   // features, just rarely-clicked/technical — collapsed by default to keep
   // the main tab row focused, not removed.
