@@ -144,11 +144,22 @@
           <p id="subStatus" class="text-body-sm font-body-sm text-on-surface font-bold">בודק...</p>
         </div>
         <a href="/membership" id="subCta" style="display:none" class="text-label-sm font-label-sm text-primary underline self-start">אין לכם מנוי עדיין — רוצים להיות מנויים? לחצו כאן</a>
-        <button id="enablePushBtn" type="button" class="flex items-center justify-center gap-2 h-10 rounded-lg bg-surface-container-lowest text-text-secondary text-label-sm font-label-sm border border-outline/20">
-          <span class="material-symbols-outlined text-[18px]">notifications_active</span>
-          הפעילו התראות על התאמת איזון
-        </button>
       </div>
+    </div>
+
+    <!-- Push opt-in — a prominent, hard-to-miss card (not just a small
+         button) so people actually notice it and enable it; this is the
+         only channel that notifies someone the moment they get matched. -->
+    <div id="pushBanner" class="relative overflow-hidden rounded-2xl p-4 flex items-center gap-3" style="background:linear-gradient(135deg,rgba(255,87,8,.22),rgba(255,170,0,.12));border:1px solid rgba(255,87,8,.4)">
+      <div class="absolute -top-8 -left-8 w-28 h-28 rounded-full bg-primary-container/25 blur-2xl pointer-events-none"></div>
+      <div class="relative shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background:rgba(255,87,8,.18);border:1px solid rgba(255,87,8,.45);box-shadow:0 0 16px rgba(255,87,8,.35)">
+        <span class="material-symbols-outlined text-primary text-[24px]">notifications_active</span>
+      </div>
+      <div class="relative min-w-0 flex-1">
+        <p class="text-text-primary font-bold text-sm">קבלו התראה מיידית כשמוצאים לכם התאמת איזון</p>
+        <p class="text-text-secondary text-xs mt-0.5">בלי זה תפספסו — זה הערוץ היחיד שמודיע לכם ברגע שיש התאמה</p>
+      </div>
+      <button id="enablePushBtn" type="button" class="relative shrink-0 rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold text-xs py-2.5 px-3.5 whitespace-nowrap shadow-md">הפעלת התראות</button>
     </div>
 
     <!-- balance match -->
@@ -492,8 +503,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function wirePushButton(phone) {
     const btn = document.getElementById("enablePushBtn");
+    const banner = document.getElementById("pushBanner");
     if (!btn || btn.dataset.wired) return;
     btn.dataset.wired = "1";
+
+    // Already granted (and presumably already subscribed via a previous
+    // visit) — don't nag with the banner every time they open the page.
+    if (typeof Notification !== "undefined" && Notification.permission === "granted" && banner) {
+      banner.style.display = "none";
+    }
+
     btn.addEventListener("click", async () => {
       btn.disabled = true;
       const prevText = btn.textContent;
@@ -503,7 +522,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       btn.textContent = prevText;
       if (result === "ok") {
         toast("התראות הופעלו בהצלחה");
-        btn.style.display = "none";
+        if (banner) banner.style.display = "none";
       } else if (result === "ios-not-installed") {
         toast("באייפון: קודם הוסיפו את האתר למסך הבית (שיתוף ⬆️ ← הוסף למסך הבית), ואז הפעילו התראות", "error");
       } else if (result === "denied") {

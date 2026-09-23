@@ -49,12 +49,20 @@ const getAllPushSubscriptions = async () => {
  * Vercel serverless relay (browsers can't send Web Push directly — that
  * needs the VAPID private key, which only lives server-side). Never throws;
  * a push failure must not block whatever admin action triggered it.
+ *
+ * Returns a status the caller can use to surface real problems instead of
+ * assuming silence means success: `{ hasDevice, ok, sent, total, error }`.
+ * `hasDevice: false` means the person never enabled push at all (nothing to
+ * send to — not a bug); `ok: false` with `hasDevice: true` means the server
+ * relay itself failed (e.g. VAPID_PRIVATE_KEY missing in the deploy env, or
+ * a network error) — that's the case worth surfacing to an admin, because
+ * every push for every recipient will silently fail the same way.
  */
 export const sendPushToPhone = async (phoneNumber, { title, body, url } = {}) => {
   try {
     const subs = await getPushSubscriptionsByPhone(phoneNumber);
-    if (!subs.length) return;
-    const res = await fetch('/api/send-push', {
+    if (!subs.length) return { hasDevice: false, ok: false, sent: 0, total: 0 };
+    const response = await fetch('/api/send-push', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -63,13 +71,19 @@ export const sendPushToPhone = async (phoneNumber, { title, body, url } = {}) =>
         body,
         url,
       }),
-    }).then((r) => r.json()).catch(() => null);
+    });
+    const res = await response.json().catch(() => null);
 
     if (res?.deadIds?.length) {
       await Promise.all(res.deadIds.map((id) => deletePushSubscription(id).catch(() => {})));
     }
-  } catch {
-    // best-effort — swallow
+
+    if (!response.ok || !res?.ok) {
+      return { hasDevice: true, ok: false, sent: 0, total: subs.length, error: res?.error || `HTTP ${response.status}` };
+    }
+    return { hasDevice: true, ok: true, sent: res.sent ?? 0, total: subs.length };
+  } catch (err) {
+    return { hasDevice: true, ok: false, sent: 0, total: 0, error: err.message || 'network error' };
   }
 };
 
