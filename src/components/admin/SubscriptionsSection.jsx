@@ -117,7 +117,7 @@ const SubscriptionsSection = ({ showSaved }) => {
     showSaved();
   };
 
-  const handleCreateSubscriber = async ({ firstName, lastName, phoneNumber, paymentMethod, expiryDate, tier }) => {
+  const handleCreateSubscriber = async ({ firstName, lastName, phoneNumber, paymentMethod, expiryDate, tier, login }) => {
     const fullName = `${firstName} ${lastName}`.trim();
     const user = await createUser(phoneNumber, fullName, 'male');
     // Gold has no expiry date — pass null so setSubscriptionExpiry treats it
@@ -128,6 +128,13 @@ const SubscriptionsSection = ({ showSaved }) => {
       method: paymentMethod,
       note: 'הפעלת מנוי חדש',
     });
+    if (login?.nickname && login?.password) {
+      const created = await registerForumUser(login.nickname, login.password, phoneNumber);
+      await approveForumUser(created.id);
+      await linkForumUserToSiteUser(created.id, user.id);
+      await setForumUserPasswordWithReset(created.id, login.password);
+      await loadLoginAccounts();
+    }
     if (newSubscriberPrefill?.requestId) {
       await resolveSubscriptionRequest(newSubscriberPrefill.requestId, 'approved');
       await loadPendingRequests();
