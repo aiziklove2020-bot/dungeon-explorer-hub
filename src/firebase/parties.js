@@ -1222,6 +1222,11 @@ export const updateParty = async (partyId, partyData) => {
     if (partyData.title !== undefined) updateData.title = partyData.title;
     if (partyData.registrationLink !== undefined) updateData.registrationLink = partyData.registrationLink;
     if (partyData.whatsappNumber !== undefined) updateData.whatsappNumber = partyData.whatsappNumber;
+    // category/city drive the site's filter pills and were missing here
+    // entirely — editing them on an existing party silently never saved,
+    // only a brand-new party (createParty spreads every field) picked them up.
+    if (partyData.category !== undefined) updateData.category = partyData.category || '';
+    if (partyData.city !== undefined) updateData.city = partyData.city || '';
 
     if (partyData.partyType !== undefined) {
       updateData.partyType = partyData.partyType;
@@ -1233,6 +1238,7 @@ export const updateParty = async (partyId, partyData) => {
     if (partyData.publishToInstagram !== undefined) {
       updateData.publishToInstagram = partyData.publishToInstagram === true;
     }
+    if (partyData.badge !== undefined) updateData.badge = partyData.badge || '';
 
     // Quick-control toggles + assigned safety team, set from the admin's
     // "שליטה מהירה" panel (PartiesSection) rather than the full party editor.

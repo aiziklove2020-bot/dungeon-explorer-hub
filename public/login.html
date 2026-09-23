@@ -115,7 +115,7 @@ document.getElementById("loginForm").addEventListener("submit", async e => {
   const btn = e.target.querySelector("button");
   btn.disabled = true;
   try {
-    await import("./assets/site-data.js?v=202609232010");
+    await import("./assets/site-data.js?v=202609231633");
     const u = await window.LPData.login(f.get("phone").replace(/\D/g, ""), f.get("password"));
     LP.setCurrent(u);
     toast("התחברת בהצלחה");
