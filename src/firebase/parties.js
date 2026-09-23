@@ -1493,19 +1493,33 @@ export const saveBalanceMatches = async (partyId, balanceMatches) => {
   await invalidateCache('activeParties_all'); // Clear all parties cache
 
   // Best-effort mobile push to both sides of every newly-matched pair —
-  // never let a push failure surface as a "match save failed" error.
+  // never let a push failure surface as a "match save failed" error. Still
+  // collected and returned (not just fired-and-forgotten) so the admin UI
+  // can tell the difference between "they never enabled push" (nothing
+  // wrong) and "the push server itself is broken" (every single
+  // notification silently failing the same way, invisible without this).
+  const pushResults = [];
   for (const m of newlyMatched) {
-    sendPushToPhone(m.malePhone, {
+    const pushMsg = {
       title: '🎉 יש לכם התאמת איזון!',
       body: 'מצאנו לכם התאמה למסיבה. היכנסו לאזור האישי לפרטים.',
       url: '/my-area',
-    }).catch(() => {});
-    sendPushToPhone(m.femalePhone, {
-      title: '🎉 יש לכם התאמת איזון!',
-      body: 'מצאנו לכם התאמה למסיבה. היכנסו לאזור האישי לפרטים.',
-      url: '/my-area',
-    }).catch(() => {});
+    };
+    const [male, female] = await Promise.all([
+      sendPushToPhone(m.malePhone, pushMsg).catch(() => ({ hasDevice: true, ok: false, error: 'unknown' })),
+      sendPushToPhone(m.femalePhone, pushMsg).catch(() => ({ hasDevice: true, ok: false, error: 'unknown' })),
+    ]);
+    pushResults.push({ phone: m.malePhone, ...male }, { phone: m.femalePhone, ...female });
   }
+
+  const attempted = pushResults.filter((r) => r.hasDevice);
+  const failed = attempted.filter((r) => !r.ok);
+  return {
+    newlyMatchedCount: newlyMatched.length,
+    pushAttempted: attempted.length,
+    pushFailed: failed.length,
+    pushError: failed[0]?.error || null,
+  };
 };
 
 // Re-export from dataAccess for backward compatibility

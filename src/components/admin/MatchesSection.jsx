@@ -67,6 +67,21 @@ const MatchesSection = ({ showSaved }) => {
     }
   };
 
+  // saveBalanceMatches now reports whether the push notifications for
+  // newly-matched pairs actually went out. Without this, a broken push
+  // relay (e.g. a missing VAPID key on the server) fails silently every
+  // single time — the admin sees "saved" and has no way to know the
+  // matched people were never notified. Surface it loudly instead.
+  const warnIfPushFailed = (result) => {
+    if (result?.pushAttempted > 0 && result.pushFailed > 0) {
+      alert(
+        `ההתאמה נשמרה, אבל שליחת ההתראה נכשלה עבור ${result.pushFailed} מתוך ${result.pushAttempted} התראות.` +
+        (result.pushError ? `\nשגיאה: ${result.pushError}` : '') +
+        '\nיש לבדוק את הגדרות ה-Push בשרת (VAPID_PRIVATE_KEY) — עד שזה יתוקן, אף אחד לא יקבל התראה על התאמות חדשות.'
+      );
+    }
+  };
+
   const handleUnmatch = async (partyId, match) => {
     try {
       const filterMatch = (arr) => arr.filter(m => {
@@ -141,14 +156,15 @@ const MatchesSection = ({ showSaved }) => {
 
       const updatedBalance = [...currentBalance, newMatch];
 
-      await saveBalanceMatches(partyId, updatedBalance);
+      const result = await saveBalanceMatches(partyId, updatedBalance);
 
       setPartyBalances(prev => ({
         ...prev,
         [partyId]: updatedBalance
       }));
-      
+
       showSaved();
+      warnIfPushFailed(result);
     } catch (error) {
       alert(`${t('admin.balanceTables.errorCreatingBalance')}: ${error.message}`);
     }
@@ -179,14 +195,15 @@ const MatchesSection = ({ showSaved }) => {
       );
       updatedBalance.push(newMatch);
 
-      await saveBalanceMatches(partyId, updatedBalance);
+      const result = await saveBalanceMatches(partyId, updatedBalance);
 
       setPartyBalances(prev => ({
         ...prev,
         [partyId]: updatedBalance
       }));
-      
+
       showSaved();
+      warnIfPushFailed(result);
     } catch (error) {
       alert(`${t('admin.balanceTables.errorCreatingBalance')}: ${error.message}`);
     }
@@ -227,7 +244,7 @@ const MatchesSection = ({ showSaved }) => {
 
       const updatedBalance = [...withoutOverride, newMatch];
 
-      await saveBalanceMatches(partyId, updatedBalance);
+      const result = await saveBalanceMatches(partyId, updatedBalance);
 
       setPartyBalances(prev => ({
         ...prev,
@@ -235,6 +252,7 @@ const MatchesSection = ({ showSaved }) => {
       }));
 
       showSaved();
+      warnIfPushFailed(result);
     } catch (error) {
       alert(`${t('admin.balanceTables.errorCreatingBalance')}: ${error.message}`);
     }
@@ -436,7 +454,7 @@ const MatchesSection = ({ showSaved }) => {
       
       const mergedBalance = [...existingMatchedPairs, ...newMatchedPairs, ...newUnmatchedPairs];
 
-      await saveBalanceMatches(party.id, mergedBalance);
+      const result = await saveBalanceMatches(party.id, mergedBalance);
 
       setPartyBalances(prev => ({
         ...prev,
@@ -444,6 +462,7 @@ const MatchesSection = ({ showSaved }) => {
       }));
 
       showSaved();
+      warnIfPushFailed(result);
     } catch (error) {
       alert(`${t('admin.balanceTables.errorCreatingBalance')}: ${error.message}`);
     } finally {
