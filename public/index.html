@@ -137,7 +137,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     // leaving the page stuck on its static "טוען אירועים..." placeholder
     // forever with no visible error. Surface it instead.
     const box = document.getElementById("dynamicEvents");
-    if (box) box.innerHTML = `<p class="text-text-muted text-body-sm">שגיאה בטעינת האתר — נסו לרענן את הדף.<br><span style="direction:ltr;display:inline-block;font-size:10px;opacity:.7">${(err && (err.stack || err.message || String(err)) || "").toString().slice(0, 500).replace(/</g, "&lt;")}</span></p>`;
+    if (box) {
+      // Safari's Error.stack is JUST call frames (func@url:line:col), no
+      // leading "TypeError: message" line like Chrome/V8 — show name +
+      // message explicitly first, or the stack alone told us nothing.
+      const detail = `${err?.name || ""}: ${err?.message || ""}`.trim() || String(err);
+      const stack = (err?.stack || "").toString().slice(0, 400);
+      box.innerHTML = `<p class="text-text-muted text-body-sm">שגיאה בטעינת האתר — נסו לרענן את הדף.<br><span style="direction:ltr;display:inline-block;font-size:10px;opacity:.7">${detail.replace(/</g, "&lt;")}<br>${stack.replace(/</g, "&lt;")}</span></p>`;
+    }
     return;
   }
   (async () => {
