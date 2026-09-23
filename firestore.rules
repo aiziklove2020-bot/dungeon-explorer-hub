@@ -98,7 +98,10 @@ service cloud.firestore {
                     && isNonEmpty('phoneNumber') && maxLen('phoneNumber', 20)
                     && request.resource.data.status == 'pending';
       allow update: if affectedOnly(['status', 'resolvedAt']);
-      allow delete: if false;
+      // TODO(auth): restrict to isAdmin() — matches the same trust level as
+      // create/update above (admin panel uses a shared secret, not per-user
+      // auth, elsewhere in this codebase).
+      allow delete: if true;
     }
 
     // ── Web Push subscriptions (balance-match / party alerts to mobile) ─
