@@ -35080,6 +35080,7 @@ function MU(e) {
 		dj: e.dj || "",
 		category: e.category || kU(t, n),
 		city: e.city || jU(t),
+		badge: e.badge || "",
 		type: e.partyType === "external" ? "אירוע חיצוני" : "מסיבה",
 		img: e.imageURL || "",
 		desc: n,

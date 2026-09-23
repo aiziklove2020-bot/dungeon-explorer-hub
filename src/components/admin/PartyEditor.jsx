@@ -51,6 +51,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
       partyType: party.partyType || 'internal',
       category: party.category || '',
       city: party.city || '',
+      badge: party.badge || '',
       publishToInstagram: party.publishToInstagram === true
     };
   });
@@ -338,6 +339,21 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             <option value="שפרעם">שפרעם</option>
             <option value="תל אביב-יפו">תל אביב-יפו</option>
           </select>
+        </div>
+        <div className="space-y-1 text-right">
+          <label className="text-xs uppercase font-bold text-[#94A3B8]">תגית קידום (בכרטיס באתר)</label>
+          <select
+            value={formData.badge}
+            onChange={e => setFormData(prev => ({...prev, badge: e.target.value}))}
+            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+          >
+            <option value="">— ללא —</option>
+            <option value="recommended">⭐ מומלצה</option>
+            <option value="popular">🔥 פופולרי</option>
+          </select>
+          <p className="text-[#94A3B8] text-xs mt-1">
+            מציג תגית צבעונית על כרטיס המסיבה בדף הבית. השתמשו בזה במידה, כדי שהתגיות ימשיכו לבלוט.
+          </p>
         </div>
       </div>
       <label className="flex items-center gap-2 text-sm bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl cursor-pointer select-none">

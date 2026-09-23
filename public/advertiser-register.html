@@ -72,7 +72,7 @@ document.getElementById("advReg").addEventListener("submit", async e => {
   const btn = e.target.querySelector("button");
   btn.disabled = true;
   try {
-    await import("./assets/site-data.js?v=202609232010");
+    await import("./assets/site-data.js?v=202609231633");
     await window.LPData.registerAdvertiserAccount({
       businessName: f.get("businessName"),
       contactName: f.get("contactName"),
