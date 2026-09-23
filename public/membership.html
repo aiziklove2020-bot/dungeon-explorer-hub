@@ -126,36 +126,43 @@
 
 <script src="assets/app.js?v=202609221638"></script>
 <script type="module">
-import "/assets/leads.js?v=202609052312";
-document.querySelectorAll('#tierCards article').forEach((card) => {
-  card.addEventListener('click', () => {
-    document.getElementById('leadTrack').value = card.dataset.track;
-    document.getElementById('leadPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  });
-});
-document.getElementById('leadForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const f = new FormData(e.target);
-  const btn = e.target.querySelector('button');
-  const msg = document.getElementById('leadMsg');
-  msg.textContent = '';
-  btn.disabled = true;
-  btn.textContent = 'שולח...';
+document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await window.LPLeads.submitLead({
-      name: f.get('name'),
-      phone: f.get('phone'),
-      track: f.get('track'),
-      message: f.get('message'),
-      source: 'membership_page',
-    });
-    document.getElementById('leadForm').style.display = 'none';
-    document.getElementById('leadDone').style.display = 'flex';
+    await import("/assets/leads.js?v=202609052312");
   } catch (err) {
-    msg.textContent = err.message || 'אירעה שגיאה, נסה שוב';
-    btn.disabled = false;
-    btn.textContent = 'שלחו לי פרטים';
+    console.error("leads.js failed to load:", err);
+    return;
   }
+  document.querySelectorAll('#tierCards article').forEach((card) => {
+    card.addEventListener('click', () => {
+      document.getElementById('leadTrack').value = card.dataset.track;
+      document.getElementById('leadPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+  document.getElementById('leadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const btn = e.target.querySelector('button');
+    const msg = document.getElementById('leadMsg');
+    msg.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'שולח...';
+    try {
+      await window.LPLeads.submitLead({
+        name: f.get('name'),
+        phone: f.get('phone'),
+        track: f.get('track'),
+        message: f.get('message'),
+        source: 'membership_page',
+      });
+      document.getElementById('leadForm').style.display = 'none';
+      document.getElementById('leadDone').style.display = 'flex';
+    } catch (err) {
+      msg.textContent = err.message || 'אירעה שגיאה, נסה שוב';
+      btn.disabled = false;
+      btn.textContent = 'שלחו לי פרטים';
+    }
+  });
 });
 </script>
 </body></html>

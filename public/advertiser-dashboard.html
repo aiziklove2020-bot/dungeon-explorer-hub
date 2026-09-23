@@ -80,9 +80,13 @@
 
 <script src="assets/app.js?v=202609221638"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609231530";
-import { renderAdvertiserCouples } from "./assets/advertiser-couples.js?v=202609052133";
-window.__renderAdvertiserCouples = renderAdvertiserCouples;
+try {
+  await import("./assets/site-data.js?v=202609231530");
+  const { renderAdvertiserCouples } = await import("./assets/advertiser-couples.js?v=202609052133");
+  window.__renderAdvertiserCouples = renderAdvertiserCouples;
+} catch (err) {
+  console.error("Failed to load site-data.js / advertiser-couples.js:", err);
+}
 </script><script>
 document.addEventListener("DOMContentLoaded", async () => {
   const u = LP.current();

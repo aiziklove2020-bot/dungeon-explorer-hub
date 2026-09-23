@@ -115,10 +115,6 @@
       "destination": "/register-event.html"
     },
     {
-      "source": "/store",
-      "destination": "/store.html"
-    },
-    {
       "source": "/terms",
       "destination": "/terms.html"
     }
@@ -222,11 +218,6 @@
     {
       "source": "/register-event.html",
       "destination": "/register-event",
-      "permanent": true
-    },
-    {
-      "source": "/store.html",
-      "destination": "/store",
       "permanent": true
     },
     {
