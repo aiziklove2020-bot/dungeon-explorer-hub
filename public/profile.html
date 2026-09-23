@@ -105,6 +105,20 @@
     </div>
   </div>
 
+  <!-- Push opt-in — same prominent banner as /my-area, so every logged-in
+       subscriber sees it regardless of which personal area they use. -->
+  <div id="pushBanner" class="relative overflow-hidden rounded-2xl p-4 mb-6 flex items-center gap-3" style="display:none;background:linear-gradient(135deg,rgba(255,87,8,.22),rgba(255,170,0,.12));border:1px solid rgba(255,87,8,.4)">
+    <div class="absolute -top-8 -left-8 w-28 h-28 rounded-full bg-primary-container/25 blur-2xl pointer-events-none"></div>
+    <div class="relative shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background:rgba(255,87,8,.18);border:1px solid rgba(255,87,8,.45);box-shadow:0 0 16px rgba(255,87,8,.35)">
+      <span class="material-symbols-outlined text-primary text-[24px]">notifications_active</span>
+    </div>
+    <div class="relative min-w-0 flex-1">
+      <p class="text-text-primary font-bold text-sm">קבלו התראה מיידית כשמוצאים לכם התאמת איזון</p>
+      <p class="text-text-secondary text-xs mt-0.5">בלי זה תפספסו — זה הערוץ היחיד שמודיע לכם ברגע שיש התאמה</p>
+    </div>
+    <button id="enablePushBtn" type="button" class="relative shrink-0 rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white font-bold text-xs py-2.5 px-3.5 whitespace-nowrap shadow-md">הפעלת התראות</button>
+  </div>
+
   <div id="matchSection" class="mb-6" style="display:none">
     <div class="flex items-center gap-2 mb-3">
       <span class="material-symbols-outlined text-primary text-[24px]">favorite</span>
@@ -195,6 +209,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch { return ""; }
   }
 
+  function wirePushButton(phone) {
+    const btn = document.getElementById("enablePushBtn");
+    const banner = document.getElementById("pushBanner");
+    if (!btn || !banner || btn.dataset.wired) return;
+    btn.dataset.wired = "1";
+    banner.style.display = "";
+
+    // Already granted (and presumably already subscribed via a previous
+    // visit) — don't nag with the banner every time they open the page.
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      banner.style.display = "none";
+      return;
+    }
+
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      const prevText = btn.textContent;
+      btn.textContent = "מפעיל...";
+      const result = await window.lpEnablePushNotifications(phone);
+      btn.disabled = false;
+      btn.textContent = prevText;
+      if (result === "ok") {
+        toast("התראות הופעלו בהצלחה");
+        banner.style.display = "none";
+      } else if (result === "ios-not-installed") {
+        toast("באייפון: קודם הוסיפו את האתר למסך הבית (שיתוף ⬆️ ← הוסף למסך הבית), ואז הפעילו התראות", "error");
+      } else if (result === "denied") {
+        toast("ההתראות נחסמו בדפדפן — אפשר לאשר אותן דרך הגדרות האתר", "error");
+      } else {
+        toast("לא ניתן להפעיל התראות במכשיר הזה", "error");
+      }
+    });
+  }
+
   let personalArea = null;
   try {
     personalArea = await window.LPData.loadMyForumPersonalArea(u.id);
@@ -203,6 +251,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   if (personalArea && personalArea.phone) {
+    wirePushButton(personalArea.phone);
     const labelEl = document.getElementById("membershipLabel");
     const expiryEl = document.getElementById("membershipExpiry");
     const active = !!(personalArea.profile && personalArea.profile.hasActiveSubscription);
