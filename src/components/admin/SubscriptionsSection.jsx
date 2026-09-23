@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { Search, Download, Upload, RotateCcw, Plus, Clock, Check, X, UserCog, Trash2 } from 'lucide-react';
+import { Search, Download, Upload, RotateCcw, Plus, Clock, Check, X, UserCog, Trash2, KeyRound } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import useAdminSection from '../../hooks/useAdminSection';
 import AdminLoader from './AdminLoader';
@@ -23,6 +23,13 @@ import {
   removeSubscription
 } from '../../firebase/subscriptions';
 import { getPendingSubscriptionRequests, resolveSubscriptionRequest, deleteSubscriptionRequest } from '../../firebase/subscriptionRequests';
+import {
+  getAllForumUsers,
+  registerForumUser,
+  approveForumUser,
+  linkForumUserToSiteUser,
+  setForumUserPasswordWithReset
+} from '../../firebase/forumUsers';
 import SubscriptionBadge from './SubscriptionBadge';
 import SubscriptionEditor from './SubscriptionEditor';
 import NewSubscriberModal from './NewSubscriberModal';
@@ -55,6 +62,23 @@ const SubscriptionsSection = ({ showSaved }) => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(true);
 
+  // Login accounts (the "forumUsers" collection — nickname + password used to
+  // sign in to the site) keyed by the subscriber (`users/{id}`) they're
+  // linked to, so the subscriber card can offer a password reset without
+  // sending the admin to a separate tab.
+  const [loginAccountsByUserId, setLoginAccountsByUserId] = useState({});
+
+  const loadLoginAccounts = useCallback(async () => {
+    try {
+      const all = await getAllForumUsers();
+      const map = {};
+      all.forEach((fu) => { if (fu.linkedUserId) map[fu.linkedUserId] = fu; });
+      setLoginAccountsByUserId(map);
+    } catch {
+      /* best-effort; the reset button just won't show a linked account yet */
+    }
+  }, []);
+
   const loadPendingRequests = useCallback(async () => {
     setLoadingRequests(true);
     try {
@@ -66,6 +90,7 @@ const SubscriptionsSection = ({ showSaved }) => {
   }, []);
 
   useEffect(() => { loadPendingRequests(); }, [loadPendingRequests]);
+  useEffect(() => { loadLoginAccounts(); }, [loadLoginAccounts]);
 
   const handleApproveRequest = (request) => {
     const parts = String(request.fullName || '').trim().split(/\s+/);
@@ -205,6 +230,39 @@ const SubscriptionsSection = ({ showSaved }) => {
       showSaved();
     } catch (error) {
       window.alert(`הפעולה נכשלה: ${error.message || error}`);
+    }
+  };
+
+  /** Reset the subscriber's site-login password. Creates a login account for
+   *  them (linked to this subscriber) first if they don't have one yet, so
+   *  this is the one action an admin needs regardless of whether the person
+   *  ever registered a nickname themselves. */
+  const handleResetLoginPassword = async (u) => {
+    const existing = loginAccountsByUserId[u.id];
+    const newPassword = prompt(
+      existing
+        ? `הזן סיסמה זמנית חדשה עבור "${u.name}" (הוא יחויב לבחור סיסמה משלו בהתחברות הבאה):`
+        : `ל"${u.name}" אין עדיין חשבון כניסה לאתר. הזן סיסמה זמנית ליצירת החשבון (הוא יחויב לבחור סיסמה משלו בהתחברות הבאה):`
+    );
+    if (!newPassword) return;
+    if (newPassword.length < 4) { alert('סיסמה חייבת להכיל לפחות 4 תווים'); return; }
+    try {
+      if (existing) {
+        await setForumUserPasswordWithReset(existing.id, newPassword);
+      } else {
+        const defaultNick = (u.name || u.phoneNumber?.slice(-4) || 'user').replace(/\s+/g, '_').slice(0, 30);
+        const nickname = prompt('בחר כינוי לחשבון הכניסה של המנוי:', defaultNick);
+        if (!nickname) return;
+        const created = await registerForumUser(nickname.trim(), newPassword, u.phoneNumber);
+        await approveForumUser(created.id);
+        await linkForumUserToSiteUser(created.id, u.id);
+        await setForumUserPasswordWithReset(created.id, newPassword);
+      }
+      alert('הסיסמה נשמרה. המנוי יחויב לבחור סיסמה חדשה בהתחברות הבאה.');
+      await loadLoginAccounts();
+      showSaved();
+    } catch (err) {
+      alert(err.message || 'שגיאה באיפוס הסיסמה');
     }
   };
 
@@ -729,6 +787,13 @@ const SubscriptionsSection = ({ showSaved }) => {
                         className="bg-[#2a292e] hover:bg-[#353439] text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm"
                       >
                         ✏️ ערוך
+                      </button>
+                      <button
+                        onClick={() => handleResetLoginPassword(u)}
+                        title={loginAccountsByUserId[u.id] ? `כינוי כניסה: ${loginAccountsByUserId[u.id].nickname}` : 'אין עדיין חשבון כניסה — הכפתור ייצור אחד'}
+                        className="flex items-center gap-1 bg-[#2a292e] hover:bg-[#353439] text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm"
+                      >
+                        <KeyRound size={13} /> {loginAccountsByUserId[u.id] ? 'איפוס סיסמה' : 'צור כניסה + סיסמה'}
                       </button>
                       {u.level === 'blocked' ? (
                         <button onClick={() => handleUpdateUserLevel(u.id, 'regular')} className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm">
