@@ -153,8 +153,13 @@
 
 <script src="assets/app.js?v=202609221638"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609221848";
 document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await import("./assets/site-data.js?v=202609221848");
+  } catch (err) {
+    console.error("site-data.js failed to load:", err);
+    return;
+  }
   const u = LP.current();
   if (!u) { location = "/login"; return; }
   const status = await window.LPData.checkMyAccountStatus(u.id).catch(() => ({ valid: true }));

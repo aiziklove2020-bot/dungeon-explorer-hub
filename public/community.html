@@ -202,7 +202,6 @@
 
 <script src="assets/app.js?v=202609221638"></script>
 <script type="module">
-import "./assets/site-data.js?v=202609221848";
 const CHANNEL_STYLE = {
   whatsapp: { icon: "chat", iconBg: "bg-primary-container/20 text-primary", cta: "הצטרפות מהירה לוואטסאפ" },
   telegramChannel: { icon: "send", iconBg: "bg-secondary-container/20 text-secondary", cta: "הצטרפות לערוץ הטלגרם" },
@@ -213,6 +212,7 @@ const CHANNEL_STYLE = {
 document.addEventListener("DOMContentLoaded", async () => {
   const box = document.getElementById("socialLinksBox");
   try {
+    await import("./assets/site-data.js?v=202609221848");
     const links = await window.LPData.loadSocialLinks();
     box.innerHTML = links.length
       ? links.map(l => {
