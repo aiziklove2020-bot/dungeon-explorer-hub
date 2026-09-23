@@ -115,7 +115,7 @@ document.getElementById("advLogin").addEventListener("submit", async e => {
   const btn = e.target.querySelector("button");
   btn.disabled = true;
   try {
-    await import("./assets/site-data.js?v=202609231530");
+    await import("./assets/site-data.js?v=202609232010");
     const u = await window.LPData.loginAdvertiser(f.get("phoneNumber"), f.get("password"));
     LP.setCurrent(u);
     toast("ברוכים הבאים למערכת המפרסמים");
