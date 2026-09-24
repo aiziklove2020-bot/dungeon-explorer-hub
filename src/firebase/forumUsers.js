@@ -404,10 +404,26 @@ export const setForumUserEmail = async (id, email) => {
 };
 
 /** Admin override: mark a forum user's email as verified without the email round-trip.
- *  Useful when staff control the mailbox or for manual onboarding. */
+ *  Useful when staff control the mailbox or for manual onboarding.
+ *
+ *  Goes through the admin-verify-email server route (Admin SDK), not a
+ *  direct client updateDoc — firestore.rules deliberately forbids any
+ *  client from ever flipping emailVerified false→true (so a compromised
+ *  public bundle can't self-verify an attacker-controlled address), which
+ *  meant the previous direct write here was unconditionally rejected: this
+ *  button did nothing but throw permission-denied for every account. */
 export const adminMarkForumEmailVerified = async (id) => {
   if (!id) throw new Error('חסר משתמש');
-  await updateDoc(doc(db, COL, id), { emailVerified: true });
+  const { adminAuthHeader } = await import('../utils/adminApi');
+  const res = await fetch('/api/forum-auth?action=admin-verify-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminAuthHeader() },
+    body: JSON.stringify({ forumUserId: id }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error === 'not_found' ? 'משתמש לא נמצא' : 'שגיאה בסימון האימייל כמאומת');
+  }
   invalidateForumUserCache(id);
 };
 
