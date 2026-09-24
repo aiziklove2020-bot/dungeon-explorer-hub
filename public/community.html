@@ -212,7 +212,7 @@ const CHANNEL_STYLE = {
 document.addEventListener("DOMContentLoaded", async () => {
   const box = document.getElementById("socialLinksBox");
   try {
-    await import("./assets/site-data.js?v=202609231633");
+    await import("./assets/site-data.js?v=202609241954");
     const links = await window.LPData.loadSocialLinks();
     box.innerHTML = links.length
       ? links.map(l => {

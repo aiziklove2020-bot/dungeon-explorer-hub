@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Repeat } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getUserRegistrationInfo } from '../../firebase/users';
 import PhoneLink from '../PhoneLink';
 
-const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, onRemoveFromParty, allUsersMap }) => {
+const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, onRemoveFromParty, onSwapPartner, allUsersMap }) => {
   const { t } = useLanguage();
   const maleUser = maleReg?.phoneNumber && allUsersMap ? allUsersMap.get(maleReg.phoneNumber) : null;
   const femaleUser = femaleReg?.phoneNumber && allUsersMap ? allUsersMap.get(femaleReg.phoneNumber) : null;
@@ -12,6 +12,17 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
   const femaleIsUser = femaleUser && femaleUser.level !== 'blocked';
   const maleRegInfo = maleUser ? getUserRegistrationInfo(maleUser) : null;
   const femaleRegInfo = femaleUser ? getUserRegistrationInfo(femaleUser) : null;
+  const coupleId = maleReg?.coupleId || femaleReg?.coupleId || null;
+
+  const handleSwap = (gender, currentReg) => {
+    if (!onSwapPartner || !coupleId) return;
+    const fullName = window.prompt(`שם מלא לבן/בת הזוג החדש/ה (${gender === 'male' ? 'גבר' : 'אישה'}):`, '');
+    if (fullName == null || !fullName.trim()) return;
+    const phoneNumber = window.prompt('מספר טלפון (10 ספרות, מתחיל ב-05):', '');
+    if (phoneNumber == null) return;
+    const telegramUsername = window.prompt('כינוי טלגרם (אופציונלי):', '') || '';
+    onSwapPartner(partyId, coupleId, gender, { fullName: fullName.trim(), phoneNumber, telegramUsername });
+  };
 
   return (
     <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] border-l-4 border-l-purple-500 p-2 md:p-3 rounded-lg">
@@ -49,6 +60,15 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
                 title={t('confirmRemoveUser')}
               >
                 <Trash2 size={10} /> {t('admin.remove')}
+              </button>
+            )}
+            {onSwapPartner && coupleId && (
+              <button
+                onClick={() => handleSwap('male', maleReg)}
+                className="bg-purple-700 hover:bg-purple-600 text-white px-2 py-1 rounded text-[10px] font-bold"
+                title="החלף לבן זוג אחר"
+              >
+                <Repeat size={10} /> החלף
               </button>
             )}
             {!maleIsUser && maleReg && (
@@ -96,6 +116,15 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
                 title={t('confirmRemoveUser')}
               >
                 <Trash2 size={10} /> {t('admin.remove')}
+              </button>
+            )}
+            {onSwapPartner && coupleId && (
+              <button
+                onClick={() => handleSwap('female', femaleReg)}
+                className="bg-purple-700 hover:bg-purple-600 text-white px-2 py-1 rounded text-[10px] font-bold"
+                title="החלף לבת זוג אחרת"
+              >
+                <Repeat size={10} /> החלף
               </button>
             )}
             {!femaleIsUser && femaleReg && (
