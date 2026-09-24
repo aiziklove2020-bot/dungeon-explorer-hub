@@ -29,6 +29,14 @@ const LP = {
 };
 LP.seed();
 
+function escapeHtml(str){
+  if(str === null || str === undefined) return "";
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+window.escapeHtml = escapeHtml;
+
 function toast(msg, kind="success"){
   // Centered above the mobile bottom-nav. Previously pinned to left:20px,
   // which landed directly on top of the support-chat bubble (same corner)

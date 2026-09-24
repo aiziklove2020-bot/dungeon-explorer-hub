@@ -261,7 +261,7 @@
 </nav>
 
 
-<script src="assets/app.js?v=202609242014"></script>
+<script src="assets/app.js?v=202609242035"></script>
 <script type="module">
 // window.LPData.registerForParty only dedupes by logged-in userId, not by
 // phone number — this form is anonymous (no login), so without this check
@@ -318,7 +318,7 @@ let selectedParty = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202609242007");
+    await import("./assets/site-data.js?v=202609242035");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
@@ -387,10 +387,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   picker.innerHTML = events.map(e => `
     <article class="bg-surface-card border border-white/5 rounded-2xl overflow-hidden flex items-center gap-4 p-3">
-      <div class="w-20 h-20 rounded-xl bg-cover bg-center flex-shrink-0" style="background-image:url('${e.img}')"></div>
+      <div class="w-20 h-20 rounded-xl bg-cover bg-center flex-shrink-0" style="background-image:url('${escapeHtml(e.img)}')"></div>
       <div class="flex-1 min-w-0">
-        <h3 class="font-headline-sm text-headline-sm text-text-primary truncate">${e.title}</h3>
-        ${(e.day || e.date) ? `<div class="flex items-center gap-1 text-text-secondary text-xs mt-1"><span class="material-symbols-outlined text-[15px]">calendar_month</span><span>${e.day || ""}${e.day && e.date ? ", " : ""}${e.date || ""}</span></div>` : ""}
+        <h3 class="font-headline-sm text-headline-sm text-text-primary truncate">${escapeHtml(e.title)}</h3>
+        ${(e.day || e.date) ? `<div class="flex items-center gap-1 text-text-secondary text-xs mt-1"><span class="material-symbols-outlined text-[15px]">calendar_month</span><span>${escapeHtml(e.day) || ""}${e.day && e.date ? ", " : ""}${escapeHtml(e.date) || ""}</span></div>` : ""}
       </div>
       <button type="button" class="flex-shrink-0 rounded-xl bg-gradient-to-l from-[#ff5708] to-[#ff7a29] text-white text-sm font-bold py-2.5 px-4" data-party="${e.id}">בחרו</button>
     </article>`).join("");

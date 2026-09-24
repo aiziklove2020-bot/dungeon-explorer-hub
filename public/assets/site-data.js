@@ -34986,16 +34986,25 @@ var bU = "favorites", xU = (e, t) => `${e}_${t}`, SU = async (e, t) => {
 	await ed(E(H, bU, xU(e, t)));
 }, wU = async (e) => (await k(D(T(H, bU), O("userId", "==", e)))).docs.map((e) => e.data().partyId);
 Qj(), B(), W(), pA(), Sk();
+function lpToLocalDate(e) {
+	if (e instanceof Date) return e;
+	if (e?.toDate) return e.toDate();
+	if (typeof e === "string") {
+		const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(e);
+		if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+	}
+	return new Date(e);
+}
 function TU(e) {
-	let t = e instanceof Date ? e : e?.toDate ? e.toDate() : new Date(e);
+	let t = lpToLocalDate(e);
 	return !t || Number.isNaN(t.getTime()) ? "" : t.toLocaleDateString("he-IL", { weekday: "long" });
 }
 function EU(e) {
-	let t = e instanceof Date ? e : e?.toDate ? e.toDate() : new Date(e);
+	let t = lpToLocalDate(e);
 	return !t || Number.isNaN(t.getTime()) ? "" : `${String(t.getDate()).padStart(2, "0")}.${String(t.getMonth() + 1).padStart(2, "0")}.${t.getFullYear()}`;
 }
 function DU(e) {
-	let t = e instanceof Date ? e : e?.toDate ? e.toDate() : new Date(e);
+	let t = lpToLocalDate(e);
 	return !t || Number.isNaN(t.getTime()) ? "" : `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 }
 var OU = [

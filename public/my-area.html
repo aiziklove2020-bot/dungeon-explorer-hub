@@ -231,13 +231,13 @@
 </div>
 </nav>
 
-<script src="assets/app.js?v=202609242014"></script>
+<script src="assets/app.js?v=202609242035"></script>
 <script type="module">
 const STORAGE_KEY = "lp_my_area_phone";
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202609242007");
+    await import("./assets/site-data.js?v=202609242035");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
@@ -343,20 +343,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (match.role === "male") {
       box.innerHTML = `<div class="rounded-xl p-5 flex flex-col gap-3" style="${glowStyle}">
-        <p class="text-label-sm font-label-sm text-text-muted">${match.partyName ? "עבור " + match.partyName : ""}</p>
+        <p class="text-label-sm font-label-sm text-text-muted">${match.partyName ? "עבור " + escapeHtml(match.partyName) : ""}</p>
         <div class="flex items-center gap-3">
           <span class="w-11 h-11 rounded-full bg-primary-container/15 flex items-center justify-center shrink-0">
             <span class="material-symbols-outlined text-primary text-[22px]">favorite</span>
           </span>
           <div>
             <p class="text-label-sm font-label-sm text-text-muted">האיזון שלך</p>
-            <h3 class="text-headline-sm font-headline-sm text-text-primary">${match.matchName || "—"}</h3>
+            <h3 class="text-headline-sm font-headline-sm text-text-primary">${escapeHtml(match.matchName) || "—"}</h3>
           </div>
         </div>
         ${match.matchPhone
           ? `<div class="rounded-lg bg-surface-container p-3 flex items-center justify-between">
               <span class="text-body-sm font-body-sm text-text-secondary">בחרה לשתף איתך את הטלפון שלה</span>
-              <a href="tel:${match.matchPhone}" class="text-primary font-label-md font-bold" dir="ltr">${match.matchPhone}</a>
+              <a href="tel:${escapeHtml(match.matchPhone)}" class="text-primary font-label-md font-bold" dir="ltr">${escapeHtml(match.matchPhone)}</a>
             </div>`
           : `<p class="text-body-sm font-body-sm text-text-muted">היא עדיין לא בחרה לשתף איתך מספר טלפון. אם תבחר בכך, המספר יופיע כאן.</p>`
         }
@@ -365,20 +365,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     box.innerHTML = `<div class="rounded-xl p-5 flex flex-col gap-4" style="${glowStyle}">
-      <p class="text-label-sm font-label-sm text-text-muted">${match.partyName ? "עבור " + match.partyName : ""}</p>
+      <p class="text-label-sm font-label-sm text-text-muted">${match.partyName ? "עבור " + escapeHtml(match.partyName) : ""}</p>
       <div class="flex items-center gap-3">
         <span class="w-11 h-11 rounded-full bg-primary-container/15 flex items-center justify-center shrink-0">
           <span class="material-symbols-outlined text-primary text-[22px]">favorite</span>
         </span>
         <div>
           <p class="text-label-sm font-label-sm text-text-muted">האיזון שלך</p>
-          <h3 class="text-headline-sm font-headline-sm text-text-primary">${match.matchName || "—"}</h3>
+          <h3 class="text-headline-sm font-headline-sm text-text-primary">${escapeHtml(match.matchName) || "—"}</h3>
         </div>
       </div>
       ${match.matchPhone
         ? `<div class="rounded-lg bg-surface-container p-3 flex items-center justify-between">
             <span class="text-body-sm font-body-sm text-text-secondary">מספר הטלפון שלו</span>
-            <a href="tel:${match.matchPhone}" class="text-primary font-label-md font-bold" dir="ltr">${match.matchPhone}</a>
+            <a href="tel:${escapeHtml(match.matchPhone)}" class="text-primary font-label-md font-bold" dir="ltr">${escapeHtml(match.matchPhone)}</a>
           </div>`
         : ""
       }
