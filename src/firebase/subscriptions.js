@@ -15,9 +15,9 @@
  * here.
  */
 
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, runTransaction } from 'firebase/firestore';
 import { db } from './config';
-import { getUserById as getUserByIdFromDataAccess, invalidateCache } from './dataAccess';
+import { invalidateCache } from './dataAccess';
 
 const USERS_COLLECTION = 'users';
 
@@ -331,35 +331,56 @@ const computeNextSubscription = (prevSub, tier) => {
   };
 };
 
-const writeSubscriptionUpdate = async (userId, nextSubsMap, userData) => {
+/**
+ * Read-modify-write a single subscription `kind` inside a Firestore
+ * transaction, so two concurrent calls for the same user (e.g. an admin
+ * extending `parties` in one tab while something else touches
+ * `exchangeParties` in another) can't clobber each other. Both read and
+ * write happen against the transaction's own consistent snapshot, not the
+ * (possibly stale) dataAccess cache, and Firestore retries the whole
+ * transaction if the document changed underneath it.
+ *
+ * `computeNext(prevSub, userData)` returns the new value for `kind` (or
+ * `null` to clear it) and may throw to abort the whole update.
+ */
+const applySubscriptionChange = async (userId, kind, computeNext) => {
   const userRef = doc(db, USERS_COLLECTION, userId);
+  let userData;
+  let next;
 
-  const projected = { ...userData, subscriptions: nextSubsMap };
-  const legacy = buildLegacyFieldsFromSubscriptions(projected);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(userRef);
+    if (!snap.exists()) throw new Error('User not found');
+    userData = normalizeUserSubscriptions({ id: userId, ...snap.data() });
+    const prev = userData.subscriptions?.[kind] || null;
+    next = computeNext(prev, userData);
 
-  const updateData = {
-    subscriptions: nextSubsMap,
-    registrationExpiry: legacy.registrationExpiry,
-    registrationStartDate: legacy.registrationStartDate,
-  };
+    const nextSubsMap = {
+      parties: userData.subscriptions?.parties || null,
+      exchangeParties: userData.subscriptions?.exchangeParties || null,
+      [kind]: next,
+    };
 
-  if (userData?.level !== 'admin' && userData?.level !== 'blocked' && !userData?.isAdmin) {
-    updateData.level = legacy.level;
-  }
+    const projected = { ...userData, subscriptions: nextSubsMap };
+    const legacy = buildLegacyFieldsFromSubscriptions(projected);
 
-  await updateDoc(userRef, updateData);
+    const updateData = {
+      subscriptions: nextSubsMap,
+      registrationExpiry: legacy.registrationExpiry,
+      registrationStartDate: legacy.registrationStartDate,
+    };
+    if (userData?.level !== 'admin' && userData?.level !== 'blocked' && !userData?.isAdmin) {
+      updateData.level = legacy.level;
+    }
+    tx.update(userRef, updateData);
+  });
 
   await invalidateCache(`userById_${userId}`);
   await invalidateCache('allUsers');
   if (userData?.phoneNumber) {
     await invalidateCache(`userByPhone_${userData.phoneNumber}`);
   }
-};
-
-const loadUserOrThrow = async (userId) => {
-  const userData = await getUserByIdFromDataAccess(userId);
-  if (!userData) throw new Error('User not found');
-  return normalizeUserSubscriptions(userData);
+  return next;
 };
 
 /**
@@ -372,18 +393,7 @@ export const addOrExtendSubscription = async (userId, kind, tier) => {
   if (!SUBSCRIPTION_KINDS[kind]) throw new Error(`Unknown subscription kind: ${kind}`);
   if (!SUBSCRIPTION_TIERS[tier]) throw new Error(`Unknown subscription tier: ${tier}`);
 
-  const userData = await loadUserOrThrow(userId);
-  const prev = userData.subscriptions?.[kind] || null;
-  const next = computeNextSubscription(prev, tier);
-
-  const nextSubsMap = {
-    parties: userData.subscriptions?.parties || null,
-    exchangeParties: userData.subscriptions?.exchangeParties || null,
-    [kind]: next,
-  };
-
-  await writeSubscriptionUpdate(userId, nextSubsMap, userData);
-  return next;
+  return applySubscriptionChange(userId, kind, (prev) => computeNextSubscription(prev, tier));
 };
 
 /**
@@ -396,42 +406,30 @@ export const addOrExtendSubscription = async (userId, kind, tier) => {
 export const setSubscriptionExpiry = async (userId, kind, expiryDate, explicitTier) => {
   if (!SUBSCRIPTION_KINDS[kind]) throw new Error(`Unknown subscription kind: ${kind}`);
 
-  const userData = await loadUserOrThrow(userId);
-  const prev = userData.subscriptions?.[kind] || null;
-  const nowIso = new Date().toISOString();
-
-  let next;
-  if (!expiryDate) {
-    next = {
-      tier: 'gold',
-      expiry: null,
-      startDate: prev?.startDate ? toIso(prev.startDate) || nowIso : nowIso,
-      lastRenewedAt: nowIso,
-      lastRenewalTier: 'gold',
-    };
-  } else {
+  return applySubscriptionChange(userId, kind, (prev) => {
+    const nowIso = new Date().toISOString();
+    if (!expiryDate) {
+      return {
+        tier: 'gold',
+        expiry: null,
+        startDate: prev?.startDate ? toIso(prev.startDate) || nowIso : nowIso,
+        lastRenewedAt: nowIso,
+        lastRenewalTier: 'gold',
+      };
+    }
     const iso = toIso(expiryDate);
     if (!iso) throw new Error('Invalid expiry date');
     const tier = SUBSCRIPTION_TIER_IDS.includes(explicitTier)
       ? explicitTier
       : (prev?.tier && prev.tier !== 'gold' ? prev.tier : 'year');
-    next = {
+    return {
       tier,
       expiry: iso,
       startDate: prev?.startDate ? toIso(prev.startDate) || nowIso : nowIso,
       lastRenewedAt: nowIso,
       lastRenewalTier: tier,
     };
-  }
-
-  const nextSubsMap = {
-    parties: userData.subscriptions?.parties || null,
-    exchangeParties: userData.subscriptions?.exchangeParties || null,
-    [kind]: next,
-  };
-
-  await writeSubscriptionUpdate(userId, nextSubsMap, userData);
-  return next;
+  });
 };
 
 /**
@@ -441,15 +439,7 @@ export const setSubscriptionExpiry = async (userId, kind, expiryDate, explicitTi
 export const removeSubscription = async (userId, kind) => {
   if (!SUBSCRIPTION_KINDS[kind]) throw new Error(`Unknown subscription kind: ${kind}`);
 
-  const userData = await loadUserOrThrow(userId);
-
-  const nextSubsMap = {
-    parties: userData.subscriptions?.parties || null,
-    exchangeParties: userData.subscriptions?.exchangeParties || null,
-    [kind]: null,
-  };
-
-  await writeSubscriptionUpdate(userId, nextSubsMap, userData);
+  await applySubscriptionChange(userId, kind, () => null);
 };
 
 /**

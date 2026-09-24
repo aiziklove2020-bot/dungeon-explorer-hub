@@ -1,4 +1,5 @@
 import webpush from 'web-push';
+import { requireAdminApiSecret } from '../lib/apiAuth.js';
 
 /**
  * Sends Web Push notifications to a set of subscriptions. POST JSON:
@@ -8,11 +9,16 @@ import webpush from 'web-push';
  * hardcoded below, which is safe to expose — it's the public half). Without
  * it configured, this responds 500 rather than silently no-op'ing so a
  * missing env var is obvious instead of "notifications just don't arrive".
+ *
+ * Admin-only: both callers (saveBalanceMatches, notifyPrivilegedSubscribersOfNewParty)
+ * live in src/firebase/parties.js, used only from the admin panel. Without this
+ * gate, anyone could POST arbitrary endpoint/keys and use this deploy's VAPID
+ * identity as a free open push relay.
  */
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Max-Age', '86400');
 }
 
@@ -22,6 +28,7 @@ export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
+  if (!requireAdminApiSecret(req, res)) return;
 
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   if (!privateKey) {

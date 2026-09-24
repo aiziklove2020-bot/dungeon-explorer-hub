@@ -1293,9 +1293,6 @@ export const updateParty = async (partyId, partyData) => {
 
     if (partyData.partyType !== undefined) {
       updateData.partyType = partyData.partyType;
-    } else {
-
-      updateData.partyType = 'internal';
     }
 
     if (partyData.publishToInstagram !== undefined) {

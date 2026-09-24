@@ -43,33 +43,46 @@ export const autoProvisionFemaleUsers = onDocumentWritten('parties/{partyId}', a
   const usersRef = db.collection('users');
   for (const phone of femalePhones) {
     try {
-      const existing = await usersRef.where('phoneNumber', '==', phone).limit(1).get();
-      if (!existing.empty) continue; // already a user — nothing to do
-
       const reg = registrations.find((r) => normalizeIsraeliPhone(r?.phoneNumber) === phone && r?.gender === 'female');
       const now = new Date();
       const expiry = new Date(now.getTime());
       expiry.setFullYear(expiry.getFullYear() + 1);
 
-      await usersRef.add({
-        name: reg?.fullName || reg?.userName || '',
-        phoneNumber: phone,
-        gender: 'female',
-        level: 'registered',
-        telegramUsername: reg?.telegramUsername || '',
-        subscriptions: {
-          parties: {
-            tier: 'year',
-            startDate: now.toISOString(),
-            lastRenewedAt: now.toISOString(),
-            lastRenewalTier: 'year',
-            expiry: expiry.toISOString(),
+      // Runs on every write to every party document, so the same woman
+      // registering for two parties close together can trigger two
+      // concurrent invocations for the same phone. A plain query-then-add
+      // lets both see "no existing user" before either write lands,
+      // creating two duplicate accounts for one phone number. Doing the
+      // query-then-create inside a transaction closes that: Firestore
+      // tracks the query's result set as part of the transaction's read
+      // set, so if a concurrent transaction creates the matching user
+      // first, this one is automatically retried and its own retry finds
+      // that user and skips creation instead of duplicating it.
+      const created = await db.runTransaction(async (tx) => {
+        const existing = await tx.get(usersRef.where('phoneNumber', '==', phone).limit(1));
+        if (!existing.empty) return false; // already a user — nothing to do
+        const newRef = usersRef.doc();
+        tx.set(newRef, {
+          name: reg?.fullName || reg?.userName || '',
+          phoneNumber: phone,
+          gender: 'female',
+          level: 'registered',
+          telegramUsername: reg?.telegramUsername || '',
+          subscriptions: {
+            parties: {
+              tier: 'year',
+              startDate: now.toISOString(),
+              lastRenewedAt: now.toISOString(),
+              lastRenewalTier: 'year',
+              expiry: expiry.toISOString(),
+            },
+            exchangeParties: null,
           },
-          exchangeParties: null,
-        },
-        createdAt: Timestamp.now(),
+          createdAt: Timestamp.now(),
+        });
+        return true;
       });
-      logger.info('autoProvisionFemaleUsers: created user for', phone);
+      if (created) logger.info('autoProvisionFemaleUsers: created user for', phone);
     } catch (e) {
       logger.error('autoProvisionFemaleUsers failed for', phone, e);
     }

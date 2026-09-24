@@ -699,12 +699,13 @@ export const makeUserAdmin = async (userId, username, password) => {
       throw new Error('Username already exists');
     }
     
+    const hashed = await bcrypt.hash(password, 10);
     const userRef = doc(db, USERS_COLLECTION, userId);
     // Always set isActive: true when making user admin - admin stays active
     await updateDoc(userRef, {
       isAdmin: true,
       adminUsername: username,
-      password: password,
+      password: hashed,
       isActive: true
     });
 
