@@ -938,8 +938,15 @@ export const adminRemoveUserFromParty = async (partyId, userIdOrPhone) => {
       });
     }
 
-    // If user is part of a couple, convert partner to single registration
-    if (userRegistration.registrationType === 'couple' && userRegistration.coupleId) {
+    // If user is part of a couple, convert partner to single registration.
+    // Covers both couple record shapes: the legacy single combined record
+    // (registrationType === 'couple') and the current two-record shape
+    // (registrationType 'single-male-couple'/'single-female-couple', linked
+    // only by a shared coupleId) — checking coupleId alone catches both,
+    // where checking the literal 'couple' string only caught the legacy one
+    // and left the current shape's other half orphaned with a partnerPhone/
+    // partnerName pointing at someone no longer registered.
+    if (userRegistration.coupleId) {
       const coupleId = userRegistration.coupleId;
       
       // Find the partner's registration (same coupleId)
@@ -1011,6 +1018,62 @@ export const adminRemoveUserFromParty = async (partyId, userIdOrPhone) => {
   } catch (error) {
     throw error;
   }
+};
+
+/**
+ * Admin action: replace one side of an already-registered couple (identified
+ * by their shared `coupleId`) with a different person — e.g. the couple that
+ * registered together isn't actually coming, or one partner changed. Keeps
+ * the couple's slot/registeredAt/coupleId, only swaps the replaced side's
+ * identity fields, and updates the OTHER side's partnerName/partnerPhone so
+ * the pairing stays consistent instead of pointing at whoever used to be
+ * there.
+ */
+export const swapCoupleRegistrationPartner = async (partyId, coupleId, sideGender, newPartner) => {
+  if (!partyId || !coupleId) throw new Error('חסר מזהה מסיבה או זוג');
+  if (sideGender !== 'male' && sideGender !== 'female') throw new Error('צד לא תקין');
+
+  const cleanPhone = String(newPartner?.phoneNumber || '').replace(/\D/g, '');
+  if (!/^05\d{8}$/.test(cleanPhone)) throw new Error('נא להזין מספר טלפון תקין לבן/בת הזוג החדש/ה (10 ספרות, מתחיל ב-05)');
+  const fullName = String(newPartner?.fullName || '').trim();
+  if (!fullName) throw new Error('נא להזין שם מלא לבן/בת הזוג החדש/ה');
+
+  const partyData = await getPartyByIdFromDataAccess(partyId);
+  if (!partyData) throw new Error('Party not found');
+  const partyRef = doc(db, PARTIES_COLLECTION, partyId);
+  const registrations = [...(partyData.registrations || [])];
+
+  const sideIndex = registrations.findIndex((r) => r.coupleId === coupleId && r.gender === sideGender);
+  if (sideIndex === -1) throw new Error('לא נמצאה רשומת הזוג לצד המבוקש');
+  const otherIndex = registrations.findIndex((r) => r.coupleId === coupleId && r.gender !== sideGender);
+
+  const alreadyRegisteredElsewhere = registrations.some(
+    (r, i) => i !== sideIndex && r.phoneNumber === cleanPhone
+  );
+  if (alreadyRegisteredElsewhere) throw new Error('מספר הטלפון הזה כבר רשום למסיבה הזו');
+
+  const old = registrations[sideIndex];
+  registrations[sideIndex] = {
+    ...old,
+    fullName,
+    userName: fullName,
+    phoneNumber: cleanPhone,
+    telegramUsername: newPartner?.telegramUsername || '',
+    userId: null,
+    autoApproved: false,
+  };
+  if (otherIndex !== -1) {
+    registrations[otherIndex] = {
+      ...registrations[otherIndex],
+      partnerName: fullName,
+      partnerPhone: cleanPhone,
+    };
+  }
+
+  await updateDoc(partyRef, { registrations });
+  await invalidateCache(`party_${partyId}`);
+  await invalidateCache('activeParties');
+  return true;
 };
 
 export const updateRegistrationType = async (partyId, userIdOrPhone, newRegistrationType) => {

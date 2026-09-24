@@ -35210,7 +35210,8 @@ async function WU(e, t) {
 		registrationType: n,
 		partnerName: t.partnerName || null,
 		partnerPhone: t.partnerPhone || null,
-		pickupAddress: t.pickupAddress || ""
+		pickupAddress: t.pickupAddress || "",
+		coupleId: t.coupleId || null
 	}), a = n === "single-female-couple";
 	try {
 		let i = await SM(e);

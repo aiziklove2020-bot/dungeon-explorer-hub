@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { RotateCcw, Plus, Trash2, Clock, AlertTriangle, X } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminLoader from './AdminLoader';
-import { getAllParties, createParty, updateParty, deleteParty, adminRemoveUserFromParty, recomputeAllPartiesExpiration } from '../../firebase/parties';
+import { getAllParties, createParty, updateParty, deleteParty, adminRemoveUserFromParty, swapCoupleRegistrationPartner, recomputeAllPartiesExpiration } from '../../firebase/parties';
 import { createUserFromRegistration, getAllUsers } from '../../firebase/users';
 import { getPartySettings, updatePartySettings } from '../../firebase/partySettings';
 import { DEFAULT_PARTY_RETENTION_HOURS, isPartyExpiredByDate } from '../../../shared/partyExpiry.js';
@@ -331,6 +331,16 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
       alert(t('userRemovedFromParty'));
     } catch (error) {
       alert(`${t('failedToRemoveUser')}: ${error.message}`);
+    }
+  };
+
+  const handleSwapCoupleRegistrationPartner = async (partyId, coupleId, sideGender, newPartner) => {
+    try {
+      await swapCoupleRegistrationPartner(partyId, coupleId, sideGender, newPartner);
+      loadActiveParties();
+      showSaved();
+    } catch (error) {
+      alert(`שגיאה בהחלפת בן/בת הזוג: ${error.message}`);
     }
   };
 
@@ -800,6 +810,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                                   partyId={selectedParty.id}
                                   onConvertToUser={handleConvertClientToUser}
                                   onRemoveFromParty={handleRemoveFromParty}
+                                  onSwapPartner={handleSwapCoupleRegistrationPartner}
                                   allUsersMap={allUsersMap}
                                 />
                               ) : (
