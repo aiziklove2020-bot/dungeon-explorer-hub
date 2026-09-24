@@ -61,7 +61,7 @@
         <h1 class="font-headline-md text-headline-md text-text-primary font-bold">בקשה להצטרפות כמנוי</h1>
         <p class="text-text-secondary text-body-sm mt-1">מלאו את הפרטים ובחרו סיסמה לחשבון שלכם. חיבור המנוי עצמו (התשלום/התוקף) מתבצע ידנית על ידי צוות הקהילה לאחר יצירת קשר.</p>
       </div>
-      <form class="relative flex flex-col gap-3" id="subRequestForm">
+      <form class="relative flex flex-col gap-3" id="subRequestForm" novalidate>
         <div>
           <label class="block text-xs font-bold text-text-secondary mb-1.5">שם מלא</label>
           <input required name="fullName" autocomplete="name" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container">
@@ -118,6 +118,22 @@ document.getElementById("subRequestForm").addEventListener("submit", async e => 
   const confirmPassword = f.get("confirmPassword");
   const btn = e.target.querySelector("button");
 
+  // Explicit checks instead of relying on the browser's native "required"
+  // validation UI — that UI doesn't behave consistently across every mobile
+  // browser, and when it silently fails to show its prompt, the submit
+  // event never fires at all and the button looks like it does nothing.
+  if (!String(fullName || "").trim()) {
+    toast("נא להזין שם מלא", "error");
+    return;
+  }
+  if (!/^0\d{9}$/.test(phone)) {
+    toast("נא להזין מספר טלפון תקין (10 ספרות, מתחיל ב-0)", "error");
+    return;
+  }
+  if (!password || password.length < 4) {
+    toast("סיסמה חייבת להכיל לפחות 4 תווים", "error");
+    return;
+  }
   if (password !== confirmPassword) {
     toast("הסיסמאות לא תואמות", "error");
     return;

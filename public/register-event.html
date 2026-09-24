@@ -108,7 +108,7 @@
       <button type="button" id="backToPartiesWa" class="w-full mt-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-text-primary font-bold py-3">חזרה לבחירת מסיבה</button>
     </div>
 
-    <form id="regForm" class="space-y-4">
+    <form id="regForm" class="space-y-4" novalidate>
       <div>
         <label class="font-label-md text-label-md font-semibold text-on-surface block mb-2">סוג הרשמה ואיזון מגדרי</label>
         <select name="registrationType" id="typeSelect" required class="sr-only">
@@ -228,7 +228,7 @@
       </div>
 
       <label class="flex items-start gap-2.5 p-3 rounded-lg bg-surface-container-lowest text-sm text-text-secondary cursor-pointer">
-        <input required type="checkbox" class="mt-0.5 w-4 h-4 rounded accent-[#ff5708] shrink-0"> אני מעל גיל 18 ומאשר/ת את תנאי ההשתתפות, שמירה מוחלטת על פרטיות הקהילה ומרחב בטוח ומכבד
+        <input id="ageConsent" type="checkbox" class="mt-0.5 w-4 h-4 rounded accent-[#ff5708] shrink-0"> אני מעל גיל 18 ומאשר/ת את תנאי ההשתתפות, שמירה מוחלטת על פרטיות הקהילה ומרחב בטוח ומכבד
       </label>
 
       <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-primary-container to-secondary-container text-white font-headline-sm text-headline-sm font-bold py-4 flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(255,87,8,0.4)] active:scale-[0.98] transition-all">
@@ -450,7 +450,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     const isCouple = typeSelect.value === "couple";
     const btn = form.querySelector("button[type=submit]");
 
+    // The form used to rely entirely on the browser's native HTML validation
+    // (`required` attributes) to block an incomplete submit — but that means
+    // the "submit" event, and everything in this handler, never fires at all
+    // if native validation blocks it first. That UI (especially around a
+    // visually-hidden required <select> and a custom-styled checkbox) isn't
+    // consistent across every mobile browser; when it silently fails to
+    // show its "please fill this in" prompt, the button does nothing and it
+    // looks exactly like the whole form is broken, with no error anywhere.
+    // The form now has `novalidate`, and every required condition is
+    // re-checked explicitly here instead, so the behavior is identical on
+    // every browser.
+    const ageConsent = document.getElementById("ageConsent");
+    if (!ageConsent.checked) {
+      toast("יש לאשר שאתם מעל גיל 18 ואת תנאי ההשתתפות", "error");
+      ageConsent.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
     if (!isCouple) {
+      if (!String(f.get("fullName") || "").trim()) {
+        toast("נא להזין שם מלא", "error");
+        form.fullName.focus();
+        return;
+      }
       const phoneNumber = String(f.get("phoneNumber") || "").replace(/\D/g, "");
       if (!ISRAELI_PHONE_RE.test(phoneNumber)) {
         toast("נא להזין מספר טלפון תקין (10 ספרות, מתחיל ב-05)", "error");
