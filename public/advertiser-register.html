@@ -50,7 +50,7 @@
 </aside><div class="scrim"></div>
 <main>
 <section class="auth-shell"><div class="auth-card" id="advRegCard"><div class="logo-mini"><img src="assets/logo-new.png?v=202609220510"></div><h1>פתיחת חשבון מפרסם</h1>
-<form class="form" id="advReg"><label>שם העסק / ההפקה<input required name="businessName"></label><label>שם איש קשר<input required name="contactName"></label><label>טלפון<input required name="phoneNumber" type="tel" placeholder="050-0000000" autocomplete="tel"></label><label>סיסמה<input required minlength="4" type="password" name="password"></label><label><span><input required type="checkbox" style="width:auto"> אני מאשר/ת את תנאי הפרסום באתר</span></label><button class="btn primary full">פתיחת חשבון מפרסם</button></form>
+<form class="form" id="advReg" novalidate><label>שם העסק / ההפקה<input required name="businessName"></label><label>שם איש קשר<input required name="contactName"></label><label>טלפון<input required name="phoneNumber" type="tel" placeholder="050-0000000" autocomplete="tel"></label><label>סיסמה<input required minlength="4" type="password" name="password"></label><label><span><input type="checkbox" id="advRegTerms" style="width:auto"> אני מאשר/ת את תנאי הפרסום באתר</span></label><button class="btn primary full">פתיחת חשבון מפרסם</button></form>
 <p style="color:#aaa;font-size:13px;text-align:center;margin-top:12px">החשבון ייפתח לאחר אישור מנהל</p></div></section></main>
 <footer class="footer"><div class="container" style="text-align:center"><span class="logo-wrap" style="justify-content:center"><img src="assets/logo-new.png?v=202609220510" alt="" class="logo-icon"><span class="logo-text"><b>LIBRAL PARTY</b><small>LIBERAL PARTIES ISRAEL</small></span></span><p style="color:#8f8f98;margin-top:10px">קהילת אירועים ליברלית, דיסקרטית ומכילה.</p></div><div class="container" style="border-top:1px solid #24242a;padding-top:16px;margin-top:20px;text-align:center;color:#666;font-size:13px">© <span class="cyear"></span> כל הזכויות שמורות למסיבות ליברליות בישראל &nbsp;·&nbsp; <a href="/privacy" style="color:#8a8a92">מדיניות פרטיות</a> &nbsp;·&nbsp; <a href="/terms" style="color:#8a8a92">תקנון</a></div></footer>
 
@@ -70,14 +70,23 @@ document.getElementById("advReg").addEventListener("submit", async e => {
   e.preventDefault();
   const f = new FormData(e.target);
   const btn = e.target.querySelector("button");
+  const businessName = f.get("businessName");
+  const contactName = f.get("contactName");
+  const phoneNumber = f.get("phoneNumber");
+  const password = f.get("password");
+  if (!String(businessName || "").trim()) { toast("נא להזין שם עסק/הפקה", "error"); return; }
+  if (!String(contactName || "").trim()) { toast("נא להזין שם איש קשר", "error"); return; }
+  if (!String(phoneNumber || "").trim()) { toast("נא להזין מספר טלפון", "error"); return; }
+  if (!password || password.length < 4) { toast("סיסמה חייבת להכיל לפחות 4 תווים", "error"); return; }
+  if (!document.getElementById("advRegTerms").checked) { toast("יש לאשר את תנאי הפרסום באתר", "error"); return; }
   btn.disabled = true;
   try {
-    await import("./assets/site-data.js?v=202609241954");
+    await import("./assets/site-data.js?v=202609242007");
     await window.LPData.registerAdvertiserAccount({
-      businessName: f.get("businessName"),
-      contactName: f.get("contactName"),
-      phoneNumber: f.get("phoneNumber"),
-      password: f.get("password"),
+      businessName,
+      contactName,
+      phoneNumber,
+      password,
     });
     document.getElementById("advRegCard").innerHTML = `
       <div class="logo-mini"><img src="assets/logo-new.png?v=202609220510"></div>

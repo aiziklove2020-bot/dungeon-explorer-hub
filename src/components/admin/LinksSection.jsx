@@ -118,8 +118,20 @@ const LinksSection = ({ showSaved }) => {
     }
   };
 
+  // Once even one bot is configured in the newer "טלגרם" tab, the settings
+  // doc carries a `bots` array — and getTelegramSettings() (the function
+  // every actual send path reads from) then ignores this doc's legacy
+  // botToken/chatId/enabled fields entirely. Saving this old form still
+  // "succeeds" (the write lands, showSaved() fires) but nothing downstream
+  // ever reads it again — a silent no-op an admin has no way to notice.
+  const isMultiBotMode = Array.isArray(telegramSettings.bots) && telegramSettings.bots.length > 0;
+
   const handleSaveTelegramSettings = async (e) => {
     e.preventDefault();
+    if (isMultiBotMode) {
+      alert('הגדרות טלגרם עברו לטאב "טלגרם" (מערכת רב-בוטים/ערוצים). המסך הזה כבר לא פעיל — שינויים כאן לא ישפיעו על שליחת הודעות. יש להגדיר בוטים וערוצים בטאב "טלגרם".');
+      return;
+    }
     try {
       await updateTelegramSettings(telegramSettings);
       showSaved();
@@ -300,6 +312,11 @@ const LinksSection = ({ showSaved }) => {
               </button>
             </div>
           </div>
+          {showTelegramForm && isMultiBotMode && (
+            <div className="bg-amber-900/30 border border-amber-600/50 text-amber-200 text-sm rounded-xl p-3">
+              ⚠️ מוגדרים כבר בוטים בטאב "טלגרם" (מערכת רב-בוטים) — המסך הזה לא פעיל יותר ולא משפיע על שליחת הודעות. יש לנהל את ההגדרות בטאב "טלגרם".
+            </div>
+          )}
           {showTelegramForm && (
             <form onSubmit={handleSaveTelegramSettings} className="space-y-4">
               <div>

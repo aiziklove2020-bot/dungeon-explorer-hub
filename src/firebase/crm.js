@@ -3,7 +3,7 @@
  * Stored directly on the user doc under `crm` so it rides along with the
  * rest of the user's data (no separate collection needed for this scale).
  */
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from './config';
 import { invalidateCache } from './dataAccess';
 
@@ -50,9 +50,13 @@ export const setUserSource = async (userId, source, sourceNote = '') => {
   await invalidateCache('allUsers');
 };
 
-/** Appends one payment record. `record`: { date (YYYY-MM-DD), amount, method, note }. */
+/** Appends one payment record. `record`: { date (YYYY-MM-DD), amount, method, note }.
+ *  Uses arrayUnion (atomic on the server) instead of a read-then-write of
+ *  the whole array — two admins (or two tabs) adding a payment for the same
+ *  user within moments of each other used to race: both read the same
+ *  snapshot, and whichever write landed second silently overwrote the
+ *  first admin's payment, dropping it from the CRM log with no error. */
 export const addPaymentRecord = async (userId, record) => {
-  const current = await getUserCrm(userId);
   const entry = {
     id: genId(),
     date: record.date || new Date().toISOString().split('T')[0],
@@ -62,16 +66,22 @@ export const addPaymentRecord = async (userId, record) => {
     createdAt: new Date().toISOString(),
   };
   await updateDoc(doc(db, USERS_COLLECTION, userId), {
-    'crm.payments': [...current.payments, entry],
+    'crm.payments': arrayUnion(entry),
   });
   await invalidateCache(`userById_${userId}`);
   await invalidateCache('allUsers');
 };
 
+/** arrayRemove matches the exact element server-side at write time, so this
+ *  stays correct even if `current` (read here only to find the record's
+ *  exact shape) is stale — unlike a full-array read-then-write, it can't
+ *  clobber a payment added concurrently by someone else. */
 export const deletePaymentRecord = async (userId, recordId) => {
   const current = await getUserCrm(userId);
+  const target = current.payments.find((p) => p.id === recordId);
+  if (!target) return;
   await updateDoc(doc(db, USERS_COLLECTION, userId), {
-    'crm.payments': current.payments.filter((p) => p.id !== recordId),
+    'crm.payments': arrayRemove(target),
   });
   await invalidateCache(`userById_${userId}`);
   await invalidateCache('allUsers');

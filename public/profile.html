@@ -138,7 +138,7 @@
   </div>
 
   <h2 class="font-headline-md text-headline-md text-text-primary mb-3">שינוי סיסמה</h2>
-  <form id="passwordForm" class="bg-surface-card border border-white/5 rounded-2xl p-5 space-y-4">
+  <form id="passwordForm" class="bg-surface-card border border-white/5 rounded-2xl p-5 space-y-4" novalidate>
     <div>
       <label class="block text-xs font-bold text-text-secondary mb-1.5">סיסמה נוכחית</label>
       <input name="currentPassword" type="password" required class="w-full rounded-xl bg-surface-container border border-white/10 text-text-primary py-3 px-4 focus:border-primary-container focus:outline-none">
@@ -169,7 +169,7 @@
 <script type="module">
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202609241954");
+    await import("./assets/site-data.js?v=202609242007");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
@@ -391,8 +391,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("passwordForm").addEventListener("submit", async e => {
     e.preventDefault();
     const f = new FormData(e.target);
+    const currentPassword = f.get("currentPassword");
     const newPassword = f.get("newPassword");
     const confirmPassword = f.get("confirmPassword");
+    if (!currentPassword) {
+      toast("נא להזין את הסיסמה הנוכחית", "error");
+      return;
+    }
+    if (!newPassword || newPassword.length < 4) {
+      toast("סיסמה חדשה חייבת להכיל לפחות 4 תווים", "error");
+      return;
+    }
     if (newPassword !== confirmPassword) {
       toast("הסיסמאות החדשות לא תואמות", "error");
       return;
@@ -400,7 +409,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btn = e.target.querySelector("button");
     btn.disabled = true;
     try {
-      await window.LPData.changeMyForumPassword(u.id, f.get("currentPassword"), newPassword);
+      await window.LPData.changeMyForumPassword(u.id, currentPassword, newPassword);
       toast("הסיסמה עודכנה בהצלחה");
       e.target.reset();
     } catch (err) {

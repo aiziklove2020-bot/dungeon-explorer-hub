@@ -62,7 +62,7 @@
         <h2 class="font-headline-sm text-headline-md text-text-primary font-bold">זיהוי לצפייה באיזון שלך</h2>
       </div>
       <p class="relative text-body-sm font-body-sm text-text-secondary mb-5">הזינו את מספר הטלפון שנרשמתם איתו למסיבה, כדי לראות את הרישומים, האיזון והמועדפים שלכם.</p>
-      <form id="lookupForm" class="relative flex flex-col gap-3">
+      <form id="lookupForm" class="relative flex flex-col gap-3" novalidate>
         <label class="text-label-md font-label-md text-text-secondary">מספר טלפון</label>
         <input id="phoneInput" type="tel" required placeholder="05XXXXXXXX" dir="ltr" class="w-full h-12 px-4 rounded-lg bg-surface-container-lowest text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-primary-container text-left">
         <button type="submit" class="h-12 rounded-lg bg-gradient-to-l from-primary-container to-secondary-container text-on-primary font-label-lg text-label-lg shadow-[0_4px_20px_rgba(255,87,8,0.35)]">כניסה</button>
@@ -237,7 +237,7 @@ const STORAGE_KEY = "lp_my_area_phone";
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202609241954");
+    await import("./assets/site-data.js?v=202609242007");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
@@ -257,7 +257,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   form.addEventListener("submit", (ev) => {
     ev.preventDefault();
     const phone = phoneInput.value.trim();
-    if (!phone) return;
+    if (!phone) {
+      toast("נא להזין מספר טלפון", "error");
+      return;
+    }
     localStorage.setItem(STORAGE_KEY, phone);
     openArea(phone);
   });
