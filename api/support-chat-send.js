@@ -124,9 +124,9 @@ async function handleDiagnostic(req, res) {
 }
 
 async function handleAdvertiserSignupAlert(req, res, body) {
-  const businessName = (body.businessName || '').trim();
-  const contactName = (body.contactName || '').trim();
-  const phoneNumber = (body.phoneNumber || '').trim();
+  const businessName = (body.businessName || '').trim().slice(0, 200);
+  const contactName = (body.contactName || '').trim().slice(0, 200);
+  const phoneNumber = (body.phoneNumber || '').trim().slice(0, 40);
 
   if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     return res.status(503).json({ error: 'Not configured' });
@@ -189,10 +189,10 @@ const TRACK_LABELS = {
 };
 
 async function handleMembershipLeadAlert(req, res, body) {
-  const name = (body.name || '').trim();
-  const phone = (body.phone || '').trim();
-  const track = (body.track || '').trim();
-  const message = (body.message || '').trim();
+  const name = (body.name || '').trim().slice(0, 200);
+  const phone = (body.phone || '').trim().slice(0, 40);
+  const track = (body.track || '').trim().slice(0, 100);
+  const message = (body.message || '').trim().slice(0, 2000);
 
   if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     return res.status(503).json({ error: 'Not configured' });
@@ -271,9 +271,9 @@ async function handleMembershipLeadAlert(req, res, body) {
 }
 
 async function handleSubscriptionRequestAlert(req, res, body) {
-  const name = (body.name || '').trim();
-  const phone = (body.phone || '').trim();
-  const note = (body.note || '').trim();
+  const name = (body.name || '').trim().slice(0, 200);
+  const phone = (body.phone || '').trim().slice(0, 40);
+  const note = (body.note || '').trim().slice(0, 1000);
 
   if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     return res.status(503).json({ error: 'Not configured' });

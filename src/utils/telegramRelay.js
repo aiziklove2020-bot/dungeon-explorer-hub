@@ -17,9 +17,10 @@ export function getTelegramRelayUrl() {
  * @returns {Promise<{ data: object, status: number }>} — check `data.ok` (Telegram-shaped JSON).
  */
 export async function relayTelegramApi(telegramMethod, botToken, payload = {}) {
+  const { adminAuthHeader } = await import('./adminApi');
   const res = await fetch(getTelegramRelayUrl(), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...adminAuthHeader() },
     body: JSON.stringify({ telegramMethod, botToken, payload })
   });
   const status = res.status;

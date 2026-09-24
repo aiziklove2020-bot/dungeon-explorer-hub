@@ -2,12 +2,17 @@
  * Proxy Telegram Bot API for the SPA (Telegram does not send CORS headers).
  * POST JSON: { telegramMethod, botToken, payload? }
  *
- * Whitelist only methods used by this app.
+ * Whitelist only methods used by this app. Admin-only: the only caller is the
+ * admin panel's bot-management UI (src/utils/telegramRelay.js) — without this
+ * gate, anyone could use this deploy as a free, unauthenticated proxy to the
+ * Telegram Bot API with any bot token they supply.
  */
+import { requireAdminApiSecret } from '../lib/apiAuth.js';
+
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Max-Age', '86400');
 }
 
@@ -22,6 +27,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false, description: 'Method not allowed' });
   }
+  if (!requireAdminApiSecret(req, res)) return;
 
   let body;
   try {

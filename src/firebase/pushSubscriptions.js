@@ -62,9 +62,10 @@ export const sendPushToPhone = async (phoneNumber, { title, body, url } = {}) =>
   try {
     const subs = await getPushSubscriptionsByPhone(phoneNumber);
     if (!subs.length) return { hasDevice: false, ok: false, sent: 0, total: 0 };
+    const { adminAuthHeader } = await import('../utils/adminApi');
     const response = await fetch('/api/send-push', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...adminAuthHeader() },
       body: JSON.stringify({
         subscriptions: subs.map((s) => ({ id: s.id, endpoint: s.endpoint, keys: s.keys })),
         title,
