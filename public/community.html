@@ -224,13 +224,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                   <span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1">${s.icon}</span>
                 </div>
                 <div>
-                  <span class="text-text-primary font-headline-sm text-headline-sm font-bold block">${l.label}</span>
+                  <span class="text-text-primary font-headline-sm text-headline-sm font-bold block">${escapeHtml(l.label)}</span>
                   <span class="text-secondary font-label-caps text-label-sm">ערוץ רשמי של הקהילה</span>
                 </div>
               </div>
               <span class="px-2 py-1 rounded bg-surface-container-high text-primary font-label-caps text-label-sm">פעיל עכשיו</span>
             </div>
-            <a href="${l.url}" target="_blank" rel="noopener noreferrer" class="w-full py-3 rounded-xl bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container font-headline-sm text-label-lg font-bold flex items-center justify-center gap-2 shadow-md active:scale-95 transition-transform">
+            <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" class="w-full py-3 rounded-xl bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container font-headline-sm text-label-lg font-bold flex items-center justify-center gap-2 shadow-md active:scale-95 transition-transform">
               <span class="material-symbols-outlined text-[20px]">${s.icon}</span>
               <span>${s.cta}</span>
             </a>
