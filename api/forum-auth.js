@@ -23,6 +23,10 @@
  *       Bcrypt-hashes newPassword, atomically writes password +
  *       mustResetPassword=false, marks the token used.
  *
+ *   - admin-verify-email  POST { forumUserId }   requires Authorization: Bearer ADMIN_API_SECRET
+ *       Marks a forum user's email verified via the Admin SDK — firestore.rules
+ *       forbids any client from making this transition directly.
+ *
  * Env: GOOGLE_APPLICATION_CREDENTIALS_JSON, RESEND_API_KEY, RESEND_FROM_EMAIL,
  *      PUBLIC_SITE_URL
  */
@@ -43,6 +47,7 @@ import {
   sendForumEmailVerification,
   sendForumPasswordReset
 } from '../lib/email.js';
+import { requireAdminApiSecret } from '../lib/apiAuth.js';
 
 const VERIFY_TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const RESET_TOKEN_TTL_MS = 30 * 60 * 1000;
@@ -183,6 +188,37 @@ async function handleVerifyConfirm(req, res, body) {
     return res.status(400).json({ error: 'invalid_token' });
   } catch (err) {
     console.error('forum-auth verify-confirm:', err);
+    return res.status(500).json({ error: 'internal' });
+  }
+}
+
+/**
+ * Admin-only override: mark a forum user's email verified without the
+ * verification-link round-trip (staff control the mailbox, or manual
+ * onboarding). Must go through the Admin SDK here, not a client-side
+ * updateDoc — firestore.rules deliberately forbids any client from ever
+ * flipping emailVerified false→true (so a compromised public bundle can't
+ * self-verify an attacker-controlled address), which meant
+ * adminMarkForumEmailVerified()'s previous direct Firestore write was
+ * unconditionally rejected: the admin panel's "mark verified" button did
+ * nothing but throw permission-denied for every account it was used on.
+ */
+async function handleAdminVerifyEmail(req, res, body) {
+  if (!requireAdminApiSecret(req, res)) return;
+  const forumUserId = typeof body.forumUserId === 'string' ? body.forumUserId.trim() : '';
+  if (!forumUserId) return res.status(400).json({ error: 'missing_forum_user_id' });
+
+  const db = await getDb(res, 'forum-auth admin-verify-email');
+  if (!db) return;
+
+  try {
+    const userRef = db.collection('forumUsers').doc(forumUserId);
+    const snap = await userRef.get();
+    if (!snap.exists) return res.status(404).json({ error: 'not_found' });
+    await userRef.update({ emailVerified: true });
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error('forum-auth admin-verify-email:', err);
     return res.status(500).json({ error: 'internal' });
   }
 }
@@ -330,6 +366,8 @@ export default async function handler(req, res) {
       return handleResetRequest(req, res, body);
     case 'reset-confirm':
       return handleResetConfirm(req, res, body);
+    case 'admin-verify-email':
+      return handleAdminVerifyEmail(req, res, body);
     default:
       return res.status(400).json({ error: 'unknown_action' });
   }

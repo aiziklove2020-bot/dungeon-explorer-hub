@@ -201,7 +201,13 @@ service cloud.firestore {
                     && isString('text')
                     && maxLen('text', 4000);
       allow update: if false;
-      allow delete: if false;
+      // deleteSupportChatSession() (src/firebase/supportChat.js) deletes
+      // every message doc in a session ("delete chat" in the admin panel).
+      // Not wired to any UI yet, but `delete: if false` here would reject
+      // the very first message delete the moment it is — matches the
+      // same trust level as the parent supportChat doc above.
+      // TODO(auth): restrict to isAdmin() once auth migration ships.
+      allow delete: if true;
     }
     match /supportChatTelegramMap/{docId} {
       // TODO(auth): server-only via Admin SDK.
@@ -357,8 +363,12 @@ service cloud.firestore {
       allow create: if hasAll(['followerId', 'authorId'])
                     && isString('followerId')
                     && isString('authorId');
-      // Identity-only document; no updates needed.
-      allow update: if false;
+      // markBlogAuthorSeen() (src/firebase/blog.js) updates lastSeenAt on an
+      // existing follow doc to clear the "new posts from this author"
+      // badge — that's a real, load-bearing update, not "no updates
+      // needed" as the previous comment (and `if false` rule) claimed.
+      // Every click of "mark as read" was rejected with permission-denied.
+      allow update: if affectedOnly(['lastSeenAt']);
       allow delete: if true;
     }
 
