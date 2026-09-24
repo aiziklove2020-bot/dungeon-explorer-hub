@@ -209,7 +209,15 @@ service cloud.firestore {
     }
 
     match /deleteRequests/{docId} {
-      allow create: if hasAll(['userId', 'createdAt']);
+      // submitDeleteRequest() (src/firebase/deleteRequests.js) writes
+      // {phoneNumber, status, createdAt} — there is no userId field on this
+      // collection and never has been (DeleteRequestsSection.jsx reads
+      // r.phoneNumber). The rule previously required 'userId', which no
+      // real write ever set, so every submission was rejected with
+      // permission-denied — the account-deletion request form was
+      // completely broken in production.
+      allow create: if hasAll(['phoneNumber', 'createdAt'])
+                    && isNonEmpty('phoneNumber') && maxLen('phoneNumber', 20);
       allow read: if true;
       allow update: if affectedOnly(['status', 'processedAt', 'notes']);
       allow delete: if false;

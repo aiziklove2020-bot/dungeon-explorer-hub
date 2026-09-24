@@ -194,6 +194,12 @@ async function lpWireFavHearts(container) {
     icon.textContent = myFavIds.includes(id) ? "favorite" : "favorite_border";
     btn.addEventListener("click", async (ev) => {
       ev.preventDefault();
+      // addFavorite writes via setDoc on a deterministic doc id, and the
+      // favorites collection's rules disallow "update" on an existing doc —
+      // a fast double-tap before the first request finished used to fire a
+      // second toggle whose write Firestore would reject. Guard against
+      // that by ignoring clicks while one is already in flight.
+      if (btn.dataset.favPending === "1") return;
       const current = lpFavIdentity();
       if (!current) {
         toast("יש להתחבר כמנוי כדי לשמור מועדפים");
@@ -203,12 +209,15 @@ async function lpWireFavHearts(container) {
       const nowFav = icon.textContent === "favorite";
       const next = !nowFav;
       icon.textContent = next ? "favorite" : "favorite_border"; // optimistic
+      btn.dataset.favPending = "1";
       try {
         await window.LPData.toggleFavorite(current, id, next);
         toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
       } catch (err) {
         icon.textContent = nowFav ? "favorite" : "favorite_border"; // revert
         toast(err?.message || "שגיאה בשמירת מועדף", "error");
+      } finally {
+        delete btn.dataset.favPending;
       }
     });
   });
