@@ -165,18 +165,21 @@
 </nav>
 
 
-<script src="assets/app.js?v=202609242014"></script>
+<script src="assets/app.js?v=202609242035"></script>
 <script type="module">
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202609242007");
+    await import("./assets/site-data.js?v=202609242035");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
   }
   const u = LP.current();
   if (!u) { location = "/login"; return; }
-  const status = await window.LPData.checkMyAccountStatus(u.id).catch(() => ({ valid: true }));
+  const status = await window.LPData.checkMyAccountStatus(u.id).catch((err) => {
+    console.error("checkMyAccountStatus failed, treating as valid to avoid locking out a real user on a network blip:", err);
+    return { valid: true };
+  });
   if (!status.valid) {
     localStorage.removeItem("lp_current");
     toast(status.reason || "החשבון שלך אינו פעיל", "error");
@@ -324,9 +327,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               <span class="material-symbols-outlined text-primary text-[22px]">person</span>
             </span>
             <div class="min-w-0">
-              <h3 class="text-text-primary font-bold text-lg truncate">${match.matchName || "—"}</h3>
+              <h3 class="text-text-primary font-bold text-lg truncate">${escapeHtml(match.matchName) || "—"}</h3>
               ${match.matchPhone
-                ? `<a href="tel:${match.matchPhone}" class="text-primary font-bold text-sm" dir="ltr">${match.matchPhone}</a>`
+                ? `<a href="tel:${escapeHtml(match.matchPhone)}" class="text-primary font-bold text-sm" dir="ltr">${escapeHtml(match.matchPhone)}</a>`
                 : `<p class="text-text-muted text-xs">עדיין לא שותף מספר טלפון.</p>`
               }
             </div>

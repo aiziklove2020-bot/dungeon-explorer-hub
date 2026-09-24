@@ -176,11 +176,11 @@
 </div>
 </nav>
 
-<script src="assets/app.js?v=202609242014"></script>
+<script src="assets/app.js?v=202609242035"></script>
 <script type="module">
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202609242007");
+    await import("./assets/site-data.js?v=202609242035");
   } catch (err) {
     // A failed module import here used to silently break everything below
     // it (this whole listener never finished registering its inner logic),
@@ -239,22 +239,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     const badge = BADGE_STYLES[e.badge];
     return `<article class="relative rounded-2xl overflow-hidden bg-surface-card shadow-md w-full min-w-0 flex flex-col h-full">
       <div class="relative w-full aspect-[4/5] bg-black overflow-hidden shrink-0">
-        <img class="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60" src="${e.img}" alt="" aria-hidden="true">
+        <img class="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60" src="${escapeHtml(e.img)}" alt="" aria-hidden="true">
         ${badge ? `<span class="absolute top-2 left-2 z-10 flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold text-white shadow-md" style="background:${badge.css}"><span class="material-symbols-outlined text-[12px]">${badge.icon}</span>${badge.label}</span>` : ""}
         ${favBtnHtml(e)}
-        <img class="absolute inset-0 w-full h-full object-contain" src="${e.img}" alt="" onerror="this.style.display='none'">
+        <img class="absolute inset-0 w-full h-full object-contain" src="${escapeHtml(e.img)}" alt="" onerror="this.style.display='none'">
       </div>
       <div class="p-2.5 flex flex-col gap-1.5 flex-1">
-        <h4 class="text-body-md font-bold text-text-primary break-words leading-snug" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${e.title}</h4>
+        <h4 class="text-body-md font-bold text-text-primary break-words leading-snug" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escapeHtml(e.title)}</h4>
         <div class="flex items-center gap-2 flex-wrap text-[11px] text-text-muted">
-          ${e.city ? `<span class="flex items-center gap-0.5 truncate"><span class="material-symbols-outlined text-[13px]">location_on</span>${e.city}</span>` : ""}
-          ${e.category ? `<span class="flex items-center gap-0.5 truncate"><span class="material-symbols-outlined text-[13px]">group</span>${e.category}</span>` : ""}
+          ${e.city ? `<span class="flex items-center gap-0.5 truncate"><span class="material-symbols-outlined text-[13px]">location_on</span>${escapeHtml(e.city)}</span>` : ""}
+          ${e.category ? `<span class="flex items-center gap-0.5 truncate"><span class="material-symbols-outlined text-[13px]">group</span>${escapeHtml(e.category)}</span>` : ""}
         </div>
         <div class="flex items-center gap-2 flex-wrap text-[11px] text-text-muted">
-          ${e.date ? `<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">calendar_month</span>${e.date}</span>` : ""}
-          ${e.time ? `<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">schedule</span>${e.time}</span>` : ""}
+          ${e.date ? `<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">calendar_month</span>${escapeHtml(e.date)}</span>` : ""}
+          ${e.time ? `<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">schedule</span>${escapeHtml(e.time)}</span>` : ""}
         </div>
-        <a class="mt-auto h-9 rounded-full bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-sm text-label-sm font-bold shadow-md flex items-center justify-center gap-1" href="/event?id=${e.id}">
+        <a class="mt-auto h-9 rounded-full bg-gradient-to-l from-primary-container to-secondary-container text-on-primary-container font-label-sm text-label-sm font-bold shadow-md flex items-center justify-center gap-1" href="/event?id=${encodeURIComponent(e.id)}">
           <span>פרטים והרשמה</span><span class="material-symbols-outlined text-[16px]">chevron_left</span>
         </a>
       </div>
