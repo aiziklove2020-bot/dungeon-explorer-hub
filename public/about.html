@@ -77,19 +77,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
   const box = document.getElementById("aboutBox");
-  const renderText = (s) => String(s || "")
+  const renderText = (s) => escapeHtml(s)
     .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
     .replace(/(חן|איציק)/g, '<b class="text-primary">$1</b>');
 
   try {
     const a = await window.LPData.loadAbout();
-    const cards = (a.infoCards || []).map(c => `<div class="rounded-xl bg-surface-card p-5 shadow-md text-center"><h2 class="text-text-primary text-headline-sm font-headline-sm mb-2">${c.title || ""}</h2><p class="text-text-secondary text-body-sm font-body-sm leading-relaxed">${renderText(c.text)}</p></div>`).join("");
+    const cards = (a.infoCards || []).map(c => `<div class="rounded-xl bg-surface-card p-5 shadow-md text-center"><h2 class="text-text-primary text-headline-sm font-headline-sm mb-2">${escapeHtml(c.title)}</h2><p class="text-text-secondary text-body-sm font-body-sm leading-relaxed">${renderText(c.text)}</p></div>`).join("");
     const stepsArr = a.steps || [];
     const steps = stepsArr.map((s) => {
       const desc = renderText(s.d);
       return `<div class="rounded-xl bg-surface-card p-5 shadow-md text-center flex flex-col items-center gap-2">
-        <div class="w-8 h-8 rounded-full bg-primary-container/20 text-primary flex items-center justify-center text-label-sm font-label-sm font-bold border border-primary-container/40">${s.n}</div>
-        <h3 class="text-text-primary text-headline-sm font-headline-sm">${s.t || ""}</h3>
+        <div class="w-8 h-8 rounded-full bg-primary-container/20 text-primary flex items-center justify-center text-label-sm font-label-sm font-bold border border-primary-container/40">${escapeHtml(s.n)}</div>
+        <h3 class="text-text-primary text-headline-sm font-headline-sm">${escapeHtml(s.t)}</h3>
         <p class="text-text-secondary text-body-sm font-body-sm">${desc}</p>
       </div>`;
     }).join("");
@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <p class="text-primary text-body-sm font-body-sm">בלי המשפט הזה בדיוק — לא תקבלו את ההנחה בכניסה!</p>
       </div>` : "";
     box.innerHTML = `
-      <div class="rounded-xl bg-surface-card p-5 shadow-md text-center"><h2 class="text-text-primary text-headline-md font-headline-md mb-2">${a.roleTitle || "החזון שלנו"}</h2><p class="text-text-secondary text-body-md font-body-md leading-relaxed">${renderText(a.roleText)}</p>${a.roleSubtext ? `<p class="text-text-secondary text-body-md font-body-md leading-relaxed mt-2">${renderText(a.roleSubtext)}</p>` : ""}</div>
+      <div class="rounded-xl bg-surface-card p-5 shadow-md text-center"><h2 class="text-text-primary text-headline-md font-headline-md mb-2">${a.roleTitle ? escapeHtml(a.roleTitle) : "החזון שלנו"}</h2><p class="text-text-secondary text-body-md font-body-md leading-relaxed">${renderText(a.roleText)}</p>${a.roleSubtext ? `<p class="text-text-secondary text-body-md font-body-md leading-relaxed mt-2">${renderText(a.roleSubtext)}</p>` : ""}</div>
       ${cards ? `<div class="grid grid-cols-1 gap-4">${cards}</div>` : ""}
       ${steps ? `<div class="grid grid-cols-1 gap-4">${steps}</div>` : ""}
       ${entryNote}

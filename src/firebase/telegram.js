@@ -5,6 +5,22 @@ import { getTelegramSettings } from './settings';
 /** Canonical public site URL used as the fallback link in channel broadcasts. */
 const SITE_URL = 'https://www.libralparty.net';
 
+/**
+ * Escapes the 3 characters Telegram's `parse_mode: 'HTML'` treats specially
+ * (it has no attribute syntax to worry about, unlike browser HTML). Without
+ * this, a party title/description, a registrant's name, or a free-text
+ * pickup address containing `<`/`>`/`&` either breaks Telegram's entity
+ * parser (the whole message silently fails to send — `can't parse entities`)
+ * or, worse, gets interpreted as real markup (e.g. an `<a href="...">` turns
+ * into a genuine clickable link inside the bot's own message). Only ever
+ * wrap actual user/advertiser-supplied values with this — never the
+ * surrounding `<b>...</b>` labels, which are static and author-trusted.
+ */
+const tgEscape = (value) => {
+  if (value === null || value === undefined) return '';
+  return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+};
+
 /** Built-in message keys */
 export const MESSAGE_KEYS = {
   REGISTRATION: 'registration',
@@ -183,7 +199,7 @@ export const replacePlaceholders = (template, payload) => {
     for (const k of keys) {
       value = value != null && typeof value === 'object' ? value[k] : undefined;
     }
-    return value != null ? String(value) : '';
+    return value != null ? tgEscape(value) : '';
   });
 };
 
@@ -308,33 +324,33 @@ const SAMPLE_PAYLOADS = {
 const formatNewPartyNotification = (party, language = 'he', siteUrl = SITE_URL) => {
   const t = (key) => getTranslation(key, language);
   const dateStr = formatDateOnly(party?.date, language);
-  const name = party?.name || party?.title || t('telegram.party');
-  const linkLine = siteUrl ? `\n\n<b>${t('telegram.registerUrl') || 'הרשמה'}:</b> ${siteUrl}` : '';
-  return `🆕 <b>${t('telegram.newParty') || 'מסיבה חדשה'}</b>\n\n<b>${t('telegram.party')}:</b> ${name}${party?.day ? `\n<b>יום:</b> ${party.day}` : ''}\n<b>${t('telegram.date')}:</b> ${dateStr}${party?.time ? `\n<b>${t('telegram.time')}:</b> ${party.time}` : ''}${party?.dj ? `\n<b>${t('telegram.dj')}:</b> ${party.dj}` : ''}${party?.maleLimit != null ? `\n<b>${t('telegram.maleLimit')}:</b> ${party.maleLimit}` : ''}${party?.femaleLimit != null ? `\n<b>${t('telegram.femaleLimit')}:</b> ${party.femaleLimit}` : ''}${party?.description ? `\n${party.description}` : ''}${linkLine}`;
+  const name = tgEscape(party?.name || party?.title || t('telegram.party'));
+  const linkLine = siteUrl ? `\n\n<b>${t('telegram.registerUrl') || 'הרשמה'}:</b> ${tgEscape(siteUrl)}` : '';
+  return `🆕 <b>${t('telegram.newParty') || 'מסיבה חדשה'}</b>\n\n<b>${t('telegram.party')}:</b> ${name}${party?.day ? `\n<b>יום:</b> ${tgEscape(party.day)}` : ''}\n<b>${t('telegram.date')}:</b> ${dateStr}${party?.time ? `\n<b>${t('telegram.time')}:</b> ${tgEscape(party.time)}` : ''}${party?.dj ? `\n<b>${t('telegram.dj')}:</b> ${tgEscape(party.dj)}` : ''}${party?.maleLimit != null ? `\n<b>${t('telegram.maleLimit')}:</b> ${party.maleLimit}` : ''}${party?.femaleLimit != null ? `\n<b>${t('telegram.femaleLimit')}:</b> ${party.femaleLimit}` : ''}${party?.description ? `\n${tgEscape(party.description)}` : ''}${linkLine}`;
 };
 
 /** Default format when no template for new external party notification */
 const formatNewExternalPartyNotification = (party, partyUrl, language = 'he') => {
   const t = (key) => getTranslation(key, language);
   const dateStr = formatDateOnly(party?.date, language);
-  const name = party?.name || party?.title || t('telegram.party');
+  const name = tgEscape(party?.name || party?.title || t('telegram.party'));
   let msg = `🌐 <b>${t('telegram.newExternalParty') || 'אירוע חיצוני חדש'}</b>\n\n<b>${t('telegram.party')}:</b> ${name}`;
-  if (party?.day) msg += `\n<b>יום:</b> ${party.day}`;
+  if (party?.day) msg += `\n<b>יום:</b> ${tgEscape(party.day)}`;
   msg += `\n<b>${t('telegram.date')}:</b> ${dateStr}`;
-  if (party?.time) msg += `\n<b>${t('telegram.time')}:</b> ${party.time}`;
-  if (party?.dj) msg += `\n<b>${t('telegram.dj')}:</b> ${party.dj}`;
-  if (party?.description) msg += `\n${party.description}`;
-  if (partyUrl) msg += `\n\n<b>${t('telegram.partyUrl') || 'קישור לאירוע'}:</b> ${partyUrl}`;
+  if (party?.time) msg += `\n<b>${t('telegram.time')}:</b> ${tgEscape(party.time)}`;
+  if (party?.dj) msg += `\n<b>${t('telegram.dj')}:</b> ${tgEscape(party.dj)}`;
+  if (party?.description) msg += `\n${tgEscape(party.description)}`;
+  if (partyUrl) msg += `\n\n<b>${t('telegram.partyUrl') || 'קישור לאירוע'}:</b> ${tgEscape(partyUrl)}`;
   return msg;
 };
 
 /** Default format when no template for subscription request notification */
 const formatSubscriptionRequestNotification = (request, language = 'he') => {
   const t = (key) => getTranslation(key, language);
-  const name = request?.fullName || '';
-  const phone = request?.phoneNumber || '';
+  const name = tgEscape(request?.fullName || '');
+  const phone = tgEscape(request?.phoneNumber || '');
   let msg = `⚖️ <b>${t('telegram.subscriptionRequest') || 'בקשת מנוי חדשה'}</b>\n\n<b>${t('telegram.name')}:</b> ${name}\n<b>${t('telegram.phone')}:</b> ${phone}`;
-  if (request?.note) msg += `\n\n${request.note}`;
+  if (request?.note) msg += `\n\n${tgEscape(request.note)}`;
   return msg;
 };
 
@@ -461,7 +477,7 @@ export const formatBalancePublishMessage = (party, partyBalance, siteUrl = '', l
   const unmatchedMen = Math.max(0, totalMen - matchedMenCount);
   const unmatchedWomen = Math.max(0, totalWomen - matchedWomenCount);
 
-  const partyName = party.name || party.title || party.day || t('telegram.balancePublish.partyDefault');
+  const partyName = tgEscape(party.name || party.title || party.day || t('telegram.balancePublish.partyDefault'));
   let body;
   if (totalMen === 0 && totalWomen === 0) {
     body = `${partyName}: ${t('telegram.balancePublish.noRegistrations')}`;
@@ -512,55 +528,67 @@ export const formatRegistrationNotification = (registration, party, language = '
   });
 
   const isCouple = registration.registrationType === 'couple' || registration.registrationType === 'single-male-couple' || registration.registrationType === 'single-female-couple' || (registration.partnerName && registration.partnerPhone);
-  
-  const message = language === 'he' 
+
+  // Escape every free-text field once up front — party name, the
+  // registrant's own name/phone/telegram handle, a partner's name/phone,
+  // and the optional pickup address are all advertiser/user-supplied and
+  // must not reach the HTML-parse-mode Telegram message unescaped.
+  const partyNameEsc = tgEscape(party.name);
+  const fullNameEsc = tgEscape(registration.fullName || registration.userName);
+  const phoneEsc = tgEscape(registration.phoneNumber);
+  const telegramUsernameEsc = tgEscape(registration.telegramUsername);
+  const partnerNameEsc = tgEscape(registration.partnerName || '');
+  const partnerPhoneEsc = tgEscape(registration.partnerPhone || '');
+  const pickupAddressEsc = tgEscape(registration.pickupAddress);
+
+  const message = language === 'he'
     ? isCouple
       ? `🎉 <b>${t('telegram.newRegistration')}</b>
 
-<b>${t('telegram.party')}:</b> ${party.name}
+<b>${t('telegram.party')}:</b> ${partyNameEsc}
 <b>${t('telegram.date')}:</b> ${formattedDate}
 <b>${t('telegram.registrationType')}:</b> ${t('telegram.couple')}
 ${partyDaysText ? `<b>${t('telegram.partyDays')}:</b> ${partyDaysText}` : ''}
 
 <b>${t('telegram.maleInCouple')}:</b>
-<b>${t('telegram.name')}:</b> ${registration.gender === 'male' ? (registration.fullName || registration.userName) : (registration.partnerName || '')}
-<b>${t('telegram.phone')}:</b> ${registration.gender === 'male' ? registration.phoneNumber : (registration.partnerPhone || '')}
-${registration.gender === 'male' && registration.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${registration.telegramUsername}` : ''}
+<b>${t('telegram.name')}:</b> ${registration.gender === 'male' ? fullNameEsc : partnerNameEsc}
+<b>${t('telegram.phone')}:</b> ${registration.gender === 'male' ? phoneEsc : partnerPhoneEsc}
+${registration.gender === 'male' && registration.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${telegramUsernameEsc}` : ''}
 
 <b>${t('telegram.femaleInCouple')}:</b>
-<b>${t('telegram.name')}:</b> ${registration.gender === 'female' ? (registration.fullName || registration.userName) : (registration.partnerName || '')}
-<b>${t('telegram.phone')}:</b> ${registration.gender === 'female' ? registration.phoneNumber : (registration.partnerPhone || '')}
-${registration.gender === 'female' && registration.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${registration.telegramUsername}` : ''}
+<b>${t('telegram.name')}:</b> ${registration.gender === 'female' ? fullNameEsc : partnerNameEsc}
+<b>${t('telegram.phone')}:</b> ${registration.gender === 'female' ? phoneEsc : partnerPhoneEsc}
+${registration.gender === 'female' && registration.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${telegramUsernameEsc}` : ''}
 
 <b>${t('telegram.totalRegistered')}:</b> ${party.registrations?.length || 0}
 <b>${t('telegram.males')}:</b> ${party.registrations?.filter(r => r.gender === 'male').length || 0}/${party.maleLimit}
 <b>${t('telegram.females')}:</b> ${party.registrations?.filter(r => r.gender === 'female').length || 0}/${party.femaleLimit}`
       : `🎉 <b>${t('telegram.newRegistration')}</b>
 
-<b>${t('telegram.party')}:</b> ${party.name}
+<b>${t('telegram.party')}:</b> ${partyNameEsc}
 <b>${t('telegram.date')}:</b> ${formattedDate}
-<b>${t('telegram.name')}:</b> ${registration.fullName || registration.userName}
-<b>${t('telegram.phone')}:</b> ${registration.phoneNumber}
-${registration.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${registration.telegramUsername}` : ''}
+<b>${t('telegram.name')}:</b> ${fullNameEsc}
+<b>${t('telegram.phone')}:</b> ${phoneEsc}
+${registration.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${telegramUsernameEsc}` : ''}
 <b>${t('telegram.registrationType')}:</b> ${registrationTypeMap[registration.registrationType] || registration.registrationType}
 ${partyDaysText ? `<b>${t('telegram.partyDays')}:</b> ${partyDaysText}` : ''}
 <b>${t('telegram.gender')}:</b> ${registration.gender === 'male' ? t('telegram.male') : registration.gender === 'female' ? t('telegram.female') : t('telegram.couple')}
-${registration.pickupAddress ? `<b>${t('telegram.pickupAddress') || 'כתובת לאיסוף'}:</b> ${registration.pickupAddress}` : ''}
+${registration.pickupAddress ? `<b>${t('telegram.pickupAddress') || 'כתובת לאיסוף'}:</b> ${pickupAddressEsc}` : ''}
 
 <b>${t('telegram.totalRegistered')}:</b> ${party.registrations?.length || 0}
 <b>${t('telegram.males')}:</b> ${party.registrations?.filter(r => r.gender === 'male').length || 0}/${party.maleLimit}
 <b>${t('telegram.females')}:</b> ${party.registrations?.filter(r => r.gender === 'female').length || 0}/${party.femaleLimit}`
     : `🎉 <b>${t('telegram.newRegistration')}</b>
 
-<b>${t('telegram.party')}:</b> ${party.name}
+<b>${t('telegram.party')}:</b> ${partyNameEsc}
 <b>${t('telegram.date')}:</b> ${formattedDate}
-<b>${t('telegram.name')}:</b> ${registration.fullName || registration.userName}
-<b>${t('telegram.phone')}:</b> ${registration.phoneNumber}
-${registration.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${registration.telegramUsername}` : ''}
+<b>${t('telegram.name')}:</b> ${fullNameEsc}
+<b>${t('telegram.phone')}:</b> ${phoneEsc}
+${registration.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${telegramUsernameEsc}` : ''}
 <b>${t('telegram.registrationType')}:</b> ${registrationTypeMap[registration.registrationType] || registration.registrationType}
 ${partyDaysText ? `<b>${t('telegram.partyDays')}:</b> ${partyDaysText}` : ''}
 <b>${t('telegram.gender')}:</b> ${registration.gender === 'male' ? t('telegram.male') : registration.gender === 'female' ? t('telegram.female') : t('telegram.couple')}
-${registration.pickupAddress ? `<b>${t('telegram.pickupAddress') || 'כתובת לאיסוף'}:</b> ${registration.pickupAddress}` : ''}
+${registration.pickupAddress ? `<b>${t('telegram.pickupAddress') || 'כתובת לאיסוף'}:</b> ${pickupAddressEsc}` : ''}
 
 <b>${t('telegram.totalRegistered')}:</b> ${party.registrations?.length || 0}
 <b>${t('telegram.males')}:</b> ${party.registrations?.filter(r => r.gender === 'male').length || 0}/${party.maleLimit}
@@ -591,28 +619,33 @@ export const formatBalanceMatchNotification = (matchedPerson, party, language = 
     'couple': t('telegram.registrationType.couple')
   };
   
-  const message = language === 'he' 
+  const partyNameEsc = tgEscape(party.name);
+  const matchedNameEsc = tgEscape(matchedPerson.fullName || matchedPerson.userName);
+  const matchedPhoneEsc = tgEscape(matchedPerson.phoneNumber);
+  const matchedTelegramEsc = tgEscape(matchedPerson.telegramUsername);
+
+  const message = language === 'he'
     ? `🎉 <b>${t('telegram.matchFound')}</b>
 
-<b>${t('telegram.party')}:</b> ${party.name}
+<b>${t('telegram.party')}:</b> ${partyNameEsc}
 <b>${t('telegram.date')}:</b> ${formattedDate}
 
 <b>${t('telegram.matchedPersonDetails')}:</b>
-<b>${t('telegram.name')}:</b> ${matchedPerson.fullName || matchedPerson.userName}
-<b>${t('telegram.phone')}:</b> ${matchedPerson.phoneNumber}
-${matchedPerson.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${matchedPerson.telegramUsername}` : ''}
+<b>${t('telegram.name')}:</b> ${matchedNameEsc}
+<b>${t('telegram.phone')}:</b> ${matchedPhoneEsc}
+${matchedPerson.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${matchedTelegramEsc}` : ''}
 <b>${t('telegram.registrationType')}:</b> ${registrationTypeMap[matchedPerson.registrationType] || matchedPerson.registrationType || t('telegram.notSpecified')}
 
 🎊 ${t('telegram.congratulations')}`
     : `🎉 <b>${t('telegram.matchFound')}</b>
 
-<b>${t('telegram.party')}:</b> ${party.name}
+<b>${t('telegram.party')}:</b> ${partyNameEsc}
 <b>${t('telegram.date')}:</b> ${formattedDate}
 
 <b>${t('telegram.matchedPersonDetails')}:</b>
-<b>${t('telegram.name')}:</b> ${matchedPerson.fullName || matchedPerson.userName}
-<b>${t('telegram.phone')}:</b> ${matchedPerson.phoneNumber}
-${matchedPerson.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${matchedPerson.telegramUsername}` : ''}
+<b>${t('telegram.name')}:</b> ${matchedNameEsc}
+<b>${t('telegram.phone')}:</b> ${matchedPhoneEsc}
+${matchedPerson.telegramUsername ? `<b>${t('telegram.telegram')}:</b> @${matchedTelegramEsc}` : ''}
 <b>${t('telegram.registrationType')}:</b> ${registrationTypeMap[matchedPerson.registrationType] || matchedPerson.registrationType || t('telegram.notSpecified')}
 
 🎊 ${t('telegram.congratulations')}`;
