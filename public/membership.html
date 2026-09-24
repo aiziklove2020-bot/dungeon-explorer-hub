@@ -89,7 +89,7 @@
     <h2 class="text-text-primary text-headline-md font-headline-md">רוצה להיות מנוי?</h2>
     <p class="text-text-secondary text-body-sm font-body-sm">השאירו פרטים ונחזור אליכם עם כל המידע על המסלולים</p>
   </div>
-  <form class="flex flex-col gap-3" id="leadForm">
+  <form class="flex flex-col gap-3" id="leadForm" novalidate>
     <div class="flex gap-3">
       <label class="flex-1">שם מלא<input required name="name" autocomplete="name"></label>
       <label class="flex-1">טלפון<input required type="tel" name="phone" dir="ltr" placeholder="050-0000000" autocomplete="tel"></label>
@@ -145,6 +145,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btn = e.target.querySelector('button');
     const msg = document.getElementById('leadMsg');
     msg.textContent = '';
+    // Explicit checks instead of relying on native HTML validation — that
+    // UI isn't consistent across mobile browsers, and when it silently
+    // fails to block an incomplete submit, the "submit" event never fires
+    // at all and a real sales lead is lost with no error shown.
+    if (!String(f.get('name') || '').trim()) { msg.textContent = 'נא להזין שם מלא'; return; }
+    if (!String(f.get('phone') || '').trim()) { msg.textContent = 'נא להזין מספר טלפון'; return; }
+    if (!f.get('track')) { msg.textContent = 'נא לבחור מסלול'; return; }
     btn.disabled = true;
     btn.textContent = 'שולח...';
     try {

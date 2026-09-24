@@ -35211,7 +35211,9 @@ async function WU(e, t) {
 		partnerName: t.partnerName || null,
 		partnerPhone: t.partnerPhone || null,
 		pickupAddress: t.pickupAddress || "",
-		coupleId: t.coupleId || null
+		coupleId: t.coupleId || null,
+		partyDays: t.partyDays || [],
+		selfArrival: t.selfArrival || !1
 	}), a = n === "single-female-couple";
 	try {
 		let i = await SM(e);

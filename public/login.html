@@ -72,7 +72,7 @@
 
   <div class="w-full relative overflow-hidden rounded-2xl bg-gradient-to-b from-surface-container-high via-surface-container to-surface-container-low p-5 shadow-[0_12px_32px_rgba(0,0,0,0.5)] mt-4">
     <div class="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-primary-container/15 blur-3xl pointer-events-none"></div>
-    <form class="relative flex flex-col gap-3" id="loginForm">
+    <form class="relative flex flex-col gap-3" id="loginForm" novalidate>
       <div>
         <div class="flex items-center justify-between mb-1.5">
           <label class="text-xs font-bold text-text-secondary">מספר טלפון</label>
@@ -113,10 +113,23 @@ document.getElementById("loginForm").addEventListener("submit", async e => {
   e.preventDefault();
   const f = new FormData(e.target);
   const btn = e.target.querySelector("button");
+  const phone = String(f.get("phone") || "").replace(/\D/g, "");
+  const password = f.get("password");
+  // Explicit checks instead of relying on native HTML validation — that UI
+  // isn't consistent across mobile browsers, and when it silently fails to
+  // block an incomplete submit, the "submit" event never fires at all.
+  if (!/^0\d{9}$/.test(phone)) {
+    toast("נא להזין מספר טלפון תקין (10 ספרות, מתחיל ב-0)", "error");
+    return;
+  }
+  if (!password) {
+    toast("נא להזין סיסמה", "error");
+    return;
+  }
   btn.disabled = true;
   try {
-    await import("./assets/site-data.js?v=202609241954");
-    const u = await window.LPData.login(f.get("phone").replace(/\D/g, ""), f.get("password"));
+    await import("./assets/site-data.js?v=202609242007");
+    const u = await window.LPData.login(phone, password);
     LP.setCurrent(u);
     toast("התחברת בהצלחה");
     setTimeout(() => location = "/profile", 700);
