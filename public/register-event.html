@@ -270,21 +270,40 @@
 // time) instead of at the top of the module, so it doesn't add to the
 // page's initial load weight — this page already loads a bundled Firebase
 // build via site-data.js for everything else.
+// Memoized so two calls in flight at once (the couple flow checks both
+// partners) share one Firebase app instead of racing to initializeApp() —
+// two concurrent calls both seeing zero registered apps and both calling
+// initializeApp() throws "Firebase App named '[DEFAULT]' already exists" on
+// whichever one loses the race. Caught safely either way, but it's wasted
+// work and an extra failure point on exactly the flow (couples) that only
+// needs to be more reliable, not less — every call here also doubled the
+// concurrent CDN fetch load on the network, which needlessly stacks the
+// odds against a flaky mobile connection.
+let firebaseAppPromise = null;
+function getSharedFirebaseApp() {
+  if (!firebaseAppPromise) {
+    firebaseAppPromise = import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js")
+      .then(({ initializeApp, getApps, getApp }) => {
+        const firebaseConfig = {
+          apiKey: "AIzaSyAJv0APn-Qmv59H2Behu3PhskObCaPHW_A",
+          authDomain: "tbdsm-5acca.firebaseapp.com",
+          projectId: "tbdsm-5acca",
+          storageBucket: "tbdsm-5acca.firebasestorage.app",
+          messagingSenderId: "905865425928",
+          appId: "1:905865425928:web:1898ebb5b8de87ecf3cdbd",
+        };
+        return getApps().length ? getApp() : initializeApp(firebaseConfig);
+      });
+  }
+  return firebaseAppPromise;
+}
+
 async function isPhoneAlreadyRegistered(partyId, phoneNumber) {
   try {
-    const [{ initializeApp, getApps, getApp }, { getFirestore, doc, getDoc }] = await Promise.all([
-      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+    const [app, { getFirestore, doc, getDoc }] = await Promise.all([
+      getSharedFirebaseApp(),
       import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
     ]);
-    const firebaseConfig = {
-      apiKey: "AIzaSyAJv0APn-Qmv59H2Behu3PhskObCaPHW_A",
-      authDomain: "tbdsm-5acca.firebaseapp.com",
-      projectId: "tbdsm-5acca",
-      storageBucket: "tbdsm-5acca.firebasestorage.app",
-      messagingSenderId: "905865425928",
-      appId: "1:905865425928:web:1898ebb5b8de87ecf3cdbd",
-    };
-    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const snap = await getDoc(doc(db, "parties", partyId));
     if (!snap.exists()) return false;
@@ -532,10 +551,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     btn.disabled = true;
-    const [maleTaken, femaleTaken] = await Promise.all([
-      isPhoneAlreadyRegistered(selectedParty.id, malePhone),
-      isPhoneAlreadyRegistered(selectedParty.id, femalePhone),
-    ]);
+    // Sequential, not Promise.all — two concurrent CDN-backed checks doubled
+    // the concurrent network load for exactly the flow (couples) that most
+    // needs to be reliable on a weak mobile connection, for no real benefit
+    // (this pre-check is a courtesy; the real dedupe happens server-side).
+    const maleTaken = await isPhoneAlreadyRegistered(selectedParty.id, malePhone);
+    const femaleTaken = await isPhoneAlreadyRegistered(selectedParty.id, femalePhone);
     if (maleTaken || femaleTaken) {
       toast("אחד ממספרי הטלפון כבר רשום למסיבה הזו", "error");
       btn.disabled = false;
@@ -547,6 +568,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     // right gender while staying distinct from the plain single-balance
     // types. There is no coupleId field on this write path — the two
     // records are linked purely by each other's partnerPhone.
+    //
+    // The two halves are registered as separate, sequential writes, so a
+    // failure on the second one used to surface a single generic error with
+    // no indication the first one had already gone through — confusing, and
+    // a retry would then hit "already registered" for that first person.
+    // Each half is now attributed by name so a partial failure is obvious
+    // and actionable instead of looking like the whole thing silently broke.
+    let maleDone = false;
     try {
       await window.LPData.registerForParty(selectedParty.id, {
         fullName: maleFullName,
@@ -557,6 +586,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         partnerName: femaleFullName,
         partnerPhone: femalePhone,
       });
+      maleDone = true;
       await window.LPData.registerForParty(selectedParty.id, {
         fullName: femaleFullName,
         phoneNumber: femalePhone,
@@ -572,7 +602,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       // fire a *third*, near-identical message on top of that.
       showSuccess(selectedParty, "");
     } catch (err) {
-      toast(err.message || "שגיאה בהרשמה, נסו שוב", "error");
+      const who = maleDone ? femaleFullName : maleFullName;
+      const baseMsg = err.message || "שגיאה בהרשמה, נסו שוב";
+      toast(
+        maleDone
+          ? `ההרשמה של ${maleFullName} נקלטה, אבל ${who} נכשל/ה: ${baseMsg}. אנא נסו שוב עבור ${who} בלבד או צרו קשר איתנו.`
+          : `ההרשמה נכשלה: ${baseMsg}`,
+        "error"
+      );
     } finally {
       btn.disabled = false;
     }
