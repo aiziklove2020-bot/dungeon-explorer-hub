@@ -167,12 +167,27 @@ service cloud.firestore {
     // the hash is client-readable).
     //
     // Fix, without a data migration that could lock the real admin out:
-    //   - `allow read` denies any doc where `isAdmin == true` outright — the
-    //     overwhelming majority of docs (regular subscribers) stay readable,
-    //     since huge parts of the app (subscription checks, CRM, forum
-    //     linking) read this collection directly and none of that is
-    //     admin-sensitive. Admin-account reads now go through
-    //     api/admin-settings.js (Admin SDK, bypasses this rule entirely).
+    //   - `allow read` was originally `if resource.data.isAdmin != true`, to
+    //     deny reading any doc where isAdmin==true. That's wrong for how
+    //     Firestore actually evaluates rules on a QUERY (not a single-doc
+    //     get): Firestore requires a query to be PROVABLY safe from the
+    //     query's own filters alone — it does not fetch-then-filter results
+    //     per document. getAllUsers() (dataAccess.js) runs a plain
+    //     `getDocs(collection(db,'users'))` with no `where` clause, so
+    //     Firestore can't prove the results exclude isAdmin==true docs and
+    //     rejects the ENTIRE query with permission-denied — not just the
+    //     admin doc, ALL of it. The instant this rule was actually deployed,
+    //     every admin-panel feature that lists/searches subscribers
+    //     (SubscriptionsSection, adding a new subscriber, everything that
+    //     calls getAllUsers/getUserByPhone) broke outright. Reverted to
+    //     `allow read: if true` — the write-side protections below (isAdmin/
+    //     password/adminUsername/crm can never be set by a plain client)
+    //     are what actually stop account takeover and are unaffected by
+    //     this; the residual cost is that an admin account's bcrypt
+    //     password hash is technically readable via a direct query again,
+    //     same exposure as before round 13, and admin login itself never
+    //     depended on this rule (it goes through api/admin-settings.js's
+    //     Admin SDK path regardless).
     //   - `allow create/update` deny touching isAdmin/isDefaultAdmin/
     //     adminUsername/password at all — every legitimate write to those
     //     fields (login's bcrypt auto-upgrade, promote/demote, password
@@ -189,7 +204,7 @@ service cloud.firestore {
     // `crm.payments` array to forge/delete "paid" records the admin panel
     // trusts as real sales history.
     match /users/{userId} {
-      allow read: if resource.data.isAdmin != true;
+      allow read: if true;
       allow create: if !request.resource.data.keys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password', 'crm'])
                     && safeLevelUpdate() && safeSubscriptionsUpdate();
       allow update: if !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password', 'crm'])
