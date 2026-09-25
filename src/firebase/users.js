@@ -3,7 +3,6 @@ import {
   doc,
   setDoc,
   updateDoc,
-  deleteDoc,
   query,
   where,
   getDocs
@@ -444,8 +443,12 @@ export const deleteUser = async (userId) => {
     const userData = await getUserByIdFromDataAccess(userId);
     const phoneNumber = userData?.phoneNumber;
 
-    const userRef = doc(db, USERS_COLLECTION, userId);
-    await deleteDoc(userRef);
+    // firestore.rules sets `users/{userId}` to `allow delete: if false` (no
+    // real per-user auth for the rule to trust) — a plain client deleteDoc()
+    // here always failed with "Missing or insufficient permissions". Route
+    // through the Admin SDK-backed endpoint instead, same as every other
+    // admin-only user mutation (admin-remove-admin, admin-set-level, etc.).
+    await callAdminSettings('admin-delete-user', { userId });
 
     // Clear cache - CRITICAL: Must clear cache after deletion
     await invalidateCache(`userById_${userId}`);

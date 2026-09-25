@@ -508,6 +508,24 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
+    // firestore.rules sets `users/{userId}` to `allow delete: if false` —
+    // there is no real per-user Firebase Auth for a rule to trust, so a
+    // subscriber delete (unlike every other admin-only user mutation above)
+    // was never wired to go through this route at all: SubscriptionsSection's
+    // delete button called plain client-side deleteDoc(), which the rule
+    // silently rejects with "Missing or insufficient permissions" every time.
+    if (action === 'admin-delete-user') {
+      const { userId } = body;
+      if (!userId) return res.status(400).json({ error: 'Missing userId' });
+      const snap = await usersRef.doc(userId).get();
+      if (!snap.exists) return res.status(404).json({ error: 'User not found' });
+      if (snap.data().isDefaultAdmin) {
+        return res.status(400).json({ error: 'Cannot delete default admin' });
+      }
+      await usersRef.doc(userId).delete();
+      return res.status(200).json({ ok: true });
+    }
+
     // ── Subscription / level actions ────────────────────────────────────
     // firestore.rules blocks a plain client update from setting
     // level:'admin' or any subscription tier to 'gold' (see the comment on
