@@ -56,6 +56,137 @@ import bcrypt from 'bcryptjs';
 import { requireAdminApiSecret } from '../lib/apiAuth.js';
 import { getFirebaseAdmin } from '../lib/forumAuthApi.js';
 
+// ── Subscription logic, ported from src/firebase/subscriptions.js ──────────
+// Pure computation only (no Firestore calls) — kept in lockstep with that
+// file's SUBSCRIPTION_TIERS/computeNextSubscription/deriveUserLevel/
+// buildLegacyFieldsFromSubscriptions. Duplicated here (rather than imported)
+// because that file pulls in the browser Firestore client SDK and
+// browser-only caching, neither of which belong in a serverless function.
+const SUBSCRIPTION_TIERS = {
+  day: { months: null, days: 1 },
+  month: { months: 1, days: null },
+  halfYear: { months: 6, days: null },
+  year: { months: 12, days: null },
+  gold: { months: null, days: null }
+};
+
+const parseDate = (value) => {
+  if (!value) return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  if (typeof value === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const d = new Date(`${value}T00:00:00.000Z`);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  if (typeof value === 'object' && value?.seconds != null) {
+    const d = new Date(value.seconds * 1000);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+};
+const toIso = (value) => {
+  const d = parseDate(value);
+  return d ? d.toISOString() : null;
+};
+const addMonths = (date, months) => {
+  const d = new Date(date.getTime());
+  d.setMonth(d.getMonth() + months);
+  return d;
+};
+const addDays = (date, days) => {
+  const d = new Date(date.getTime());
+  d.setDate(d.getDate() + days);
+  return d;
+};
+
+const normalizeSubs = (user) => {
+  const subs = user?.subscriptions;
+  if (subs && typeof subs === 'object' && !Array.isArray(subs)) {
+    return { parties: subs.parties || null, exchangeParties: subs.exchangeParties || null };
+  }
+  return { parties: null, exchangeParties: null };
+};
+
+const getSubInfo = (sub) => {
+  if (!sub) return { exists: false, isGold: false, isActive: false };
+  if (sub.tier === 'gold') return { exists: true, isGold: true, isActive: true };
+  const expiryDate = parseDate(sub.expiry);
+  if (!expiryDate) return { exists: true, isGold: false, isActive: false };
+  return { exists: true, isGold: false, isActive: expiryDate.getTime() > Date.now(), expiry: expiryDate.toISOString() };
+};
+
+const deriveLevel = (userData, subs) => {
+  if (userData.level === 'admin' || userData.isAdmin) return 'admin';
+  if (userData.level === 'blocked') return 'blocked';
+  const p = getSubInfo(subs.parties);
+  const e = getSubInfo(subs.exchangeParties);
+  if (p.isGold || e.isGold) return 'gold';
+  if (p.isActive || e.isActive) return 'registered';
+  return 'regular';
+};
+
+const buildLegacyFields = (userData, subs) => {
+  const level = deriveLevel(userData, subs);
+  const p = getSubInfo(subs.parties);
+  const e = getSubInfo(subs.exchangeParties);
+  let registrationExpiry = null;
+  let registrationStartDate = null;
+  if (p.isGold) {
+    registrationStartDate = subs.parties?.startDate || new Date().toISOString();
+  } else if (p.exists && p.expiry) {
+    registrationExpiry = p.expiry;
+    registrationStartDate = subs.parties?.startDate || new Date().toISOString();
+  } else if (e.isGold) {
+    registrationStartDate = subs.exchangeParties?.startDate || new Date().toISOString();
+  } else if (e.exists && e.expiry) {
+    registrationStartDate = subs.exchangeParties?.startDate || new Date().toISOString();
+  }
+  return { level, registrationExpiry, registrationStartDate };
+};
+
+const computeNextSubscription = (prevSub, tier) => {
+  if (!SUBSCRIPTION_TIERS[tier]) throw new Error(`Unknown subscription tier: ${tier}`);
+  const nowIso = new Date().toISOString();
+  const startDate = prevSub?.startDate ? toIso(prevSub.startDate) || nowIso : nowIso;
+  if (tier === 'gold') {
+    return { tier: 'gold', expiry: null, startDate, lastRenewedAt: nowIso, lastRenewalTier: 'gold' };
+  }
+  const { months, days } = SUBSCRIPTION_TIERS[tier];
+  const prevExpiry = parseDate(prevSub?.expiry);
+  const base = prevExpiry && prevExpiry.getTime() > Date.now() ? prevExpiry : new Date();
+  const nextExpiry = months ? addMonths(base, months) : addDays(base, days);
+  return { tier, expiry: nextExpiry.toISOString(), startDate, lastRenewedAt: nowIso, lastRenewalTier: tier };
+};
+
+/** Read-modify-write a subscription kind inside an Admin-SDK transaction. */
+const applySubscriptionChange = async (db, userId, kind, computeNext) => {
+  const userRef = db.collection('users').doc(userId);
+  let next;
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(userRef);
+    if (!snap.exists) throw new Error('User not found');
+    const userData = snap.data();
+    const subs = normalizeSubs(userData);
+    const prev = subs[kind] || null;
+    next = computeNext(prev, userData);
+    const nextSubsMap = { ...subs, [kind]: next };
+    const legacy = buildLegacyFields(userData, nextSubsMap);
+    const updateData = {
+      subscriptions: nextSubsMap,
+      registrationExpiry: legacy.registrationExpiry,
+      registrationStartDate: legacy.registrationStartDate
+    };
+    if (userData.level !== 'admin' && userData.level !== 'blocked' && !userData.isAdmin) {
+      updateData.level = legacy.level;
+    }
+    tx.update(userRef, updateData);
+  });
+  return next;
+};
+
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -350,6 +481,90 @@ export default async function handler(req, res) {
       });
       await activateDefaultAdminIfNeeded();
       return res.status(200).json({ ok: true });
+    }
+
+    // ── Subscription / level actions ────────────────────────────────────
+    // firestore.rules blocks a plain client update from setting
+    // level:'admin' or any subscription tier to 'gold' (see the comment on
+    // safeLevelUpdate()/safeSubscriptionsUpdate() there) — before that fix,
+    // anyone could grant themselves a permanent gold subscription or
+    // admin-level status with a single updateDoc. These actions are the
+    // only way to legitimately grant either now.
+    const SUBSCRIPTION_KIND_IDS = ['parties', 'exchangeParties'];
+    const SUBSCRIPTION_TIER_IDS = Object.keys(SUBSCRIPTION_TIERS);
+
+    if (action === 'admin-add-subscription') {
+      const { userId, kind, tier } = body;
+      if (!SUBSCRIPTION_KIND_IDS.includes(kind)) return res.status(400).json({ error: 'Unknown subscription kind' });
+      if (!SUBSCRIPTION_TIER_IDS.includes(tier)) return res.status(400).json({ error: 'Unknown subscription tier' });
+      const next = await applySubscriptionChange(db, userId, kind, (prev) => computeNextSubscription(prev, tier));
+      return res.status(200).json({ ok: true, next });
+    }
+
+    if (action === 'admin-set-subscription-expiry') {
+      const { userId, kind, expiryDate, explicitTier } = body;
+      if (!SUBSCRIPTION_KIND_IDS.includes(kind)) return res.status(400).json({ error: 'Unknown subscription kind' });
+      const next = await applySubscriptionChange(db, userId, kind, (prev) => {
+        const nowIso = new Date().toISOString();
+        if (!expiryDate) {
+          return { tier: 'gold', expiry: null, startDate: prev?.startDate ? toIso(prev.startDate) || nowIso : nowIso, lastRenewedAt: nowIso, lastRenewalTier: 'gold' };
+        }
+        const iso = toIso(expiryDate);
+        if (!iso) throw new Error('Invalid expiry date');
+        const tier = SUBSCRIPTION_TIER_IDS.includes(explicitTier) ? explicitTier : (prev?.tier && prev.tier !== 'gold' ? prev.tier : 'year');
+        return { tier, expiry: iso, startDate: prev?.startDate ? toIso(prev.startDate) || nowIso : nowIso, lastRenewedAt: nowIso, lastRenewalTier: tier };
+      });
+      return res.status(200).json({ ok: true, next });
+    }
+
+    if (action === 'admin-remove-subscription') {
+      const { userId, kind } = body;
+      if (!SUBSCRIPTION_KIND_IDS.includes(kind)) return res.status(400).json({ error: 'Unknown subscription kind' });
+      await applySubscriptionChange(db, userId, kind, () => null);
+      return res.status(200).json({ ok: true });
+    }
+
+    if (action === 'admin-set-level') {
+      const { userId, level, expiryDate } = body;
+      if (!userId) return res.status(400).json({ error: 'Missing userId' });
+      const userRef = usersRef.doc(userId);
+
+      if (level === 'registered') {
+        if (expiryDate) {
+          await applySubscriptionChange(db, userId, 'parties', (prev) => {
+            const nowIso = new Date().toISOString();
+            const iso = toIso(expiryDate);
+            if (!iso) throw new Error('Invalid expiry date');
+            const tier = prev?.tier && prev.tier !== 'gold' ? prev.tier : 'year';
+            return { tier, expiry: iso, startDate: prev?.startDate ? toIso(prev.startDate) || nowIso : nowIso, lastRenewedAt: nowIso, lastRenewalTier: tier };
+          });
+        } else {
+          await applySubscriptionChange(db, userId, 'parties', (prev) => computeNextSubscription(prev, 'year'));
+        }
+        return res.status(200).json({ ok: true });
+      }
+      if (level === 'gold') {
+        await applySubscriptionChange(db, userId, 'parties', (prev) => computeNextSubscription(prev, 'gold'));
+        return res.status(200).json({ ok: true });
+      }
+      if (level === 'regular') {
+        await applySubscriptionChange(db, userId, 'parties', () => null);
+        return res.status(200).json({ ok: true });
+      }
+      if (level === 'blocked') {
+        await userRef.update({
+          level: 'blocked',
+          registrationExpiry: null,
+          registrationStartDate: null,
+          subscriptions: { parties: null, exchangeParties: null }
+        });
+        return res.status(200).json({ ok: true });
+      }
+      if (level === 'admin') {
+        await userRef.update({ level: 'admin' });
+        return res.status(200).json({ ok: true });
+      }
+      return res.status(400).json({ error: `Unknown level: ${level}` });
     }
 
     return res.status(400).json({ error: 'Unknown action' });

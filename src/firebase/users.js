@@ -214,8 +214,11 @@ export const updateUserLevel = async (userId, level, expiryDate = null) => {
     }
 
     if (level === 'admin') {
-      const userRef = doc(db, USERS_COLLECTION, userId);
-      await updateDoc(userRef, { level: 'admin' });
+      // firestore.rules blocks a plain client write from ever setting
+      // level:'admin' (see safeLevelUpdate() there) — before that fix,
+      // anyone could updateDoc their own user doc to level:'admin'. Goes
+      // through api/admin-settings.js's admin-set-level action instead.
+      await callAdminSettings('admin-set-level', { userId, level: 'admin' });
       await invalidateCache('allUsers');
       await invalidateCache(`userById_${userId}`);
       if (userData.phoneNumber) {

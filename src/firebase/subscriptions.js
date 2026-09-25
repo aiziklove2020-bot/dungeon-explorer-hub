@@ -15,11 +15,8 @@
  * here.
  */
 
-import { doc, runTransaction } from 'firebase/firestore';
-import { db } from './config';
 import { invalidateCache } from './dataAccess';
-
-const USERS_COLLECTION = 'users';
+import { callAdminSettings } from '../utils/adminApi';
 
 export const SUBSCRIPTION_KINDS = {
   parties: { id: 'parties', label: 'מסיבות' },
@@ -63,18 +60,6 @@ const parseDate = (value) => {
 const toIso = (value) => {
   const d = parseDate(value);
   return d ? d.toISOString() : null;
-};
-
-const addMonths = (date, months) => {
-  const d = new Date(date.getTime());
-  d.setMonth(d.getMonth() + months);
-  return d;
-};
-
-const addDays = (date, days) => {
-  const d = new Date(date.getTime());
-  d.setDate(d.getDate() + days);
-  return d;
 };
 
 /**
@@ -258,129 +243,18 @@ export const deriveUserLevel = (userData) => {
   return 'regular';
 };
 
-/**
- * Build the legacy-compatible fields (`level`, `registrationExpiry`,
- * `registrationStartDate`) from the new subscriptions map. The `parties`
- * subscription is the source of truth for the legacy fields because all
- * historic callers were operating on what is now `parties`.
- */
-const buildLegacyFieldsFromSubscriptions = (userData) => {
-  const partiesInfo = getSubscription(userData, 'parties');
-  const exchangeInfo = getSubscription(userData, 'exchangeParties');
-  const level = deriveUserLevel(userData);
-
-  let registrationExpiry = null;
-  let registrationStartDate = null;
-
-  if (partiesInfo.isGold) {
-    registrationExpiry = null;
-    registrationStartDate = partiesInfo.startDate || new Date().toISOString();
-  } else if (partiesInfo.exists && partiesInfo.expiry) {
-    registrationExpiry = partiesInfo.expiry;
-    registrationStartDate = partiesInfo.startDate || new Date().toISOString();
-  } else if (exchangeInfo.isGold) {
-    // No parties subscription but a gold exchange one — legacy "registered" view
-    // shouldn't claim a parties expiry, so leave it null. We still keep
-    // `registrationStartDate` so older readers know the user is "established".
-    registrationExpiry = null;
-    registrationStartDate = exchangeInfo.startDate || new Date().toISOString();
-  } else if (exchangeInfo.exists && exchangeInfo.expiry) {
-    registrationExpiry = null;
-    registrationStartDate = exchangeInfo.startDate || new Date().toISOString();
-  }
-
-  return { level, registrationExpiry, registrationStartDate };
-};
-
-/**
- * Compute the next subscription block when applying a tier change. Pure
- * function over the previous subscription value + the chosen tier.
- *
- * Tier semantics:
- *   - `gold`              -> unlimited, expiry = null
- *   - `month/halfYear/year` -> add N months to max(now, currentExpiry)
- */
-const computeNextSubscription = (prevSub, tier) => {
-  if (!SUBSCRIPTION_TIERS[tier]) {
-    throw new Error(`Unknown subscription tier: ${tier}`);
-  }
-  const nowIso = new Date().toISOString();
-  const startDate = prevSub?.startDate ? toIso(prevSub.startDate) || nowIso : nowIso;
-
-  if (tier === 'gold') {
-    return {
-      tier: 'gold',
-      expiry: null,
-      startDate,
-      lastRenewedAt: nowIso,
-      lastRenewalTier: 'gold',
-    };
-  }
-
-  const { months, days } = SUBSCRIPTION_TIERS[tier];
-  const prevExpiry = parseDate(prevSub?.expiry);
-  const base = prevExpiry && prevExpiry.getTime() > Date.now() ? prevExpiry : new Date();
-  const nextExpiry = months ? addMonths(base, months) : addDays(base, days);
-
-  return {
-    tier,
-    expiry: nextExpiry.toISOString(),
-    startDate,
-    lastRenewedAt: nowIso,
-    lastRenewalTier: tier,
-  };
-};
-
-/**
- * Read-modify-write a single subscription `kind` inside a Firestore
- * transaction, so two concurrent calls for the same user (e.g. an admin
- * extending `parties` in one tab while something else touches
- * `exchangeParties` in another) can't clobber each other. Both read and
- * write happen against the transaction's own consistent snapshot, not the
- * (possibly stale) dataAccess cache, and Firestore retries the whole
- * transaction if the document changed underneath it.
- *
- * `computeNext(prevSub, userData)` returns the new value for `kind` (or
- * `null` to clear it) and may throw to abort the whole update.
- */
-const applySubscriptionChange = async (userId, kind, computeNext) => {
-  const userRef = doc(db, USERS_COLLECTION, userId);
-  let userData;
-  let next;
-
-  await runTransaction(db, async (tx) => {
-    const snap = await tx.get(userRef);
-    if (!snap.exists()) throw new Error('User not found');
-    userData = normalizeUserSubscriptions({ id: userId, ...snap.data() });
-    const prev = userData.subscriptions?.[kind] || null;
-    next = computeNext(prev, userData);
-
-    const nextSubsMap = {
-      parties: userData.subscriptions?.parties || null,
-      exchangeParties: userData.subscriptions?.exchangeParties || null,
-      [kind]: next,
-    };
-
-    const projected = { ...userData, subscriptions: nextSubsMap };
-    const legacy = buildLegacyFieldsFromSubscriptions(projected);
-
-    const updateData = {
-      subscriptions: nextSubsMap,
-      registrationExpiry: legacy.registrationExpiry,
-      registrationStartDate: legacy.registrationStartDate,
-    };
-    if (userData?.level !== 'admin' && userData?.level !== 'blocked' && !userData?.isAdmin) {
-      updateData.level = legacy.level;
-    }
-    tx.update(userRef, updateData);
-  });
-
+// firestore.rules blocks a plain client write from ever setting a
+// subscription tier to 'gold' or level to 'admin' (see safeSubscriptionsUpdate/
+// safeLevelUpdate there) — before that fix, any visitor could grant
+// themselves a permanent gold subscription with a single updateDoc. These
+// three (admin-only in every real caller — SubscriptionsSection.jsx) now go
+// through api/admin-settings.js's admin-* subscription actions, which run
+// the equivalent transactional read-modify-write via the Admin SDK
+// (bypassing that rule, same as every other admin-only action moved
+// server-side this round).
+const afterSubscriptionChange = async (userId) => {
   await invalidateCache(`userById_${userId}`);
   await invalidateCache('allUsers');
-  if (userData?.phoneNumber) {
-    await invalidateCache(`userByPhone_${userData.phoneNumber}`);
-  }
-  return next;
 };
 
 /**
@@ -392,8 +266,9 @@ const applySubscriptionChange = async (userId, kind, computeNext) => {
 export const addOrExtendSubscription = async (userId, kind, tier) => {
   if (!SUBSCRIPTION_KINDS[kind]) throw new Error(`Unknown subscription kind: ${kind}`);
   if (!SUBSCRIPTION_TIERS[tier]) throw new Error(`Unknown subscription tier: ${tier}`);
-
-  return applySubscriptionChange(userId, kind, (prev) => computeNextSubscription(prev, tier));
+  const { next } = await callAdminSettings('admin-add-subscription', { userId, kind, tier });
+  await afterSubscriptionChange(userId);
+  return next;
 };
 
 /**
@@ -405,31 +280,9 @@ export const addOrExtendSubscription = async (userId, kind, tier) => {
  */
 export const setSubscriptionExpiry = async (userId, kind, expiryDate, explicitTier) => {
   if (!SUBSCRIPTION_KINDS[kind]) throw new Error(`Unknown subscription kind: ${kind}`);
-
-  return applySubscriptionChange(userId, kind, (prev) => {
-    const nowIso = new Date().toISOString();
-    if (!expiryDate) {
-      return {
-        tier: 'gold',
-        expiry: null,
-        startDate: prev?.startDate ? toIso(prev.startDate) || nowIso : nowIso,
-        lastRenewedAt: nowIso,
-        lastRenewalTier: 'gold',
-      };
-    }
-    const iso = toIso(expiryDate);
-    if (!iso) throw new Error('Invalid expiry date');
-    const tier = SUBSCRIPTION_TIER_IDS.includes(explicitTier)
-      ? explicitTier
-      : (prev?.tier && prev.tier !== 'gold' ? prev.tier : 'year');
-    return {
-      tier,
-      expiry: iso,
-      startDate: prev?.startDate ? toIso(prev.startDate) || nowIso : nowIso,
-      lastRenewedAt: nowIso,
-      lastRenewalTier: tier,
-    };
-  });
+  const { next } = await callAdminSettings('admin-set-subscription-expiry', { userId, kind, expiryDate, explicitTier });
+  await afterSubscriptionChange(userId);
+  return next;
 };
 
 /**
@@ -438,8 +291,8 @@ export const setSubscriptionExpiry = async (userId, kind, expiryDate, explicitTi
  */
 export const removeSubscription = async (userId, kind) => {
   if (!SUBSCRIPTION_KINDS[kind]) throw new Error(`Unknown subscription kind: ${kind}`);
-
-  await applySubscriptionChange(userId, kind, () => null);
+  await callAdminSettings('admin-remove-subscription', { userId, kind });
+  await afterSubscriptionChange(userId);
 };
 
 /**
