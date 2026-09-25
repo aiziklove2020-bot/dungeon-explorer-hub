@@ -2,12 +2,19 @@
  * Proxy Telegram Bot API for the SPA (Telegram does not send CORS headers).
  * POST JSON: { telegramMethod, botToken, payload? }
  *
- * Whitelist only methods used by this app. Admin-only: the only caller is the
- * admin panel's bot-management UI (src/utils/telegramRelay.js) — without this
- * gate, anyone could use this deploy as a free, unauthenticated proxy to the
- * Telegram Bot API with any bot token they supply.
+ * Whitelist only methods used by this app. `sendMessage`/`sendPhoto` are also
+ * called anonymously — by real site visitors, with no admin secret available
+ * — from the public registration flow (public/assets/site-data.js's
+ * sendRegistrationTelegram) to post the "new registration" notification, so
+ * those two stay open. The bot token isn't actually secret anyway: it's read
+ * straight out of the public `settings/telegram` Firestore document
+ * (`allow read: if true`) by that same public flow. Bot-management actions
+ * (getMe/getUpdates/setWebhook/deleteWebhook) have no public caller and can
+ * reconfigure or hijack the bot's webhook, so those stay admin-only.
  */
 import { requireAdminApiSecret } from '../lib/apiAuth.js';
+
+const ADMIN_ONLY_METHODS = new Set(['getMe', 'getUpdates', 'deleteWebhook', 'setWebhook']);
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -27,8 +34,6 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false, description: 'Method not allowed' });
   }
-  if (!requireAdminApiSecret(req, res)) return;
-
   let body;
   try {
     body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
@@ -40,6 +45,7 @@ export default async function handler(req, res) {
   if (!telegramMethod || typeof telegramMethod !== 'string' || !ALLOWED.has(telegramMethod)) {
     return res.status(400).json({ ok: false, description: 'Unsupported or missing telegramMethod' });
   }
+  if (ADMIN_ONLY_METHODS.has(telegramMethod) && !requireAdminApiSecret(req, res)) return;
   if (!botToken || typeof botToken !== 'string' || !TOKEN_RE.test(botToken.trim())) {
     return res.status(400).json({ ok: false, description: 'Invalid bot token' });
   }
