@@ -18359,7 +18359,13 @@ function YE(e) {
 }
 function XE(e) {
 	let t = YE(e);
-	return t.startsWith("972") && t.length === 12 ? "0" + t.slice(3) : t;
+	if (t.startsWith("00972")) t = t.slice(2);
+	if (t.startsWith("972")) {
+		let r = t.slice(3);
+		if (r.startsWith("0")) r = r.slice(1);
+		if (r.length === 9) return "0" + r;
+	}
+	return t;
 }
 var ZE = o((() => {})), QE, $E = o((() => {
 	QE = {
