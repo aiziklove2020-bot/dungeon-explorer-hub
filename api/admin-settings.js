@@ -107,9 +107,18 @@ const toIso = (value) => {
   const d = parseDate(value);
   return d ? d.toISOString() : null;
 };
+// Plain `d.setMonth(d.getMonth() + months)` overflows on month-end anchors:
+// adding 1 month to Jan 31 rolls into March 3 (Feb only has 28 days), not
+// Feb 28 — a subscription granted/renewed near month-end silently gets a few
+// extra free days each time, and the expiry date the admin sees drifts later
+// on every renewal. Clamp to the last day of the target month instead.
 const addMonths = (date, months) => {
+  const day = date.getDate();
   const d = new Date(date.getTime());
+  d.setDate(1);
   d.setMonth(d.getMonth() + months);
+  const daysInTargetMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, daysInTargetMonth));
   return d;
 };
 const addDays = (date, days) => {

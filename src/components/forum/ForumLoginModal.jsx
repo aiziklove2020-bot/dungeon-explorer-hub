@@ -9,11 +9,12 @@ import Dialog from '../a11y/Dialog';
 import '../LoginModal.css';
 
 const ForumLoginModal = ({ isOpen, onClose, onLoggedIn }) => {
-  const { forumLogin, forumRegister, requestForumPasswordReset } = useForumAuth();
+  const { forumLogin, forumRegister, forumResetPassword, requestForumPasswordReset } = useForumAuth();
   const { siteUser } = useSiteAuth();
-  const [tab, setTab] = useState('login'); // login | register | forgot
+  const [tab, setTab] = useState('login'); // login | register | forgot | reset
   const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [gender, setGender] = useState('');
@@ -34,6 +35,7 @@ const ForumLoginModal = ({ isOpen, onClose, onLoggedIn }) => {
   const idName = useId();
   const idPhone = useId();
   const idForgot = useId();
+  const idNewPwd = useId();
   const firstFieldRef = useRef(null);
 
   const needsSiteFields = tab === 'register' && !siteUser;
@@ -47,6 +49,7 @@ const ForumLoginModal = ({ isOpen, onClose, onLoggedIn }) => {
   const reset = () => {
     setNickname('');
     setPassword('');
+    setNewPassword('');
     setName('');
     setPhone('');
     setGender('');
@@ -85,7 +88,12 @@ const ForumLoginModal = ({ isOpen, onClose, onLoggedIn }) => {
       return;
     }
 
-    if (!nickname.trim() || !password) {
+    if (tab === 'reset') {
+      if (!newPassword || newPassword.length < 6) {
+        setError('הסיסמה החדשה חייבת להכיל לפחות 6 תווים');
+        return;
+      }
+    } else if (!nickname.trim() || !password) {
       setError('כינוי וסיסמה נדרשים');
       return;
     }
@@ -135,6 +143,15 @@ const ForumLoginModal = ({ isOpen, onClose, onLoggedIn }) => {
         // JWT instead of staying stuck on the old "session expired" view.
         onLoggedIn?.();
         onClose?.();
+      } else if (tab === 'reset') {
+        // `nickname`/`password` still hold the values from the login attempt
+        // that got redirected here (see the PASSWORD_RESET_REQUIRED catch
+        // below) — forumResetPassword re-verifies the temporary password
+        // server-side before accepting the new one.
+        await forumResetPassword(nickname.trim(), password, newPassword);
+        reset();
+        onLoggedIn?.();
+        onClose?.();
       } else {
         const siteFields = needsSiteFields
           ? { name: name.trim(), phone: phone.replace(/\D/g, ''), gender }
@@ -146,7 +163,19 @@ const ForumLoginModal = ({ isOpen, onClose, onLoggedIn }) => {
         setPostSubmit('verification');
       }
     } catch (err) {
-      setError(err.message || 'שגיאה');
+      // An admin-issued temporary password ("reset login password" in the
+      // admin panel) makes the next forumLogin throw this instead of logging
+      // in. Before this, the modal just showed the raw English error code
+      // with no way to proceed — the account was stuck until someone
+      // realized what "PASSWORD_RESET_REQUIRED" meant. Route to a
+      // set-new-password step instead.
+      if (tab === 'login' && err.code === 'PASSWORD_RESET_REQUIRED') {
+        setTab('reset');
+        setNewPassword('');
+        setError('');
+      } else {
+        setError(err.message || 'שגיאה');
+      }
     } finally {
       setLoading(false);
     }
@@ -254,21 +283,25 @@ const ForumLoginModal = ({ isOpen, onClose, onLoggedIn }) => {
           <X size={20} aria-hidden="true" />
         </button>
 
-        {tab !== 'forgot' && renderTabs()}
+        {tab !== 'forgot' && tab !== 'reset' && renderTabs()}
 
         <h2 id={titleId} className="login-modal-title">
           {tab === 'forgot'
             ? 'איפוס סיסמה'
-            : tab === 'login'
-              ? 'התחברות לפורום ובלוג'
-              : 'הרשמה לפורום ובלוג'}
+            : tab === 'reset'
+              ? 'נדרשת סיסמה חדשה'
+              : tab === 'login'
+                ? 'התחברות לפורום ובלוג'
+                : 'הרשמה לפורום ובלוג'}
         </h2>
         <p className="login-modal-subtitle">
           {tab === 'forgot'
             ? 'הזן את הכינוי או האימייל שלך ונשלח קישור לאיפוס סיסמה'
-            : tab === 'login'
-              ? 'הזן כינוי וסיסמה כדי להתחבר'
-              : 'בחר כינוי וסיסמה כדי ליצור חשבון'}
+            : tab === 'reset'
+              ? 'הוגדרה עבורך סיסמה זמנית — בחר/י סיסמה חדשה כדי להמשיך'
+              : tab === 'login'
+                ? 'הזן כינוי וסיסמה כדי להתחבר'
+                : 'בחר כינוי וסיסמה כדי ליצור חשבון'}
         </p>
 
         {postSubmit === 'reset-sent' && renderForgotSuccess()}
@@ -289,6 +322,23 @@ const ForumLoginModal = ({ isOpen, onClose, onLoggedIn }) => {
                   maxLength={120}
                   className="login-modal-input"
                   autoComplete="username"
+                  disabled={loading}
+                  aria-invalid={!!error}
+                  aria-describedby={error ? errorId : undefined}
+                />
+              </>
+            ) : tab === 'reset' ? (
+              <>
+                <label htmlFor={idNewPwd} className="sr-only">סיסמה חדשה</label>
+                <input
+                  id={idNewPwd}
+                  ref={firstFieldRef}
+                  type="password"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  placeholder="סיסמה חדשה (לפחות 6 תווים)"
+                  className="login-modal-input"
+                  autoComplete="new-password"
                   disabled={loading}
                   aria-invalid={!!error}
                   aria-describedby={error ? errorId : undefined}
@@ -413,9 +463,11 @@ const ForumLoginModal = ({ isOpen, onClose, onLoggedIn }) => {
                 ? 'טוען...'
                 : tab === 'forgot'
                   ? 'שלח קישור איפוס'
-                  : tab === 'login'
-                    ? 'היכנס'
-                    : 'הירשם'}
+                  : tab === 'reset'
+                    ? 'שמור סיסמה חדשה והתחבר'
+                    : tab === 'login'
+                      ? 'היכנס'
+                      : 'הירשם'}
             </button>
 
             {tab === 'login' && (

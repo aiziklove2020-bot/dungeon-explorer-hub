@@ -228,98 +228,106 @@ export const registerToPartyNew = async (partyId, registrationData) => {
       }
     }
     
-    // Use dataAccess to get party data (with caching)
-    const partyData = await getPartyByIdFromDataAccess(partyId);
-    
-    if (!partyData) {
-      throw new Error('Party not found');
-    }
-    
     const partyRef = doc(db, PARTIES_COLLECTION, partyId);
 
     const normalizedIncomingPhone = normalizeIsraeliPhone(registrationData.phoneNumber) || registrationData.phoneNumber;
-    const existingRegistration = partyData.registrations?.find(
-      reg => normalizeIsraeliPhone(reg.phoneNumber) === normalizedIncomingPhone || (userId && reg.userId === userId)
-    );
-    
-    if (existingRegistration) {
-      throw new Error('Already registered to this party');
-    }
-
-    if (registrationData.gender !== 'couple') {
-      const genderRegistrations = partyData.registrations?.filter(
-        reg => reg.gender === registrationData.gender
-      ) || [];
-
-      const genderLimit = registrationData.gender === 'male'
-        ? partyData.maleLimit
-        : partyData.femaleLimit;
-
-      if (genderRegistrations.length >= genderLimit) {
-        throw new Error(`${registrationData.gender === 'male' ? 'Male' : 'Female'} spots are full`);
-      }
-    }
-
-    // Admin's "נעילת מכירה לגברים סולו" quick-control — blocks only the plain
-    // solo-male-balance registration type, not the male half of a couple
-    // registering together (single-male-couple).
-    if (partyData.soloMenSalesLocked && registrationData.registrationType === 'single-male-balance') {
-      throw new Error('הרשמת גברים בודדים למסיבה זו סגורה כרגע');
-    }
-
-    // Admin's "אישור אוטומטי לזוגות מאומתים" quick-control — a couple is
-    // "known" here if BOTH halves already have an existing account (i.e.
-    // they've registered/appeared in the system before, same bar as
-    // isRealUser elsewhere in this codebase — no separate verification
-    // flag exists). Only relevant for the two couple-half registration
-    // types; the legacy combined "couple" type isn't used by the current
-    // public registration form.
-    let autoApproved = false;
-    if (
-      partyData.autoApproveVerifiedCouples &&
-      (registrationData.registrationType === 'single-male-couple' || registrationData.registrationType === 'single-female-couple') &&
-      userData &&
-      registrationData.partnerPhone
-    ) {
-      try {
-        const partnerUser = await getUserByPhone(registrationData.partnerPhone);
-        if (partnerUser && partnerUser.level !== 'blocked') {
-          autoApproved = true;
-        }
-      } catch (error) {
-        // best-effort — falls back to manual review
-      }
-    }
-
     const finalGender = userData?.gender || registrationData.gender;
     const finalName = userData?.name || registrationData.fullName;
     const finalTelegram = userData?.telegramUsername || registrationData.telegramUsername || '';
 
-    const registration = {
-      userId: userId || null,
-      userName: finalName,
-      fullName: finalName,
-      // Store the local 05xxxxxxxx form, not whatever format the caller
-      // sent (e.g. a +972-prefixed number from a Telegram contact share) —
-      // every downstream lookup (usersInTable, balance matching) compares
-      // this field directly against user.phoneNumber, which is always local.
-      phoneNumber: normalizeIsraeliPhone(registrationData.phoneNumber) || registrationData.phoneNumber,
-      telegramUsername: finalTelegram,
-      registrationType: registrationData.registrationType,
-      partyDays: registrationData.partyDays || [],
-      pickupAddress: registrationData.pickupAddress || '',
-      selfArrival: registrationData.selfArrival || false,
-      gender: finalGender,
-      registeredAt: Timestamp.now(),
+    // The duplicate-registration and gender-capacity checks used to read
+    // partyData from the (possibly stale) dataAccess cache and then write
+    // with a plain updateDoc — no transaction, no re-check at write time.
+    // Two solo registrations for the same last open gender spot, submitted
+    // within milliseconds of each other, could both read "19/20", both pass
+    // the `>= genderLimit` check, and both succeed — silently oversubscribing
+    // the party. registerCoupleToParty already avoids this the same way:
+    // read fresh inside a transaction, write inside the same transaction.
+    let autoApproved = false;
+    let registration;
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(partyRef);
+      if (!snap.exists()) throw new Error('Party not found');
+      const partyData = snap.data();
+      const registrations = partyData.registrations || [];
 
-      coupleId: registrationData.coupleId || null,
-      partnerName: registrationData.partnerName || null,
-      partnerPhone: normalizeIsraeliPhone(registrationData.partnerPhone) || registrationData.partnerPhone || null,
-      autoApproved
-    };
-    
-    await updateDoc(partyRef, {
-      registrations: arrayUnion(registration)
+      const existingRegistration = registrations.find(
+        reg => normalizeIsraeliPhone(reg.phoneNumber) === normalizedIncomingPhone || (userId && reg.userId === userId)
+      );
+      if (existingRegistration) {
+        throw new Error('Already registered to this party');
+      }
+
+      if (registrationData.gender !== 'couple') {
+        const genderRegistrations = registrations.filter(
+          reg => reg.gender === registrationData.gender
+        );
+
+        const genderLimit = registrationData.gender === 'male'
+          ? partyData.maleLimit
+          : partyData.femaleLimit;
+
+        if (genderRegistrations.length >= genderLimit) {
+          throw new Error(`${registrationData.gender === 'male' ? 'Male' : 'Female'} spots are full`);
+        }
+      }
+
+      // Admin's "נעילת מכירה לגברים סולו" quick-control — blocks only the plain
+      // solo-male-balance registration type, not the male half of a couple
+      // registering together (single-male-couple).
+      if (partyData.soloMenSalesLocked && registrationData.registrationType === 'single-male-balance') {
+        throw new Error('הרשמת גברים בודדים למסיבה זו סגורה כרגע');
+      }
+
+      // Admin's "אישור אוטומטי לזוגות מאומתים" quick-control — a couple is
+      // "known" here if BOTH halves already have an existing account (i.e.
+      // they've registered/appeared in the system before, same bar as
+      // isRealUser elsewhere in this codebase — no separate verification
+      // flag exists). Only relevant for the two couple-half registration
+      // types; the legacy combined "couple" type isn't used by the current
+      // public registration form.
+      if (
+        partyData.autoApproveVerifiedCouples &&
+        (registrationData.registrationType === 'single-male-couple' || registrationData.registrationType === 'single-female-couple') &&
+        userData &&
+        registrationData.partnerPhone
+      ) {
+        try {
+          const partnerUser = await getUserByPhone(registrationData.partnerPhone);
+          if (partnerUser && partnerUser.level !== 'blocked') {
+            autoApproved = true;
+          }
+        } catch (error) {
+          // best-effort — falls back to manual review
+        }
+      }
+
+      registration = {
+        userId: userId || null,
+        userName: finalName,
+        fullName: finalName,
+        // Store the local 05xxxxxxxx form, not whatever format the caller
+        // sent (e.g. a +972-prefixed number from a Telegram contact share) —
+        // every downstream lookup (usersInTable, balance matching) compares
+        // this field directly against user.phoneNumber, which is always local.
+        phoneNumber: normalizeIsraeliPhone(registrationData.phoneNumber) || registrationData.phoneNumber,
+        telegramUsername: finalTelegram,
+        registrationType: registrationData.registrationType,
+        partyDays: registrationData.partyDays || [],
+        pickupAddress: registrationData.pickupAddress || '',
+        selfArrival: registrationData.selfArrival || false,
+        gender: finalGender,
+        registeredAt: Timestamp.now(),
+
+        coupleId: registrationData.coupleId || null,
+        partnerName: registrationData.partnerName || null,
+        partnerPhone: normalizeIsraeliPhone(registrationData.partnerPhone) || registrationData.partnerPhone || null,
+        autoApproved
+      };
+
+      tx.update(partyRef, {
+        registrations: arrayUnion(registration)
+      });
     });
 
     // Clear cache - CRITICAL: Must clear all related caches

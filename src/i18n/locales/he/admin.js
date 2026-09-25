@@ -219,6 +219,10 @@ export default {
   'admin.showingResults': 'מציג',
   'admin.outOf': 'מתוך',
   'admin.users': 'משתמשים',
+  // Fallback placeholder in registration lists (MatchesSection/PartiesSection)
+  // when a registration record has no name/username/phone — was missing
+  // entirely, so it rendered the raw key "admin.user" instead of Hebrew text.
+  'admin.user': 'משתמש',
   'admin.usersCount': 'מספר משתמשים',
   'admin.totalCount': 'סה"כ',
   'admin.noSearchResults': 'לא נמצאו תוצאות לחיפוש',
