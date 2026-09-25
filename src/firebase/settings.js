@@ -1,15 +1,6 @@
-import { 
-  doc, 
-  getDoc, 
-  setDoc,
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  getDocs
-} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from './config';
-import { 
+import {
   getContentSettings as getContentSettingsFromDataAccess,
   getRegistrationSettings as getRegistrationSettingsFromDataAccess,
   getSocialLinks as getSocialLinksFromDataAccess,
@@ -22,6 +13,7 @@ import {
   getDeployStatus as getDeployStatusFromDataAccess,
   invalidateCache
 } from './dataAccess';
+import { callAdminSettings } from '../utils/adminApi';
 
 const SETTINGS_COLLECTION = 'settings';
 const SETTINGS_DOC_ID = 'socialLinks';
@@ -39,9 +31,8 @@ export const getSocialLinks = getSocialLinksFromDataAccess;
 
 export const updateSocialLinks = async (links) => {
   try {
-    const settingsRef = doc(db, SETTINGS_COLLECTION, SETTINGS_DOC_ID);
-    await setDoc(settingsRef, links, { merge: true });
-    
+    await callAdminSettings('set-settings', { docId: SETTINGS_DOC_ID, data: links });
+
     // Clear cache after update
     await invalidateCache('socialLinks');
   } catch (error) {
@@ -54,8 +45,7 @@ export const getTelegramSettings = getTelegramSettingsFromDataAccess;
 
 export const updateTelegramSettings = async (settings) => {
   try {
-    const settingsRef = doc(db, SETTINGS_COLLECTION, TELEGRAM_SETTINGS_DOC_ID);
-    await setDoc(settingsRef, settings, { merge: true });
+    await callAdminSettings('set-settings', { docId: TELEGRAM_SETTINGS_DOC_ID, data: settings });
     await invalidateCache('telegramSettings');
   } catch (error) {
     throw error;
@@ -69,8 +59,7 @@ export const getDeployStatus = getDeployStatusFromDataAccess;
 
 export const updateSupportChatSettings = async (settings) => {
   try {
-    const settingsRef = doc(db, SETTINGS_COLLECTION, SUPPORT_CHAT_DOC_ID);
-    await setDoc(settingsRef, settings, { merge: true });
+    await callAdminSettings('set-settings', { docId: SUPPORT_CHAT_DOC_ID, data: settings });
     await invalidateCache('supportChatSettings');
   } catch (error) {
     throw error;
@@ -82,9 +71,8 @@ export const getAboutStory = getAboutStoryFromDataAccess;
 
 export const updateAboutStory = async (story) => {
   try {
-    const settingsRef = doc(db, SETTINGS_COLLECTION, ABOUT_STORY_DOC_ID);
-    await setDoc(settingsRef, story, { merge: true });
-    
+    await callAdminSettings('set-settings', { docId: ABOUT_STORY_DOC_ID, data: story });
+
     // Clear cache after update
     await invalidateCache('aboutStory');
   } catch (error) {
@@ -97,9 +85,8 @@ export const getWhatsappGroups = getWhatsappGroupsFromDataAccess;
 
 export const updateWhatsappGroups = async (groups) => {
   try {
-    const settingsRef = doc(db, SETTINGS_COLLECTION, WHATSAPP_GROUPS_DOC_ID);
-    await setDoc(settingsRef, groups, { merge: true });
-    
+    await callAdminSettings('set-settings', { docId: WHATSAPP_GROUPS_DOC_ID, data: groups });
+
     // Clear cache after update
     await invalidateCache('whatsappGroups');
   } catch (error) {
@@ -112,9 +99,8 @@ export const getContent = getContentSettingsFromDataAccess;
 
 export const updateContent = async (content) => {
   try {
-    const settingsRef = doc(db, SETTINGS_COLLECTION, CONTENT_DOC_ID);
-    await setDoc(settingsRef, content, { merge: true });
-    
+    await callAdminSettings('set-settings', { docId: CONTENT_DOC_ID, data: content });
+
     // Clear cache after update
     await invalidateCache('contentSettings');
   } catch (error) {
@@ -127,17 +113,14 @@ export const getRegistrationSettings = getRegistrationSettingsFromDataAccess;
 
 export const updateRegistrationSettings = async (settings) => {
   try {
-    const settingsRef = doc(db, SETTINGS_COLLECTION, REGISTRATION_SETTINGS_DOC_ID);
-    await setDoc(settingsRef, settings, { merge: true });
-    
+    await callAdminSettings('set-settings', { docId: REGISTRATION_SETTINGS_DOC_ID, data: settings });
+
     // Clear cache after update
     await invalidateCache('registrationSettings');
   } catch (error) {
     throw error;
   }
 };
-
-const RSS_FEEDS_COLLECTION = 'rssFeeds';
 
 // Re-export from dataAccess for caching
 export const getRssFeeds = getRssFeedsFromDataAccess;
@@ -147,8 +130,10 @@ const RSS_TICKER_SETTINGS_DOC_ID = 'rssTickerSettings';
 
 export const updateRssTickerSettings = async (settings) => {
   try {
-    const settingsRef = doc(db, SETTINGS_COLLECTION, RSS_TICKER_SETTINGS_DOC_ID);
-    await setDoc(settingsRef, { ...settings, updatedAt: new Date().toISOString() }, { merge: true });
+    await callAdminSettings('set-settings', {
+      docId: RSS_TICKER_SETTINGS_DOC_ID,
+      data: { ...settings, updatedAt: new Date().toISOString() }
+    });
     await invalidateCache('rssTickerSettings');
   } catch (error) {
     throw error;
@@ -157,16 +142,15 @@ export const updateRssTickerSettings = async (settings) => {
 
 export const addRssFeed = async (feedData) => {
   try {
-    const feedsRef = collection(db, RSS_FEEDS_COLLECTION);
-    const newFeed = {
-      text: feedData.text || '',
-      enabled: feedData.enabled !== false,
-      order: feedData.order || 0,
-      createdAt: new Date().toISOString()
-    };
-    const docRef = await addDoc(feedsRef, newFeed);
+    const result = await callAdminSettings('add-rss-feed', {
+      data: {
+        text: feedData.text || '',
+        enabled: feedData.enabled !== false,
+        order: feedData.order || 0
+      }
+    });
     await invalidateCache('rssFeeds');
-    return { id: docRef.id, ...newFeed };
+    return { id: result.id, text: result.text, enabled: result.enabled, order: result.order, createdAt: result.createdAt };
   } catch (error) {
     throw error;
   }
@@ -174,12 +158,13 @@ export const addRssFeed = async (feedData) => {
 
 export const updateRssFeed = async (feedId, feedData) => {
   try {
-    const feedRef = doc(db, RSS_FEEDS_COLLECTION, feedId);
-    await updateDoc(feedRef, {
-      text: feedData.text,
-      enabled: feedData.enabled !== false,
-      order: feedData.order || 0,
-      updatedAt: new Date().toISOString()
+    await callAdminSettings('update-rss-feed', {
+      feedId,
+      data: {
+        text: feedData.text,
+        enabled: feedData.enabled !== false,
+        order: feedData.order || 0
+      }
     });
     await invalidateCache('rssFeeds');
   } catch (error) {
@@ -189,8 +174,7 @@ export const updateRssFeed = async (feedId, feedData) => {
 
 export const deleteRssFeed = async (feedId) => {
   try {
-    const feedRef = doc(db, RSS_FEEDS_COLLECTION, feedId);
-    await deleteDoc(feedRef);
+    await callAdminSettings('delete-rss-feed', { feedId });
     await invalidateCache('rssFeeds');
   } catch (error) {
     throw error;
@@ -215,12 +199,11 @@ export const getLiveChatSettings = async () => {
 };
 
 export const updateLiveChatSettings = async (partial) => {
-  const settingsRef = doc(db, SETTINGS_COLLECTION, LIVE_CHAT_DOC_ID);
   const next = { ...partial, updatedAt: new Date().toISOString() };
   if (next.retentionDays != null) {
     const rd = Number(next.retentionDays);
     next.retentionDays = Number.isFinite(rd) ? Math.min(365, Math.max(1, Math.floor(rd))) : 3;
   }
-  await setDoc(settingsRef, next, { merge: true });
+  await callAdminSettings('set-settings', { docId: LIVE_CHAT_DOC_ID, data: next });
 };
 

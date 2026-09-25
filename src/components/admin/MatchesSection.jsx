@@ -84,6 +84,11 @@ const MatchesSection = ({ showSaved }) => {
 
   const handleUnmatch = async (partyId, match) => {
     try {
+      // Expressed as a mutator (applied to whatever is actually in
+      // Firestore at commit time, inside saveBalanceMatches's own
+      // transaction) rather than a pre-computed array from local state, so
+      // this can't silently clobber a concurrent edit from another admin
+      // tab that landed after this component's data was loaded.
       const filterMatch = (arr) => arr.filter(m => {
         if (match.coupleId && m.coupleId) {
           return m.coupleId !== match.coupleId;
@@ -91,25 +96,24 @@ const MatchesSection = ({ showSaved }) => {
         return !(m.malePhone === match.malePhone && m.femalePhone === match.femalePhone);
       });
 
-      const updatedBalance = filterMatch(partyBalances[partyId] || []);
-
+      let result;
       // Manual matches: only in balanceMatches, no balancedWith on registrations - just save
       if (match.matchType === 'manual') {
-        await saveBalanceMatches(partyId, updatedBalance);
+        result = await saveBalanceMatches(partyId, filterMatch);
       } else if (match.isCouple && match.coupleId) {
         // Couple: convert both to singles and remove from balance
         await convertCoupleToSingles(partyId, match.coupleId);
       } else if (match.malePhone && match.femalePhone) {
         // Algorithm match: remove balancedWith from registrations
         await unmatchBalance(partyId, match.malePhone, match.femalePhone);
-        await saveBalanceMatches(partyId, updatedBalance);
+        result = await saveBalanceMatches(partyId, filterMatch);
       } else {
-        await saveBalanceMatches(partyId, updatedBalance);
+        result = await saveBalanceMatches(partyId, filterMatch);
       }
 
       setPartyBalances(prev => ({
         ...prev,
-        [partyId]: updatedBalance
+        [partyId]: result ? result.matches : filterMatch(prev[partyId] || [])
       }));
 
       await loadActiveParties();
@@ -152,15 +156,11 @@ const MatchesSection = ({ showSaved }) => {
         entered: false
       };
 
-      const currentBalance = partyBalances[partyId] || [];
-
-      const updatedBalance = [...currentBalance, newMatch];
-
-      const result = await saveBalanceMatches(partyId, updatedBalance);
+      const result = await saveBalanceMatches(partyId, (current) => [...current, newMatch]);
 
       setPartyBalances(prev => ({
         ...prev,
-        [partyId]: updatedBalance
+        [partyId]: result.matches
       }));
 
       showSaved();
@@ -188,18 +188,14 @@ const MatchesSection = ({ showSaved }) => {
         entered: oldMatch.entered || false
       };
 
-      const currentBalance = partyBalances[partyId] || [];
-
-      const updatedBalance = currentBalance.filter(m => 
-        !(m.malePhone === oldMatch.malePhone && m.femalePhone === oldMatch.femalePhone)
-      );
-      updatedBalance.push(newMatch);
-
-      const result = await saveBalanceMatches(partyId, updatedBalance);
+      const result = await saveBalanceMatches(partyId, (current) => [
+        ...current.filter(m => !(m.malePhone === oldMatch.malePhone && m.femalePhone === oldMatch.femalePhone)),
+        newMatch
+      ]);
 
       setPartyBalances(prev => ({
         ...prev,
-        [partyId]: updatedBalance
+        [partyId]: result.matches
       }));
 
       showSaved();
@@ -219,36 +215,33 @@ const MatchesSection = ({ showSaved }) => {
       const coupleId = coupleMatch?.coupleId;
       if (!coupleId) return;
 
-      const currentBalance = partyBalances[partyId] || [];
-      const previousOverride = currentBalance.find(m => m.isCouple && m.coupleId === coupleId && m.swapped);
-      const withoutOverride = currentBalance.filter(m => !(m.isCouple && m.coupleId === coupleId && m.swapped));
-
       const male = newPartnerGender === 'male' ? newPartner : keptPerson;
       const female = newPartnerGender === 'female' ? newPartner : keptPerson;
 
-      const newMatch = {
-        isCouple: true,
-        isMatched: true,
-        swapped: true,
-        coupleId,
-        maleName: male.fullName || male.userName || '',
-        malePhone: male.phoneNumber || '',
-        maleTelegram: male.telegramUsername || '',
-        femaleName: female.fullName || female.userName || '',
-        femalePhone: female.phoneNumber || '',
-        femaleTelegram: female.telegramUsername || '',
-        matchedAt: new Date().toISOString(),
-        matchType: 'manual',
-        entered: previousOverride?.entered || coupleMatch.entered || false
-      };
-
-      const updatedBalance = [...withoutOverride, newMatch];
-
-      const result = await saveBalanceMatches(partyId, updatedBalance);
+      const result = await saveBalanceMatches(partyId, (current) => {
+        const previousOverride = current.find(m => m.isCouple && m.coupleId === coupleId && m.swapped);
+        const withoutOverride = current.filter(m => !(m.isCouple && m.coupleId === coupleId && m.swapped));
+        const newMatch = {
+          isCouple: true,
+          isMatched: true,
+          swapped: true,
+          coupleId,
+          maleName: male.fullName || male.userName || '',
+          malePhone: male.phoneNumber || '',
+          maleTelegram: male.telegramUsername || '',
+          femaleName: female.fullName || female.userName || '',
+          femalePhone: female.phoneNumber || '',
+          femaleTelegram: female.telegramUsername || '',
+          matchedAt: new Date().toISOString(),
+          matchType: 'manual',
+          entered: previousOverride?.entered || coupleMatch.entered || false
+        };
+        return [...withoutOverride, newMatch];
+      });
 
       setPartyBalances(prev => ({
         ...prev,
-        [partyId]: updatedBalance
+        [partyId]: result.matches
       }));
 
       showSaved();
@@ -260,41 +253,30 @@ const MatchesSection = ({ showSaved }) => {
 
   const handleToggleEntered = async (partyId, match) => {
     try {
-      
-      const currentBalance = partyBalances[partyId] || [];
+      const result = await saveBalanceMatches(partyId, (current) => {
+        const matchExists = current.some(m =>
+          (m.malePhone === match.malePhone && m.femalePhone === match.femalePhone) ||
+          (match.coupleId && m.coupleId === match.coupleId)
+        );
 
-      const matchExists = currentBalance.some(m => 
-        (m.malePhone === match.malePhone && m.femalePhone === match.femalePhone) ||
-        (match.coupleId && m.coupleId === match.coupleId)
-      );
-      
-      let updatedBalance;
-      
-      if (matchExists) {
-        
-        updatedBalance = currentBalance.map(m => {
-          if ((m.malePhone === match.malePhone && m.femalePhone === match.femalePhone) ||
-              (match.coupleId && m.coupleId === match.coupleId)) {
-            return { ...m, entered: !m.entered };
-          }
-          return m;
-        });
-      } else {
+        if (matchExists) {
+          return current.map(m => {
+            if ((m.malePhone === match.malePhone && m.femalePhone === match.femalePhone) ||
+                (match.coupleId && m.coupleId === match.coupleId)) {
+              return { ...m, entered: !m.entered };
+            }
+            return m;
+          });
+        }
 
-        const newMatch = {
-          ...match,
-          entered: !match.entered
-        };
-        updatedBalance = [...currentBalance, newMatch];
-      }
-
-      await saveBalanceMatches(partyId, updatedBalance);
+        return [...current, { ...match, entered: !match.entered }];
+      });
 
       setPartyBalances(prev => ({
         ...prev,
-        [partyId]: updatedBalance
+        [partyId]: result.matches
       }));
-      
+
       showSaved();
     } catch (error) {
       alert(`${t('admin.balanceTables.errorCreatingBalance')}: ${error.message}`);
@@ -448,17 +430,22 @@ const MatchesSection = ({ showSaved }) => {
         partyName: party.name || party.title
       })), usersByPhone);
 
-      const existingMatchedPairs = existingBalance.filter(m => m.isMatched);
       const newMatchedPairs = newBalanceMatches.filter(m => m.isMatched);
       const newUnmatchedPairs = newBalanceMatches.filter(m => !m.isMatched);
-      
-      const mergedBalance = [...existingMatchedPairs, ...newMatchedPairs, ...newUnmatchedPairs];
 
-      const result = await saveBalanceMatches(party.id, mergedBalance);
+      // Re-derive existingMatchedPairs from whatever is actually in
+      // Firestore at commit time (not the possibly-stale `existingBalance`
+      // read above), so this merge can't drop a match another admin saved
+      // in the meantime.
+      const result = await saveBalanceMatches(party.id, (current) => [
+        ...current.filter(m => m.isMatched),
+        ...newMatchedPairs,
+        ...newUnmatchedPairs
+      ]);
 
       setPartyBalances(prev => ({
         ...prev,
-        [party.id]: mergedBalance
+        [party.id]: result.matches
       }));
 
       showSaved();

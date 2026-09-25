@@ -1,8 +1,8 @@
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  setDoc, 
+import {
+  collection,
+  doc,
+  getDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   getDocs,
@@ -12,7 +12,8 @@ import {
   arrayRemove,
   Timestamp,
   writeBatch,
-  waitForPendingWrites
+  waitForPendingWrites,
+  runTransaction
 } from 'firebase/firestore';
 import { db } from './config';
 import { normalizeIsraeliPhone } from '../utils/phone';
@@ -1133,36 +1134,47 @@ export const updateRegistrationType = async (partyId, userIdOrPhone, newRegistra
  */
 export const convertCoupleToSingles = async (partyId, coupleId) => {
   try {
-    const partyData = await getPartyByIdFromDataAccess(partyId);
-    if (!partyData) throw new Error('Party not found');
-
     const partyRef = doc(db, PARTIES_COLLECTION, partyId);
-    let registrations = [...(partyData.registrations || [])];
-    const coupleRegs = registrations.filter(reg => reg.coupleId === coupleId);
-    if (coupleRegs.length < 2) return;
+    // Reads the live document inside a transaction instead of the
+    // (possibly stale) dataAccess cache — this runs from the same admin
+    // "unmatch" flow as saveBalanceMatches, so it needs the same
+    // read-fresh/retry-on-conflict protection against a concurrent edit to
+    // this party's registrations or balanceMatches.
+    let didUpdate = false;
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(partyRef);
+      if (!snap.exists()) throw new Error('Party not found');
+      const partyData = snap.data();
+      let registrations = [...(partyData.registrations || [])];
+      const coupleRegs = registrations.filter(reg => reg.coupleId === coupleId);
+      if (coupleRegs.length < 2) return;
+      didUpdate = true;
 
-    const newRegistrationType = (gender) =>
-      gender === 'male' ? 'single-male-balance' : 'single-female-balance';
+      const newRegistrationType = (gender) =>
+        gender === 'male' ? 'single-male-balance' : 'single-female-balance';
 
-    registrations = registrations.map(reg => {
-      if (reg.coupleId !== coupleId) return reg;
-      const { coupleId: _, partnerName: __, partnerPhone: ___, ...rest } = reg;
-      return { ...rest, registrationType: newRegistrationType(reg.gender) };
+      registrations = registrations.map(reg => {
+        if (reg.coupleId !== coupleId) return reg;
+        const { coupleId: _, partnerName: __, partnerPhone: ___, ...rest } = reg;
+        return { ...rest, registrationType: newRegistrationType(reg.gender) };
+      });
+
+      const updatedBalanceMatches = (partyData.balanceMatches || []).filter(
+        m => !(m.isCouple && m.coupleId === coupleId)
+      );
+
+      tx.update(partyRef, {
+        registrations,
+        balanceMatches: updatedBalanceMatches,
+        balanceUpdatedAt: Timestamp.now()
+      });
     });
 
-    let updatedBalanceMatches = (partyData.balanceMatches || []).filter(
-      m => !(m.isCouple && m.coupleId === coupleId)
-    );
-
-    await updateDoc(partyRef, {
-      registrations,
-      balanceMatches: updatedBalanceMatches,
-      balanceUpdatedAt: Timestamp.now()
-    });
-
-    await invalidateCache(`party_${partyId}`);
-    await invalidateCache(`balanceMatches_${partyId}`);
-    await invalidateCache('activeParties');
+    if (didUpdate) {
+      await invalidateCache(`party_${partyId}`);
+      await invalidateCache(`balanceMatches_${partyId}`);
+      await invalidateCache('activeParties');
+    }
   } catch (error) {
     throw error;
   }
@@ -1170,70 +1182,72 @@ export const convertCoupleToSingles = async (partyId, coupleId) => {
 
 export const unmatchBalance = async (partyId, phoneNumber1, phoneNumber2) => {
   try {
-    // Use dataAccess to get party data (with caching)
-    const partyData = await getPartyByIdFromDataAccess(partyId);
-    
-    if (!partyData) {
-      throw new Error('Party not found');
-    }
-    
     const partyRef = doc(db, PARTIES_COLLECTION, partyId);
-    let registrations = [...(partyData.registrations || [])];
 
-    const reg1Index = registrations.findIndex(
-      reg => reg.phoneNumber === phoneNumber1 || reg.userId === phoneNumber1
-    );
-    const reg2Index = registrations.findIndex(
-      reg => reg.phoneNumber === phoneNumber2 || reg.userId === phoneNumber2
-    );
-    
-    if (reg1Index === -1 || reg2Index === -1) {
-      throw new Error('One or both registrations not found');
-    }
+    // Reads the live document inside a transaction instead of the
+    // (possibly stale) dataAccess cache — same reasoning as
+    // convertCoupleToSingles above.
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(partyRef);
+      if (!snap.exists()) throw new Error('Party not found');
+      const partyData = snap.data();
+      let registrations = [...(partyData.registrations || [])];
 
-    if (registrations[reg1Index].originalRegistrationType) {
-      const { balancedWith, balancedAt, originalRegistrationType, ...rest1 } = registrations[reg1Index];
-      registrations[reg1Index] = {
-        ...rest1,
-        registrationType: registrations[reg1Index].originalRegistrationType
-      };
-    } else {
-      const { balancedWith, balancedAt, ...rest1 } = registrations[reg1Index];
-      registrations[reg1Index] = rest1;
-    }
-    
-    if (registrations[reg2Index].originalRegistrationType) {
-      const { balancedWith, balancedAt, originalRegistrationType, ...rest2 } = registrations[reg2Index];
-      registrations[reg2Index] = {
-        ...rest2,
-        registrationType: registrations[reg2Index].originalRegistrationType
-      };
-    } else {
-      const { balancedWith, balancedAt, ...rest2 } = registrations[reg2Index];
-      registrations[reg2Index] = rest2;
-    }
+      const reg1Index = registrations.findIndex(
+        reg => reg.phoneNumber === phoneNumber1 || reg.userId === phoneNumber1
+      );
+      const reg2Index = registrations.findIndex(
+        reg => reg.phoneNumber === phoneNumber2 || reg.userId === phoneNumber2
+      );
 
-    const removeUndefined = (obj) => {
-      const cleaned = {};
-      for (const key in obj) {
-        if (obj[key] !== undefined) {
-          cleaned[key] = obj[key];
-        }
+      if (reg1Index === -1 || reg2Index === -1) {
+        throw new Error('One or both registrations not found');
       }
-      return cleaned;
-    };
 
-    const cleanedRegistrations = registrations.map(reg => removeUndefined(reg));
+      if (registrations[reg1Index].originalRegistrationType) {
+        const { balancedWith, balancedAt, originalRegistrationType, ...rest1 } = registrations[reg1Index];
+        registrations[reg1Index] = {
+          ...rest1,
+          registrationType: registrations[reg1Index].originalRegistrationType
+        };
+      } else {
+        const { balancedWith, balancedAt, ...rest1 } = registrations[reg1Index];
+        registrations[reg1Index] = rest1;
+      }
 
-    await updateDoc(partyRef, {
-      registrations: cleanedRegistrations
+      if (registrations[reg2Index].originalRegistrationType) {
+        const { balancedWith, balancedAt, originalRegistrationType, ...rest2 } = registrations[reg2Index];
+        registrations[reg2Index] = {
+          ...rest2,
+          registrationType: registrations[reg2Index].originalRegistrationType
+        };
+      } else {
+        const { balancedWith, balancedAt, ...rest2 } = registrations[reg2Index];
+        registrations[reg2Index] = rest2;
+      }
+
+      const removeUndefined = (obj) => {
+        const cleaned = {};
+        for (const key in obj) {
+          if (obj[key] !== undefined) {
+            cleaned[key] = obj[key];
+          }
+        }
+        return cleaned;
+      };
+
+      const cleanedRegistrations = registrations.map(reg => removeUndefined(reg));
+
+      tx.update(partyRef, {
+        registrations: cleanedRegistrations
+      });
     });
-    
+
     // Clear cache - CRITICAL: Must clear all related caches
     await invalidateCache(`party_${partyId}`); // Clear partyById cache
     await invalidateCache(`balanceMatches_${partyId}`);
     await invalidateCache('activeParties'); // Clear all parties cache
-    
+
     return true;
   } catch (error) {
     throw error;
@@ -1513,24 +1527,48 @@ export const linkClientRegistrationsToUser = async (phoneNumber, userId, userDat
   }
 };
 
-export const saveBalanceMatches = async (partyId, balanceMatches) => {
+/**
+ * Persist a party's balanceMatches array.
+ *
+ * `balanceMatchesOrMutator` is either the full next array (legacy shape,
+ * kept for any external caller that genuinely wants a blind overwrite) or a
+ * function `(currentMatches) => nextMatches` computed from whatever is
+ * ACTUALLY in Firestore at commit time, inside a transaction. The function
+ * form is what every admin-panel call site uses now: two admins (or two
+ * browser tabs) editing the same party's matches around the same moment
+ * used to silently clobber each other, because each one read the array once
+ * on page load, mutated its own copy, and overwrote the whole field —
+ * whichever save landed second won, dropping the first admin's change with
+ * no error. The transaction re-reads the live document and re-runs the
+ * mutator against it, so Firestore retries automatically if the document
+ * changed since the read, and neither edit is lost.
+ */
+export const saveBalanceMatches = async (partyId, balanceMatchesOrMutator) => {
   const partyRef = doc(db, PARTIES_COLLECTION, partyId);
+  const isMutator = typeof balanceMatchesOrMutator === 'function';
 
-  // Diff against what's currently stored so a push only fires for pairs
-  // that are newly matched by this save, not on every subsequent edit of
-  // an already-matched pair (e.g. an admin fixing an unrelated match).
-  const prevSnap = await getDoc(partyRef);
-  const prevMatches = prevSnap.exists() ? (prevSnap.data().balanceMatches || []) : [];
+  let prevMatches = [];
+  let nextMatches = [];
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(partyRef);
+    const current = snap.exists() ? (snap.data().balanceMatches || []) : [];
+    prevMatches = current;
+    nextMatches = isMutator ? balanceMatchesOrMutator(current) : (balanceMatchesOrMutator || []);
+    tx.update(partyRef, {
+      balanceMatches: nextMatches,
+      balanceUpdatedAt: Timestamp.now()
+    });
+  });
+
+  // Diff against what was actually stored right before this save landed, so
+  // a push only fires for pairs that are newly matched by this save, not on
+  // every subsequent edit of an already-matched pair (e.g. an admin fixing
+  // an unrelated match).
   const wasMatchedPair = (m) =>
     prevMatches.some((p) => p.isMatched && !p.isCouple && p.malePhone === m.malePhone && p.femalePhone === m.femalePhone);
-  const newlyMatched = (balanceMatches || []).filter(
+  const newlyMatched = (nextMatches || []).filter(
     (m) => m.isMatched && !m.isCouple && m.malePhone && m.femalePhone && !wasMatchedPair(m)
   );
-
-  await updateDoc(partyRef, {
-    balanceMatches: balanceMatches,
-    balanceUpdatedAt: Timestamp.now()
-  });
 
   // updateDoc() resolves as soon as the write lands in Firestore's
   // persistent local cache (enabled in firebase/config.js), which happens
@@ -1579,6 +1617,11 @@ export const saveBalanceMatches = async (partyId, balanceMatches) => {
     pushAttempted: attempted.length,
     pushFailed: failed.length,
     pushError: failed[0]?.error || null,
+    // The array actually committed, computed from the live document inside
+    // the transaction — callers should sync their local state to this
+    // rather than to whatever they optimistically built it from, since a
+    // retried transaction may have re-run the mutator against newer data.
+    matches: nextMatches,
   };
 };
 

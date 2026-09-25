@@ -1,9 +1,7 @@
-import { doc, setDoc } from 'firebase/firestore';
-import { db } from './config';
 import { getPartySettings as getPartySettingsFromDataAccess, invalidateCache } from './dataAccess';
 import { normalizeRetentionHours } from '../../shared/partyExpiry.js';
+import { callAdminSettings } from '../utils/adminApi';
 
-const PARTY_SETTINGS_COLLECTION = 'settings';
 const PARTY_SETTINGS_DOC_ID = 'partySettings';
 
 /** Read the current party settings (cached). Always resolves with `{ retentionHours }`. */
@@ -23,8 +21,7 @@ export const updatePartySettings = async (settings) => {
   const sanitized = {
     retentionHours: normalizeRetentionHours(settings?.retentionHours),
   };
-  const settingsRef = doc(db, PARTY_SETTINGS_COLLECTION, PARTY_SETTINGS_DOC_ID);
-  await setDoc(settingsRef, sanitized, { merge: true });
+  await callAdminSettings('set-settings', { docId: PARTY_SETTINGS_DOC_ID, data: sanitized });
   await invalidateCache('partySettings');
   return sanitized;
 };

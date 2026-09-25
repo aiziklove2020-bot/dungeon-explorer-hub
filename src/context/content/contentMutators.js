@@ -1,5 +1,6 @@
 import { setByPath } from './defaults';
 import { logError } from '../../utils/logger';
+import { callAdminSettings } from '../../utils/adminApi';
 
 /**
  * Per-section update functions extracted from ContentContext. Each mutator
@@ -15,10 +16,7 @@ export function createContentMutators(setContent, getContent) {
   const updateHero = async (heroData) => {
     setContent((prev) => ({ ...prev, hero: { ...heroData } }));
     try {
-      const { doc, setDoc } = await import('firebase/firestore');
-      const { db: firestoreDb } = await import('../../firebase/config');
-      const contentRef = doc(firestoreDb, 'settings', 'content');
-      await setDoc(contentRef, { hero: heroData }, { merge: true });
+      await callAdminSettings('set-settings', { docId: 'content', data: { hero: heroData } });
     } catch (error) {
       logError('Content.updateHero', error);
     }
@@ -151,16 +149,16 @@ export function createContentMutators(setContent, getContent) {
     }));
 
     try {
-      const { doc, setDoc } = await import('firebase/firestore');
-      const { db: firestoreDb } = await import('../../firebase/config');
-      const contentRef = doc(firestoreDb, 'settings', 'content');
-      await setDoc(contentRef, {
-        about: {
-          ...aboutData,
-          infoCards: aboutData.infoCards ? aboutData.infoCards.map((card) => ({ ...card })) : [],
-          steps: aboutData.steps ? aboutData.steps.map((step) => ({ ...step })) : [],
-        },
-      }, { merge: true });
+      await callAdminSettings('set-settings', {
+        docId: 'content',
+        data: {
+          about: {
+            ...aboutData,
+            infoCards: aboutData.infoCards ? aboutData.infoCards.map((card) => ({ ...card })) : [],
+            steps: aboutData.steps ? aboutData.steps.map((step) => ({ ...step })) : [],
+          },
+        }
+      });
     } catch (error) {
       logError('Content.updateAbout', error);
     }
@@ -169,10 +167,7 @@ export function createContentMutators(setContent, getContent) {
   const updateContact = async (contactData) => {
     setContent((prev) => ({ ...prev, contact: { ...contactData } }));
     try {
-      const { doc, setDoc } = await import('firebase/firestore');
-      const { db: firestoreDb } = await import('../../firebase/config');
-      const contentRef = doc(firestoreDb, 'settings', 'content');
-      await setDoc(contentRef, { contact: { ...contactData } }, { merge: true });
+      await callAdminSettings('set-settings', { docId: 'content', data: { contact: { ...contactData } } });
     } catch (error) {
       logError('Content.updateContact', error);
     }
@@ -184,10 +179,7 @@ export function createContentMutators(setContent, getContent) {
       registration: { ...prev.registration, ...registrationData },
     }));
     try {
-      const { doc, setDoc } = await import('firebase/firestore');
-      const { db: firestoreDb } = await import('../../firebase/config');
-      const registrationRef = doc(firestoreDb, 'settings', 'registrationSettings');
-      await setDoc(registrationRef, { ...registrationData }, { merge: true });
+      await callAdminSettings('set-settings', { docId: 'registrationSettings', data: { ...registrationData } });
     } catch (error) {
       logError('Content.updateRegistration', error);
     }
@@ -208,9 +200,6 @@ export function createContentMutators(setContent, getContent) {
     }
 
     try {
-      const { doc, setDoc } = await import('firebase/firestore');
-      const { db: firestoreDb } = await import('../../firebase/config');
-
       const linksToPersist = Array.isArray(links)
         ? {
             instagram: links.find((l) => l && l.type === 'instagram')?.url || '',
@@ -227,8 +216,7 @@ export function createContentMutators(setContent, getContent) {
             facebook: links?.facebook || '',
           };
 
-      const socialLinksRef = doc(firestoreDb, 'settings', 'socialLinks');
-      await setDoc(socialLinksRef, linksToPersist, { merge: true });
+      await callAdminSettings('set-settings', { docId: 'socialLinks', data: linksToPersist });
     } catch (error) {
       logError('Content.updateSocialLinks', error);
     }
@@ -237,10 +225,7 @@ export function createContentMutators(setContent, getContent) {
   const updateWhatsappGroups = async (groups) => {
     setContent((prev) => ({ ...prev, whatsappGroups: { ...groups } }));
     try {
-      const { doc, setDoc } = await import('firebase/firestore');
-      const { db: firestoreDb } = await import('../../firebase/config');
-      const whatsappGroupsRef = doc(firestoreDb, 'settings', 'whatsappGroups');
-      await setDoc(whatsappGroupsRef, { ...groups }, { merge: true });
+      await callAdminSettings('set-settings', { docId: 'whatsappGroups', data: { ...groups } });
     } catch (error) {
       logError('Content.updateWhatsappGroups', error);
     }
@@ -272,10 +257,7 @@ export function createContentMutators(setContent, getContent) {
     setContent((prev) => ({ ...prev, [section]: updatedSection }));
 
     try {
-      const { doc, setDoc } = await import('firebase/firestore');
-      const { db: firestoreDb } = await import('../../firebase/config');
-      const contentRef = doc(firestoreDb, 'settings', 'content');
-      await setDoc(contentRef, { [section]: updatedSection }, { merge: true });
+      await callAdminSettings('set-settings', { docId: 'content', data: { [section]: updatedSection } });
     } catch (error) {
       console.error('Failed to persist content path:', path, error);
     }
