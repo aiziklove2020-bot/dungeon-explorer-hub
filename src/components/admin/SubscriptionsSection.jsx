@@ -264,6 +264,7 @@ const SubscriptionsSection = ({ showSaved }) => {
     if (!newPassword) return;
     if (newPassword.length < 4) { alert('סיסמה חייבת להכיל לפחות 4 תווים'); return; }
     try {
+      let loginNickname = existing?.nickname;
       if (existing) {
         await setForumUserPasswordWithReset(existing.id, newPassword);
       } else {
@@ -274,8 +275,14 @@ const SubscriptionsSection = ({ showSaved }) => {
         await approveForumUser(created.id);
         await linkForumUserToSiteUser(created.id, u.id);
         await setForumUserPasswordWithReset(created.id, newPassword);
+        loginNickname = created.nickname;
       }
-      alert('הסיסמה נשמרה. המנוי יחויב לבחור סיסמה חדשה בהתחברות הבאה.');
+      // The login screen (/login) asks for the NICKNAME, not the phone
+      // number — an admin who only hands the subscriber the password (the
+      // only thing this flow used to confirm back) leaves them unable to
+      // log in with no way to know why. Spell out both together so there's
+      // one clear thing to copy-paste and send.
+      alert(`נשמר!\n\nכינוי כניסה: ${loginNickname}\nסיסמה זמנית: ${newPassword}\n\nיש למסור למנוי את שני הפרטים האלה יחד — בדף ההתחברות הוא יזין את ה"כינוי" (לא את מספר הטלפון) ואת הסיסמה. הוא יחויב לבחור סיסמה חדשה בהתחברות הבאה.`);
       await loadLoginAccounts();
       showSaved();
     } catch (err) {
