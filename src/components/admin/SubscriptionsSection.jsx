@@ -26,6 +26,7 @@ import {
 import { getPendingSubscriptionRequests, resolveSubscriptionRequest, deleteSubscriptionRequest } from '../../firebase/subscriptionRequests';
 import {
   getAllForumUsers,
+  getForumUserByPhone,
   registerForumUser,
   approveForumUser,
   linkForumUserToSiteUser,
@@ -251,22 +252,41 @@ const SubscriptionsSection = ({ showSaved }) => {
   };
 
   /** Reset the subscriber's site-login password. Creates a login account for
-   *  them (linked to this subscriber) first if they don't have one yet, so
-   *  this is the one action an admin needs regardless of whether the person
-   *  ever registered a nickname themselves. */
+   *  them first if they don't have one yet, so this is the one action an
+   *  admin needs regardless of what state the account is in.
+   *
+   *  The underlying account lives in the `forumUsers` collection (a name
+   *  left over from when this app had a discussion forum — that feature is
+   *  gone, this collection is now just "site login accounts"). Real
+   *  subscribers log in with their PHONE NUMBER + password at /login.html;
+   *  it looks up this account by phone internally, so the admin never needs
+   *  to see or hand out the internal nickname.
+   *
+   *  Idempotent/self-healing: if an earlier attempt got interrupted partway
+   *  through (e.g. the approve or link step failed) it left a `forumUsers`
+   *  doc that isn't approved and/or isn't linked, but IS phone-matched.
+   *  Re-running this finds that record by phone (not just by the already-
+   *  linked map, which would miss it) and completes whatever's missing
+   *  instead of trying to create a second account and failing with
+   *  "phone already registered" — which used to leave the admin stuck with
+   *  no way to recover from this screen at all. */
   const handleResetLoginPassword = async (u) => {
-    const existing = loginAccountsByUserId[u.id];
+    let account = loginAccountsByUserId[u.id];
+    if (!account && u.phoneNumber) {
+      account = await getForumUserByPhone(u.phoneNumber).catch(() => null);
+    }
     const newPassword = prompt(
-      existing
+      account
         ? `הזן סיסמה זמנית חדשה עבור "${u.name}" (הוא יחויב לבחור סיסמה משלו בהתחברות הבאה):`
         : `ל"${u.name}" אין עדיין חשבון כניסה לאתר. הזן סיסמה זמנית ליצירת החשבון (הוא יחויב לבחור סיסמה משלו בהתחברות הבאה):`
     );
     if (!newPassword) return;
     if (newPassword.length < 4) { alert('סיסמה חייבת להכיל לפחות 4 תווים'); return; }
     try {
-      let loginNickname = existing?.nickname;
-      if (existing) {
-        await setForumUserPasswordWithReset(existing.id, newPassword);
+      if (account) {
+        if (account.isApproved === false) await approveForumUser(account.id);
+        if (!account.linkedUserId) await linkForumUserToSiteUser(account.id, u.id);
+        await setForumUserPasswordWithReset(account.id, newPassword);
       } else {
         const defaultNick = (u.name || u.phoneNumber?.slice(-4) || 'user').replace(/\s+/g, '_').slice(0, 30);
         const nickname = prompt('בחר כינוי לחשבון הכניסה של המנוי:', defaultNick);
@@ -275,14 +295,8 @@ const SubscriptionsSection = ({ showSaved }) => {
         await approveForumUser(created.id);
         await linkForumUserToSiteUser(created.id, u.id);
         await setForumUserPasswordWithReset(created.id, newPassword);
-        loginNickname = created.nickname;
       }
-      // The login screen (/login) asks for the NICKNAME, not the phone
-      // number — an admin who only hands the subscriber the password (the
-      // only thing this flow used to confirm back) leaves them unable to
-      // log in with no way to know why. Spell out both together so there's
-      // one clear thing to copy-paste and send.
-      alert(`נשמר!\n\nכינוי כניסה: ${loginNickname}\nסיסמה זמנית: ${newPassword}\n\nיש למסור למנוי את שני הפרטים האלה יחד — בדף ההתחברות הוא יזין את ה"כינוי" (לא את מספר הטלפון) ואת הסיסמה. הוא יחויב לבחור סיסמה חדשה בהתחברות הבאה.`);
+      alert(`נשמר!\n\nהמנוי יכול להתחבר עכשיו ב-login.html עם מספר הטלפון שלו (${u.phoneNumber}) והסיסמה הזמנית: ${newPassword}\n\nהוא יחויב לבחור סיסמה חדשה בהתחברות הבאה.`);
       await loadLoginAccounts();
       showSaved();
     } catch (err) {
