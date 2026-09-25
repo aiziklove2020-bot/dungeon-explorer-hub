@@ -18,9 +18,15 @@ import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 
 const db = getFirestore();
 
+// Kept in sync with src/utils/phone.js's normalizeIsraeliPhone.
 function normalizeIsraeliPhone(value) {
-  const digits = String(value || '').replace(/\D/g, '');
-  if (digits.startsWith('972') && digits.length === 12) return '0' + digits.slice(3);
+  let digits = String(value || '').replace(/\D/g, '');
+  if (digits.startsWith('00972')) digits = digits.slice(2);
+  if (digits.startsWith('972')) {
+    let rest = digits.slice(3);
+    if (rest.startsWith('0')) rest = rest.slice(1);
+    if (rest.length === 9) return '0' + rest;
+  }
   return digits;
 }
 
