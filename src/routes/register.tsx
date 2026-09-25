@@ -1,53 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PageLayout } from "@/components/PageLayout";
-import { ContentProvider } from "@/context/ContentContext";
-import { SiteAuthProvider } from "@/context/AuthContext";
-import { LanguageProvider } from "../i18n/LanguageContext";
-import RegistrationForm from "@/components/RegistrationForm";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// index.html's own "הצטרפות" (join) button links to /register, expecting
+// the real "request to become a subscriber" page (public/register.html,
+// which calls LPData.requestSubscription — the same subscriptionRequests
+// queue the admin panel's "בקשות ממתינות" reviews). This route instead
+// rendered a per-PARTY registration form (RegistrationForm, expecting
+// day/partyId query params that a generic "join" link never provides) —
+// the same class of stale link as the old /login and /tickets routes.
+// No live code links here with those params either: per-event registration
+// actually goes through public/register-event.html?partyId=... instead.
 export const Route = createFileRoute("/register")({
-  validateSearch: (search: Record<string, unknown>): { day?: string; partyId?: string } => ({
-    day: typeof search.day === "string" ? search.day : undefined,
-    partyId: typeof search.partyId === "string" ? search.partyId : undefined,
-  }),
-  head: () => ({
-    meta: [
-      { title: "הרשמה לאירוע | מסיבות ליברליות בישראל" },
-      {
-        name: "description",
-        content: "הרשמה למסיבות וארועי מסיבות ליברליות בישראל.",
-      },
-      {
-        property: "og:title",
-        content: "הרשמה לאירוע | מסיבות ליברליות בישראל",
-      },
-      { property: "og:url", content: "/register" },
-    ],
-    links: [{ rel: "canonical", href: "/register" }],
-  }),
-  component: RegisterPage,
+  beforeLoad: () => {
+    throw redirect({ href: "/register.html" });
+  },
 });
-
-function RegisterPage() {
-  const search = Route.useSearch();
-
-  return (
-    <PageLayout>
-      <LanguageProvider>
-        <ContentProvider>
-          <SiteAuthProvider>
-            <div className="mx-auto max-w-2xl px-4 py-12">
-              <RegistrationForm
-                onCancel={() => {
-                  window.location.href = "/";
-                }}
-                clickedDay={search.day}
-                partyId={search.partyId}
-              />
-            </div>
-          </SiteAuthProvider>
-        </ContentProvider>
-      </LanguageProvider>
-    </PageLayout>
-  );
-}
