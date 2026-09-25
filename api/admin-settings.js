@@ -50,9 +50,25 @@
  * POST { action: 'admin-make-admin', userId, username, password }
  * POST { action: 'admin-remove-admin', adminId }
  *
+ * Subscription actions (all operate on `users/{userId}.subscriptions`/`level`):
+ * POST { action: 'admin-add-subscription', userId, kind, tier }
+ * POST { action: 'admin-set-subscription-expiry', userId, kind, expiryDate, explicitTier }
+ * POST { action: 'admin-remove-subscription', userId, kind }
+ * POST { action: 'admin-set-level', userId, level, expiryDate }
+ *
+ * CRM actions (all operate on `users/{userId}.crm`, same rationale as above —
+ * firestore.rules denies plain clients any write to the `crm` field, since a
+ * forged crm.source/crm.payments entry would corrupt the admin panel's sales
+ * records with no way to tell it apart from a real payment):
+ * POST { action: 'admin-set-crm-source', userId, source, sourceNote }
+ * POST { action: 'admin-add-crm-payment', userId, record }
+ *   record: { date?, amount?, method?, note? } — server assigns id/createdAt.
+ * POST { action: 'admin-delete-crm-payment', userId, recordId }
+ *
  * Env: GOOGLE_APPLICATION_CREDENTIALS_JSON, ADMIN_API_SECRET
  */
 import bcrypt from 'bcryptjs';
+import { FieldValue } from 'firebase-admin/firestore';
 import { requireAdminApiSecret } from '../lib/apiAuth.js';
 import { getFirebaseAdmin } from '../lib/forumAuthApi.js';
 
@@ -565,6 +581,58 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
       return res.status(400).json({ error: `Unknown level: ${level}` });
+    }
+
+    // ── CRM actions ──────────────────────────────────────────────────────
+    // firestore.rules denies any client write that touches `crm` at all
+    // (see the comment on /users/{userId}) — previously anyone could
+    // updateDoc `crm.payments`/`crm.source` on ANY user doc (ids are
+    // enumerable, since non-admin user reads are open) with no admin
+    // involved, forging fabricated payment history or corrupting
+    // lead-attribution data. These three mirror src/firebase/crm.js
+    // exactly, via the Admin SDK.
+    const genId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    if (action === 'admin-set-crm-source') {
+      const { userId, source, sourceNote } = body;
+      if (!userId) return res.status(400).json({ error: 'Missing userId' });
+      await usersRef.doc(userId).update({
+        'crm.source': typeof source === 'string' ? source : '',
+        'crm.sourceNote': typeof sourceNote === 'string' ? sourceNote : ''
+      });
+      return res.status(200).json({ ok: true });
+    }
+
+    if (action === 'admin-add-crm-payment') {
+      const { userId, record } = body;
+      if (!userId) return res.status(400).json({ error: 'Missing userId' });
+      const r = record && typeof record === 'object' ? record : {};
+      const entry = {
+        id: genId(),
+        date: typeof r.date === 'string' && r.date ? r.date : new Date().toISOString().split('T')[0],
+        amount: r.amount ? Number(r.amount) : null,
+        method: typeof r.method === 'string' ? r.method : '',
+        note: typeof r.note === 'string' ? r.note.trim() : '',
+        createdAt: new Date().toISOString()
+      };
+      await usersRef.doc(userId).update({
+        'crm.payments': FieldValue.arrayUnion(entry)
+      });
+      return res.status(200).json({ ok: true, entry });
+    }
+
+    if (action === 'admin-delete-crm-payment') {
+      const { userId, recordId } = body;
+      if (!userId || !recordId) return res.status(400).json({ error: 'Missing userId or recordId' });
+      const snap = await usersRef.doc(userId).get();
+      if (!snap.exists) return res.status(404).json({ error: 'User not found' });
+      const payments = Array.isArray(snap.data()?.crm?.payments) ? snap.data().crm.payments : [];
+      const target = payments.find((p) => p.id === recordId);
+      if (!target) return res.status(200).json({ ok: true });
+      await usersRef.doc(userId).update({
+        'crm.payments': FieldValue.arrayRemove(target)
+      });
+      return res.status(200).json({ ok: true });
     }
 
     return res.status(400).json({ error: 'Unknown action' });
