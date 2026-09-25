@@ -50,4 +50,29 @@ describe('sanitizeRichHtml (production XSS regression)', () => {
     expect(out).toContain('<strong>');
     expect(out).toContain('<ul>');
   });
+
+  it('preserves Quill color/background/align/direction formatting', () => {
+    const html = '<p class="ql-align-center" style="color: rgb(230, 0, 0); background-color: rgb(255, 255, 0);">hi</p>';
+    const out = sanitizeRichHtml(html);
+    expect(out).toContain('ql-align-center');
+    expect(out).toContain('color: rgb(230, 0, 0)');
+    expect(out).toContain('background-color: rgb(255, 255, 0)');
+  });
+
+  it('strips arbitrary/Tailwind classes and layout-escaping inline styles (clickjacking/overlay)', () => {
+    const out = sanitizeRichHtml('<div class="fixed inset-0 z-50 bg-white">x</div>');
+    expect(out).not.toContain('fixed');
+    expect(out).not.toContain('inset-0');
+    expect(out).not.toContain('z-50');
+
+    const out2 = sanitizeRichHtml('<a href="https://example.com" style="position:fixed;inset:0;z-index:99999">click</a>');
+    expect(out2).not.toContain('position');
+    expect(out2).not.toContain('z-index');
+  });
+
+  it('strips unsafe values even under an allowed style property name', () => {
+    const out = sanitizeRichHtml('<p style="color: url(javascript:alert(1))">x</p>');
+    expect(out.toLowerCase()).not.toContain('url(');
+    expect(out.toLowerCase()).not.toContain('javascript:');
+  });
 });
