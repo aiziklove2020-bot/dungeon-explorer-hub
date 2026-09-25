@@ -45,6 +45,27 @@ service cloud.firestore {
     function isAdmin() {
       return request.auth != null && request.auth.token.admin == true;
     }
+    // A client write to `users` may still set `level`/`subscriptions` (the
+    // public registration flow auto-grants a hardcoded 'year' tier to new
+    // female registrants with no admin involved — see
+    // createUserFromRegistration in src/firebase/users.js), but never to the
+    // two privileged states admins grant deliberately: 'admin' level or a
+    // 'gold' (unlimited) tier. Those still need a real admin action; without
+    // this, anyone could updateDoc their own user doc straight to
+    // level:'admin' or a permanent gold subscription, the same class of bug
+    // fixed for isAdmin/password below.
+    function safeLevelUpdate() {
+      return !('level' in request.resource.data) || request.resource.data.level != 'admin';
+    }
+    function safeSubscriptionsUpdate() {
+      return !('subscriptions' in request.resource.data) ||
+        ((!('parties' in request.resource.data.subscriptions)
+          || request.resource.data.subscriptions.parties == null
+          || request.resource.data.subscriptions.parties.tier != 'gold')
+        && (!('exchangeParties' in request.resource.data.subscriptions)
+          || request.resource.data.subscriptions.exchangeParties == null
+          || request.resource.data.subscriptions.exchangeParties.tier != 'gold'));
+    }
 
     // Default-deny is implicit; explicitly listed collections only.
 
@@ -120,8 +141,10 @@ service cloud.firestore {
     //     denied outright rather than left open.
     match /users/{userId} {
       allow read: if resource.data.isAdmin != true;
-      allow create: if !request.resource.data.keys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password']);
-      allow update: if !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password']);
+      allow create: if !request.resource.data.keys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password'])
+                    && safeLevelUpdate() && safeSubscriptionsUpdate();
+      allow update: if !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password'])
+                    && safeLevelUpdate() && safeSubscriptionsUpdate();
       allow delete: if false;
     }
 
