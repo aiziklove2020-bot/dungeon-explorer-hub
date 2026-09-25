@@ -365,25 +365,7 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
     throw err;
   }
 
-  const partyData = await getPartyByIdFromDataAccess(partyId);
-  if (!partyData) {
-    throw new Error('Party not found');
-  }
   const partyRef = doc(db, PARTIES_COLLECTION, partyId);
-  const registrations = [...(partyData.registrations || [])];
-
-  const findByPhone = (phone) =>
-    registrations.find(
-      (r) => normalizePhone(r.phoneNumber) === phone || (r.userId && String(r.userId) === phone)
-    );
-  const maleExisting = findByPhone(malePhone);
-  const femaleExisting = findByPhone(femalePhone);
-
-  if (maleExisting && femaleExisting) {
-    const err = new Error('Both partners are already registered to this party');
-    err.code = COUPLE_BOTH_REGISTERED_ERROR;
-    throw err;
-  }
 
   const timestamp = Date.now();
   const randomStr = Math.random().toString(36).substring(2, 11);
@@ -434,75 +416,106 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
     };
   };
 
-  if (maleExisting && !femaleExisting) {
-    const updatedMale = {
-      ...maleExisting,
-      registrationType: 'couple',
-      coupleId,
-      partnerName: femaleRegistrationData.fullName,
-      partnerPhone: femalePhone
-    };
-    const femaleReg = await buildRegistration(
-      femaleRegistrationData,
-      'female',
-      maleRegistrationData.fullName,
-      malePhone
-    );
-    const maleMatch = (r) =>
-      normalizePhone(r.phoneNumber) === malePhone || (r.userId && String(r.userId) === malePhone);
-    const updated = registrations.map((r) => (maleMatch(r) ? updatedMale : r));
-    await updateDoc(partyRef, { registrations: [...updated, femaleReg] });
-    await invalidateCache(`party_${partyId}`);
-    await invalidateCache('activeParties');
-    // Women get free full access automatically — provision the account
-    // here instead of requiring a manual admin click. Best-effort.
-    createUserFromRegistration(femaleReg, 'registered', 'year').catch(() => {});
-    return { male: updatedMale, female: femaleReg };
-  }
+  // Reads the party's registrations fresh inside a transaction instead of
+  // the (possibly stale) dataAccess cache, and writes back inside the same
+  // transaction. Two of the three branches below do a full-array
+  // read-modify-write (converting one existing single registration into a
+  // couple) rather than an atomic arrayUnion — without this, a registration
+  // landing on this party between the read and the write (e.g. someone else
+  // registering, or an admin edit) could be silently dropped by the
+  // overwrite. Firestore retries the whole transaction automatically if the
+  // document changed since the read.
+  let result;
+  let accountRegForNewFemale = null;
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(partyRef);
+    if (!snap.exists()) throw new Error('Party not found');
+    const registrations = [...(snap.data().registrations || [])];
 
-  if (femaleExisting && !maleExisting) {
-    const updatedFemale = {
-      ...femaleExisting,
-      registrationType: 'couple',
-      coupleId,
-      partnerName: maleRegistrationData.fullName,
-      partnerPhone: malePhone
-    };
+    const findByPhone = (phone) =>
+      registrations.find(
+        (r) => normalizePhone(r.phoneNumber) === phone || (r.userId && String(r.userId) === phone)
+      );
+    const maleExisting = findByPhone(malePhone);
+    const femaleExisting = findByPhone(femalePhone);
+
+    if (maleExisting && femaleExisting) {
+      const err = new Error('Both partners are already registered to this party');
+      err.code = COUPLE_BOTH_REGISTERED_ERROR;
+      throw err;
+    }
+
+    if (maleExisting && !femaleExisting) {
+      const updatedMale = {
+        ...maleExisting,
+        registrationType: 'couple',
+        coupleId,
+        partnerName: femaleRegistrationData.fullName,
+        partnerPhone: femalePhone
+      };
+      const femaleReg = await buildRegistration(
+        femaleRegistrationData,
+        'female',
+        maleRegistrationData.fullName,
+        malePhone
+      );
+      const maleMatch = (r) =>
+        normalizePhone(r.phoneNumber) === malePhone || (r.userId && String(r.userId) === malePhone);
+      const updated = registrations.map((r) => (maleMatch(r) ? updatedMale : r));
+      tx.update(partyRef, { registrations: [...updated, femaleReg] });
+      accountRegForNewFemale = femaleReg;
+      result = { male: updatedMale, female: femaleReg };
+      return;
+    }
+
+    if (femaleExisting && !maleExisting) {
+      const updatedFemale = {
+        ...femaleExisting,
+        registrationType: 'couple',
+        coupleId,
+        partnerName: maleRegistrationData.fullName,
+        partnerPhone: malePhone
+      };
+      const maleReg = await buildRegistration(
+        maleRegistrationData,
+        'male',
+        femaleRegistrationData.fullName,
+        femalePhone
+      );
+      const femaleMatch = (r) =>
+        normalizePhone(r.phoneNumber) === femalePhone || (r.userId && String(r.userId) === femalePhone);
+      const updated = registrations.map((r) => (femaleMatch(r) ? updatedFemale : r));
+      tx.update(partyRef, { registrations: [...updated, maleReg] });
+      accountRegForNewFemale = updatedFemale;
+      result = { male: maleReg, female: updatedFemale };
+      return;
+    }
+
     const maleReg = await buildRegistration(
       maleRegistrationData,
       'male',
       femaleRegistrationData.fullName,
-      femalePhone
+      femaleRegistrationData.phoneNumber
     );
-    const femaleMatch = (r) =>
-      normalizePhone(r.phoneNumber) === femalePhone || (r.userId && String(r.userId) === femalePhone);
-    const updated = registrations.map((r) => (femaleMatch(r) ? updatedFemale : r));
-    await updateDoc(partyRef, { registrations: [...updated, maleReg] });
-    await invalidateCache(`party_${partyId}`);
-    await invalidateCache('activeParties');
-    createUserFromRegistration(updatedFemale, 'registered', 'year').catch(() => {});
-    return { male: maleReg, female: updatedFemale };
-  }
-
-  const maleReg = await buildRegistration(
-    maleRegistrationData,
-    'male',
-    femaleRegistrationData.fullName,
-    femaleRegistrationData.phoneNumber
-  );
-  const femaleReg = await buildRegistration(
-    femaleRegistrationData,
-    'female',
-    maleRegistrationData.fullName,
-    maleRegistrationData.phoneNumber
-  );
-  await updateDoc(partyRef, {
-    registrations: arrayUnion(maleReg, femaleReg)
+    const femaleReg = await buildRegistration(
+      femaleRegistrationData,
+      'female',
+      maleRegistrationData.fullName,
+      maleRegistrationData.phoneNumber
+    );
+    tx.update(partyRef, { registrations: arrayUnion(maleReg, femaleReg) });
+    accountRegForNewFemale = femaleReg;
+    result = { male: maleReg, female: femaleReg };
   });
+
   await invalidateCache(`party_${partyId}`);
   await invalidateCache('activeParties');
-  createUserFromRegistration(femaleReg, 'registered', 'year').catch(() => {});
-  return { male: maleReg, female: femaleReg };
+  // Women get free full access automatically — provision the account here
+  // instead of requiring a manual admin click. Best-effort.
+  if (accountRegForNewFemale) {
+    createUserFromRegistration(accountRegForNewFemale, 'registered', 'year').catch(() => {});
+  }
+  return result;
 };
 
 export const createBalance = async (partyId) => {
@@ -871,14 +884,18 @@ export const adminRemoveUserFromParty = async (partyId, userIdOrPhone) => {
     if (!partyId) {
       throw new Error('Party ID is required');
     }
-    // Use dataAccess to get party data (with caching) – only this party's document
-    const partyData = await getPartyByIdFromDataAccess(partyId);
-    
-    if (!partyData) {
-      throw new Error('Party not found');
-    }
-    
     const partyRef = doc(db, PARTIES_COLLECTION, partyId);
+
+    // Reads the live document inside a transaction instead of the
+    // (possibly stale) dataAccess cache — this does a full-array
+    // read-modify-write of both registrations and balanceMatches (removing
+    // the user, un-pairing their balance/couple partner), so a concurrent
+    // registration or edit landing between the read and the write could
+    // otherwise be silently dropped by the overwrite.
+    await runTransaction(db, async (tx) => {
+    const snap = await tx.get(partyRef);
+    if (!snap.exists()) throw new Error('Party not found');
+    const partyData = snap.data();
     let registrations = [...(partyData.registrations || [])];
 
     const userRegistrationIndex = registrations.findIndex(
@@ -1008,7 +1025,8 @@ export const adminRemoveUserFromParty = async (partyId, userIdOrPhone) => {
       updateData.balanceUpdatedAt = Timestamp.now();
     }
 
-    await updateDoc(partyRef, updateData);
+    tx.update(partyRef, updateData);
+    });
 
     // Clear cache - must invalidate party_${partyId} so next delete doesn't use stale registrations
     await invalidateCache(`party_${partyId}`);
@@ -1039,39 +1057,47 @@ export const swapCoupleRegistrationPartner = async (partyId, coupleId, sideGende
   const fullName = String(newPartner?.fullName || '').trim();
   if (!fullName) throw new Error('נא להזין שם מלא לבן/בת הזוג החדש/ה');
 
-  const partyData = await getPartyByIdFromDataAccess(partyId);
-  if (!partyData) throw new Error('Party not found');
   const partyRef = doc(db, PARTIES_COLLECTION, partyId);
-  const registrations = [...(partyData.registrations || [])];
 
-  const sideIndex = registrations.findIndex((r) => r.coupleId === coupleId && r.gender === sideGender);
-  if (sideIndex === -1) throw new Error('לא נמצאה רשומת הזוג לצד המבוקש');
-  const otherIndex = registrations.findIndex((r) => r.coupleId === coupleId && r.gender !== sideGender);
+  // Reads the live document inside a transaction instead of the (possibly
+  // stale) dataAccess cache — this is a full-array read-modify-write of
+  // registrations, so a concurrent registration or edit landing between the
+  // read and the write could otherwise be silently dropped by the overwrite.
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(partyRef);
+    if (!snap.exists()) throw new Error('Party not found');
+    const registrations = [...(snap.data().registrations || [])];
 
-  const alreadyRegisteredElsewhere = registrations.some(
-    (r, i) => i !== sideIndex && r.phoneNumber === cleanPhone
-  );
-  if (alreadyRegisteredElsewhere) throw new Error('מספר הטלפון הזה כבר רשום למסיבה הזו');
+    const sideIndex = registrations.findIndex((r) => r.coupleId === coupleId && r.gender === sideGender);
+    if (sideIndex === -1) throw new Error('לא נמצאה רשומת הזוג לצד המבוקש');
+    const otherIndex = registrations.findIndex((r) => r.coupleId === coupleId && r.gender !== sideGender);
 
-  const old = registrations[sideIndex];
-  registrations[sideIndex] = {
-    ...old,
-    fullName,
-    userName: fullName,
-    phoneNumber: cleanPhone,
-    telegramUsername: newPartner?.telegramUsername || '',
-    userId: null,
-    autoApproved: false,
-  };
-  if (otherIndex !== -1) {
-    registrations[otherIndex] = {
-      ...registrations[otherIndex],
-      partnerName: fullName,
-      partnerPhone: cleanPhone,
+    const alreadyRegisteredElsewhere = registrations.some(
+      (r, i) => i !== sideIndex && r.phoneNumber === cleanPhone
+    );
+    if (alreadyRegisteredElsewhere) throw new Error('מספר הטלפון הזה כבר רשום למסיבה הזו');
+
+    const old = registrations[sideIndex];
+    registrations[sideIndex] = {
+      ...old,
+      fullName,
+      userName: fullName,
+      phoneNumber: cleanPhone,
+      telegramUsername: newPartner?.telegramUsername || '',
+      userId: null,
+      autoApproved: false,
     };
-  }
+    if (otherIndex !== -1) {
+      registrations[otherIndex] = {
+        ...registrations[otherIndex],
+        partnerName: fullName,
+        partnerPhone: cleanPhone,
+      };
+    }
 
-  await updateDoc(partyRef, { registrations });
+    tx.update(partyRef, { registrations });
+  });
+
   await invalidateCache(`party_${partyId}`);
   await invalidateCache('activeParties');
   return true;
@@ -1079,49 +1105,51 @@ export const swapCoupleRegistrationPartner = async (partyId, coupleId, sideGende
 
 export const updateRegistrationType = async (partyId, userIdOrPhone, newRegistrationType) => {
   try {
-    // Use dataAccess to get party data (with caching)
-    const partyData = await getPartyByIdFromDataAccess(partyId);
-    
-    if (!partyData) {
-      throw new Error('Party not found');
-    }
-    
     const partyRef = doc(db, PARTIES_COLLECTION, partyId);
-    let registrations = [...(partyData.registrations || [])];
 
-    const regIndex = registrations.findIndex(
-      reg => reg.userId === userIdOrPhone || reg.phoneNumber === userIdOrPhone
-    );
-    
-    if (regIndex === -1) {
-      throw new Error('User not registered to this party');
-    }
+    // Reads the live document inside a transaction instead of the
+    // (possibly stale) dataAccess cache — full-array read-modify-write of
+    // registrations, so a concurrent registration or edit landing between
+    // the read and the write could otherwise be silently dropped.
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(partyRef);
+      if (!snap.exists()) throw new Error('Party not found');
+      let registrations = [...(snap.data().registrations || [])];
 
-    const removeUndefined = (obj) => {
-      const cleaned = {};
-      for (const key in obj) {
-        if (obj[key] !== undefined) {
-          cleaned[key] = obj[key];
-        }
+      const regIndex = registrations.findIndex(
+        reg => reg.userId === userIdOrPhone || reg.phoneNumber === userIdOrPhone
+      );
+
+      if (regIndex === -1) {
+        throw new Error('User not registered to this party');
       }
-      return cleaned;
-    };
 
-    registrations[regIndex] = removeUndefined({
-      ...registrations[regIndex],
-      registrationType: newRegistrationType
+      const removeUndefined = (obj) => {
+        const cleaned = {};
+        for (const key in obj) {
+          if (obj[key] !== undefined) {
+            cleaned[key] = obj[key];
+          }
+        }
+        return cleaned;
+      };
+
+      registrations[regIndex] = removeUndefined({
+        ...registrations[regIndex],
+        registrationType: newRegistrationType
+      });
+
+      const cleanedRegistrations = registrations.map(reg => removeUndefined(reg));
+
+      tx.update(partyRef, {
+        registrations: cleanedRegistrations
+      });
     });
 
-    const cleanedRegistrations = registrations.map(reg => removeUndefined(reg));
-
-    await updateDoc(partyRef, {
-      registrations: cleanedRegistrations
-    });
-    
     // Clear cache - CRITICAL: Must clear all related caches
     await invalidateCache(`party_${partyId}`); // Clear partyById cache
     await invalidateCache('activeParties'); // Clear all parties cache
-    
+
     return true;
   } catch (error) {
     throw error;
