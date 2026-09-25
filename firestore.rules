@@ -75,11 +75,20 @@ service cloud.firestore {
     // real relationship between the two accounts. get() here reads a
     // different collection during this write's own authorization check,
     // which is allowed to bypass that target document's rules.
+    // BUG (found live, breaking every single forum-to-site-user link since
+    // this shipped): `.data.isAdmin` throws a rule-evaluation error when the
+    // field is simply ABSENT on the doc — true for every regular subscriber,
+    // since only actual admin accounts ever set `isAdmin` at all. A runtime
+    // error inside a security rule denies the whole request, so linking a
+    // forum account to ANY normal (non-admin) site user — the overwhelming
+    // majority of every link, self-service or admin-driven — was rejected
+    // with permission-denied. Use `.get(field, default)` (safe on a missing
+    // key) instead of dot access.
     function targetUserIsAdmin(uid) {
       return uid != null &&
         exists(/databases/$(database)/documents/users/$(uid)) &&
-        (get(/databases/$(database)/documents/users/$(uid)).data.isAdmin == true ||
-         get(/databases/$(database)/documents/users/$(uid)).data.level == 'admin');
+        (get(/databases/$(database)/documents/users/$(uid)).data.get('isAdmin', false) == true ||
+         get(/databases/$(database)/documents/users/$(uid)).data.get('level', null) == 'admin');
     }
 
     // Default-deny is implicit; explicitly listed collections only.
