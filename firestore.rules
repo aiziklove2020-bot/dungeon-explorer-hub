@@ -125,13 +125,16 @@ service cloud.firestore {
     }
 
     // ── Advertisers (self-signup, admin-approved) ──────────────────────
+    // Contains a bcrypt password hash. Writes go through api/advertiser-auth.js
+    // now (Admin SDK) instead of the client SDK — this used to be
+    // `allow read, write: if true`, which let anyone read every advertiser's
+    // phone + password hash directly (offline brute-force) or write a doc
+    // with `status: 'approved'` themselves, bypassing admin approval
+    // entirely. isAdmin() can't actually be satisfied by any client today
+    // (no Firebase Auth), so this is effectively `if false` for the
+    // browser, with the API route as the one deliberate exception.
     match /advertisers/{docId} {
-      // Contains a bcrypt password hash — do not expose broadly once
-      // Firebase Auth lands. Open read/write for now, matching the same
-      // no-auth-yet pattern as every other collection in this file.
-      // TODO(auth): restrict to isAdmin() / the owning advertiser.
-      allow read: if true;
-      allow write: if true;
+      allow read, write: if isAdmin();
     }
 
     // Writes go through api/admin-settings.js now (see the comment on
@@ -159,36 +162,29 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // ── Store ───────────────────────────────────────────────────────────
+    // ── Store (feature removed from the app — see git history) ──────────
+    // No UI reads or writes these anymore, but the Firestore project config
+    // is public (embedded in every page), so anyone could still hit these
+    // collections directly via the SDK/REST API while the rules stayed
+    // open — unlimited free-form writes here is a storage/billing abuse
+    // vector with zero product benefit. Denied outright rather than left
+    // open "just in case"; restore real rules if the feature ever returns.
     match /storeProducts/{docId} {
-      allow read: if true;
-      // TODO(auth): restrict to isAdmin().
-      allow write: if true;
+      allow read, write: if false;
     }
 
     match /storeOrders/{docId} {
-      allow read: if true;
-      allow create: if hasAll(['items', 'createdAt'])
-                    && request.resource.data.items is list
-                    && request.resource.data.items.size() > 0
-                    && request.resource.data.items.size() <= 100;
-      // Status changes only; cannot edit items after creation.
-      allow update: if affectedOnly(['status', 'notes', 'updatedAt', 'paidAt', 'shippedAt']);
-      allow delete: if false;
+      allow read, write: if false;
     }
 
-    // ── Workshops ───────────────────────────────────────────────────────
+    // ── Workshops (feature removed from the app — see git history) ──────
+    // Same reasoning as Store above.
     match /workshops/{workshopId} {
-      allow read: if true;
-      // TODO(auth): restrict to isAdmin().
-      allow write: if true;
+      allow read, write: if false;
     }
 
     match /workshopRegistrations/{docId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if affectedOnly(['status', 'notes', 'updatedAt', 'cancelled']);
-      allow delete: if false;
+      allow read, write: if false;
     }
 
     // ── Leads (public "רוצה להיות מנוי?" banner submissions) ─────────────
@@ -442,43 +438,39 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // ── Live chat ───────────────────────────────────────────────────────
-    // This was originally designed to require real Firebase Auth (a custom
-    // token minted by the issueForumChatToken Cloud Function, carrying
-    // forumUid/forumAdmin/chatGlobalMod claims). That Cloud Function was
-    // never deployed for this project (requires the paid Blaze plan), so
-    // request.auth is always null here — the client instead runs in its
-    // built-in direct-Firestore-write fallback mode (VITE_CHAT_CALLABLE_SEND=false),
-    // identifying users via the app-level forumUser.id the same way every
-    // other collection in this file already does.
-    // TODO(auth): reinstate the stricter request.auth-based rules above (see
-    // git history) if/when Cloud Functions get deployed on a paid plan.
+    // ── Live chat (feature removed from the app — see git history) ──────
+    // No UI reads or writes any of these collections anymore. They were
+    // left at `allow read, write: if true` with zero validation after
+    // removal — since the Firestore project config is public, that was a
+    // live, unauthenticated write hole (unlimited free-form documents,
+    // fabricated mute/report records) with no product using it. Denied
+    // outright; restore real rules if the feature is rebuilt.
     match /chatRooms/{roomId} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
 
     match /chatRooms/{roomId}/messages/{messageId} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
 
     match /chatRooms/{roomId}/messages/{messageId}/reactions/{reactionId} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
 
     match /chatRooms/{roomId}/members/{memberId} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
 
     match /chatRooms/{roomId}/typing/{userId} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
 
     match /chatMutes/{userId} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
 
     match /chatMessageReports/{reportId} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

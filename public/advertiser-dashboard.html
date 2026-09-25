@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const original = btn.textContent;
         btn.textContent = "שולח...";
         try {
-          const result = await window.LPData.publishPartyToTelegram(id);
+          const result = await window.LPData.publishPartyToTelegram(u.id, id);
           if (result.failures && result.failures.length) {
             alert(`פורסם ל-${result.sentCount}/${result.totalDestinations} ערוצים. נכשל: ${result.failures.join(", ")}`);
           } else {

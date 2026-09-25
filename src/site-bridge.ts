@@ -445,10 +445,16 @@ async function deleteAdvertiserParty(advertiserId: string, partyId: string) {
  * raw `createdBy`/`imageURL` fields the Telegram formatter needs) so the same
  * advertiser-allowlist filter in sendManualPartyAnnouncement sees the real
  * `createdBy`, and can never reach a channel that advertiser isn't allowed into.
+ *
+ * Unlike sendManualPartyAnnouncement's own channel filtering, nothing here
+ * used to check WHO was calling — any visitor could force-broadcast ANY
+ * party (someone else's, or one not ready yet) straight from the browser
+ * console. Same ownership check as updateAdvertiserParty/deleteAdvertiserParty
+ * above.
  */
-async function publishPartyToTelegram(partyId: string) {
-  const party = await getPartyById(partyId);
-  if (!party) throw new Error("המסיבה לא נמצאה");
+async function publishPartyToTelegram(advertiserId: string, partyId: string) {
+  const party: any = await getPartyById(partyId);
+  if (!party || party.createdBy !== advertiserId) throw new Error("המסיבה לא נמצאה");
   const result = await sendManualPartyAnnouncement(party);
   await updateParty(partyId, { manualTelegramPublishedAt: new Date().toISOString() });
   return result;
