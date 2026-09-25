@@ -91,10 +91,38 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // The site's admin-login system stores a bcrypt password hash on this
+    // same collection (isAdmin/adminUsername/password/isDefaultAdmin), right
+    // alongside every regular subscriber. This used to be
+    // `allow read, write: if true` — the worst hole found in this whole
+    // audit: any visitor could open devtools and run
+    // `updateDoc(doc(db,'users','<their own id>'), { isAdmin: true })` to
+    // grant themselves full admin-panel access with no password at all, or
+    // pull every admin's bcrypt hash for offline brute-forcing (the login
+    // check used to run bcrypt.compare in the browser, which only works if
+    // the hash is client-readable).
+    //
+    // Fix, without a data migration that could lock the real admin out:
+    //   - `allow read` denies any doc where `isAdmin == true` outright — the
+    //     overwhelming majority of docs (regular subscribers) stay readable,
+    //     since huge parts of the app (subscription checks, CRM, forum
+    //     linking) read this collection directly and none of that is
+    //     admin-sensitive. Admin-account reads now go through
+    //     api/admin-settings.js (Admin SDK, bypasses this rule entirely).
+    //   - `allow create/update` deny touching isAdmin/isDefaultAdmin/
+    //     adminUsername/password at all — every legitimate write to those
+    //     fields (login's bcrypt auto-upgrade, promote/demote, password
+    //     reset) now goes through that same API. No other client write path
+    //     in this codebase ever touches these four fields (verified against
+    //     every setDoc/updateDoc call on this collection).
+    //   - `allow delete` was implicitly allowed by the old `write: if true`
+    //     but nothing in the app ever deletes a user doc from the client —
+    //     denied outright rather than left open.
     match /users/{userId} {
-      allow read: if true;
-      // TODO(auth): restrict to isAdmin() / owner.
-      allow write: if true;
+      allow read: if resource.data.isAdmin != true;
+      allow create: if !request.resource.data.keys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password']);
+      allow update: if !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password']);
+      allow delete: if false;
     }
 
     // ── Subscription requests (public "I want to subscribe" form) ──────
@@ -240,48 +268,44 @@ service cloud.firestore {
     }
 
     // ── Forum ───────────────────────────────────────────────────────────
+    // No code anywhere in this repo reads or writes this collection (the
+    // forum has no category-management UI) — same reasoning as the
+    // Store/Workshops/live-chat collections above: an open write rule on a
+    // dead collection is still a live abuse vector since the Firestore
+    // config is public. Denied outright.
     match /forumSections/{docId} {
-      allow read: if true;
-      // TODO(auth): restrict to isAdmin().
-      allow write: if true;
+      allow read, write: if false;
     }
 
+    // forumTopics/forumReplies: no code anywhere in this repo reads or
+    // writes either collection (this old-style forum — sections/topics/
+    // replies — was superseded by the live chat + blog comments). Their
+    // rules previously allowed unrestricted `delete: if true` (anyone could
+    // wipe any topic/reply, not just its author or an admin) on top of
+    // being otherwise unused — same reasoning as forumSections above.
+    // Denied outright.
     match /forumTopics/{docId} {
-      allow read: if true;
-      allow create: if hasAll(['sectionId', 'title', 'content', 'authorId', 'authorName'])
-                    && isNonEmpty('title')
-                    && maxLen('title', 150)
-                    && maxLen('content', 20000)
-                    && isString('authorId');
-      // Authorship and section identity must not change after creation.
-      allow update: if request.resource.data.authorId == resource.data.authorId
-                    && request.resource.data.sectionId == resource.data.sectionId
-                    && (!('content' in request.resource.data) || request.resource.data.content.size() <= 20000)
-                    && (!('title' in request.resource.data) || request.resource.data.title.size() <= 150);
-      // TODO(auth): restrict to isAdmin() or author.
-      allow delete: if true;
+      allow read, write: if false;
     }
 
     match /forumReplies/{docId} {
-      allow read: if true;
-      allow create: if hasAll(['topicId', 'content', 'authorId', 'authorName'])
-                    && isNonEmpty('content')
-                    && maxLen('content', 20000)
-                    && isString('authorId');
-      allow update: if request.resource.data.authorId == resource.data.authorId
-                    && request.resource.data.topicId == resource.data.topicId
-                    && (!('content' in request.resource.data) || request.resource.data.content.size() <= 20000);
-      // TODO(auth): restrict to isAdmin() or author.
-      allow delete: if true;
+      allow read, write: if false;
     }
 
     match /forumUsers/{docId} {
       // Public read exposes hashed passwords. TODO(auth): replace with Firebase Auth.
       allow read: if true;
+      // A create can set role/isBlocked/isApproved (registerForumUser does,
+      // to 'user'/false/false) but never to a privileged/bypassing value —
+      // otherwise the update rule's protection below could be sidestepped
+      // entirely by just creating the doc already-privileged.
       allow create: if hasAll(['nickname', 'password'])
                     && isNonEmpty('nickname')
                     && maxLen('nickname', 30)
-                    && isNonEmpty('password');
+                    && isNonEmpty('password')
+                    && (!('role' in request.resource.data) || request.resource.data.role == 'user')
+                    && (!('isBlocked' in request.resource.data) || request.resource.data.isBlocked == false)
+                    && (!('isApproved' in request.resource.data) || request.resource.data.isApproved == false);
       // Identity fields must not change post-create; password change limited.
       // `nicknameLower` is denormalized from `nickname` for case-insensitive
       // lookup and must stay pinned in lockstep with it (legacy docs without
@@ -292,6 +316,15 @@ service cloud.firestore {
       // verified. We compare against `resource.data` so a partial update
       // (e.g. profile bio edit) doesn't fail just because the post-write
       // doc still carries the existing `emailVerified == true`.
+      // `role` and `isBlocked` used to have NO protection at all here — any
+      // forum account could self-promote via a plain client updateDoc (e.g.
+      // {role: 'forumAdmin'}, which functions/issueForumChatToken.js reads
+      // to grant chatGlobalMod over the live chat), or clear its own block.
+      // `isApproved` gates whether a new signup can log in at all
+      // (loginForumUser) and had the same gap. All three are now pinned to
+      // their existing value, same treatment as emailVerified below — only
+      // api/forum-auth.js's admin-set-role/-blocked/-approved actions
+      // (Admin SDK) can change them.
       allow update: if request.resource.data.nickname == resource.data.nickname
                     && (!('nicknameLower' in request.resource.data)
                         || !('nicknameLower' in resource.data)
@@ -306,7 +339,16 @@ service cloud.firestore {
                             )
                        )
                     && (!('createdAt' in request.resource.data)
-                        || request.resource.data.createdAt == resource.data.createdAt);
+                        || request.resource.data.createdAt == resource.data.createdAt)
+                    && (!('role' in request.resource.data)
+                        || !('role' in resource.data)
+                        || request.resource.data.role == resource.data.role)
+                    && (!('isBlocked' in request.resource.data)
+                        || !('isBlocked' in resource.data)
+                        || request.resource.data.isBlocked == resource.data.isBlocked)
+                    && (!('isApproved' in request.resource.data)
+                        || !('isApproved' in resource.data)
+                        || request.resource.data.isApproved == resource.data.isApproved);
       // Forum user deletion is admin-driven from the Users tab. Until Firebase
       // Auth + custom claims land we can't enforce isAdmin() at the rule
       // layer, so this matches the existing pattern used for other

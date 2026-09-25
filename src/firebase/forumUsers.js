@@ -335,32 +335,49 @@ export const deleteForumUser = async (id) => {
   invalidateForumUserCache(id);
 };
 
-export const setForumUserRole = async (id, role) => {
-  await updateDoc(doc(db, COL, id), { role });
+// role/isBlocked/isApproved are all pinned to their existing value by
+// firestore.rules on every client update (see the comment there) — before
+// that fix, any forum account could self-promote to forumAdmin (which
+// functions/issueForumChatToken.js reads to grant chatGlobalMod over the
+// live chat) or clear its own block/approval-pending flag with a single
+// client-side updateDoc. All three now go through api/forum-auth.js's
+// Admin SDK, same pattern as adminMarkForumEmailVerified below.
+const callAdminForumField = async (action, id, field, value, notFoundMessage, genericMessage) => {
+  if (!id) throw new Error('חסר משתמש');
+  const { adminAuthHeader } = await import('../utils/adminApi');
+  const res = await fetch(`/api/forum-auth?action=${action}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminAuthHeader() },
+    body: JSON.stringify({ forumUserId: id, [field]: value }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error === 'not_found' ? notFoundMessage : genericMessage);
+  }
   invalidateForumUserCache(id);
+};
+
+export const setForumUserRole = async (id, role) => {
+  await callAdminForumField('admin-set-role', id, 'role', role, 'משתמש לא נמצא', 'שגיאה בעדכון הרשאה');
 };
 
 export const blockForumUser = async (id) => {
-  await updateDoc(doc(db, COL, id), { isBlocked: true });
-  invalidateForumUserCache(id);
+  await callAdminForumField('admin-set-blocked', id, 'isBlocked', true, 'משתמש לא נמצא', 'שגיאה בחסימת משתמש');
 };
 
 export const unblockForumUser = async (id) => {
-  await updateDoc(doc(db, COL, id), { isBlocked: false });
-  invalidateForumUserCache(id);
+  await callAdminForumField('admin-set-blocked', id, 'isBlocked', false, 'משתמש לא נמצא', 'שגיאה בביטול חסימה');
 };
 
 export const approveForumUser = async (id) => {
-  await updateDoc(doc(db, COL, id), { isApproved: true });
-  invalidateForumUserCache(id);
+  await callAdminForumField('admin-set-approved', id, 'isApproved', true, 'משתמש לא נמצא', 'שגיאה באישור משתמש');
 };
 
 /** Explicitly flags an account (including a legacy one predating this field
  *  entirely) as not approved — the admin's way to override the "no field =
  *  grandfathered in" default for a specific account. */
 export const revokeForumUserApproval = async (id) => {
-  await updateDoc(doc(db, COL, id), { isApproved: false });
-  invalidateForumUserCache(id);
+  await callAdminForumField('admin-set-approved', id, 'isApproved', false, 'משתמש לא נמצא', 'שגיאה בביטול אישור');
 };
 
 export const linkForumUserToSiteUser = async (forumUserId, siteUserId) => {
