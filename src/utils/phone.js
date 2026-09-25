@@ -24,9 +24,20 @@ export function isValidIsraeliPhone(value) {
  * Telegram contacts), which the canonical form doesn't accept as-is.
  */
 export function normalizeIsraeliPhone(value) {
-  const digits = cleanPhone(value);
-  if (digits.startsWith('972') && digits.length === 12) {
-    return '0' + digits.slice(3);
+  let digits = cleanPhone(value);
+  // "00" international access prefix before the country code (e.g. dialed
+  // as 00972501234567) — strip it so the 972-handling below still applies.
+  if (digits.startsWith('00972')) {
+    digits = digits.slice(2);
+  }
+  if (digits.startsWith('972')) {
+    let rest = digits.slice(3);
+    // A stray leading 0 kept after the country code (e.g. +972-050-1234567,
+    // copied from a contact card that mixed the local and international
+    // forms) — the mobile number itself never starts with 0 once the
+    // country code is present.
+    if (rest.startsWith('0')) rest = rest.slice(1);
+    if (rest.length === 9) return '0' + rest;
   }
   return digits;
 }

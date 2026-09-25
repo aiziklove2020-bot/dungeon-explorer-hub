@@ -394,7 +394,17 @@ const MatchesSection = ({ showSaved }) => {
       if (clients.length > 0) {
       }
 
-      const existingBalance = partyBalances[party.id] || [];
+      // Read fresh rather than trusting local `partyBalances` state, which is
+      // only populated once BalanceTables' lazy onLoadBalance effect resolves
+      // — clicking "צור איזון" before that finished used to see an empty
+      // array here, treat every already-matched person as unmatched, and
+      // compute brand-new pairs for them. saveBalanceMatches then merged
+      // those spurious pairs alongside the real (still-current) ones it read
+      // fresh inside its own transaction, leaving the same phone number in
+      // two simultaneous "matched" entries with two different partners.
+      // getBalanceMatches is cache-backed, so this is a no-op fetch once
+      // onLoadBalance has already primed it.
+      const existingBalance = await getBalanceMatches(party.id);
 
       const matchedPhones = new Set();
       existingBalance.forEach(match => {

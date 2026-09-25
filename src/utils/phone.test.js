@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cleanPhone, isValidIsraeliPhone } from './phone';
+import { cleanPhone, isValidIsraeliPhone, normalizeIsraeliPhone } from './phone';
 
 describe('cleanPhone', () => {
   it('strips everything that is not a digit', () => {
@@ -48,5 +48,31 @@ describe('isValidIsraeliPhone', () => {
   it('handles nullish input safely', () => {
     expect(isValidIsraeliPhone(undefined)).toBe(false);
     expect(isValidIsraeliPhone(null)).toBe(false);
+  });
+});
+
+describe('normalizeIsraeliPhone', () => {
+  it('leaves an already-local number untouched', () => {
+    expect(normalizeIsraeliPhone('0501234567')).toBe('0501234567');
+  });
+
+  it('converts the standard 972 international prefix (12 digits)', () => {
+    expect(normalizeIsraeliPhone('+972501234567')).toBe('0501234567');
+    expect(normalizeIsraeliPhone('972-50-123-4567')).toBe('0501234567');
+  });
+
+  it('converts a 972 prefix with a stray leading 0 kept on the mobile part (13 digits)', () => {
+    expect(normalizeIsraeliPhone('+972-050-1234567')).toBe('0501234567');
+  });
+
+  it('strips the 00 international access prefix before the country code (14 digits)', () => {
+    expect(normalizeIsraeliPhone('00972501234567')).toBe('0501234567');
+    expect(normalizeIsraeliPhone('00-972-050-1234567')).toBe('0501234567');
+  });
+
+  it('handles nullish/empty input safely', () => {
+    expect(normalizeIsraeliPhone(undefined)).toBe('');
+    expect(normalizeIsraeliPhone(null)).toBe('');
+    expect(normalizeIsraeliPhone('')).toBe('');
   });
 });
