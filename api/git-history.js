@@ -16,7 +16,7 @@
  *
  * Env: DEPLOY_STATUS_SECRET (must match the secret sent by the Action), GOOGLE_APPLICATION_CREDENTIALS_JSON
  */
-import { requireAdminApiSecret } from '../lib/apiAuth.js';
+import { requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 
 function cleanCommitMessage(msg) {
   if (typeof msg !== 'string') return msg;
@@ -44,7 +44,7 @@ async function handleRecordDeployStatus(req, res) {
   }
 
   const { secret, commitSha, tag, timestamp } = body;
-  if (secret !== expectedSecret) {
+  if (!safeEq(secret, expectedSecret)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 

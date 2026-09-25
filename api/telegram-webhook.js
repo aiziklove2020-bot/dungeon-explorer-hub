@@ -40,7 +40,7 @@
  * `Authorization: Bearer ADMIN_API_SECRET` (see lib/apiAuth.js), same as
  * every other admin-only endpoint.
  */
-import { requireTelegramWebhookSecret, requireAdminApiSecret } from '../lib/apiAuth.js';
+import { requireTelegramWebhookSecret, requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 
 // Sending every active party to every allowed destination can take longer
@@ -213,7 +213,7 @@ function isPromoAuthorized(req) {
   const secret = process.env.TELEGRAM_PROMO_SECRET;
   if (!secret) return false; // must be explicitly configured — no lenient default for a public-facing job
   const key = req.query?.key || new URL(req.url, 'http://x').searchParams.get('key');
-  return key === secret;
+  return safeEq(key, secret);
 }
 
 // ?job=set-webhook — (re)registers the webhook URL with Telegram. Found via

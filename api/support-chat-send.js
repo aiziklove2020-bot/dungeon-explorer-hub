@@ -9,6 +9,17 @@
  * serverless-function limit). Requires `Authorization: Bearer ${ADMIN_API_SECRET}`.
  */
 import { requireAdminApiSecret } from '../lib/apiAuth.js';
+import { getRequestIp, isRateLimited } from '../lib/forumAuthApi.js';
+
+// Per-IP throttle for the unauthenticated relay jobs below (advertiser-signup/
+// membership-lead/subscription-request/plain chat relay) — these have no
+// secret and no CAPTCHA by design (they're fired right after a real public
+// form submission), so without this an attacker could hit them directly in a
+// loop and flood the site owner's personal Telegram with unlimited forged
+// alerts, or drown out real ones badly enough that Telegram rate-limits the
+// bot and legitimate notifications stop arriving too.
+const RELAY_RATE_WINDOW_MS = 15 * 60 * 1000;
+const RELAY_RATE_PER_IP = 10;
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -153,6 +164,10 @@ async function handleAdvertiserSignupAlert(req, res, body) {
   }
 
   try {
+    if (await isRateLimited(admin.firestore(), 'support-chat-advertiser-signup', getRequestIp(req), RELAY_RATE_WINDOW_MS, RELAY_RATE_PER_IP)) {
+      return res.status(200).json({ ok: true });
+    }
+
     const privateSnap = await admin.firestore().collection('settings').doc('private').collection('supportChat').doc('config').get();
     let d = privateSnap.exists ? privateSnap.data() : null;
     if (!d) {
@@ -219,6 +234,10 @@ async function handleMembershipLeadAlert(req, res, body) {
   }
 
   try {
+    if (await isRateLimited(admin.firestore(), 'support-chat-membership-lead', getRequestIp(req), RELAY_RATE_WINDOW_MS, RELAY_RATE_PER_IP)) {
+      return res.status(200).json({ ok: true });
+    }
+
     const privateSnap = await admin.firestore().collection('settings').doc('private').collection('supportChat').doc('config').get();
     let d = privateSnap.exists ? privateSnap.data() : null;
     if (!d) {
@@ -300,6 +319,10 @@ async function handleSubscriptionRequestAlert(req, res, body) {
   }
 
   try {
+    if (await isRateLimited(admin.firestore(), 'support-chat-subscription-request', getRequestIp(req), RELAY_RATE_WINDOW_MS, RELAY_RATE_PER_IP)) {
+      return res.status(200).json({ ok: true });
+    }
+
     const privateSnap = await admin.firestore().collection('settings').doc('private').collection('supportChat').doc('config').get();
     let d = privateSnap.exists ? privateSnap.data() : null;
     if (!d) {
@@ -351,6 +374,15 @@ async function handleSubscriptionRequestAlert(req, res, body) {
 }
 
 async function handleAgentAlert(req, res, body) {
+  // Unlike the three alert jobs above (which mirror a real public form
+  // submission), nothing on the public site ever legitimately calls this —
+  // only a scheduled cloud-agent routine (see the dispatch comment below).
+  // Without a gate here, anyone could post arbitrary "🤖 המלצת סוכן"-branded
+  // text into the admin's Telegram, which reads as an automated recommendation
+  // and is exactly the kind of message a non-technical owner could be
+  // social-engineered by.
+  if (!requireAdminApiSecret(req, res)) return;
+
   const message = (body.message || '').trim().slice(0, 2000);
   if (!message) {
     return res.status(400).json({ error: 'message required' });
@@ -505,6 +537,10 @@ export default async function handler(req, res) {
     } catch (e) {
       console.error('support-chat-send Firebase init:', e.message);
       return res.status(503).json({ error: 'Server configuration error' });
+    }
+
+    if (await isRateLimited(admin.firestore(), 'support-chat-message', getRequestIp(req), RELAY_RATE_WINDOW_MS, RELAY_RATE_PER_IP)) {
+      return res.status(200).json({ ok: true });
     }
 
     // settings/supportChat was publicly readable (Firestore rules allow read:
