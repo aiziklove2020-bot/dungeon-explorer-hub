@@ -63,8 +63,15 @@ const RssSection = ({ showSaved }) => {
           {!editingRssFeed && (
             <button
               onClick={() => {
-                setEditingRssFeed({ id: null, text: '', enabled: true, order: feeds.length });
-                setRssFeedForm({ text: '', enabled: true, order: feeds.length });
+                // feeds.length collides with an existing feed's order once
+                // any feed has ever been deleted (e.g. orders 0,1,3 after
+                // deleting order=2 — feeds.length is 3, tying the new feed
+                // with the existing order=3 one), making manual reordering
+                // unpredictable. Base it on the highest order actually in
+                // use instead.
+                const nextOrder = feeds.reduce((max, f) => Math.max(max, f.order || 0), -1) + 1;
+                setEditingRssFeed({ id: null, text: '', enabled: true, order: nextOrder });
+                setRssFeedForm({ text: '', enabled: true, order: nextOrder });
               }}
               className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2"
             >

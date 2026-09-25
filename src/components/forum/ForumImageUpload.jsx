@@ -38,15 +38,30 @@ const ForumImageUpload = ({ images, onChange, maxImages }) => {
     if (!toUpload.length) return;
 
     setUploading(true);
+    // Append each image as soon as it succeeds instead of collecting them
+    // locally and only calling onChange once the whole loop finishes —
+    // uploading 3 photos where the 3rd fails (bad type/too large/network
+    // blip) used to throw out of the loop and discard the first 2 uploads
+    // entirely, even though they'd already landed in Cloudinary: the user
+    // saw only an error alert with nothing added to the post, no way to
+    // recover those two without re-uploading them.
+    let failedCount = 0;
     try {
-      const uploaded = [];
       for (const file of toUpload) {
-        const url = await uploadForumImage(file);
-        uploaded.push({ url, isSpoiler: false });
+        try {
+          const url = await uploadForumImage(file);
+          onChange((current) => [...current, { url, isSpoiler: false }]);
+        } catch (err) {
+          failedCount += 1;
+        }
       }
-      onChange([...images, ...uploaded]);
-    } catch (err) {
-      alert(err.message || 'שגיאה בהעלאת תמונה');
+      if (failedCount > 0) {
+        alert(
+          failedCount === toUpload.length
+            ? 'שגיאה בהעלאת תמונה'
+            : `${failedCount} מתוך ${toUpload.length} תמונות נכשלו בהעלאה`
+        );
+      }
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = '';
