@@ -1771,8 +1771,21 @@ export const getMyRegistrations = async (phoneNumber) => {
   const results = [];
 
   for (const party of parties) {
-    const partyDate = party.date instanceof Date ? party.date : new Date(party.date);
-    if (!Number.isNaN(partyDate.getTime()) && partyDate.getTime() < now) continue;
+    // A party's `date` is Israel-local midnight of the labeled day (e.g. a
+    // "Friday 00:00" party is stored as Friday's own midnight, which is
+    // already in the past by Friday evening even though the party itself
+    // hasn't happened yet) — comparing it directly against `now` marked
+    // same-day registrations as "expired" for the rest of the party's own
+    // day. Use the same expiration rule every other read path already uses
+    // (prefer the stored `expiration` Timestamp, else recompute from `date`
+    // + the retention window) so a party stays visible through its own day.
+    const expiration = party.expiration?.toMillis
+      ? party.expiration.toMillis()
+      : party.expiration
+        ? Date.parse(party.expiration)
+        : null;
+    const expired = Number.isFinite(expiration) ? now >= expiration : isPartyExpiredByDate(party.date);
+    if (expired) continue;
 
     const registrations = party.registrations || [];
     const myReg = registrations.find(
