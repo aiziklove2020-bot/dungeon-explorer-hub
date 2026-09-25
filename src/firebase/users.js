@@ -1,17 +1,16 @@
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  setDoc, 
+import {
+  collection,
+  doc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
   where,
   getDocs
 } from 'firebase/firestore';
-import bcrypt from 'bcryptjs';
 import { db } from './config';
 import { normalizeIsraeliPhone } from '../utils/phone';
+import { callAdminSettings } from '../utils/adminApi';
 import { getUserByPhone as getUserByPhoneFromDataAccess, getAllUsers as getAllUsersFromDataAccess, getUserById as getUserByIdFromDataAccess, invalidateCache } from './dataAccess';
 import {
   addOrExtendSubscription,
@@ -458,299 +457,46 @@ export const deleteUser = async (userId) => {
   }
 };
 
-export const getAdminByUsername = async (username) => {
-  try {
-    const usersRef = collection(db, USERS_COLLECTION);
-    const q = query(usersRef, where('adminUsername', '==', username));
-    const querySnapshot = await getDocs(q);
-    
-    if (!querySnapshot.empty) {
-      const userDoc = querySnapshot.docs[0];
-      return { id: userDoc.id, ...userDoc.data() };
-    }
-    return null;
-  } catch (error) {
-    throw error;
-  }
-};
+// Every admin-account operation below (login, password set/reset, promote,
+// demote, activate/deactivate) used to read/write isAdmin/password/
+// adminUsername directly on the `users` doc via the client SDK. firestore.rules
+// now denies client writes to those specific fields (see the comment on
+// /users/{userId} in firestore.rules) — allow write: if true there used to
+// mean any site visitor could open devtools and run
+// updateDoc(doc(db,'users','<their own id>'), { isAdmin: true }) to grant
+// themselves full admin-panel access with no password, and allow read: if
+// true let anyone pull every admin's bcrypt hash for offline brute-forcing
+// (this file used to bcrypt.compare in the browser). Every function here is
+// now a thin wrapper around api/admin-settings.js's admin-account actions,
+// which do the same work server-side via the Admin SDK.
 
 export const authenticateAdmin = async (username, password) => {
-  try {
-    
-    await activateDefaultAdminIfNeeded();
-
-    let admin = await getAdminByUsername(username);
-
-    if (!admin) {
-      admin = await getDefaultAdmin();
-      
-      if (!admin) {
-        admin = await createDefaultAdmin();
-      }
-    }
-    
-    if (!admin) {
-      return { authenticated: false, error: 'Admin not found' };
-    }
-
-    // First-login bootstrap: default admin with no password set yet must be
-    // forced through the password-set flow. We no longer accept a hardcoded
-    // `admin/admin` credential pair (see docs/SECURITY_MIGRATION.md).
-    if (admin.isDefaultAdmin && username === 'admin' && !admin.password) {
-      return { admin, isFirstLogin: true };
-    }
-
-    if (!admin.isActive && !admin.isDefaultAdmin) {
-      return { authenticated: false, error: 'Admin account is disabled' };
-    }
-
-    if (admin.isDefaultAdmin) {
-      const hasActiveAdmins = await checkActiveAdmins();
-      if (!hasActiveAdmins) {
-        
-        await setAdminActive(admin.id, true);
-        admin.isActive = true;
-      } else if (!admin.isActive) {
-        return { authenticated: false, error: 'Default admin is disabled' };
-      }
-    }
-
-    if (!admin.password) {
-      return { admin, isFirstLogin: true };
-    }
-
-    // Verify password. Stored value may be either a bcrypt hash ($2*) for new
-    // accounts, or a legacy plaintext value for accounts created before the
-    // migration. Legacy accounts are auto-upgraded on a successful login.
-    const looksHashed = typeof admin.password === 'string'
-      && admin.password.startsWith('$2');
-    let ok = false;
-    if (looksHashed) {
-      ok = await bcrypt.compare(password, admin.password);
-    } else {
-      ok = admin.password === password;
-      if (ok) {
-        try {
-          const upgraded = await bcrypt.hash(password, 10);
-          await updateDoc(doc(db, USERS_COLLECTION, admin.id), { password: upgraded });
-          admin.password = upgraded;
-        } catch (err) {
-          console.error('admin password auto-upgrade failed:', err);
-        }
-      }
-    }
-    if (!ok) {
-      return { authenticated: false, error: 'Invalid password' };
-    }
-
-    return { authenticated: true, admin };
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const getDefaultAdmin = async () => {
-  try {
-    const usersRef = collection(db, USERS_COLLECTION);
-    const q = query(usersRef, where('isDefaultAdmin', '==', true));
-    const querySnapshot = await getDocs(q);
-    
-    if (!querySnapshot.empty) {
-      const userDoc = querySnapshot.docs[0];
-      return { id: userDoc.id, ...userDoc.data() };
-    }
-
-    return await createDefaultAdmin();
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const checkActiveAdmins = async () => {
-  try {
-    const usersRef = collection(db, USERS_COLLECTION);
-    const q = query(usersRef, where('isAdmin', '==', true));
-    const querySnapshot = await getDocs(q);
-    
-    for (const docSnap of querySnapshot.docs) {
-      const userData = docSnap.data();
-      
-      if (userData.isActive && !userData.isDefaultAdmin) {
-        return true;
-      }
-    }
-    
-    return false;
-  } catch (error) {
-    return false;
-  }
-};
-
-export const activateDefaultAdminIfNeeded = async () => {
-  try {
-    const hasActiveAdmins = await checkActiveAdmins();
-    if (!hasActiveAdmins) {
-      const defaultAdmin = await getDefaultAdmin();
-      if (defaultAdmin && !defaultAdmin.isActive) {
-        // Directly update without calling setAdminActive to avoid recursion
-        const userRef = doc(db, USERS_COLLECTION, defaultAdmin.id);
-        await updateDoc(userRef, { isActive: true });
-      }
-    }
-  } catch (error) {
-  }
-};
-
-export const createDefaultAdmin = async () => {
-  try {
-    
-    const usersRef = collection(db, USERS_COLLECTION);
-    const q = query(usersRef, where('isDefaultAdmin', '==', true));
-    const querySnapshot = await getDocs(q);
-    
-    if (!querySnapshot.empty) {
-      const userDoc = querySnapshot.docs[0];
-      return { id: userDoc.id, ...userDoc.data() };
-    }
-
-    // Bootstrap account with no password. The first login flow forces the
-    // operator to set a password (which is then stored as a bcrypt hash).
-    const userData = {
-      adminUsername: 'admin',
-      password: null,
-      isAdmin: true,
-      isDefaultAdmin: true,
-      isActive: true,
-      name: 'Default Admin',
-      createdAt: new Date().toISOString()
-    };
-    
-    const newUserRef = doc(usersRef);
-    await setDoc(newUserRef, userData);
-    
-    return { id: newUserRef.id, ...userData };
-  } catch (error) {
-    throw error;
-  }
+  return callAdminSettings('admin-login', { username, password });
 };
 
 export const setAdminPassword = async (adminId, newPassword) => {
-  try {
-    if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 8) {
-      throw new Error('Password must be at least 8 characters');
-    }
-    const hashed = await bcrypt.hash(newPassword, 10);
-    const userRef = doc(db, USERS_COLLECTION, adminId);
-    await updateDoc(userRef, { password: hashed });
-    return true;
-  } catch (error) {
-    throw error;
-  }
+  await callAdminSettings('admin-set-password', { adminId, newPassword });
+  return true;
 };
 
 export const getAllAdmins = async () => {
-  try {
-    const usersRef = collection(db, USERS_COLLECTION);
-    const q = query(usersRef, where('isAdmin', '==', true));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    throw error;
-  }
+  const { admins } = await callAdminSettings('admin-list');
+  return admins;
 };
 
 export const setAdminActive = async (adminId, isActive) => {
-  try {
-    const userRef = doc(db, USERS_COLLECTION, adminId);
-    // Use dataAccess to get user data (with caching)
-    const userData = await getUserByIdFromDataAccess(adminId);
-    
-    if (!userData) {
-      throw new Error('User not found');
-    }
-    
-    // Don't allow disabling default admin if it's the only active admin
-    if (!isActive && userData.isDefaultAdmin) {
-      const hasActiveAdmins = await checkActiveAdmins();
-      if (!hasActiveAdmins) {
-        // Can't disable default admin if no other active admins exist
-        throw new Error('Cannot disable default admin when no other active admins exist');
-      }
-    }
-    
-    await updateDoc(userRef, { isActive });
-
-    // If disabling an admin, check if default admin should be activated automatically
-    if (!isActive) {
-      await activateDefaultAdminIfNeeded();
-    }
-    
-    return true;
-  } catch (error) {
-    throw error;
-  }
+  await callAdminSettings('admin-set-active', { adminId, isActive });
+  return true;
 };
 
 export const makeUserAdmin = async (userId, username, password) => {
-  try {
-    
-    const existingAdmin = await getAdminByUsername(username);
-    if (existingAdmin && existingAdmin.id !== userId) {
-      throw new Error('Username already exists');
-    }
-    
-    const hashed = await bcrypt.hash(password, 10);
-    const userRef = doc(db, USERS_COLLECTION, userId);
-    // Always set isActive: true when making user admin - admin stays active
-    await updateDoc(userRef, {
-      isAdmin: true,
-      adminUsername: username,
-      password: hashed,
-      isActive: true
-    });
-
-    // If there are other active admins, disable default admin
-    const hasActiveAdmins = await checkActiveAdmins();
-    if (hasActiveAdmins) {
-      const defaultAdmin = await getDefaultAdmin();
-      if (defaultAdmin && defaultAdmin.isActive) {
-        await setAdminActive(defaultAdmin.id, false);
-      }
-    }
-    
-    return true;
-  } catch (error) {
-    throw error;
-  }
+  await callAdminSettings('admin-make-admin', { userId, username, password });
+  return true;
 };
 
 export const removeAdmin = async (userId) => {
-  try {
-    const userRef = doc(db, USERS_COLLECTION, userId);
-    // Use dataAccess to get user data (with caching)
-    const userData = await getUserByIdFromDataAccess(userId);
-    
-    if (!userData) {
-      throw new Error('User not found');
-    }
-
-    if (userData.isDefaultAdmin) {
-      throw new Error('Cannot remove default admin');
-    }
-    
-    await updateDoc(userRef, {
-      isAdmin: false,
-      adminUsername: null,
-      password: null,
-      isActive: false
-    });
-
-    await activateDefaultAdminIfNeeded();
-    
-    return true;
-  } catch (error) {
-    throw error;
-  }
+  await callAdminSettings('admin-remove-admin', { adminId: userId });
+  return true;
 };
 
 export const importUsers = async (usersData) => {

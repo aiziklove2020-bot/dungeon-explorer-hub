@@ -27,6 +27,13 @@
  *       Marks a forum user's email verified via the Admin SDK — firestore.rules
  *       forbids any client from making this transition directly.
  *
+ *   - admin-set-role      POST { forumUserId, role }       requires Bearer ADMIN_API_SECRET
+ *   - admin-set-blocked   POST { forumUserId, isBlocked }  requires Bearer ADMIN_API_SECRET
+ *   - admin-set-approved  POST { forumUserId, isApproved } requires Bearer ADMIN_API_SECRET
+ *       Same reasoning as admin-verify-email: firestore.rules pins role/
+ *       isBlocked/isApproved to their existing value on every client update,
+ *       so promote-to-forumAdmin / block / approve all go through here now.
+ *
  * Env: GOOGLE_APPLICATION_CREDENTIALS_JSON, RESEND_API_KEY, RESEND_FROM_EMAIL,
  *      PUBLIC_SITE_URL
  */
@@ -223,6 +230,36 @@ async function handleAdminVerifyEmail(req, res, body) {
   }
 }
 
+/**
+ * Admin-only: change a forum user's role/isBlocked/isApproved. firestore.rules
+ * pins all three to their existing value on every client update (see the
+ * comment there) — the previous rule only protected nickname/emailVerified/
+ * createdAt, so any forum account could self-promote to forumAdmin (which
+ * functions/issueForumChatToken.js reads to grant chatGlobalMod), or clear
+ * its own block/approval-pending flag, with a single client-side updateDoc.
+ */
+async function handleAdminSetForumField(req, res, body, field, expectedType) {
+  if (!requireAdminApiSecret(req, res)) return;
+  const forumUserId = typeof body.forumUserId === 'string' ? body.forumUserId.trim() : '';
+  if (!forumUserId) return res.status(400).json({ error: 'missing_forum_user_id' });
+  const value = body[field];
+  if (typeof value !== expectedType) return res.status(400).json({ error: `invalid_${field}` });
+
+  const db = await getDb(res, `forum-auth admin-set-${field}`);
+  if (!db) return;
+
+  try {
+    const userRef = db.collection('forumUsers').doc(forumUserId);
+    const snap = await userRef.get();
+    if (!snap.exists) return res.status(404).json({ error: 'not_found' });
+    await userRef.update({ [field]: value });
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error(`forum-auth admin-set-${field}:`, err);
+    return res.status(500).json({ error: 'internal' });
+  }
+}
+
 async function handleResetRequest(req, res, body) {
   const db = await getDb(res, 'forum-auth reset-request');
   if (!db) return;
@@ -368,6 +405,12 @@ export default async function handler(req, res) {
       return handleResetConfirm(req, res, body);
     case 'admin-verify-email':
       return handleAdminVerifyEmail(req, res, body);
+    case 'admin-set-role':
+      return handleAdminSetForumField(req, res, body, 'role', 'string');
+    case 'admin-set-blocked':
+      return handleAdminSetForumField(req, res, body, 'isBlocked', 'boolean');
+    case 'admin-set-approved':
+      return handleAdminSetForumField(req, res, body, 'isApproved', 'boolean');
     default:
       return res.status(400).json({ error: 'unknown_action' });
   }
