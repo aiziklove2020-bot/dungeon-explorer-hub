@@ -24650,10 +24650,10 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 	}, MM = async (e) => {
 		let t = XE(e) || (e || "").replace(/\D/g, "").trim();
 		if (!t) return [];
-		let n = await oM(), r = Date.now(), i = [];
+		let n = await oM(), i = [];
 		for (let e of n) {
-			let n = e.date instanceof Date ? e.date : new Date(e.date);
-			if (!Number.isNaN(n.getTime()) && n.getTime() < r) continue;
+			let expMs = e.expiration?.toMillis ? e.expiration.toMillis() : e.expiration ? Date.parse(e.expiration) : null, expired = Number.isFinite(expMs) ? Date.now() >= expMs : OO(e.date);
+			if (expired) continue;
 			let a = (e.registrations || []).find((e) => XE(e.phoneNumber) === t);
 			if (!a) continue;
 			let o = String(a.registrationType || "").includes("balance"), s = "confirmed";
