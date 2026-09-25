@@ -1,7 +1,14 @@
 /**
  * Full Firestore DB backup and restore.
  * Export: one-to-one snapshot including document IDs (UIDs). Optionally by selected collections.
- * Import: replaces existing data with backup (clears then writes so result matches backup exactly).
+ * Import: MERGE only — writes every document in the backup with setDoc(...,
+ * { merge: true }), updating/creating as needed, but never deletes anything
+ * that isn't in the backup. Restoring an older backup does not roll the DB
+ * back to that point in time; it only re-applies what was captured in it.
+ * (This comment used to say "replaces existing data... clears then writes",
+ * which never matched what importFullDb actually does below — the admin
+ * panel's own restore-confirmation copy in DBSection.jsx has always
+ * correctly described this as a merge.)
  * Firebase supports writing with custom document ID via setDoc(doc(db, coll, id), data) — UID restore is supported.
  */
 

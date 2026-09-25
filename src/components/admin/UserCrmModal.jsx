@@ -6,8 +6,7 @@ import AdminLoader from './AdminLoader';
 import PhoneLink from '../PhoneLink';
 import SubscriptionBadge from './SubscriptionBadge';
 import SubscriptionEditor from './SubscriptionEditor';
-
-const todayStr = () => new Date().toISOString().split('T')[0];
+import { todayLocalStr as todayStr } from '../../utils/dateFormat';
 
 const UserCrmModal = ({ user, onClose, onSubscriptionAction }) => {
   const [loading, setLoading] = useState(true);

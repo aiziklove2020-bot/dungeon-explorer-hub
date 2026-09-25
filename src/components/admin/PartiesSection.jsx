@@ -6,6 +6,7 @@ import { getAllParties, createParty, updateParty, deleteParty, adminRemoveUserFr
 import { createUserFromRegistration, getAllUsers } from '../../firebase/users';
 import { getPartySettings, updatePartySettings } from '../../firebase/partySettings';
 import { DEFAULT_PARTY_RETENTION_HOURS, isPartyExpiredByDate } from '../../../shared/partyExpiry.js';
+import { todayLocalStr } from '../../utils/dateFormat';
 import PartyEditor from './PartyEditor';
 import RegistrationItem from './RegistrationItem';
 import CoupleRegistrationItem from './CoupleRegistrationItem';
@@ -391,7 +392,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
       name: '',
       title: '',
       description: '',
-      date: new Date().toISOString().split('T')[0],
+      date: todayLocalStr(),
       day: '',
       time: '',
       dj: '',
