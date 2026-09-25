@@ -24,14 +24,11 @@ async function sanitizeContentField(event, fieldName = 'content') {
   }
 }
 
-export const sanitizeForumTopicContent = onDocumentWritten('forumTopics/{docId}', (event) =>
-  sanitizeContentField(event, 'content')
-);
-
-export const sanitizeForumReplyContent = onDocumentWritten('forumReplies/{docId}', (event) =>
-  sanitizeContentField(event, 'content')
-);
-
+// forumTopics/forumReplies are denied outright in firestore.rules ("no code
+// anywhere in this repo reads or writes either collection" — the old-style
+// forum was superseded by the live chat + blog comments) — these two
+// triggers can never fire and are left undeployed rather than kept as dead
+// weight. Restore if that collection is ever brought back.
 export const sanitizeBlogPostContent = onDocumentWritten('blogPosts/{docId}', (event) =>
   sanitizeContentField(event, 'content')
 );
@@ -40,8 +37,20 @@ export const sanitizeBlogCommentContent = onDocumentWritten('blogComments/{docId
   sanitizeContentField(event, 'content')
 );
 
-export { notifyChatMentionsOnMessageCreate } from './chatMentionsTrigger.js';
-export { issueForumChatToken } from './issueForumChatToken.js';
-export { sendLiveChatMessage } from './sendLiveChatMessage.js';
-export { sendLiveChatSystemLine } from './sendLiveChatSystemLine.js';
+// The live-chat Cloud Functions (notifyChatMentionsOnMessageCreate,
+// issueForumChatToken, sendLiveChatMessage, sendLiveChatSystemLine) are not
+// exported here anymore. firestore.rules denies all read/write on
+// chatRooms/** and its subcollections outright ("feature removed from the
+// app"), which means sendLiveChatMessage's own "join room first" check
+// (reading chatRooms/{roomId}/members/{uid}) can never pass for any real
+// caller — every invocation was already failing before this change, not a
+// live feature these functions supported. Round-18 audit also found the
+// still-deployed public bundle (public/assets/site-data.js) calling these
+// via httpsCallable and hitting that same dead end. Leaving them deployed
+// only burns invocations for a call path that can never succeed and (via
+// issueForumChatToken's chatGlobalMod custom-token claim, which is never
+// re-verified against current Firestore state per call) carried a
+// stale-privilege risk that's moot now but not worth leaving deployed.
+// Source files are kept in place, undeployed, in case live chat is
+// rebuilt with real firestore.rules for it.
 export { autoProvisionFemaleUsers } from './autoProvisionFemaleUsers.js';
