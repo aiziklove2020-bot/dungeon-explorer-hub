@@ -70,10 +70,38 @@ service cloud.firestore {
     // Default-deny is implicit; explicitly listed collections only.
 
     // ── Parties (CMS-managed) ───────────────────────────────────────────
+    // TODO(auth): restrict to isAdmin() once auth migration is complete.
+    // Can't do that today without breaking a real, live feature: approved
+    // advertisers self-serve create/edit/delete their OWN parties directly
+    // from the public site (see site-bridge.ts createAdvertiserParty/
+    // updateAdvertiserParty/deleteAdvertiserParty), and there is no real
+    // per-advertiser auth token anywhere in this app to verify a caller's
+    // claimed identity against — the ownership check those functions do
+    // (`party.createdBy === advertiserId`) only runs in client JS, which
+    // can't be trusted at the rule layer without a way to know who's
+    // actually asking. So this rule can only add STRUCTURAL validation
+    // (reject obviously malformed/oversized writes, stop an existing
+    // party's ownership from being silently reassigned) — it cannot stop
+    // one advertiser (or anyone) from editing or deleting a DIFFERENT
+    // party than their own, since that genuinely requires the Firebase
+    // Auth migration this whole file has been waiting on throughout.
+    function safePartyShape() {
+      return (!('title' in request.resource.data) || (request.resource.data.title is string && request.resource.data.title.size() <= 200))
+        && (!('description' in request.resource.data) || (request.resource.data.description is string && request.resource.data.description.size() <= 5000))
+        && (!('registrations' in request.resource.data) || (request.resource.data.registrations is list && request.resource.data.registrations.size() <= 500));
+    }
     match /parties/{partyId} {
       allow read: if true;
-      // TODO(auth): restrict to isAdmin() once auth migration is complete.
-      allow write: if true;
+      allow create: if safePartyShape()
+                    && (!('createdBy' in request.resource.data) || request.resource.data.createdBy is string);
+      // `createdBy` is pinned once set, so a party can't be silently
+      // reassigned to a different advertiser's ownership by a write that
+      // isn't itself the owning advertiser (which, again, this rule can't
+      // verify — but at least the *recorded* owner can't be swapped out
+      // from under them after the fact).
+      allow update: if safePartyShape()
+                    && (!('createdBy' in resource.data) || request.resource.data.createdBy == resource.data.createdBy);
+      allow delete: if true;
     }
 
     // ── Settings ────────────────────────────────────────────────────────
