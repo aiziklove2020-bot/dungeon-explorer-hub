@@ -55,3 +55,27 @@ export function formatDateLong(value, locale = DEFAULT_LOCALE, options = DEFAULT
   if (!d) return '';
   return d.toLocaleDateString(locale, options);
 }
+
+/**
+ * A Date as a `YYYY-MM-DD` string in the BROWSER's local calendar day —
+ * suitable for a `<input type="date">` value or a "date of this action"
+ * field. `date.toISOString().split('T')[0]` (used to be scattered across
+ * several admin components for exactly this) gives the UTC calendar day
+ * instead: between local midnight and 2-3am Israel time (UTC+2/+3), that
+ * expression silently returns YESTERDAY's date — a payment recorded, or a
+ * new party/subscription defaulted, in that window gets stamped one day
+ * early.
+ */
+export function dateToLocalInputStr(date = new Date()) {
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/** `dateToLocalInputStr` for right now — today's date in local time. */
+export function todayLocalStr() {
+  return dateToLocalInputStr(new Date());
+}

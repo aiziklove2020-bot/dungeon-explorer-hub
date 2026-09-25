@@ -5,6 +5,7 @@ import useAdminSection from '../../hooks/useAdminSection';
 import AdminLoader from './AdminLoader';
 import Loader from '../Loader';
 import PhoneLink from '../PhoneLink';
+import { todayLocalStr } from '../../utils/dateFormat';
 import {
   createUser,
   getAllUsers,
@@ -124,7 +125,7 @@ const SubscriptionsSection = ({ showSaved }) => {
     // as the unlimited/lifetime tier instead of parsing an empty date string.
     await setSubscriptionExpiry(user.id, 'parties', tier === 'gold' ? null : new Date(`${expiryDate}T00:00:00.000Z`), tier);
     await addPaymentRecord(user.id, {
-      date: new Date().toISOString().split('T')[0],
+      date: todayLocalStr(),
       method: paymentMethod,
       note: 'הפעלת מנוי חדש',
     });
@@ -156,7 +157,7 @@ const SubscriptionsSection = ({ showSaved }) => {
     if (!renewingUser) return;
     await setSubscriptionExpiry(renewingUser.id, 'parties', new Date(`${expiryDate}T00:00:00.000Z`));
     await addPaymentRecord(renewingUser.id, {
-      date: new Date().toISOString().split('T')[0],
+      date: todayLocalStr(),
       method: paymentMethod,
       note: 'חידוש מנוי',
     });

@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { PAYMENT_METHODS } from '../../firebase/crm';
+import { dateToLocalInputStr } from '../../utils/dateFormat';
 
 const todayPlusYear = () => {
   const d = new Date();
   d.setFullYear(d.getFullYear() + 1);
-  return d.toISOString().split('T')[0];
+  return dateToLocalInputStr(d);
 };
 
 const RenewSubscriptionModal = ({ user, onClose, onSubmit }) => {
