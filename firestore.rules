@@ -57,10 +57,19 @@ service cloud.firestore {
 
     // ── Settings ────────────────────────────────────────────────────────
     // PUBLIC settings (theme, public flags) — readable by anyone.
+    // Writes go through api/admin-settings.js (Admin SDK + ADMIN_API_SECRET)
+    // instead of the client SDK now — this used to be `write: if true`, which
+    // meant anyone with the public Firestore config (necessarily embedded in
+    // every page) could write arbitrary content straight into fields the
+    // public site renders (about/contact copy, social links, Telegram
+    // config), bypassing the admin panel and any escaping entirely. There is
+    // still no real Firebase Auth in this app, so `isAdmin()` below can't
+    // actually be satisfied by anyone — that's intentional here: it's already
+    // effectively `write: if false` for the client SDK, with the API route as
+    // the one deliberate exception.
     match /settings/{document} {
       allow read: if true;
-      // TODO(auth): restrict to isAdmin().
-      allow write: if true;
+      allow write: if isAdmin();
     }
     // PRIVATE settings (tokens, secrets) — never returned to clients.
     // The app must move bot tokens / API keys here and read them only from
@@ -125,9 +134,14 @@ service cloud.firestore {
       allow write: if true;
     }
 
+    // Writes go through api/admin-settings.js now (see the comment on
+    // /settings/{document} above for why this app can't just use
+    // isAdmin() yet). Feed text renders through React (auto-escaped), so
+    // this isn't an XSS vector the way /settings was, but it was still
+    // fully open to anonymous writes with no validation at all.
     match /rssFeeds/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAdmin();
     }
 
     // ── Logging collections ─────────────────────────────────────────────

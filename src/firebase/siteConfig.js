@@ -1,5 +1,6 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from './config';
+import { callAdminSettings } from '../utils/adminApi';
 
 const SETTINGS_COLLECTION = 'settings';
 const SITE_CONFIG_DOC_ID = 'siteConfig';
@@ -45,21 +46,21 @@ const invalidateCache = () => {
 };
 
 export const updateLogoUrl = async (logoUrl) => {
-  await setDoc(ref(), { logoUrl }, { merge: true });
+  await callAdminSettings('set-settings', { docId: SITE_CONFIG_DOC_ID, data: { logoUrl } });
   invalidateCache();
 };
 
 export const updateHeroImageUrl = async (heroImageUrl) => {
-  await setDoc(ref(), { heroImageUrl }, { merge: true });
+  await callAdminSettings('set-settings', { docId: SITE_CONFIG_DOC_ID, data: { heroImageUrl } });
   invalidateCache();
 };
 
 export const updateBanners = async (banners) => {
-  await setDoc(ref(), { banners }, { merge: true });
+  await callAdminSettings('set-settings', { docId: SITE_CONFIG_DOC_ID, data: { banners } });
   invalidateCache();
 };
 
 export const updatePopup = async (popup) => {
-  await setDoc(ref(), { popup }, { merge: true });
+  await callAdminSettings('set-settings', { docId: SITE_CONFIG_DOC_ID, data: { popup } });
   invalidateCache();
 };

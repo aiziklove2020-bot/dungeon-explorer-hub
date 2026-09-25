@@ -31,3 +31,24 @@ export const adminAuthHeader = () => {
   }
   return { Authorization: `Bearer ${bundledAdminApiSecret}` };
 };
+
+/**
+ * POST to `/api/admin-settings`, which writes `settings/*` docs and the
+ * `rssFeeds` collection through the Admin SDK — firestore.rules denies
+ * direct client writes to both (see that file's own header comment for
+ * why). Every settings-writing helper in src/firebase/{settings,
+ * partySettings,siteConfig,dbBackup}.js goes through this instead of a
+ * direct Firestore `setDoc`/`updateDoc`/`deleteDoc` now.
+ */
+export const callAdminSettings = async (action, payload = {}) => {
+  const res = await fetch('/api/admin-settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...adminAuthHeader() },
+    body: JSON.stringify({ action, ...payload })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data?.error) {
+    throw new Error(data?.error || `admin-settings ${action} failed (HTTP ${res.status})`);
+  }
+  return data;
+};

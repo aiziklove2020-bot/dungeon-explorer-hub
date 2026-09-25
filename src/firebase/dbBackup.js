@@ -14,6 +14,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from './config';
+import { callAdminSettings } from '../utils/adminApi';
 
 const BATCH_SIZE = 500;
 
@@ -203,7 +204,14 @@ export async function importFullDb(data, onProgress = null) {
         if (step % 50 === 0) report(`Merge ${collName} (skip unchanged)...`, step, totalSteps);
         continue;
       }
-      await setDoc(ref, restored, { merge: true });
+      // firestore.rules denies direct client writes to rssFeeds (see
+      // api/admin-settings.js) — every other collection here still allows
+      // them, so only this one needs rerouting.
+      if (collName === 'rssFeeds') {
+        await callAdminSettings('restore-rss-feed', { feedId: id, data: restored });
+      } else {
+        await setDoc(ref, restored, { merge: true });
+      }
       step++;
       if (step % 50 === 0) report(`Merge ${collName}...`, step, totalSteps);
     }
@@ -223,7 +231,10 @@ export async function importFullDb(data, onProgress = null) {
         report('Merge settings...', step, totalSteps);
         continue;
       }
-      await setDoc(ref, restored, { merge: true });
+      // firestore.rules denies direct client writes to settings/* (see
+      // api/admin-settings.js) — route restores through the same
+      // Admin-SDK-backed endpoint the admin panel's own settings edits use.
+      await callAdminSettings('set-settings', { docId, data: restored });
       step++;
       report('Merge settings...', step, totalSteps);
     }

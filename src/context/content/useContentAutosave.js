@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { isEditMode } from '../../services/contentService';
 import { logError } from '../../utils/logger';
+import { callAdminSettings } from '../../utils/adminApi';
 
 // Debounce window between a state change and the Firestore batch commit.
 // 3 s matches the previous inline value and gives rapid keystroke edits time
@@ -54,12 +55,12 @@ export function useContentAutosave(content, isInitialized) {
           return;
         }
 
-        const { doc, writeBatch } = await import('firebase/firestore');
-        const { db: firestoreDb } = await import('../../firebase/config');
-
-        const batch = writeBatch(firestoreDb);
-        const SETTINGS_COLLECTION = 'settings';
-
+        // firestore.rules denies direct client writes to settings/* (see
+        // api/admin-settings.js) — this used to be one atomic writeBatch
+        // across 4 docs; these are independent content sections, so four
+        // sequential calls through the Admin-SDK-backed endpoint are
+        // functionally equivalent (no cross-doc invariant relies on them
+        // landing together).
         const socialLinksArray = Array.isArray(content.socialLinks) ? content.socialLinks : [];
         const socialLinksObj = {
           instagram: socialLinksArray.find((l) => l && l.type === 'instagram')?.url || '',
@@ -69,23 +70,13 @@ export function useContentAutosave(content, isInitialized) {
           facebook: socialLinksArray.find((l) => l && l.type === 'facebook')?.url || '',
         };
 
-        const contentRef = doc(firestoreDb, SETTINGS_COLLECTION, 'content');
-        batch.set(contentRef, {
-          hero: content.hero,
-          about: content.about,
-          contact: content.contact,
-        }, { merge: true });
-
-        const registrationRef = doc(firestoreDb, SETTINGS_COLLECTION, 'registrationSettings');
-        batch.set(registrationRef, content.registration, { merge: true });
-
-        const socialLinksRef = doc(firestoreDb, SETTINGS_COLLECTION, 'socialLinks');
-        batch.set(socialLinksRef, socialLinksObj, { merge: true });
-
-        const whatsappGroupsRef = doc(firestoreDb, SETTINGS_COLLECTION, 'whatsappGroups');
-        batch.set(whatsappGroupsRef, content.whatsappGroups, { merge: true });
-
-        await batch.commit();
+        await callAdminSettings('set-settings', {
+          docId: 'content',
+          data: { hero: content.hero, about: content.about, contact: content.contact }
+        });
+        await callAdminSettings('set-settings', { docId: 'registrationSettings', data: content.registration });
+        await callAdminSettings('set-settings', { docId: 'socialLinks', data: socialLinksObj });
+        await callAdminSettings('set-settings', { docId: 'whatsappGroups', data: content.whatsappGroups });
 
         // The public pages (About, homepage, etc.) read this same data via
         // firebase/settings.js's cached getters. Without invalidating here,
