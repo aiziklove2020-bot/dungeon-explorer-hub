@@ -30,7 +30,7 @@
  * Env: GOOGLE_APPLICATION_CREDENTIALS_JSON, ADMIN_API_SECRET
  */
 import bcrypt from 'bcryptjs';
-import { getFirebaseAdmin, parseBody, getRequestIp, isRateLimited } from '../lib/forumAuthApi.js';
+import { getFirebaseAdmin, parseBody, getRequestIp, isRateLimited, PUBLIC_SITE_URL } from '../lib/forumAuthApi.js';
 import { requireAdminApiSecret } from '../lib/apiAuth.js';
 
 function setCors(res) {
@@ -130,8 +130,14 @@ export default async function handler(req, res) {
         throw err;
       }
 
-      // Best-effort admin alert — never blocks/fails registration.
-      fetch(`${req.headers.origin || ''}/api/support-chat-send`, {
+      // Best-effort admin alert — never blocks/fails registration. The target
+      // used to be built from `req.headers.origin`, an attacker-controlled
+      // header — anyone could set Origin to an arbitrary URL and make this
+      // server POST the new advertiser's data to it (SSRF / data exfil), or
+      // point it at an internal address. Use the site's own known origin
+      // instead, never a value from the request.
+      const siteUrl = PUBLIC_SITE_URL() || 'https://www.libralparty.net';
+      fetch(`${siteUrl}/api/support-chat-send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

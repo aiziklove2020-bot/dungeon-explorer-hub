@@ -66,6 +66,21 @@ service cloud.firestore {
           || request.resource.data.subscriptions.exchangeParties == null
           || request.resource.data.subscriptions.exchangeParties.tier != 'gold'));
     }
+    // functions/issueForumChatToken.js reads forumUsers/{id}.linkedUserId and,
+    // if the linked users/{id} doc has isAdmin==true or level=='admin', mints
+    // a chatGlobalMod custom claim for that forum account. Without this
+    // check, any forum account could self-link (via the public
+    // linkForumUserToSiteUser auto-link flow) to an admin's site-user id it
+    // merely knows/guesses and inherit global chat-moderator powers with no
+    // real relationship between the two accounts. get() here reads a
+    // different collection during this write's own authorization check,
+    // which is allowed to bypass that target document's rules.
+    function targetUserIsAdmin(uid) {
+      return uid != null &&
+        exists(/databases/$(database)/documents/users/$(uid)) &&
+        (get(/databases/$(database)/documents/users/$(uid)).data.isAdmin == true ||
+         get(/databases/$(database)/documents/users/$(uid)).data.level == 'admin');
+    }
 
     // Default-deny is implicit; explicitly listed collections only.
 
@@ -167,11 +182,17 @@ service cloud.firestore {
     //   - `allow delete` was implicitly allowed by the old `write: if true`
     //     but nothing in the app ever deletes a user doc from the client —
     //     denied outright rather than left open.
+    // `crm` (acquisition source + manual payment log, see src/firebase/crm.js)
+    // is admin-only data with no legitimate client write path at all — denied
+    // outright rather than field-validated, same reasoning as isAdmin/password
+    // above. Before this, any visitor could updateDoc their own (or anyone's)
+    // `crm.payments` array to forge/delete "paid" records the admin panel
+    // trusts as real sales history.
     match /users/{userId} {
       allow read: if resource.data.isAdmin != true;
-      allow create: if !request.resource.data.keys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password'])
+      allow create: if !request.resource.data.keys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password', 'crm'])
                     && safeLevelUpdate() && safeSubscriptionsUpdate();
-      allow update: if !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password'])
+      allow update: if !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'isDefaultAdmin', 'adminUsername', 'password', 'crm'])
                     && safeLevelUpdate() && safeSubscriptionsUpdate();
       allow delete: if false;
     }
@@ -399,7 +420,14 @@ service cloud.firestore {
                         || request.resource.data.isBlocked == resource.data.isBlocked)
                     && (!('isApproved' in request.resource.data)
                         || !('isApproved' in resource.data)
-                        || request.resource.data.isApproved == resource.data.isApproved);
+                        || request.resource.data.isApproved == resource.data.isApproved)
+                    // linkForumUserToSiteUser (the public self-link flow) may
+                    // still set linkedUserId to any regular site-user id, but
+                    // never to one belonging to an admin — see
+                    // targetUserIsAdmin() above.
+                    && (!('linkedUserId' in request.resource.data)
+                        || request.resource.data.linkedUserId == resource.data.get('linkedUserId', null)
+                        || !targetUserIsAdmin(request.resource.data.linkedUserId));
       // Forum user deletion is admin-driven from the Users tab. Until Firebase
       // Auth + custom claims land we can't enforce isAdmin() at the rule
       // layer, so this matches the existing pattern used for other
