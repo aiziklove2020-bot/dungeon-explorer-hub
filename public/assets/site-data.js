@@ -24127,38 +24127,42 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				let e = await ik(t.phoneNumber);
 				e && e.level !== "blocked" && (r = e.id, i = e);
 			} catch {}
-			let a = await sk(e);
-			if (!a) throw Error("Party not found");
-			let o = E(H, iM, e), s = XE(t.phoneNumber) || t.phoneNumber;
-			if (a.registrations?.find((e) => XE(e.phoneNumber) === s || r && e.userId === r)) throw Error("Already registered to this party");
-			if (t.gender !== "couple") {
-				let e = a.registrations?.filter((e) => e.gender === t.gender) || [], n = t.gender === "male" ? a.maleLimit : a.femaleLimit;
-				if (e.length >= n) throw Error(`${t.gender === "male" ? "Male" : "Female"} spots are full`);
-			}
-			if (a.soloMenSalesLocked && t.registrationType === "single-male-balance") throw Error("הרשמת גברים בודדים למסיבה זו סגורה כרגע");
-			let c = !1;
-			if (a.autoApproveVerifiedCouples && (t.registrationType === "single-male-couple" || t.registrationType === "single-female-couple") && i && t.partnerPhone) try {
-				let e = await ik(t.partnerPhone);
-				e && e.level !== "blocked" && (c = !0);
-			} catch {}
-			let l = i?.gender || t.gender, u = i?.name || t.fullName, d = i?.telegramUsername || t.telegramUsername || "", f = {
-				userId: r || null,
-				userName: u,
-				fullName: u,
-				phoneNumber: XE(t.phoneNumber) || t.phoneNumber,
-				telegramUsername: d,
-				registrationType: t.registrationType,
-				partyDays: t.partyDays || [],
-				pickupAddress: t.pickupAddress || "",
-				selfArrival: t.selfArrival || !1,
-				gender: l,
-				registeredAt: N.now(),
-				coupleId: t.coupleId || null,
-				partnerName: t.partnerName || null,
-				partnerPhone: XE(t.partnerPhone) || t.partnerPhone || null,
-				autoApproved: c
-			};
-			return await A(o, { registrations: vd(f) }), await q(`party_${e}`), await q("activeParties"), l === "female" && !r && Rj(f, "registered", "year").catch(() => {}), c && l === "male" && !r && Rj(f, "registered", "day").catch(() => {}), f;
+			let o = E(H, iM, e), s = XE(t.phoneNumber) || t.phoneNumber, c = !1, f;
+			await hd(H, async (tx) => {
+				let snap = await tx.get(o);
+				if (!snap.exists()) throw Error("Party not found");
+				let a = snap.data();
+				if (a.registrations?.find((e) => XE(e.phoneNumber) === s || r && e.userId === r)) throw Error("Already registered to this party");
+				if (t.gender !== "couple") {
+					let e = a.registrations?.filter((e) => e.gender === t.gender) || [], n = t.gender === "male" ? a.maleLimit : a.femaleLimit;
+					if (e.length >= n) throw Error(`${t.gender === "male" ? "Male" : "Female"} spots are full`);
+				}
+				if (a.soloMenSalesLocked && t.registrationType === "single-male-balance") throw Error("הרשמת גברים בודדים למסיבה זו סגורה כרגע");
+				if (a.autoApproveVerifiedCouples && (t.registrationType === "single-male-couple" || t.registrationType === "single-female-couple") && i && t.partnerPhone) try {
+					let e = await ik(t.partnerPhone);
+					e && e.level !== "blocked" && (c = !0);
+				} catch {}
+				let l = i?.gender || t.gender, u = i?.name || t.fullName, d = i?.telegramUsername || t.telegramUsername || "";
+				f = {
+					userId: r || null,
+					userName: u,
+					fullName: u,
+					phoneNumber: XE(t.phoneNumber) || t.phoneNumber,
+					telegramUsername: d,
+					registrationType: t.registrationType,
+					partyDays: t.partyDays || [],
+					pickupAddress: t.pickupAddress || "",
+					selfArrival: t.selfArrival || !1,
+					gender: l,
+					registeredAt: N.now(),
+					coupleId: t.coupleId || null,
+					partnerName: t.partnerName || null,
+					partnerPhone: XE(t.partnerPhone) || t.partnerPhone || null,
+					autoApproved: c
+				};
+				tx.update(o, { registrations: vd(f) });
+			});
+			return await q(`party_${e}`), await q("activeParties"), f.gender === "female" && !f.userId && Rj(f, "registered", "year").catch(() => {}), c && f.gender === "male" && !f.userId && Rj(f, "registered", "day").catch(() => {}), f;
 		} catch (e) {
 			throw e;
 		}
@@ -24168,14 +24172,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 			let e = /* @__PURE__ */ Error("Couple must use two different phone numbers");
 			throw e.code = dM, e;
 		}
-		let o = await sk(e);
-		if (!o) throw Error("Party not found");
-		let s = E(H, iM, e), c = [...o.registrations || []], l = (e) => c.find((t) => r(t.phoneNumber) === e || t.userId && String(t.userId) === e), u = l(i), d = l(a);
-		if (u && d) {
-			let e = /* @__PURE__ */ Error("Both partners are already registered to this party");
-			throw e.code = uM, e;
-		}
-		let f = `couple_${Date.now()}_${Math.random().toString(36).substring(2, 11)}_${`${i}_${a}`.replace(/\D/g, "").substring(0, 10)}`, p = async (e, t, n, r) => {
+		let s = E(H, iM, e), p = async (e, t, n, r) => {
 			let i = XE(e.phoneNumber) || e.phoneNumber, a = XE(r) || r, o = await Aj(i, e.telegramUsername);
 			if (o.blocked) throw Error("User is blocked and cannot register to parties");
 			let s = e.userId, c = null;
@@ -24203,38 +24200,50 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				partnerName: n || null,
 				partnerPhone: a || null
 			};
-		};
-		if (u && !d) {
-			let o = {
-				...u,
-				registrationType: "couple",
-				coupleId: f,
-				partnerName: n.fullName,
-				partnerPhone: a
-			}, l = await p(n, "female", t.fullName, i), d = (e) => r(e.phoneNumber) === i || e.userId && String(e.userId) === i;
-			return await A(s, { registrations: [...c.map((e) => d(e) ? o : e), l] }), await q(`party_${e}`), await q("activeParties"), Rj(l, "registered", "year").catch(() => {}), {
-				male: o,
-				female: l
+		}, f = `couple_${Date.now()}_${Math.random().toString(36).substring(2, 11)}_${`${i}_${a}`.replace(/\D/g, "").substring(0, 10)}`, result, notifyReg;
+		await hd(H, async (tx) => {
+			let snap = await tx.get(s);
+			if (!snap.exists()) throw Error("Party not found");
+			let c = [...snap.data().registrations || []], l = (e) => c.find((t) => r(t.phoneNumber) === e || t.userId && String(t.userId) === e), u = l(i), d = l(a);
+			if (u && d) {
+				let e = /* @__PURE__ */ Error("Both partners are already registered to this party");
+				throw e.code = uM, e;
+			}
+			if (u && !d) {
+				let o = {
+					...u,
+					registrationType: "couple",
+					coupleId: f,
+					partnerName: n.fullName,
+					partnerPhone: a
+				}, l = await p(n, "female", t.fullName, i), d = (e) => r(e.phoneNumber) === i || e.userId && String(e.userId) === i;
+				tx.update(s, { registrations: [...c.map((e) => d(e) ? o : e), l] }), notifyReg = l, result = {
+					male: o,
+					female: l
+				};
+				return;
+			}
+			if (d && !u) {
+				let o = {
+					...d,
+					registrationType: "couple",
+					coupleId: f,
+					partnerName: t.fullName,
+					partnerPhone: i
+				}, l = await p(t, "male", n.fullName, a), u = (e) => r(e.phoneNumber) === a || e.userId && String(e.userId) === a;
+				tx.update(s, { registrations: [...c.map((e) => u(e) ? o : e), l] }), notifyReg = o, result = {
+					male: l,
+					female: o
+				};
+				return;
+			}
+			let m = await p(t, "male", n.fullName, n.phoneNumber), h = await p(n, "female", t.fullName, t.phoneNumber);
+			tx.update(s, { registrations: vd(m, h) }), notifyReg = h, result = {
+				male: m,
+				female: h
 			};
-		}
-		if (d && !u) {
-			let o = {
-				...d,
-				registrationType: "couple",
-				coupleId: f,
-				partnerName: t.fullName,
-				partnerPhone: i
-			}, l = await p(t, "male", n.fullName, a), u = (e) => r(e.phoneNumber) === a || e.userId && String(e.userId) === a;
-			return await A(s, { registrations: [...c.map((e) => u(e) ? o : e), l] }), await q(`party_${e}`), await q("activeParties"), Rj(o, "registered", "year").catch(() => {}), {
-				male: l,
-				female: o
-			};
-		}
-		let m = await p(t, "male", n.fullName, n.phoneNumber), h = await p(n, "female", t.fullName, t.phoneNumber);
-		return await A(s, { registrations: vd(m, h) }), await q(`party_${e}`), await q("activeParties"), Rj(h, "registered", "year").catch(() => {}), {
-			male: m,
-			female: h
-		};
+		});
+		return await q(`party_${e}`), await q("activeParties"), Rj(notifyReg, "registered", "year").catch(() => {}), result;
 	}, pM = async (e) => {
 		try {
 			let t = await sk(e);
