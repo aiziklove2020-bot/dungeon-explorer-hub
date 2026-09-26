@@ -363,7 +363,7 @@ function lpWirePushBanner() {
   // bottom offset clears the fixed mobile-bottom nav bar (64px + safe area)
   // instead of stacking on top of it; on desktop, where that bar is hidden,
   // this just leaves a small harmless gap above the edge.
-  el.style.cssText = "position:fixed;z-index:21;bottom:calc(64px + env(safe-area-inset-bottom,0px));inset-inline:0;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;padding:12px 16px;background:#1c1120ee;backdrop-filter:blur(10px);border-top:1px solid #ffffff22;font-size:14px;color:#e5e1e4";
+  el.style.cssText = "position:fixed;z-index:21;bottom:calc(64px + env(safe-area-inset-bottom,0px));inset-inline:0;display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:10px;padding:12px 16px;background:#1c1120ee;backdrop-filter:blur(10px);border-top:1px solid #ffffff22;font-size:14px;color:#e5e1e4";
   document.body.appendChild(el);
 
   document.getElementById("lpPushBannerNo").addEventListener("click", () => el.remove());
