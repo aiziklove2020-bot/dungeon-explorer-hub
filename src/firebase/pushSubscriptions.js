@@ -1,8 +1,6 @@
 import { collection, doc, setDoc, getDocs, deleteDoc, query, where } from 'firebase/firestore';
 import { db } from './config';
 import { normalizeIsraeliPhone } from '../utils/phone';
-import { getUserByPhone } from './dataAccess';
-import { hasAnyPrivilegedSubscription } from './subscriptions';
 
 const COLLECTION = 'pushSubscriptions';
 
@@ -89,12 +87,15 @@ export const sendPushToPhone = async (phoneNumber, { title, body, url } = {}) =>
 };
 
 /**
- * Notify every subscriber with an active *privileged* (yearly/gold)
- * subscription and a registered device about a new party. Best-effort and
- * fire-and-forget by design — a push failure must never block or delay
- * party creation itself.
+ * Notify every registered device about a new party — not just paying
+ * subscribers. Site visitors can now opt into push notifications the moment
+ * they land on the site (before ever registering or subscribing), keyed by
+ * a local anonymous id instead of a phone number until they identify
+ * themselves; gating this on hasAnyPrivilegedSubscription would silently
+ * drop every one of those. Best-effort and fire-and-forget by design — a
+ * push failure must never block or delay party creation itself.
  */
-export const notifyPrivilegedSubscribersOfNewParty = async (party) => {
+export const notifyAllSubscribersOfNewParty = async (party) => {
   try {
     const subs = await getAllPushSubscriptions();
     const phones = [...new Set(subs.map((s) => s.phone).filter(Boolean))];
@@ -104,11 +105,7 @@ export const notifyPrivilegedSubscribersOfNewParty = async (party) => {
     const body = `${party?.name || party?.title || 'מסיבה חדשה'} נוספה לאתר`;
     const url = party?.id ? `/event?id=${party.id}` : '/events';
 
-    await Promise.all(phones.map(async (phone) => {
-      const user = await getUserByPhone(phone).catch(() => null);
-      if (!user || !hasAnyPrivilegedSubscription(user)) return;
-      await sendPushToPhone(phone, { title, body, url });
-    }));
+    await Promise.all(phones.map((phone) => sendPushToPhone(phone, { title, body, url })));
   } catch {
     // best-effort — swallow
   }

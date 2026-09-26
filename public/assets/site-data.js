@@ -24032,7 +24032,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 		let r = Date.parse(n);
 		return Number.isFinite(r) ? N.fromMillis(r) : null;
 	}, iM = "parties";
-	async function notifyPrivilegedSubscribersOfNewParty_(party) {
+	async function notifyAllSubscribersOfNewParty_(party) {
 		try {
 			let subsSnap = await k(T(H, "pushSubscriptions")),
 				phones = [...new Set(subsSnap.docs.map((d) => d.data().phone).filter(Boolean))];
@@ -24041,11 +24041,6 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				body = (party?.name || party?.title || "מסיבה חדשה") + " נוספה לאתר",
 				url = party?.id ? `/event?id=${party.id}` : "/events";
 			await Promise.all(phones.map(async (phone) => {
-				let user = await Ej(phone).catch(() => null);
-				if (!user) return;
-				let s1 = pj(user, "parties"), s2 = pj(user, "exchangeParties"),
-					priv = s1.isActive && (s1.tier === "year" || s1.tier === "gold") || s2.isActive && (s2.tier === "year" || s2.tier === "gold");
-				if (!priv) return;
 				let subsQuery = D(T(H, "pushSubscriptions"), O("phone", "==", phone)),
 					subs = (await k(subsQuery)).docs.map((d) => ({ id: d.id, ...d.data() }));
 				if (!subs.length) return;
@@ -24083,7 +24078,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 			}, o = E(T(H, iM));
 			await $u(o, a), await q("activeParties");
 			let created = { id: o.id, ...a };
-			notifyPrivilegedSubscribersOfNewParty_(created);
+			notifyAllSubscribersOfNewParty_(created);
 			return created;
 		} catch (e) {
 			throw e;

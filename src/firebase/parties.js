@@ -18,7 +18,7 @@ import {
 import { db } from './config';
 import { normalizeIsraeliPhone } from '../utils/phone';
 import { sendBalanceMatchNotification } from './telegram';
-import { sendPushToPhone, notifyPrivilegedSubscribersOfNewParty } from './pushSubscriptions';
+import { sendPushToPhone, notifyAllSubscribersOfNewParty } from './pushSubscriptions';
 import { isUserBlocked, createUserFromRegistration } from './users';
 import { getActiveParties as getActivePartiesFromDataAccess, getBalanceMatches as getBalanceMatchesFromDataAccess, getPartyById as getPartyByIdFromDataAccess, getUserByPhone, invalidateCache } from './dataAccess';
 import {
@@ -108,10 +108,11 @@ export const createParty = async (partyData) => {
 
     const created = { id: newPartyRef.id, ...party };
 
-    // Fire-and-forget mobile push to every privileged subscriber with a
-    // registered device — internal to notifyPrivilegedSubscribersOfNewParty,
-    // never awaited, so a slow/failed push never delays party creation.
-    notifyPrivilegedSubscribersOfNewParty(created);
+    // Fire-and-forget mobile push to every registered device (any site
+    // visitor who opted in, not just paying subscribers) — internal to
+    // notifyAllSubscribersOfNewParty, never awaited, so a slow/failed push
+    // never delays party creation.
+    notifyAllSubscribersOfNewParty(created);
 
     // No immediate Telegram announcement here on purpose: the scheduled/
     // manual broadcast (api/telegram-webhook.js sendAllPartyReminders) is

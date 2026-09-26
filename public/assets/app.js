@@ -314,3 +314,72 @@ async function lpEnablePushNotifications(phone) {
   }
 }
 window.lpEnablePushNotifications = lpEnablePushNotifications;
+
+// A visitor's "identity" for push purposes: a real phone if we already know
+// one (logged-in forum account, or the phone-only /my-area lookup), else a
+// stable per-browser anonymous id so someone can still opt in on their very
+// first visit, before ever registering. Firestore's pushSubscriptions rules
+// only require a short non-empty string in the "phone" field (max 20 chars),
+// so this anonymous id is written there like any other identity — the "new
+// party" broadcast then reaches everyone who opted in, subscriber or not,
+// while a real match/balance notification (sent separately, elsewhere) only
+// ever targets a genuine phone number.
+function lpPushIdentity() {
+  const forumPhone = LP.current()?.phone;
+  if (forumPhone) return forumPhone;
+  const areaPhone = localStorage.getItem("lp_my_area_phone");
+  if (areaPhone) return areaPhone;
+  let anon = localStorage.getItem("lp_anon_id");
+  if (!anon) {
+    anon = "anon" + Math.random().toString(36).slice(2, 12);
+    try { localStorage.setItem("lp_anon_id", anon); } catch {}
+  }
+  return anon;
+}
+
+// Site-wide "enable notifications" banner — every previous entry point to
+// lpEnablePushNotifications lived deep inside /my-area or /profile, which a
+// first-time or anonymous visitor has no reason to ever open. This surfaces
+// the same opt-in on every page, for every visitor, dismissible and shown
+// at most once (per browser) so it never nags someone who already decided.
+function lpWirePushBanner() {
+  if (lpIsIosNotInstalled()) return; // can't work here at all; nothing to offer
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+  if (typeof Notification === "undefined" || Notification.permission !== "default") return;
+  if (localStorage.getItem("lp_push_banner_dismissed")) return;
+
+  const el = document.createElement("div");
+  el.id = "lpPushBanner";
+  el.setAttribute("role", "status");
+  el.innerHTML = `
+    <span>רוצים לדעת ראשונים על מסיבות חדשות והתאמות איזון? </span>
+    <button type="button" id="lpPushBannerYes" class="btn gold">הפעלת התראות</button>
+    <button type="button" id="lpPushBannerNo" aria-label="סגירה" style="background:none;border:0;color:inherit;font-size:22px;line-height:1;cursor:pointer;padding:0 6px">×</button>
+  `;
+  // bottom offset clears the fixed mobile-bottom nav bar (64px + safe area)
+  // instead of stacking on top of it; on desktop, where that bar is hidden,
+  // this just leaves a small harmless gap above the edge.
+  el.style.cssText = "position:fixed;z-index:21;bottom:calc(64px + env(safe-area-inset-bottom,0px));inset-inline:0;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;padding:12px 16px;background:#1c1120ee;backdrop-filter:blur(10px);border-top:1px solid #ffffff22;font-size:14px;color:#e5e1e4";
+  document.body.appendChild(el);
+
+  const dismiss = () => {
+    localStorage.setItem("lp_push_banner_dismissed", "1");
+    el.remove();
+  };
+  document.getElementById("lpPushBannerNo").addEventListener("click", dismiss);
+  document.getElementById("lpPushBannerYes").addEventListener("click", async () => {
+    const btn = document.getElementById("lpPushBannerYes");
+    btn.disabled = true;
+    const result = await lpEnablePushNotifications(lpPushIdentity());
+    if (result === "ok") {
+      toast("התראות הופעלו בהצלחה");
+      dismiss();
+    } else if (result === "denied") {
+      toast("ההתראות נחסמו בדפדפן — אפשר לאשר אותן דרך הגדרות האתר", "error");
+      dismiss();
+    } else {
+      btn.disabled = false;
+    }
+  });
+}
+document.addEventListener("DOMContentLoaded", lpWirePushBanner);
