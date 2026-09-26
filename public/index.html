@@ -108,9 +108,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
     // With few real parties, a fixed 3-column grid leaves an empty column —
-    // switch to an exact-count layout so 1-2 cards render full-width/balanced
-    // instead of stranded next to blank space.
-    box.style.gridTemplateColumns = data.length === 1 ? "1fr" : data.length === 2 ? "repeat(2,1fr)" : "";
+    // stack full-width, one below the other, instead of stranding a card
+    // next to blank space or squeezing two into an artificial 2-column row.
+    box.style.gridTemplateColumns = data.length <= 2 ? "1fr" : "";
     const pieces = data.map(cardHtml);
     if (data.length > 2) pieces.splice(2, 0, WHATSAPP_BANNER_HTML);
     else pieces.push(WHATSAPP_BANNER_HTML.replace('class="wrap whatsapp-promo-wrap"', 'class="wrap whatsapp-promo-wrap" style="grid-column:1/-1"'));
