@@ -35267,6 +35267,31 @@ async function requestSubscription_(e, t, n = "") {
 	}).catch(() => {});
 	return { id: a.id };
 }
+async function submitDeleteRequest_(e, r = "", i = "") {
+	let t = String(e || "").replace(/\D/g, "");
+	if (t.length !== 10 || !t.startsWith("05")) return {
+		success: !1,
+		error: "invalid_phone"
+	};
+	try {
+		let n = await td(T(H, "deleteRequests"), {
+			phoneNumber: t,
+			status: "pending",
+			createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+			...(r ? { name: String(r).trim() } : {}),
+			...(i ? { reason: String(i).trim() } : {})
+		});
+		return {
+			success: !0,
+			requestId: n.id
+		};
+	} catch (e) {
+		return {
+			success: !1,
+			error: e?.message || "request_failed"
+		};
+	}
+}
 async function registerPushSubscription_(e, t) {
 	let n = XE(e) || e;
 	if (!n || !t?.endpoint) throw Error("נתונים חסרים לרישום התראות");
@@ -35509,7 +35534,8 @@ window.LPData = {
 	uploadMyProfilePhoto: lW,
 	loadMyForumPersonalArea: dW,
 	changeMyForumPassword: uW,
-	registerPushSubscription: registerPushSubscription_
+	registerPushSubscription: registerPushSubscription_,
+	submitDeleteRequest: submitDeleteRequest_
 };
 function pW() {
 	if (document.getElementById("lpSupportChat")) return;

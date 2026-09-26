@@ -108,6 +108,32 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.querySelector("[data-close]")?.addEventListener("click",close); scrim?.addEventListener("click",close);
   drawer?.querySelectorAll("a").forEach(a=>a.addEventListener("click",close));
 
+  // Header "כניסה" dropdown offering subscriber vs advertiser login — the
+  // header itself has no way to know which the visitor wants, so it opens a
+  // small picker rather than guessing. Purely a UI toggle; which link the
+  // visitor picks (/login vs /advertiser-login) is unchanged.
+  document.querySelectorAll(".login-picker").forEach(picker => {
+    const btn = picker.querySelector(".member-login");
+    const menu = picker.querySelector(".login-options");
+    if (!btn || !menu) return;
+    const closePicker = () => { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); };
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const willOpen = menu.hidden;
+      document.querySelectorAll(".login-options").forEach(m => { m.hidden = true; });
+      document.querySelectorAll(".member-login").forEach(b => b.setAttribute("aria-expanded", "false"));
+      menu.hidden = !willOpen;
+      btn.setAttribute("aria-expanded", String(willOpen));
+    });
+    document.addEventListener("click", (e) => { if (!picker.contains(e.target)) closePicker(); });
+  });
+  document.querySelectorAll(".mobile-menu").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const nav = btn.closest(".nav");
+      nav?.classList.toggle("open");
+    });
+  });
+
   const c=LP.current();
   document.querySelectorAll("[data-auth-label]").forEach(el=>el.textContent=c?c.name:"כניסה");
   document.querySelectorAll("[data-dashboard-link]").forEach(el=>{

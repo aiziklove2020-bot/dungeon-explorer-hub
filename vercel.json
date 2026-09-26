@@ -59,6 +59,10 @@
       "destination": "/create-event.html"
     },
     {
+      "source": "/delete-account",
+      "destination": "/delete-account.html"
+    },
+    {
       "source": "/event",
       "destination": "/event.html"
     },
@@ -101,6 +105,10 @@
     {
       "source": "/privacy",
       "destination": "/privacy.html"
+    },
+    {
+      "source": "/producer-info",
+      "destination": "/producer-info.html"
     },
     {
       "source": "/profile",
@@ -161,6 +169,11 @@
       "permanent": true
     },
     {
+      "source": "/delete-account.html",
+      "destination": "/delete-account",
+      "permanent": true
+    },
+    {
       "source": "/event.html",
       "destination": "/event",
       "permanent": true
@@ -203,6 +216,11 @@
     {
       "source": "/privacy.html",
       "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/producer-info.html",
+      "destination": "/producer-info",
       "permanent": true
     },
     {
