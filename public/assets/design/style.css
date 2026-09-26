@@ -171,3 +171,10 @@ body{padding-bottom:72px}.wrap{padding-left:16px;padding-right:16px}.nav{height:
 .brand-title{font-size:17px!important;line-height:1.2}
 .brand-caption{font-size:10px!important}
 }
+
+/* The site name inside the hero image ("מסיבות ליברליות בישראל", the small
+   eyebrow line above the big headline) was 11px — easy to miss entirely
+   against a busy photo background. This is the first brand mention a
+   visitor actually sees, so it needs to read clearly, not blend in. */
+.hero .eyebrow{font-size:18px!important;font-weight:700!important;letter-spacing:1px}
+@media(max-width:800px){.hero .eyebrow{font-size:16px!important}}
