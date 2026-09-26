@@ -1,6 +1,6 @@
 <!doctype html><html lang="he" dir="rtl"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#131315"><title>מסיבות ליברליות בישראל | לוח אירועים - LIBRAL PARTY</title>
+<meta name="theme-color" content="#100910"><title>מסיבות ליברליות בישראל | לוח אירועים - LIBRAL PARTY</title>
 <meta name="description" content="לוח האירועים המלא של מסיבות ליברליות בישראל: חילופי זוגות, בדסם ומסיבות קהילה ברחבי הארץ. מסננים לפי סוג, תאריך ואזור.">
 <meta property="og:title" content="מסיבות ליברליות בישראל | LIBRAL PARTY">
 <meta property="og:description" content="לוח האירועים המלא של מסיבות ליברליות בישראל: חילופי זוגות, בדסם ומסיבות קהילה.">
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `<article class="card" data-category="${escapeHtml(e.category||"")}" data-id="${escapeHtml(e.id)}">
       <div class="card-art">
         ${dateBadge ? `<div class="date">${dateBadge}</div>` : ""}
-        <button class="heart" type="button" data-fav-btn="${escapeHtml(e.id)}" aria-label="שמירת ${escapeHtml(e.title)} למועדפים"><span class="material-symbols-outlined">favorite_border</span></button>
+        <button class="heart" type="button" data-fav-btn="${escapeHtml(e.id)}" aria-label="שמירת ${escapeHtml(e.title)} למועדפים">♡</button>
       </div>
       <div class="card-body">
         ${e.category ? `<span class="tag">${escapeHtml(e.category)}</span>` : ""}

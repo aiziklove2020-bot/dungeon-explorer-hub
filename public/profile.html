@@ -1,6 +1,6 @@
 <!doctype html><html lang="he" dir="rtl"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#131315"><title>אזור אישי | LIBRAL PARTY</title>
+<meta name="theme-color" content="#100910"><title>אזור אישי | LIBRAL PARTY</title>
 
 
 
@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const favsList = document.getElementById("favsList");
       favsList.innerHTML = favs.map((e) => `
         <article class="card" data-fav-card="${escapeHtml(e.id)}">
-          <div class="card-art"><button type="button" class="heart" data-fav-remove="${escapeHtml(e.id)}" aria-label="הסרה מהמועדפים"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">favorite</span></button></div>
+          <div class="card-art"><button type="button" class="heart saved" data-fav-remove="${escapeHtml(e.id)}" aria-label="הסרה מהמועדפים">♥</button></div>
           <div class="card-body"><h3>${escapeHtml(e.title || "")}</h3><div class="card-bottom"><a class="btn gold" href="/event?id=${encodeURIComponent(e.id)}">לפרטים</a></div></div>
         </article>
       `).join("");

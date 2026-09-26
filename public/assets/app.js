@@ -102,12 +102,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     document.body.prepend(field);
     document.body.style.position = "relative";
   })();
-  const menuBtn=document.querySelector("[data-menu]"), drawer=document.querySelector(".drawer"), scrim=document.querySelector(".scrim");
-  const close=()=>{drawer?.classList.remove("open");scrim?.classList.remove("show")}
-  menuBtn?.addEventListener("click",()=>{drawer.classList.add("open");scrim.classList.add("show")});
-  document.querySelector("[data-close]")?.addEventListener("click",close); scrim?.addEventListener("click",close);
-  drawer?.querySelectorAll("a").forEach(a=>a.addEventListener("click",close));
-
   // Header "כניסה" dropdown offering subscriber vs advertiser login — the
   // header itself has no way to know which the visitor wants, so it opens a
   // small picker rather than guessing. Purely a UI toggle; which link the
@@ -146,27 +140,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     el.classList.add("connected");
   });
 
-  // Logout lives inside the drawer (a scrollable list) instead of the fixed
-  // header, so the header's icon cluster never grows/shifts when a user logs
-  // in — every header icon keeps the same spot on every page.
-  if (c && drawer && !drawer.querySelector("[data-logout]")) {
-    const nav = drawer.querySelector("nav");
-    if (nav) {
-      const logoutLink = document.createElement("a");
-      logoutLink.href = "#";
-      logoutLink.setAttribute("data-logout", "1");
-      logoutLink.innerHTML = '<span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">logout</span></span><span class="dr-tx">התנתקות</span>';
-      logoutLink.addEventListener("click", e => {
-        e.preventDefault();
-        close();
-        localStorage.removeItem("lp_current");
-        toast("התנתקת בהצלחה");
-        setTimeout(() => location.href = "index.html", 500);
-      });
-      nav.appendChild(logoutLink);
-    }
-  }
-
   document.querySelectorAll("[data-fav]").forEach(btn=>{
     let id=btn.dataset.fav, favs=LP.favorites();
     btn.textContent=favs.includes(id)?"♥":"♡";
@@ -202,7 +175,6 @@ async function lpWireFavHearts(container) {
   const buttons = [...root.querySelectorAll("[data-fav-btn]")];
   if (buttons.length === 0) return;
   const identity = lpFavIdentity();
-  const iconOf = (btn) => btn.querySelector(".material-symbols-outlined") || btn;
 
   // Favorites are a subscriber-only feature — a forum login alone isn't
   // enough (see toggleFavorite in site-bridge.ts). Hide the hearts entirely
@@ -222,10 +194,15 @@ async function lpWireFavHearts(container) {
   if (identity && window.LPData?.loadMyFavorites) {
     myFavIds = await window.LPData.loadMyFavorites(identity).catch(() => []);
   }
+  const paint = (btn, on) => {
+    btn.classList.toggle("saved", on);
+    btn.textContent = on ? "♥" : "♡";
+    btn.setAttribute("aria-pressed", on);
+  };
+
   buttons.forEach((btn) => {
     const id = btn.dataset.favBtn;
-    const icon = iconOf(btn);
-    icon.textContent = myFavIds.includes(id) ? "favorite" : "favorite_border";
+    paint(btn, myFavIds.includes(id));
     btn.addEventListener("click", async (ev) => {
       ev.preventDefault();
       // addFavorite writes via setDoc on a deterministic doc id, and the
@@ -240,15 +217,15 @@ async function lpWireFavHearts(container) {
         setTimeout(() => (location.href = "/login"), 900);
         return;
       }
-      const nowFav = icon.textContent === "favorite";
+      const nowFav = btn.classList.contains("saved");
       const next = !nowFav;
-      icon.textContent = next ? "favorite" : "favorite_border"; // optimistic
+      paint(btn, next); // optimistic
       btn.dataset.favPending = "1";
       try {
         await window.LPData.toggleFavorite(current, id, next);
         toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
       } catch (err) {
-        icon.textContent = nowFav ? "favorite" : "favorite_border"; // revert
+        paint(btn, nowFav); // revert
         toast(err?.message || "שגיאה בשמירת מועדף", "error");
       } finally {
         delete btn.dataset.favPending;
