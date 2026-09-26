@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <h3><a href="/event?id=${encodeURIComponent(e.id)}">${escapeHtml(e.title)}</a></h3>
         <div class="meta">${escapeHtml(e.city||"")}${e.city && (e.day||e.date) ? " · " : ""}${escapeHtml(e.day||"")}${e.day && e.date ? ", " : ""}${escapeHtml(e.date||"")}${e.time ? " &nbsp;·&nbsp; " + escapeHtml(e.time) : ""}</div>
         <div class="status">ההרשמה פתוחה</div>
-        <div class="card-bottom"><a class="btn gold event-register-card" href="${e.partyType === "external" && e.registrationLink ? "/event?id=" + encodeURIComponent(e.id) : "/register-event?partyId=" + encodeURIComponent(e.id)}">${e.partyType === "external" && e.registrationLink ? "לרכישת כרטיסים" : "הרשמה למסיבה"} <span>←</span></a></div>
+        <div class="card-bottom"><a class="btn gold event-register-card" href="${e.partyType === "external" && e.registrationLink ? "/event?id=" + encodeURIComponent(e.id) : "/register-event?partyId=" + encodeURIComponent(e.id)}">${e.partyType === "external" && e.registrationLink ? "לרכישת כרטיסים" : "הרשמה למסיבה"}</a></div>
       </div>
     </article>`;
   }
