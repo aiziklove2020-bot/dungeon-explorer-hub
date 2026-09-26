@@ -160,32 +160,20 @@ body{padding-bottom:72px}.wrap{padding-left:16px;padding-right:16px}.nav{height:
 .liberal-suite-tile .suite-tile-link{padding:7px 12px;font-size:.7rem;border-radius:7px}
 @media(max-width:800px){.liberal-suite-tile{min-height:190px;padding:18px 20px;background-image:linear-gradient(90deg,rgba(12,7,5,.08),rgba(13,8,6,.94) 72%),url('liberal-suite/lounge-main.jpeg');background-position:center}.liberal-suite-tile .suite-tile-copy{max-width:68%}.liberal-suite-tile h2{font-size:1.45rem}.liberal-suite-tile p{font-size:.7rem;margin-bottom:10px}}
 
-/* Brand name emphasis in the header — the site name was rendering too small
-   and low-contrast on mobile (14px), reading as a minor caption instead of
-   the site's own identity. Bumped size/weight and accented the country word
-   to match the hero's own pink-accent treatment, so the header clearly
-   reads as the site's brand at a glance. */
-.brand-title{font-weight:800}
+/* Brand name emphasis — went through a few small increments that each
+   still read as "too small" against everything else competing for
+   attention (photo background in the hero, login icon/hamburger/logo in
+   the header). Going decisively bigger this time instead of nudging again:
+   the site's own name needs to be unmistakable, on every screen size, not
+   just technically larger than before. Tagline stays hidden on mobile
+   (freed-up room the title actually uses); country word keeps the pink
+   accent tying it to the rest of the design. */
+.brand-title{font-weight:800!important}
 .brand-country{color:#ff5798}
-@media(max-width:800px){
-.brand-title{font-size:17px!important;line-height:1.2}
-.brand-caption{font-size:10px!important}
-}
-
-/* The site name inside the hero image ("מסיבות ליברליות בישראל", the small
-   eyebrow line above the big headline) was 11px — easy to miss entirely
-   against a busy photo background. This is the first brand mention a
-   visitor actually sees, so it needs to read clearly, not blend in. */
-.hero .eyebrow{font-size:18px!important;font-weight:700!important;letter-spacing:1px}
-@media(max-width:800px){.hero .eyebrow{font-size:16px!important}}
-
-/* Still not prominent enough at 17px in a cramped 64px-tall mobile header,
-   competing with the login icon, hamburger and logo image for the same
-   row. Freed up room by hiding the small tagline under it on mobile (the
-   design's own CSS already tried to hide it this way once, but a later
-   rule silently re-enabled it) and pushed the title itself further —
-   the brand name is what needs to read clearly here, not the caption. */
+.brand-title{font-size:26px!important;line-height:1.15}
+.hero .eyebrow{font-size:22px!important;font-weight:700!important;letter-spacing:1px}
 @media(max-width:800px){
 .brand-caption{display:none!important}
-.brand-title{font-size:19px!important}
+.brand-title{font-size:24px!important}
+.hero .eyebrow{font-size:20px!important}
 }
