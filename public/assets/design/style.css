@@ -169,9 +169,9 @@ body{padding-bottom:72px}.wrap{padding-left:16px;padding-right:16px}.nav{height:
    (freed-up room the title actually uses); country word keeps the pink
    accent tying it to the rest of the design. */
 .brand-title{font-weight:800!important}
-.brand-country{color:#ff5798}
+.brand-country{color:#ff5798;font-size:inherit!important}
 .brand-title{font-size:26px!important;line-height:1.15}
-.hero .eyebrow{font-size:22px!important;font-weight:700!important;letter-spacing:1px}
+.hero .eyebrow{font-size:22px!important;font-weight:700!important;letter-spacing:1px;text-shadow:0 2px 10px #000000cc,0 1px 3px #00000099}
 @media(max-width:800px){
 .brand-caption{display:none!important}
 .brand-title{font-size:24px!important}
