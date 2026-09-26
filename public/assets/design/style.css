@@ -197,3 +197,10 @@ body{padding-bottom:72px}.wrap{padding-left:16px;padding-right:16px}.nav{height:
    left it sitting lower than it needs to inside the vertically-centered
    hero box. */
 .hero h1{margin-top:0!important}
+
+/* A later, more general rule (.card-bottom .btn{color:#ff9fc3}) was
+   overriding .btn.gold's own white text at equal specificity, leaving
+   light pink text on the same pink/magenta gradient background — very
+   low contrast, hard to read. Restoring white here has one more class
+   in the selector than that rule, so it wins regardless of source order. */
+.card-bottom .btn.gold{color:#fff}
