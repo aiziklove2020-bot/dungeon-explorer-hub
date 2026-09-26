@@ -437,32 +437,32 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
             }).length;
             return (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+                <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                   <p className="text-[#94A3B8] text-xs font-bold">מסיבות פעילות</p>
                   <p className="text-2xl font-bold mt-1">{notExpired.length}</p>
                 </div>
-                <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+                <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                   <p className="text-[#94A3B8] text-xs font-bold">סה״כ נרשמים</p>
                   <p className="text-2xl font-bold mt-1">{totalRegs}</p>
                 </div>
-                <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+                <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                   <p className="text-[#94A3B8] text-xs font-bold">תפוסה ממוצעת</p>
                   <p className="text-2xl font-bold mt-1" style={{ color: '#10B981' }}>{avgOccupancy}%</p>
                 </div>
-                <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+                <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                   <p className="text-[#94A3B8] text-xs font-bold">מכסה מלאה</p>
                   <p className="text-2xl font-bold mt-1" style={{ color: soldOut > 0 ? '#ffb4ab' : undefined }}>{soldOut}</p>
                 </div>
               </div>
             );
           })()}
-          <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+          <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-start gap-3 text-right">
-                <Clock size={20} className="text-[#a9a9b2] mt-1 shrink-0" aria-hidden="true" />
+                <Clock size={20} className="text-[#c0aebb] mt-1 shrink-0" aria-hidden="true" />
                 <div>
                   <h4 className="font-bold text-base">{t('admin.partyRetention.title')}</h4>
-                  <p className="text-[#a9a9b2] text-xs mt-1">{t('admin.partyRetention.description')}</p>
+                  <p className="text-[#c0aebb] text-xs mt-1">{t('admin.partyRetention.description')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -470,7 +470,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                   value={retentionHours}
                   onChange={handleRetentionChange}
                   disabled={savingRetention}
-                  className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] px-3 py-2 rounded-xl text-white outline-none focus:border-[#ff5708] disabled:opacity-50"
+                  className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] px-3 py-2 rounded-xl text-white outline-none focus:border-[#ff438b] disabled:opacity-50"
                   aria-label={t('admin.partyRetention.title')}
                 >
                   {RETENTION_OPTIONS.map((opt) => (
@@ -540,14 +540,14 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
               { id: 'expired', label: 'פג תוקף' },
             ];
             return (
-              <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-xl p-3 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+              <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-xl p-3 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
                 <div className="relative flex-1">
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="חיפוש מסיבה, DJ, תיאור..."
-                    className="w-full bg-[#1f1f23] rounded-xl px-4 py-2 text-white placeholder:text-[#94A3B8] outline-none focus:ring-1 focus:ring-[#ff5708]"
+                    className="w-full bg-[#2a1a24] rounded-xl px-4 py-2 text-white placeholder:text-[#94A3B8] outline-none focus:ring-1 focus:ring-[#ff438b]"
                   />
                 </div>
                 <div className="flex items-center gap-1.5 overflow-x-auto">
@@ -558,8 +558,8 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                       onClick={() => setStatusTab(tab.id)}
                       className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors"
                       style={statusTab === tab.id
-                        ? { background: '#ff5708', color: '#fff' }
-                        : { background: '#1f1f23', color: '#a9a9b2' }}
+                        ? { background: '#ff438b', color: '#fff' }
+                        : { background: '#2a1a24', color: '#c0aebb' }}
                     >
                       {tab.label} ({counts[tab.id]})
                     </button>
@@ -614,8 +614,8 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                         onClick={() => setSelectedPartyId(party.id)}
                         className="w-full text-right rounded-xl p-3 border transition-colors flex items-center gap-3"
                         style={selected
-                          ? { background: '#1f1f23', borderColor: '#ff5708' }
-                          : { background: '#121218', borderColor: 'rgba(255,255,255,0.08)' }}
+                          ? { background: '#2a1a24', borderColor: '#ff438b' }
+                          : { background: '#20151e', borderColor: 'rgba(255,255,255,0.08)' }}
                       >
                         {party.imageURL ? (
                           <img
@@ -630,7 +630,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-bold text-sm truncate">{party.name || party.title}</h4>
                             {status === 'locked' && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#ff5708]/20 text-[#ffb3b6]">נעול לאיזון</span>
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#ff438b]/20 text-[#ff9fc3]">נעול לאיזון</span>
                             )}
                             {status === 'expired' && (
                               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#2a292e] text-[#94A3B8]">פג תוקף</span>
@@ -641,8 +641,8 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                           </p>
                           {!party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal') && (
                             <div className="w-full h-1.5 rounded-full bg-[#2a292e] overflow-hidden flex mt-2">
-                              <div className="h-full" style={{ width: `${malePct}%`, background: '#ff5708' }} />
-                              <div className="h-full" style={{ width: `${femalePct}%`, background: '#ffb3b6' }} />
+                              <div className="h-full" style={{ width: `${malePct}%`, background: '#ff438b' }} />
+                              <div className="h-full" style={{ width: `${femalePct}%`, background: '#ff9fc3' }} />
                             </div>
                           )}
                         </div>
@@ -655,14 +655,14 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                 {/* Detail + quick-control panel for the selected party — sticky
                     alongside the list on desktop, falls below it on mobile. */}
                 {selectedParty && (
-                  <div className="lg:sticky lg:top-4 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
+                  <div className="lg:sticky lg:top-4 bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
                     <div className="flex flex-col gap-3 mb-3">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-lg md:text-xl font-bold">{selectedParty.name || selectedParty.title}</h3>
                         <span className={`px-2 py-1 rounded text-xs font-bold ${
                           selectedParty.partyType === 'exchange' ? 'bg-purple-600'
                             : selectedParty.partyType === 'external' ? 'bg-blue-600'
-                            : 'bg-[#ff5708]'
+                            : 'bg-[#ff438b]'
                         }`}>
                           {selectedParty.partyType === 'exchange' ? t('admin.exchangeParty')
                             : selectedParty.partyType === 'external' ? t('admin.externalParty')
@@ -695,7 +695,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                         <button
                           type="button"
                           onClick={() => handleEditParty(selectedParty)}
-                          className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex-1"
+                          className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex-1"
                         >
                           {t('admin.edit')}
                         </button>
@@ -729,8 +729,8 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                       return (
                         <div className="mb-3">
                           <div className="w-full h-2.5 rounded-full bg-[#2a292e] overflow-hidden flex">
-                            <div className="h-full" style={{ width: `${malePct}%`, background: '#ff5708' }} title={`גברים: ${maleCount}/${maleLimit}`} />
-                            <div className="h-full" style={{ width: `${femalePct}%`, background: '#ffb3b6' }} title={`נשים: ${femaleCount}/${femaleLimit}`} />
+                            <div className="h-full" style={{ width: `${malePct}%`, background: '#ff438b' }} title={`גברים: ${maleCount}/${maleLimit}`} />
+                            <div className="h-full" style={{ width: `${femalePct}%`, background: '#ff9fc3' }} title={`נשים: ${femaleCount}/${femaleLimit}`} />
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 mt-2 text-sm md:text-base">
                             <p><strong>{t('maleRegistered') || 'גברים רשומים'}:</strong> <span style={maleFull ? { color: '#ffb4ab' } : undefined}>{maleCount}/{maleLimit}{maleFull ? ' (מלא)' : ''}</span></p>
@@ -741,7 +741,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                       );
                     })()}
                     {!selectedParty.whatsappNumber && ['internal', 'exchange'].includes(selectedParty.partyType || 'internal') && (
-                      <div className="mb-3 rounded-xl bg-[#121218] p-3 flex flex-col gap-3">
+                      <div className="mb-3 rounded-xl bg-[#20151e] p-3 flex flex-col gap-3">
                         <span className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">שליטה מהירה</span>
                         <label className="flex items-center justify-between gap-2 cursor-pointer">
                           <span className="text-sm">נעילת מכירה לגברים סולו</span>
@@ -749,7 +749,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                             type="checkbox"
                             checked={!!selectedParty.soloMenSalesLocked}
                             onChange={(e) => handleToggleQuickControl(selectedParty.id, 'soloMenSalesLocked', e.target.checked)}
-                            className="w-5 h-5 accent-[#ff5708] cursor-pointer"
+                            className="w-5 h-5 accent-[#ff438b] cursor-pointer"
                           />
                         </label>
                         <label className="flex items-center justify-between gap-2 cursor-pointer">
@@ -858,16 +858,16 @@ const GuardianAddForm = ({ onAdd }) => {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="שם הנאמן/ה"
-        className="flex-1 min-w-[120px] bg-[#121218] rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-[#ff5708]"
+        className="flex-1 min-w-[120px] bg-[#20151e] rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-[#ff438b]"
       />
       <input
         type="text"
         value={role}
         onChange={(e) => setRole(e.target.value)}
         placeholder="תפקיד (לא חובה)"
-        className="flex-1 min-w-[100px] bg-[#121218] rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-[#ff5708]"
+        className="flex-1 min-w-[100px] bg-[#20151e] rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-[#ff438b]"
       />
-      <button type="submit" className="px-3 py-1.5 rounded-lg bg-[#ff5708] hover:bg-[#ff7a29] text-white text-sm font-bold">
+      <button type="submit" className="px-3 py-1.5 rounded-lg bg-[#ff438b] hover:bg-[#ff5596] text-white text-sm font-bold">
         הוספה
       </button>
     </form>

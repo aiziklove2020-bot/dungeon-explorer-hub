@@ -55,8 +55,8 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
 
   if (loading) {
     return (
-      <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] p-3 rounded-lg">
-        <p className="text-[#a9a9b2] text-sm">{t('registrationItem.loading')}</p>
+      <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] p-3 rounded-lg">
+        <p className="text-[#c0aebb] text-sm">{t('registrationItem.loading')}</p>
       </div>
     );
   }
@@ -68,7 +68,7 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
   const isDiscount = registration.registrationType === 'single-female-discount' || registration.registrationType === 'female_discount';
 
   return (
-    <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] p-2 md:p-3 rounded-lg">
+    <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] p-2 md:p-3 rounded-lg">
       <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-2">
         <div className="flex-1 w-full">
           <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-1">
@@ -110,12 +110,12 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
               </span>
             )}
           </div>
-          <p className="text-[#a9a9b2] text-[10px] md:text-xs">{t('registrationItem.phone')}: <PhoneLink phone={registration.phoneNumber}>{registration.phoneNumber || '-'}</PhoneLink></p>
+          <p className="text-[#c0aebb] text-[10px] md:text-xs">{t('registrationItem.phone')}: <PhoneLink phone={registration.phoneNumber}>{registration.phoneNumber || '-'}</PhoneLink></p>
           {registration.telegramUsername && (
-            <p className="text-[#a9a9b2] text-[10px] md:text-xs">{t('registrationItem.telegram')}: @{registration.telegramUsername}</p>
+            <p className="text-[#c0aebb] text-[10px] md:text-xs">{t('registrationItem.telegram')}: @{registration.telegramUsername}</p>
           )}
           {regInfo && (
-            <div className="mt-2 p-1.5 md:p-2 rounded bg-[#1f1f23]/50">
+            <div className="mt-2 p-1.5 md:p-2 rounded bg-[#2a1a24]/50">
               {regInfo.isGold ? (
                 <p className="text-yellow-400 text-[10px] md:text-xs font-bold">⭐ {t('registrationItem.goldUserNeverExpires')}</p>
               ) : (
@@ -132,7 +132,7 @@ const RegistrationItem = ({ registration, partyId, onConvertToUser, onRemoveFrom
           {onRemoveFromParty && partyId && (
             <button
               onClick={() => onRemoveFromParty(partyId, registration)}
-              className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1"
+              className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-2 md:px-3 py-1 rounded-lg font-bold text-[10px] md:text-xs whitespace-nowrap flex items-center gap-1"
               title={t('confirmRemoveUser')}
             >
               <Trash2 size={12} />

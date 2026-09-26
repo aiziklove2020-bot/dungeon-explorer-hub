@@ -94,36 +94,36 @@ const AdminAuthForm = ({ onAuthenticated }) => {
       <div
         className="min-h-dvh text-white flex items-center justify-center px-4"
         dir="rtl"
-        style={{ background: '#050506', fontFamily: 'Arial, Heebo, sans-serif' }}
+        style={{ background: '#100910', fontFamily: 'Arial, Heebo, sans-serif' }}
       >
         <SEO title="Admin" noindex />
         <div
           className="w-full p-8"
           style={{
             maxWidth: 440,
-            background: 'linear-gradient(180deg,#101014,#0a0a0c)',
-            border: '1px solid #2d2d34',
+            background: 'linear-gradient(180deg,#241722,#160d16)',
+            border: '1px solid #f4bfd733',
             borderRadius: 24,
           }}
         >
           <div className="text-center mb-8">
             <img src="/assets/logo-new.png" alt="" className="mx-auto mb-3" style={{ width: 320, height: 'auto', objectFit: 'contain' }} />
-            <h1 className="mb-1" style={{ fontFamily: 'Georgia,"Times New Roman",serif', fontWeight: 700, fontSize: 22, color: '#f3b82d' }}>
+            <h1 className="mb-1" style={{ fontFamily: 'Georgia,"Times New Roman",serif', fontWeight: 700, fontSize: 22, color: '#f6c887' }}>
               {t('adminLogin.setPasswordTitle')}
             </h1>
-            <p style={{ color: '#a9a9b2', fontSize: 13 }}>{t('adminLogin.setPasswordSubtitle')}</p>
+            <p style={{ color: '#c0aebb', fontSize: 13 }}>{t('adminLogin.setPasswordSubtitle')}</p>
           </div>
 
           <form onSubmit={handlePasswordSetup} className="space-y-4">
             <div className="space-y-1 text-right">
-              <label htmlFor={newPasswordId} className="text-xs uppercase font-bold" style={{ color: '#a9a9b2' }}>{t('adminLogin.newPasswordLabel')}</label>
+              <label htmlFor={newPasswordId} className="text-xs uppercase font-bold" style={{ color: '#c0aebb' }}>{t('adminLogin.newPasswordLabel')}</label>
               <input
                 id={newPasswordId}
                 type="password"
                 value={newPassword}
                 onChange={(e) => { setNewPassword(e.target.value); setPasswordSetupError(''); }}
                 className="w-full outline-none text-white text-right"
-                style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #2d2d34', borderRadius: 15, padding: '14px 16px' }}
+                style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #f4bfd733', borderRadius: 15, padding: '14px 16px' }}
                 placeholder={t('adminLogin.newPasswordPlaceholderFull')}
                 autoComplete="new-password"
                 autoFocus
@@ -134,14 +134,14 @@ const AdminAuthForm = ({ onAuthenticated }) => {
               />
             </div>
             <div className="space-y-1 text-right">
-              <label htmlFor={confirmPasswordId} className="text-xs uppercase font-bold" style={{ color: '#a9a9b2' }}>{t('adminLogin.confirmPasswordLabel')}</label>
+              <label htmlFor={confirmPasswordId} className="text-xs uppercase font-bold" style={{ color: '#c0aebb' }}>{t('adminLogin.confirmPasswordLabel')}</label>
               <input
                 id={confirmPasswordId}
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => { setConfirmPassword(e.target.value); setPasswordSetupError(''); }}
                 className="w-full outline-none text-white text-right"
-                style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #2d2d34', borderRadius: 15, padding: '14px 16px' }}
+                style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #f4bfd733', borderRadius: 15, padding: '14px 16px' }}
                 placeholder={t('adminLogin.confirmPasswordPlaceholderFull')}
                 autoComplete="new-password"
                 minLength={4}
@@ -149,14 +149,14 @@ const AdminAuthForm = ({ onAuthenticated }) => {
               />
             </div>
             {passwordSetupError && (
-              <p id={setupErrorId} className="text-sm text-right" style={{ color: '#ff5708' }} role="alert">{passwordSetupError}</p>
+              <p id={setupErrorId} className="text-sm text-right" style={{ color: '#ff438b' }} role="alert">{passwordSetupError}</p>
             )}
             <button
               type="submit"
               disabled={loading}
               aria-disabled={loading}
               className="w-full text-white font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg,#f3b82d,#c98f10)', borderRadius: 15, minHeight: 54 }}
+              style={{ background: 'linear-gradient(135deg,#f6c887,#dab064)', borderRadius: 15, minHeight: 54 }}
             >
               {loading ? (
                 <div className="loader-inline"><Loader size="small" /></div>
@@ -174,15 +174,15 @@ const AdminAuthForm = ({ onAuthenticated }) => {
     <div
       className="min-h-dvh text-white flex items-center justify-center px-4"
       dir="rtl"
-      style={{ background: '#050506', fontFamily: 'Arial, Heebo, sans-serif' }}
+      style={{ background: '#100910', fontFamily: 'Arial, Heebo, sans-serif' }}
     >
       <SEO title="Admin" noindex />
       <div
         className="w-full p-8"
         style={{
           maxWidth: 440,
-          background: 'linear-gradient(180deg,#101014,#0a0a0c)',
-          border: '1px solid #2d2d34',
+          background: 'linear-gradient(180deg,#241722,#160d16)',
+          border: '1px solid #f4bfd733',
           borderRadius: 24,
         }}
       >
@@ -191,19 +191,19 @@ const AdminAuthForm = ({ onAuthenticated }) => {
           <h1 className="mb-1" style={{ fontFamily: 'Georgia,"Times New Roman",serif', fontWeight: 700, fontSize: 24 }}>
             LIBRAL PARTY
           </h1>
-          <p style={{ color: '#a9a9b2', fontSize: 13, letterSpacing: 1 }}>{t('adminLogin.loginTitle')}</p>
+          <p style={{ color: '#c0aebb', fontSize: 13, letterSpacing: 1 }}>{t('adminLogin.loginTitle')}</p>
         </div>
 
         <form onSubmit={handlePasswordSubmit} className="space-y-4">
           <div className="space-y-1 text-right">
-            <label htmlFor={usernameId} className="text-xs uppercase font-bold" style={{ color: '#a9a9b2' }}>{t('adminLogin.usernameLabel')}</label>
+            <label htmlFor={usernameId} className="text-xs uppercase font-bold" style={{ color: '#c0aebb' }}>{t('adminLogin.usernameLabel')}</label>
             <input
               id={usernameId}
               type="text"
               value={username}
               onChange={(e) => { setUsername(e.target.value); setPasswordError(''); }}
               className="w-full outline-none text-white text-right"
-              style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #2d2d34', borderRadius: 15, padding: '14px 16px' }}
+              style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #f4bfd733', borderRadius: 15, padding: '14px 16px' }}
               placeholder={t('adminLogin.usernamePlaceholderFull')}
               autoComplete="username"
               autoFocus
@@ -211,14 +211,14 @@ const AdminAuthForm = ({ onAuthenticated }) => {
             />
           </div>
           <div className="space-y-1 text-right">
-            <label htmlFor={passwordId} className="text-xs uppercase font-bold" style={{ color: '#a9a9b2' }}>{t('adminLogin.passwordLabel')}</label>
+            <label htmlFor={passwordId} className="text-xs uppercase font-bold" style={{ color: '#c0aebb' }}>{t('adminLogin.passwordLabel')}</label>
             <input
               id={passwordId}
               type="password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setPasswordError(''); }}
               className="w-full outline-none text-white text-right"
-              style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #2d2d34', borderRadius: 15, padding: '14px 16px' }}
+              style={{ background: 'rgba(0,0,0,.4)', border: '1px solid #f4bfd733', borderRadius: 15, padding: '14px 16px' }}
               placeholder={t('adminLogin.passwordPlaceholderFull')}
               autoComplete="current-password"
               required
@@ -226,7 +226,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
               aria-describedby={passwordError ? passwordErrorId : undefined}
             />
             {passwordError && (
-              <p id={passwordErrorId} className="text-sm text-right mt-1" style={{ color: '#ff5708' }} role="alert">{passwordError}</p>
+              <p id={passwordErrorId} className="text-sm text-right mt-1" style={{ color: '#ff438b' }} role="alert">{passwordError}</p>
             )}
           </div>
           <button
@@ -235,7 +235,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
             aria-disabled={loading}
             className="w-full text-white font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
             style={{
-              background: 'linear-gradient(135deg,#ff5708,#ff7a29)',
+              background: 'linear-gradient(135deg,#ff438b,#ff5596)',
               borderRadius: 15,
               minHeight: 54,
             }}

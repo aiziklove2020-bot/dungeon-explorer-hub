@@ -88,13 +88,13 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
   return createPortal(
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-2xl w-full max-w-md p-4 md:p-6"
+        className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-2xl w-full max-w-md p-4 md:p-6"
         onClick={(e) => e.stopPropagation()}
         dir="rtl"
       >
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold">מנוי חדש</h3>
-          <button onClick={onClose} className="text-[#a9a9b2] hover:text-white">
+          <button onClick={onClose} className="text-[#c0aebb] hover:text-white">
             <X size={22} />
           </button>
         </div>
@@ -107,7 +107,7 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
                 type="text"
                 value={form.firstName}
                 onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+                className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
                 required
               />
             </div>
@@ -117,7 +117,7 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
                 type="text"
                 value={form.lastName}
                 onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+                className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
               />
             </div>
           </div>
@@ -130,7 +130,7 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
               onChange={handlePhoneChange}
               placeholder="05XXXXXXXX"
               maxLength="10"
-              className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+              className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
               required
             />
           </div>
@@ -140,7 +140,7 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
             <select
               value={form.paymentMethod}
               onChange={(e) => setForm((f) => ({ ...f, paymentMethod: e.target.value }))}
-              className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+              className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
             >
               {PAYMENT_METHODS.map((m) => (
                 <option key={m} value={m}>{m}</option>
@@ -154,27 +154,27 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
               <button
                 type="button"
                 onClick={() => setForm((f) => ({ ...f, expiryDate: todayPlusDay(), tier: 'day' }))}
-                className={`flex-1 border py-2 rounded-lg font-bold text-xs ${form.tier === 'day' ? 'bg-[#ff5708] border-[#ff5708] text-white' : 'bg-[#1f1f23] hover:bg-[#2a292e] border-[rgba(255,255,255,0.08)] text-white'}`}
+                className={`flex-1 border py-2 rounded-lg font-bold text-xs ${form.tier === 'day' ? 'bg-[#ff438b] border-[#ff438b] text-white' : 'bg-[#2a1a24] hover:bg-[#2a292e] border-[rgba(255,255,255,0.08)] text-white'}`}
               >
                 מנוי יומי
               </button>
               <button
                 type="button"
                 onClick={() => setForm((f) => ({ ...f, expiryDate: todayPlusYear(), tier: 'year' }))}
-                className={`flex-1 border py-2 rounded-lg font-bold text-xs ${form.tier === 'year' ? 'bg-[#ff5708] border-[#ff5708] text-white' : 'bg-[#1f1f23] hover:bg-[#2a292e] border-[rgba(255,255,255,0.08)] text-white'}`}
+                className={`flex-1 border py-2 rounded-lg font-bold text-xs ${form.tier === 'year' ? 'bg-[#ff438b] border-[#ff438b] text-white' : 'bg-[#2a1a24] hover:bg-[#2a292e] border-[rgba(255,255,255,0.08)] text-white'}`}
               >
                 מנוי שנתי
               </button>
               <button
                 type="button"
                 onClick={() => setForm((f) => ({ ...f, expiryDate: '', tier: 'gold' }))}
-                className={`flex-1 border py-2 rounded-lg font-bold text-xs ${form.tier === 'gold' ? 'bg-yellow-500 border-yellow-500 text-black' : 'bg-[#1f1f23] hover:bg-[#2a292e] border-[rgba(255,255,255,0.08)] text-yellow-400'}`}
+                className={`flex-1 border py-2 rounded-lg font-bold text-xs ${form.tier === 'gold' ? 'bg-yellow-500 border-yellow-500 text-black' : 'bg-[#2a1a24] hover:bg-[#2a292e] border-[rgba(255,255,255,0.08)] text-yellow-400'}`}
               >
                 ⭐ זהב (לכל החיים)
               </button>
             </div>
             {form.tier === 'gold' ? (
-              <p className="text-xs text-yellow-400/80 p-3 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl">
+              <p className="text-xs text-yellow-400/80 p-3 bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl">
                 מנוי זהב — ללא הגבלת זמן, לעולם לא פג תוקף. אין צורך בתאריך תפוגה.
               </p>
             ) : (
@@ -182,7 +182,7 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
                 type="date"
                 value={form.expiryDate}
                 onChange={(e) => setForm((f) => ({ ...f, expiryDate: e.target.value }))}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+                className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
                 required
               />
             )}
@@ -224,7 +224,7 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
                         type="text"
                         value={loginNickname}
                         onChange={(e) => setLoginNickname(e.target.value)}
-                        className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+                        className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
                       />
                     </div>
                     <div>
@@ -234,7 +234,7 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         placeholder="לפחות 4 תווים"
-                        className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+                        className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
                       />
                     </div>
                     <p className="col-span-2 text-xs text-[#94A3B8]">המנוי יחויב לבחור סיסמה משלו בהתחברות הראשונה.</p>
@@ -250,11 +250,11 @@ const NewSubscriberModal = ({ onClose, onSubmit, initialValues }) => {
             <button
               type="submit"
               disabled={saving}
-              className="bg-[#ff5708] hover:bg-[#ff7a29] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold"
+              className="bg-[#ff438b] hover:bg-[#ff5596] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold"
             >
               {saving ? 'יוצר...' : 'צור מנוי'}
             </button>
-            <button type="button" onClick={onClose} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-6 py-2 rounded-xl font-bold">
+            <button type="button" onClick={onClose} className="bg-[#2a1a24] hover:bg-[#2a292e] text-white px-6 py-2 rounded-xl font-bold">
               ביטול
             </button>
           </div>

@@ -116,14 +116,14 @@ const DBSection = () => {
           type="button"
           onClick={loadSummary}
           disabled={loadingSummary}
-          className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 disabled:opacity-50"
+          className="bg-[#2a1a24] hover:bg-[#2a292e] text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 disabled:opacity-50"
         >
           <RefreshCw size={16} className={loadingSummary ? 'animate-spin' : ''} />
           רענן
         </button>
       </div>
 
-      <p className="text-[#a9a9b2] text-sm">
+      <p className="text-[#c0aebb] text-sm">
         ייצוא: בחר אילו אוספים לכלול בגיבוי (כולל UID). שחזור: merge — merges את הגיבוי ל-DB בלי למחוק; מסמך שכבר זהה לא נכתב שוב.
       </p>
 
@@ -135,26 +135,26 @@ const DBSection = () => {
       )}
 
       {(progress || downloading || uploading) && (
-        <div className="bg-[#1f1f23]/50 border border-[rgba(255,255,255,0.08)] px-4 py-3 rounded-xl flex items-center gap-3">
+        <div className="bg-[#2a1a24]/50 border border-[rgba(255,255,255,0.08)] px-4 py-3 rounded-xl flex items-center gap-3">
           {(downloading || uploading) && <Loader size="small" />}
           <span className="text-[#e4e1e7]">{progress || (downloading ? 'מוריד...' : 'מעלה...')}</span>
         </div>
       )}
 
-      <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+      <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
         <h3 className="text-sm font-bold text-[#94A3B8] uppercase mb-2">בחר אוספים לגיבוי</h3>
         <div className="flex flex-wrap gap-x-4 gap-y-1 mb-2">
-          <button type="button" onClick={() => setAllSelected(true)} className="text-[#a9a9b2] hover:text-white text-sm">
+          <button type="button" onClick={() => setAllSelected(true)} className="text-[#c0aebb] hover:text-white text-sm">
             בחר הכל
           </button>
           <span className="text-[#64748B]">|</span>
-          <button type="button" onClick={() => setAllSelected(false)} className="text-[#a9a9b2] hover:text-white text-sm">
+          <button type="button" onClick={() => setAllSelected(false)} className="text-[#c0aebb] hover:text-white text-sm">
             נקה הכל
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
           {EXPORTABLE_COLLECTION_KEYS.map((key) => (
-            <label key={key} className="flex items-center gap-2 bg-[#121218]/60 rounded-lg px-3 py-1.5 cursor-pointer">
+            <label key={key} className="flex items-center gap-2 bg-[#20151e]/60 rounded-lg px-3 py-1.5 cursor-pointer">
               <input
                 type="checkbox"
                 checked={!!selectedCollections[key]}
@@ -201,12 +201,12 @@ const DBSection = () => {
       )}
 
       {summary && summary.collections && (
-        <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+        <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
           <h3 className="text-sm font-bold text-[#94A3B8] uppercase mb-3">מצב Firebase כרגע</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-sm">
             {Object.entries(summary.collections).map(([name, count]) => (
-              <div key={name} className="bg-[#121218]/60 rounded-lg px-3 py-2">
-                <span className="text-[#a9a9b2] block truncate" title={name}>{name}</span>
+              <div key={name} className="bg-[#20151e]/60 rounded-lg px-3 py-2">
+                <span className="text-[#c0aebb] block truncate" title={name}>{name}</span>
                 <span className="text-white font-medium">{typeof count === 'number' ? count : String(count)}</span>
               </div>
             ))}

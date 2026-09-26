@@ -32,13 +32,13 @@ const RenewSubscriptionModal = ({ user, onClose, onSubmit }) => {
   return createPortal(
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-[#121218] border border-[rgba(255,255,255,0.08)] rounded-2xl w-full max-w-md p-4 md:p-6"
+        className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-2xl w-full max-w-md p-4 md:p-6"
         onClick={(e) => e.stopPropagation()}
         dir="rtl"
       >
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold">חידוש מנוי — {user.name}</h3>
-          <button onClick={onClose} className="text-[#a9a9b2] hover:text-white">
+          <button onClick={onClose} className="text-[#c0aebb] hover:text-white">
             <X size={22} />
           </button>
         </div>
@@ -50,7 +50,7 @@ const RenewSubscriptionModal = ({ user, onClose, onSubmit }) => {
               type="date"
               value={expiryDate}
               onChange={(e) => setExpiryDate(e.target.value)}
-              className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+              className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
               required
             />
           </div>
@@ -60,7 +60,7 @@ const RenewSubscriptionModal = ({ user, onClose, onSubmit }) => {
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
-              className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+              className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
             >
               {PAYMENT_METHODS.map((m) => (
                 <option key={m} value={m}>{m}</option>
@@ -78,7 +78,7 @@ const RenewSubscriptionModal = ({ user, onClose, onSubmit }) => {
             >
               {saving ? 'מחדש...' : 'חדש מנוי'}
             </button>
-            <button type="button" onClick={onClose} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-6 py-2 rounded-xl font-bold">
+            <button type="button" onClick={onClose} className="bg-[#2a1a24] hover:bg-[#2a292e] text-white px-6 py-2 rounded-xl font-bold">
               ביטול
             </button>
           </div>

@@ -212,27 +212,27 @@ const Admin = () => {
   }
 
   return (
-    <div className="lp-admin-theme min-h-dvh text-white" dir="rtl" style={{ background: '#0B0B0F', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="lp-admin-theme min-h-dvh text-white" dir="rtl" style={{ background: '#100910', fontFamily: 'Inter, system-ui, sans-serif' }}>
       <SEO title="Admin" noindex />
 
       {/* Desktop sidebar — the new design's nav shell. Hidden on mobile, where
           the existing horizontal pill-tab row below still drives navigation. */}
-      <aside className="hidden md:flex fixed right-0 top-0 h-full w-64 flex-col justify-between z-40" style={{ background: '#121218', borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
+      <aside className="hidden md:flex fixed right-0 top-0 h-full w-64 flex-col justify-between z-40" style={{ background: '#20151e', borderLeft: '1px solid #f4bfd720' }}>
         <div className="flex flex-col overflow-y-auto">
           <div className="h-16 px-5 flex items-center gap-3 shrink-0">
             <img src="/assets/logo-new.png" alt="" className="object-contain" style={{ width: 100, height: 'auto' }} />
             <div className="flex flex-col">
               <span className="font-bold text-sm tracking-tight">LIBRAL PARTY</span>
-              <span className="text-xs" style={{ color: '#ffb3b6' }}>פורטל ניהול</span>
+              <span className="text-xs" style={{ color: '#ff9fc3' }}>פורטל ניהול</span>
             </div>
           </div>
           <div className="px-4 py-2">
-            <div className="p-2.5 rounded-lg flex items-center justify-between" style={{ background: '#1f1f23' }}>
+            <div className="p-2.5 rounded-lg flex items-center justify-between" style={{ background: '#2a1a24' }}>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#10B981' }} />
                 <span className="text-xs" style={{ color: '#e4e1e7' }}>מצב מאובטח</span>
               </div>
-              <Lock size={14} style={{ color: '#ff5708' }} />
+              <Lock size={14} style={{ color: '#ff438b' }} />
             </div>
           </div>
           <nav className="flex flex-col gap-0.5 px-3 mt-2 pb-4">
@@ -245,8 +245,8 @@ const Admin = () => {
                   onClick={() => startTransition(() => setActiveSection(tab.id))}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-bold transition-colors text-right"
                   style={active
-                    ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff' }
-                    : { background: 'transparent', color: '#a9a9b2' }}
+                    ? { background: 'linear-gradient(135deg,#ff438b,#ff5596)', color: '#fff' }
+                    : { background: 'transparent', color: '#c0aebb' }}
                 >
                   <Icon size={18} />
                   <span className="truncate">{tab.label}</span>
@@ -257,7 +257,7 @@ const Admin = () => {
               type="button"
               onClick={() => setShowAdvancedTabs((v) => !v)}
               className="flex items-center justify-between px-3 py-2 rounded-lg text-sm font-bold mt-2"
-              style={{ color: '#7a7a82' }}
+              style={{ color: '#8a7887' }}
             >
               <span>מתקדם</span>
               {showAdvancedTabs ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -271,8 +271,8 @@ const Admin = () => {
                   onClick={() => startTransition(() => setActiveSection(tab.id))}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-bold transition-colors text-right"
                   style={active
-                    ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff' }
-                    : { background: 'transparent', color: '#7a7a82' }}
+                    ? { background: 'linear-gradient(135deg,#ff438b,#ff5596)', color: '#fff' }
+                    : { background: 'transparent', color: '#8a7887' }}
                 >
                   <Icon size={18} />
                   <span className="truncate">{tab.label}</span>
@@ -309,8 +309,8 @@ const Admin = () => {
               className="shrink-0 px-4 py-2 text-xs md:text-sm font-bold transition-all whitespace-nowrap touch-manipulation"
               style={
                 activeSection === tab.id
-                  ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
-                  : { background: 'transparent', color: '#a9a9b2', borderRadius: 999, border: '1px solid #2d2d34' }
+                  ? { background: 'linear-gradient(135deg,#ff438b,#ff5596)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
+                  : { background: 'transparent', color: '#c0aebb', borderRadius: 999, border: '1px solid #f4bfd733' }
               }
             >
               {tab.label}
@@ -320,7 +320,7 @@ const Admin = () => {
             type="button"
             onClick={() => setShowAdvancedTabs((v) => !v)}
             className="shrink-0 flex items-center gap-1 px-4 py-2 text-xs md:text-sm font-bold whitespace-nowrap touch-manipulation transition-all"
-            style={{ background: 'transparent', color: '#a9a9b2', borderRadius: 999, border: '1px solid #2d2d34' }}
+            style={{ background: 'transparent', color: '#c0aebb', borderRadius: 999, border: '1px solid #f4bfd733' }}
           >
             מתקדם
             {showAdvancedTabs ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -328,7 +328,7 @@ const Admin = () => {
         </div>
 
         {showAdvancedTabs && (
-          <div className="md:hidden flex flex-nowrap sm:flex-wrap gap-2 mb-6 md:mb-8 pb-3 md:pb-4 overflow-x-auto overscroll-x-contain touch-pan-x -mx-1 px-1 sm:mx-0 sm:px-0" style={{ borderBottom: '1px solid #2d2d34' }}>
+          <div className="md:hidden flex flex-nowrap sm:flex-wrap gap-2 mb-6 md:mb-8 pb-3 md:pb-4 overflow-x-auto overscroll-x-contain touch-pan-x -mx-1 px-1 sm:mx-0 sm:px-0" style={{ borderBottom: '1px solid #f4bfd733' }}>
             {adminTabs.filter(tab => tab.advanced).map(tab => (
               <button
                 key={tab.id}
@@ -336,8 +336,8 @@ const Admin = () => {
                 className="shrink-0 px-4 py-2 text-xs md:text-sm font-bold transition-all whitespace-nowrap touch-manipulation"
                 style={
                   activeSection === tab.id
-                    ? { background: 'linear-gradient(135deg,#ff5708,#ff7a29)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
-                    : { background: 'transparent', color: '#7a7a82', borderRadius: 999, border: '1px solid #2d2d34' }
+                    ? { background: 'linear-gradient(135deg,#ff438b,#ff5596)', color: '#fff', borderRadius: 999, border: '1px solid transparent' }
+                    : { background: 'transparent', color: '#8a7887', borderRadius: 999, border: '1px solid #f4bfd733' }
                 }
               >
                 {tab.label}

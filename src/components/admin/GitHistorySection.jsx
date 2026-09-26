@@ -60,7 +60,7 @@ const GitHistorySection = () => {
   };
 
   return (
-    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#20151e] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
           <GitCommit size={24} />
@@ -81,13 +81,13 @@ const GitHistorySection = () => {
       </div>
 
       {error && (
-        <div className="bg-[#93000a]/30 border border-[#ff5708]/30 p-3 rounded-lg text-[#ffb4ab] text-sm">
+        <div className="bg-[#93000a]/30 border border-[#ff438b]/30 p-3 rounded-lg text-[#ffb4ab] text-sm">
           {error}
         </div>
       )}
 
       {loading && !commits.length && (
-        <div className="text-center py-8 text-[#a9a9b2]">טוען היסטוריה...</div>
+        <div className="text-center py-8 text-[#c0aebb]">טוען היסטוריה...</div>
       )}
 
       {!loading && !error && commits.length === 0 && (
@@ -99,7 +99,7 @@ const GitHistorySection = () => {
           {commits.map((c) => (
             <li
               key={c.sha}
-              className="bg-[#1f1f23]/50 border border-white/5 rounded-lg overflow-hidden"
+              className="bg-[#2a1a24]/50 border border-white/5 rounded-lg overflow-hidden"
             >
               <div className="p-3 md:p-4">
                 <div className="flex flex-wrap items-start justify-between gap-2">
@@ -139,7 +139,7 @@ const GitHistorySection = () => {
                   <button
                     type="button"
                     onClick={() => toggleExpand(c.sha)}
-                    className="mt-3 flex items-center gap-2 text-[#a9a9b2] hover:text-white text-sm"
+                    className="mt-3 flex items-center gap-2 text-[#c0aebb] hover:text-white text-sm"
                   >
                     {expandedSha === c.sha ? (
                       <ChevronDown size={16} />
@@ -152,12 +152,12 @@ const GitHistorySection = () => {
                 )}
               </div>
               {expandedSha === c.sha && Array.isArray(c.files) && c.files.length > 0 && (
-                <div className="border-t border-white/5 bg-[#121218] px-3 md:px-4 py-2">
+                <div className="border-t border-white/5 bg-[#20151e] px-3 md:px-4 py-2">
                   <ul className="space-y-1.5 text-sm">
                     {c.files.map((f, idx) => (
                       <li
                         key={idx}
-                        className="flex flex-wrap items-center gap-2 text-[#a9a9b2]"
+                        className="flex flex-wrap items-center gap-2 text-[#c0aebb]"
                       >
                         <span
                           className={

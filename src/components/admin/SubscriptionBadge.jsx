@@ -13,7 +13,7 @@ const SubscriptionBadge = ({ user, kind }) => {
 
   if (!info.exists) {
     return (
-      <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#1f1f23]/50 border border-[rgba(255,255,255,0.08)]/50">
+      <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#2a1a24]/50 border border-[rgba(255,255,255,0.08)]/50">
         <span className="text-[#94A3B8] font-bold text-[10px] md:text-xs">{label}:</span>
         <span className="text-[#94A3B8] text-[10px] md:text-xs">ללא</span>
       </div>
@@ -32,7 +32,7 @@ const SubscriptionBadge = ({ user, kind }) => {
 
   if (info.isExpired) {
     return (
-      <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#93000a]/30 border border-[#ff5708]/50">
+      <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#93000a]/30 border border-[#ff438b]/50">
         <span className="text-[#ffb4ab] font-bold text-[10px] md:text-xs">{label}:</span>
         <span className="text-[#ffb4ab] font-bold text-[10px] md:text-xs">
           {tierLabel && `${tierLabel} · `}פג תוקף ({Math.abs(info.daysRemaining)} ימים)
