@@ -178,3 +178,14 @@ body{padding-bottom:72px}.wrap{padding-left:16px;padding-right:16px}.nav{height:
    visitor actually sees, so it needs to read clearly, not blend in. */
 .hero .eyebrow{font-size:18px!important;font-weight:700!important;letter-spacing:1px}
 @media(max-width:800px){.hero .eyebrow{font-size:16px!important}}
+
+/* Still not prominent enough at 17px in a cramped 64px-tall mobile header,
+   competing with the login icon, hamburger and logo image for the same
+   row. Freed up room by hiding the small tagline under it on mobile (the
+   design's own CSS already tried to hide it this way once, but a later
+   rule silently re-enabled it) and pushed the title itself further —
+   the brand name is what needs to read clearly here, not the caption. */
+@media(max-width:800px){
+.brand-caption{display:none!important}
+.brand-title{font-size:19px!important}
+}
