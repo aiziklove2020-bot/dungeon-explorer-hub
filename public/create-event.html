@@ -28,7 +28,7 @@
     <li>אזור כללי (למשל "מרכז הארץ") — הכתובת המדויקת נמסרת למאושרים בלבד</li>
     <li><b style="color:#fff">חובה לבחור אזור/עיר בטופס</b> — לפיו הגולשים מסננים מסיבות באתר</li>
   </ul>
-  <p class="meta" style="margin:0 0 8px"><b style="color:#ff7a29">✗ לא לכתוב בתיאור:</b></p>
+  <p class="meta" style="margin:0 0 8px"><b style="color:#ff438b">✗ לא לכתוב בתיאור:</b></p>
   <ul class="meta" style="line-height:1.9;margin:0;padding-inline-start:22px">
     <li>מספרי טלפון או קישורי וואטסאפ</li>
     <li>קישורים לאתרים או קבוצות חיצוניות</li>
@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const file = fileInput.files && fileInput.files[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      statusEl.style.display = ""; statusEl.style.color = "#ff7a29";
+      statusEl.style.display = ""; statusEl.style.color = "#ff438b";
       statusEl.textContent = "התמונה גדולה מדי (מקסימום 5MB)";
       fileInput.value = ""; return;
     }
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       statusEl.textContent = "✓ התמונה הועלתה";
     } catch (err) {
       urlEl.value = "";
-      statusEl.style.color = "#ff7a29";
+      statusEl.style.color = "#ff438b";
       statusEl.textContent = err.message || "שגיאה בהעלאת התמונה";
     } finally {
       uploading = false;

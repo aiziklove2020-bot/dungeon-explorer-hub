@@ -84,24 +84,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
   }
 
-  // Experimental animated starfield background — remove the block below to disable.
-  (() => {
-    const field = document.createElement("div");
-    field.id = "starfield";
-    field.style.cssText = "position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden";
-    const N = 70;
-    let stars = "";
-    for (let i = 0; i < N; i++) {
-      const x = Math.random() * 100, y = Math.random() * 100;
-      const size = Math.random() * 2 + 1;
-      const delay = Math.random() * 4;
-      const dur = Math.random() * 3 + 2;
-      stars += `<span style="position:absolute;left:${x}%;top:${y}%;width:${size}px;height:${size}px;border-radius:50%;background:#fff;opacity:.6;animation:starTwinkle ${dur}s ease-in-out ${delay}s infinite"></span>`;
-    }
-    field.innerHTML = stars;
-    document.body.prepend(field);
-    document.body.style.position = "relative";
-  })();
   // Header "כניסה" dropdown offering subscriber vs advertiser login — the
   // header itself has no way to know which the visitor wants, so it opens a
   // small picker rather than guessing. Purely a UI toggle; which link the
