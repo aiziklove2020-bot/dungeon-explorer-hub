@@ -411,7 +411,7 @@ async function getAdvertiserParty(advertiserId: string, partyId: string) {
  * overwrite someone else's party by guessing/reusing an id.
  */
 async function updateAdvertiserParty(advertiserId: string, partyId: string, data: {
-  title: string; date: string; time: string; dj?: string; imageURL?: string; description: string; whatsappNumber?: string; registrationLink?: string;
+  title: string; date: string; time: string; dj?: string; imageURL?: string; description: string; category?: string; city?: string; whatsappNumber?: string; registrationLink?: string;
 }) {
   const existing: any = await getPartyById(partyId);
   if (!existing || existing.createdBy !== advertiserId) throw new Error("המסיבה לא נמצאה");
@@ -423,6 +423,8 @@ async function updateAdvertiserParty(advertiserId: string, partyId: string, data
     dj: data.dj || "",
     imageURL: data.imageURL || "",
     description: data.description,
+    category: data.category || "",
+    city: data.city || "",
     partyType: data.registrationLink ? "external" : "internal",
     registrationLink: data.registrationLink || "",
     whatsappNumber: data.whatsappNumber || "",
