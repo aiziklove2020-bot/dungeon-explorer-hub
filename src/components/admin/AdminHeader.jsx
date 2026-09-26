@@ -29,7 +29,7 @@ const AdminHeader = ({
         style={{ background: 'linear-gradient(180deg,#241722,#160d16)', border: '1px solid #f4bfd733', borderRadius: 18 }}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <img src="/assets/logo-new.png" alt="" style={{ width: 68, height: 'auto', objectFit: 'contain', flexShrink: 0 }} />
+          <img src="/assets/design/couples-logo.png" alt="" style={{ width: 68, height: 'auto', objectFit: 'contain', flexShrink: 0 }} />
           <div className="min-w-0">
             <h1 className="truncate" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 700, fontSize: 17, lineHeight: 1.25 }}>
               LIBRAL PARTY <span style={{ color: '#ff438b' }}>ניהול</span>
