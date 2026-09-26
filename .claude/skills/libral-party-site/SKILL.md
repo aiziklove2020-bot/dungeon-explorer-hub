@@ -212,24 +212,30 @@ If a new UI genuinely needs a new/changed backend function here:
    the expected number of occurrences (no accidental duplicate
    declarations).
 
-## Cache-busting — bump the version on every site-data.js/app.js change
+## Cache-busting — bump the version on every site-data.js/app.js/style.css change
 
-Every `public/*.html` file imports it as
-`./assets/site-data.js?v=YYYYMMDDHHmm` (same pattern for `app.js`).
-`vercel.json` serves `/assets/(.*)` with a long cache lifetime keyed by the
-full URL including `?v=`. **If you edit either file without bumping this
-query string on every page that imports it, visitors and the CDN can keep
-serving the old cached version indefinitely after deploy**, making a real
-fix look like it didn't work. Bump with one search-and-replace across all
-`public/*.html` files whenever either file's content changes:
+Every `public/*.html` file imports these as
+`./assets/site-data.js?v=YYYYMMDDHHmm` (same pattern for `app.js` and for
+`assets/design/style.css`). `vercel.json` serves `/assets/(.*)` with a long
+cache lifetime keyed by the full URL including `?v=`. **If you edit any of
+these three files without bumping their query string on every page that
+imports them, visitors and the CDN can keep serving the old cached version
+indefinitely after deploy** — making a real fix look like it didn't work,
+or (this has actually happened) making a merged CSS fix for a real bug,
+like unreadable button text, invisible in production for a long time
+because only `site-data.js` got its version bumped and `style.css` did not.
+**`style.css` is edited constantly for design tweaks and is the one most
+likely to be forgotten — always check it too, not just the two JS files.**
+Bump all three together with one search-and-replace across all
+`public/*.html` files whenever any of their content changes:
 
 ```bash
 NEWV=$(date -u +%Y%m%d%H%M)
-for f in public/*.html; do sed -i -E "s/(site-data\.js|app\.js)\?v=[0-9]+/\1?v=$NEWV/g" "$f"; done
+for f in public/*.html; do sed -i -E "s/(site-data\.js|app\.js|design\/style\.css)\?v=[0-9]+/\1?v=$NEWV/g" "$f"; done
 ```
 
 HTML pages themselves are served with `Cache-Control: no-store`, so this
-only matters for `/assets/*.js`.
+only matters for `/assets/*` (the two JS files and the CSS file).
 
 ## Deploy workflow
 
