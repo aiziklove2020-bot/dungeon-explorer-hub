@@ -25,7 +25,7 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
   };
 
   return (
-    <div className="bg-[#121218] border border-[rgba(255,255,255,0.08)] border-l-4 border-l-purple-500 p-2 md:p-3 rounded-lg">
+    <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] border-l-4 border-l-purple-500 p-2 md:p-3 rounded-lg">
       <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2">
         <span className="px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-bold bg-purple-600">
           💑 {t('admin.couple') || 'זוג'}
@@ -43,7 +43,7 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-600">✓</span>
             )}
           </div>
-          <p className="text-[#a9a9b2] text-[10px] md:text-xs">
+          <p className="text-[#c0aebb] text-[10px] md:text-xs">
             <PhoneLink phone={maleReg?.phoneNumber}>{maleReg?.phoneNumber || '-'}</PhoneLink>
             {maleReg?.telegramUsername && ` • @${maleReg.telegramUsername}`}
           </p>
@@ -56,7 +56,7 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
             {onRemoveFromParty && partyId && (
               <button
                 onClick={() => onRemoveFromParty(partyId, maleReg)}
-                className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-2 py-1 rounded text-[10px] font-bold"
+                className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-2 py-1 rounded text-[10px] font-bold"
                 title={t('confirmRemoveUser')}
               >
                 <Trash2 size={10} /> {t('admin.remove')}
@@ -99,7 +99,7 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-600">✓</span>
             )}
           </div>
-          <p className="text-[#a9a9b2] text-[10px] md:text-xs">
+          <p className="text-[#c0aebb] text-[10px] md:text-xs">
             <PhoneLink phone={femaleReg?.phoneNumber}>{femaleReg?.phoneNumber || '-'}</PhoneLink>
             {femaleReg?.telegramUsername && ` • @${femaleReg.telegramUsername}`}
           </p>
@@ -112,7 +112,7 @@ const CoupleRegistrationItem = ({ maleReg, femaleReg, partyId, onConvertToUser, 
             {onRemoveFromParty && partyId && (
               <button
                 onClick={() => onRemoveFromParty(partyId, femaleReg)}
-                className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-2 py-1 rounded text-[10px] font-bold"
+                className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-2 py-1 rounded text-[10px] font-bold"
                 title={t('confirmRemoveUser')}
               >
                 <Trash2 size={10} /> {t('admin.remove')}

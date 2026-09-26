@@ -91,13 +91,13 @@ const BlogAdminSection = ({ showSaved }) => {
   // ---- Render: Comments list ----
   if (viewPost) {
     return (
-      <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4">
+      <div className="bg-[#20151e] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <button onClick={() => setViewPost(null)} className="text-[#a9a9b2] hover:text-white"><ArrowRight size={20} /></button>
+          <button onClick={() => setViewPost(null)} className="text-[#c0aebb] hover:text-white"><ArrowRight size={20} /></button>
           <h2 className="text-xl font-bold truncate">{viewPost.title}</h2>
         </div>
 
-        <div className="bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4 mb-4">
+        <div className="bg-[#2a1a24]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4 mb-4">
           <p className="text-[#94A3B8] text-xs mb-2">{viewPost.authorName} ({viewPost.authorId}) &middot; {formatDate(viewPost.createdAt)}</p>
           <ForumPostContent content={viewPost.content} images={viewPost.images} uncensored />
         </div>
@@ -109,7 +109,7 @@ const BlogAdminSection = ({ showSaved }) => {
         ) : (
           <div className="space-y-3">
             {comments.map(comment => (
-              <div key={comment.id} className="bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+              <div key={comment.id} className="bg-[#2a1a24]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                 {editingCommentId === comment.id ? (
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -124,11 +124,11 @@ const BlogAdminSection = ({ showSaved }) => {
                       value={editCommentContent}
                       onChange={(e) => setEditCommentContent(e.target.value)}
                       rows={4}
-                      className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
+                      className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff438b] outline-none text-right"
                     />
                     <div className="flex gap-2">
-                      <button onClick={saveEditComment} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
-                      <button onClick={() => setEditingCommentId(null)} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
+                      <button onClick={saveEditComment} className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
+                      <button onClick={() => setEditingCommentId(null)} className="bg-[#2a1a24] hover:bg-[#2a292e] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
                     </div>
                   </div>
                 ) : (
@@ -140,7 +140,7 @@ const BlogAdminSection = ({ showSaved }) => {
                     </p>
                     <ForumPostContent content={comment.content} images={comment.images} uncensored />
                     <div className="flex gap-2 mt-3">
-                      <button onClick={() => startEditComment(comment)} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1"><Pencil size={12} /> ערוך</button>
+                      <button onClick={() => startEditComment(comment)} className="bg-[#2a1a24] hover:bg-[#2a292e] text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1"><Pencil size={12} /> ערוך</button>
                       <button onClick={() => handleDeleteComment(comment.id)} className="bg-[#93000a] hover:bg-[#be0037] text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1"><Trash2 size={12} /> מחק</button>
                     </div>
                   </>
@@ -155,7 +155,7 @@ const BlogAdminSection = ({ showSaved }) => {
 
   // ---- Render: Posts list ----
   return (
-    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#20151e] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <h2 className="text-xl md:text-2xl font-bold">ניהול בלוג</h2>
 
       {loading ? <AdminLoader /> : posts.length === 0 ? (
@@ -163,14 +163,14 @@ const BlogAdminSection = ({ showSaved }) => {
       ) : (
         <div className="space-y-3">
           {posts.map(post => (
-            <div key={post.id} className="bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <div key={post.id} className="bg-[#2a1a24]/80 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
               {editingPostId === post.id ? (
                 <div className="space-y-3">
                   <input
                     type="text"
                     value={editPostForm.title}
                     onChange={(e) => setEditPostForm({ ...editPostForm, title: e.target.value })}
-                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
+                    className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff438b] outline-none text-right"
                   />
                   <div className="flex flex-wrap items-center gap-2">
                     <SpoilerWrapButton
@@ -184,11 +184,11 @@ const BlogAdminSection = ({ showSaved }) => {
                     value={editPostForm.content}
                     onChange={(e) => setEditPostForm({ ...editPostForm, content: e.target.value })}
                     rows={5}
-                    className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff5708] outline-none text-right"
+                    className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] text-white text-sm p-3 rounded-xl focus:border-[#ff438b] outline-none text-right"
                   />
                   <div className="flex gap-2">
-                    <button onClick={saveEditPost} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
-                    <button onClick={() => setEditingPostId(null)} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
+                    <button onClick={saveEditPost} className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><Save size={14} /> שמור</button>
+                    <button onClick={() => setEditingPostId(null)} className="bg-[#2a1a24] hover:bg-[#2a292e] text-white px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1"><X size={14} /> ביטול</button>
                   </div>
                 </div>
               ) : (
@@ -201,12 +201,12 @@ const BlogAdminSection = ({ showSaved }) => {
                         &middot; {post.commentCount || 0} תגובות &middot; {post.likeCount || 0} לייקים
                       </p>
                     </div>
-                    <button onClick={() => openPost(post)} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shrink-0">
+                    <button onClick={() => openPost(post)} className="bg-[#2a1a24] hover:bg-[#2a292e] text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shrink-0">
                       <MessageSquare size={12} /> תגובות
                     </button>
                   </div>
                   <div className="flex gap-2 mt-3">
-                    <button onClick={() => startEditPost(post)} className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1"><Pencil size={12} /> ערוך</button>
+                    <button onClick={() => startEditPost(post)} className="bg-[#2a1a24] hover:bg-[#2a292e] text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1"><Pencil size={12} /> ערוך</button>
                     <button onClick={() => handleDeletePost(post.id)} className="bg-[#93000a] hover:bg-[#be0037] text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1"><Trash2 size={12} /> מחק</button>
                   </div>
                 </>

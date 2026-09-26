@@ -206,12 +206,12 @@ const ForumUsersSection = ({ showSaved }) => {
   });
 
   return (
-    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#20151e] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-xl md:text-2xl font-bold">חשבונות כניסה לאתר</h2>
-            <span className="px-2.5 py-1 rounded-full bg-[#1f1f23] text-[#94A3B8] text-xs font-bold">{forumUsers.length}</span>
+            <span className="px-2.5 py-1 rounded-full bg-[#2a1a24] text-[#94A3B8] text-xs font-bold">{forumUsers.length}</span>
           </div>
           <p className="text-xs text-[#94A3B8] mt-1">
             כאן מנהלים רק את היכולת להתחבר לאתר (כינוי + סיסמה, אישור/חסימה/הרשאות). זה לא קובע אם למישהו יש מנוי — מנוי מנוהל אך ורק ב"ניהול מנויים". "מקושר למשתמש אתר" למטה מראה לאיזו רשומת מנוי/הרשמה (אם קיימת) החשבון הזה שייך.
@@ -228,7 +228,7 @@ const ForumUsersSection = ({ showSaved }) => {
       </div>
 
       {/* Link new account tool */}
-      <div className="bg-[#1f1f23]/60 border border-[rgba(255,255,255,0.08)] rounded-xl p-3 space-y-2">
+      <div className="bg-[#2a1a24]/60 border border-[rgba(255,255,255,0.08)] rounded-xl p-3 space-y-2">
         <label className="text-xs uppercase font-bold text-[#94A3B8] flex items-center gap-1.5">
           <Link2 size={14} /> צור חשבון פורום חדש ושייך למשתמש אתר קיים
         </label>
@@ -239,7 +239,7 @@ const ForumUsersSection = ({ showSaved }) => {
             onChange={(e) => setLinkSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && runLinkSearch()}
             placeholder="חפש לפי שם או טלפון..."
-            className="flex-1 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-xl focus:border-[#ff5708] outline-none text-white text-right text-sm"
+            className="flex-1 bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-2.5 rounded-xl focus:border-[#ff438b] outline-none text-white text-right text-sm"
           />
           <button onClick={runLinkSearch} className="bg-[#2a292e] hover:bg-[#353439] text-white px-4 rounded-xl font-bold text-sm">
             <Search size={16} />
@@ -248,7 +248,7 @@ const ForumUsersSection = ({ showSaved }) => {
         {linkResults.length > 0 && (
           <div className="space-y-1.5 mt-2">
             {linkResults.map((u) => (
-              <div key={u.id} className="flex items-center justify-between bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-sm">
+              <div key={u.id} className="flex items-center justify-between bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-lg p-2 text-sm">
                 <span>{u.name} — <PhoneLink phone={u.phoneNumber}>{u.phoneNumber}</PhoneLink></span>
                 <button onClick={() => handleCreateAndLink(u)} className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 rounded-lg font-bold text-xs">
                   צור וקשר
@@ -262,13 +262,13 @@ const ForumUsersSection = ({ showSaved }) => {
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="relative">
-          <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#a9a9b2]" />
+          <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#c0aebb]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="חיפוש לפי כינוי או אימייל..."
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+            className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
@@ -277,7 +277,7 @@ const ForumUsersSection = ({ showSaved }) => {
             <button
               key={f.id}
               onClick={() => setRoleFilter(f.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${roleFilter === f.id ? 'bg-purple-600 text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${roleFilter === f.id ? 'bg-purple-600 text-white' : 'bg-[#2a1a24] text-[#c0aebb] hover:bg-[#2a292e] hover:text-white'}`}
             >
               {f.label}
             </button>
@@ -296,7 +296,7 @@ const ForumUsersSection = ({ showSaved }) => {
           {filteredForumUsers.map((fu) => {
             const linkedUser = fu.linkedUserId ? siteUsersMap[fu.linkedUserId] : null;
             return (
-              <div key={fu.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
+              <div key={fu.id} className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                   <strong className="text-lg text-white">{fu.nickname}</strong>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${fu.role === 'forumAdmin' ? 'bg-purple-600' : 'bg-[#2a292e]'}`}>
@@ -343,7 +343,7 @@ const ForumUsersSection = ({ showSaved }) => {
                   {fu.isApproved === false ? (
                     <button
                       onClick={() => handleApproveUser(fu)}
-                      className="flex items-center gap-1 bg-gradient-to-l from-[#ff5708] to-[#ff7a29] hover:brightness-110 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
+                      className="flex items-center gap-1 bg-gradient-to-l from-[#ff438b] to-[#ff5596] hover:brightness-110 text-white px-2.5 py-1 rounded-lg font-bold text-[11px]"
                     >
                       <CheckCircle size={11} /> אשר משתמש
                     </button>

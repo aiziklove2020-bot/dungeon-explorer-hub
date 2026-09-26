@@ -100,7 +100,7 @@ const safePreviewHtml = (raw) => {
 
 const MessagePreviewBox = ({ text }) => (
   <div
-    className="text-white text-sm whitespace-pre-wrap break-words font-sans min-h-[80px] p-3 rounded-lg bg-[#1f1f23] border border-[rgba(255,255,255,0.08)]"
+    className="text-white text-sm whitespace-pre-wrap break-words font-sans min-h-[80px] p-3 rounded-lg bg-[#2a1a24] border border-[rgba(255,255,255,0.08)]"
     dir="auto"
     dangerouslySetInnerHTML={{ __html: safePreviewHtml(text) }}
   />
@@ -386,19 +386,19 @@ const TelegramSection = ({ showSaved }) => {
     }
   };
 
-  const inputCls = 'w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right';
+  const inputCls = 'w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right';
   const labelCls = 'block text-xs uppercase font-bold text-[#94A3B8] mb-1';
 
   if (loading) {
     return (
-      <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl">
-        <p className="text-[#a9a9b2]">{t('loading')}</p>
+      <div className="bg-[#20151e] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl">
+        <p className="text-[#c0aebb]">{t('loading')}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
+    <div className="bg-[#20151e] backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">{t('admin.telegram.title')}</h2>
         {legacy && (
@@ -407,7 +407,7 @@ const TelegramSection = ({ showSaved }) => {
           </span>
         )}
       </div>
-      <p className="text-[#a9a9b2] text-sm">
+      <p className="text-[#c0aebb] text-sm">
         {t('admin.telegram.description')}
       </p>
 
@@ -418,7 +418,7 @@ const TelegramSection = ({ showSaved }) => {
             type="button"
             onClick={() => setActivePanel(panel)}
             className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 ${
-              activePanel === panel ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'
+              activePanel === panel ? 'bg-[#ff438b] text-white' : 'bg-[#2a1a24] text-[#c0aebb] hover:text-white'
             }`}
           >
             {panel === 'bots' && t('admin.telegram.bots')}
@@ -470,13 +470,13 @@ const TelegramSection = ({ showSaved }) => {
                 autoComplete="off"
               />
             </div>
-            <button type="button" onClick={addBot} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
+            <button type="button" onClick={addBot} className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
               <Plus size={16} /> {t('admin.telegram.addBot')}
             </button>
           </div>
           <ul className="space-y-2">
             {bots.map((b) => (
-              <li key={b.id} className="flex items-center gap-3 p-3 bg-[#121218]/60 rounded-xl border border-[rgba(255,255,255,0.08)]">
+              <li key={b.id} className="flex items-center gap-3 p-3 bg-[#20151e]/60 rounded-xl border border-[rgba(255,255,255,0.08)]">
                 {editingBot === b.id ? (
                   <>
                     <input
@@ -491,7 +491,7 @@ const TelegramSection = ({ showSaved }) => {
                       onBlur={(e) => updateBot(b.id, undefined, e.target.value || b.token)}
                       className={inputCls + ' flex-1 max-w-[200px]'}
                     />
-                    <button type="button" onClick={() => setEditingBot(null)} className="text-[#a9a9b2] hover:text-white">
+                    <button type="button" onClick={() => setEditingBot(null)} className="text-[#c0aebb] hover:text-white">
                       ✓
                     </button>
                   </>
@@ -501,7 +501,7 @@ const TelegramSection = ({ showSaved }) => {
                     {botInfos[b.token] && (
                       <span className="text-green-400 text-sm">@{botInfos[b.token].username}</span>
                     )}
-                    <button type="button" onClick={() => setEditingBot(b.id)} className="text-[#a9a9b2] hover:text-white">
+                    <button type="button" onClick={() => setEditingBot(b.id)} className="text-[#c0aebb] hover:text-white">
                       <Edit2 size={14} />
                     </button>
                     <button type="button" onClick={() => removeBot(b.id)} className="text-[#ffb4ab] hover:text-[#ffdada]">
@@ -543,13 +543,13 @@ const TelegramSection = ({ showSaved }) => {
                 dir="ltr"
               />
             </div>
-            <button type="button" onClick={addChannel} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
+            <button type="button" onClick={addChannel} className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
               <Plus size={16} /> {t('admin.telegram.addChannel')}
             </button>
           </div>
           <ul className="space-y-2">
             {channels.map((c) => (
-              <li key={c.id} className="p-3 bg-[#121218]/60 rounded-xl border border-[rgba(255,255,255,0.08)] space-y-2">
+              <li key={c.id} className="p-3 bg-[#20151e]/60 rounded-xl border border-[rgba(255,255,255,0.08)] space-y-2">
                 <div className="flex items-center gap-3">
                 {editingChannel === c.id ? (
                   <>
@@ -582,7 +582,7 @@ const TelegramSection = ({ showSaved }) => {
                         לכלול בפרסום מסיבות אוטומטי
                       </span>
                     </label>
-                    <button type="button" onClick={() => setEditingChannel(c.id)} className="text-[#a9a9b2] hover:text-white">
+                    <button type="button" onClick={() => setEditingChannel(c.id)} className="text-[#c0aebb] hover:text-white">
                       <Edit2 size={14} />
                     </button>
                     <button type="button" onClick={() => removeChannel(c.id)} className="text-[#ffb4ab] hover:text-[#ffdada]">
@@ -600,13 +600,13 @@ const TelegramSection = ({ showSaved }) => {
                         checked={Array.isArray(c.allowedAdvertiserIds)}
                         onChange={() => toggleChannelRestricted(c.id)}
                       />
-                      <span className="text-[#a9a9b2]">
+                      <span className="text-[#c0aebb]">
                         רק מפרסמים נבחרים מותרים לפרסם כאן
                       </span>
                     </label>
                     {Array.isArray(c.allowedAdvertiserIds) && (
                       <div className="flex flex-wrap gap-2 mr-5">
-                        <label className="flex items-center gap-1 cursor-pointer text-xs bg-[#1f1f23]/80 border border-amber-800 rounded-lg px-2 py-1">
+                        <label className="flex items-center gap-1 cursor-pointer text-xs bg-[#2a1a24]/80 border border-amber-800 rounded-lg px-2 py-1">
                           <input
                             type="checkbox"
                             checked={c.allowedAdvertiserIds.includes(ADMIN_PSEUDO_ADVERTISER_ID)}
@@ -618,7 +618,7 @@ const TelegramSection = ({ showSaved }) => {
                           <span className="text-[#64748B] text-xs">אין מפרסמים מאושרים</span>
                         )}
                         {advertisers.map((a) => (
-                          <label key={a.id} className="flex items-center gap-1 cursor-pointer text-xs bg-[#1f1f23]/80 border border-[rgba(255,255,255,0.08)] rounded-lg px-2 py-1">
+                          <label key={a.id} className="flex items-center gap-1 cursor-pointer text-xs bg-[#2a1a24]/80 border border-[rgba(255,255,255,0.08)] rounded-lg px-2 py-1">
                             <input
                               type="checkbox"
                               checked={c.allowedAdvertiserIds.includes(a.id)}
@@ -645,7 +645,7 @@ const TelegramSection = ({ showSaved }) => {
           </p>
           <ul className="space-y-3">
             {messages.map((m) => (
-              <li key={m.id} className="border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden bg-[#121218]/60">
+              <li key={m.id} className="border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden bg-[#20151e]/60">
                 <div
                   className="flex items-center gap-2 p-3 cursor-pointer"
                   onClick={() => setEditingMessage(editingMessage === m.id ? null : m.id)}
@@ -672,7 +672,7 @@ const TelegramSection = ({ showSaved }) => {
                   <div className="p-4 border-t border-[rgba(255,255,255,0.08)] space-y-4">
                     {/* Available variables - at top */}
                     <div className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-[#0e0e12]/80 p-4">
-                      <div className="text-xs uppercase font-bold text-[#a9a9b2] mb-2">{t('admin.telegram.availableVariables')}</div>
+                      <div className="text-xs uppercase font-bold text-[#c0aebb] mb-2">{t('admin.telegram.availableVariables')}</div>
                       <p className="text-[#94A3B8] text-xs mb-2">{t('admin.telegram.clickToInsert')}</p>
                       {m.key === MESSAGE_KEYS.REGISTRATION && VARIABLES_REFERENCE[MESSAGE_KEYS.REGISTRATION] ? (
                         <div className="space-y-2 text-sm">
@@ -684,7 +684,7 @@ const TelegramSection = ({ showSaved }) => {
                                 key={v}
                                 type="button"
                                 onClick={() => insertVariable(m, `{{${v}}}`)}
-                                className="px-2 py-1 rounded bg-[#1f1f23] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
+                                className="px-2 py-1 rounded bg-[#2a1a24] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
                               >
                                 {`{{${v}}}`}
                               </button>
@@ -698,7 +698,7 @@ const TelegramSection = ({ showSaved }) => {
                                   key={v}
                                   type="button"
                                   onClick={() => insertVariable(m, `{{${v}}}`)}
-                                  className="px-2 py-1 rounded bg-[#1f1f23] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
+                                  className="px-2 py-1 rounded bg-[#2a1a24] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
                                 >
                                   {`{{${v}}}`}
                                 </button>
@@ -712,7 +712,7 @@ const TelegramSection = ({ showSaved }) => {
                                 key={v}
                                 type="button"
                                 onClick={() => insertVariable(m, `{{${v}}}`)}
-                                className="px-2 py-1 rounded bg-[#1f1f23] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
+                                className="px-2 py-1 rounded bg-[#2a1a24] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
                               >
                                 {`{{${v}}}`}
                               </button>
@@ -729,7 +729,7 @@ const TelegramSection = ({ showSaved }) => {
                                 key={v}
                                 type="button"
                                 onClick={() => insertVariable(m, `{{${v}}}`)}
-                                className="px-2 py-1 rounded bg-[#1f1f23] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
+                                className="px-2 py-1 rounded bg-[#2a1a24] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
                               >
                                 {`{{${v}}}`}
                               </button>
@@ -742,7 +742,7 @@ const TelegramSection = ({ showSaved }) => {
                                 key={v}
                                 type="button"
                                 onClick={() => insertVariable(m, `{{${v}}}`)}
-                                className="px-2 py-1 rounded bg-[#1f1f23] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
+                                className="px-2 py-1 rounded bg-[#2a1a24] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
                               >
                                 {`{{${v}}}`}
                               </button>
@@ -756,7 +756,7 @@ const TelegramSection = ({ showSaved }) => {
                               key={v}
                               type="button"
                               onClick={() => insertVariable(m, `{{${v}}}`)}
-                              className="px-2 py-1 rounded bg-[#1f1f23] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
+                              className="px-2 py-1 rounded bg-[#2a1a24] hover:bg-[#2a292e] text-[#e4e1e7] font-mono text-xs cursor-pointer border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.12)]"
                             >
                               {`{{${v}}}`}
                             </button>
@@ -821,7 +821,7 @@ const TelegramSection = ({ showSaved }) => {
                                 key={key}
                                 type="button"
                                 onClick={() => setRegistrationTemplateTab(key)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold ${registrationTemplateTab === key ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold ${registrationTemplateTab === key ? 'bg-[#ff438b] text-white' : 'bg-[#2a1a24] text-[#c0aebb] hover:text-white'}`}
                               >
                                 {getRegistrationTypeLabel(t, key)}
                               </button>
@@ -836,7 +836,7 @@ const TelegramSection = ({ showSaved }) => {
                           />
                         </div>
                         <div className="border border-[rgba(255,255,255,0.08)] rounded-xl p-4 bg-[#0e0e12]/80">
-                          <div className="flex items-center gap-2 mb-2 text-[#a9a9b2]">
+                          <div className="flex items-center gap-2 mb-2 text-[#c0aebb]">
                             <Eye size={16} />
                             <span className="text-sm font-bold uppercase">{t('admin.telegram.preview')}</span>
                             <span className="text-xs">({getRegistrationTypeLabel(t, registrationTemplateTab)})</span>
@@ -865,7 +865,7 @@ const TelegramSection = ({ showSaved }) => {
                                 key={key}
                                 type="button"
                                 onClick={() => setBalancePublishCaseTab(key)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold ${balancePublishCaseTab === key ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold ${balancePublishCaseTab === key ? 'bg-[#ff438b] text-white' : 'bg-[#2a1a24] text-[#c0aebb] hover:text-white'}`}
                               >
                                 {getBalancePublishCaseLabel(t, key)}
                               </button>
@@ -880,7 +880,7 @@ const TelegramSection = ({ showSaved }) => {
                           />
                         </div>
                         <div className="border border-[rgba(255,255,255,0.08)] rounded-xl p-4 bg-[#0e0e12]/80">
-                          <div className="flex items-center gap-2 mb-2 text-[#a9a9b2]">
+                          <div className="flex items-center gap-2 mb-2 text-[#c0aebb]">
                             <Eye size={16} />
                             <span className="text-sm font-bold uppercase">{t('admin.telegram.preview')}</span>
                             <span className="text-xs">({getBalancePublishCaseLabel(t, balancePublishCaseTab)})</span>
@@ -913,7 +913,7 @@ const TelegramSection = ({ showSaved }) => {
                           />
                         </div>
                         <div className="border border-[rgba(255,255,255,0.08)] rounded-xl p-4 bg-[#0e0e12]/80">
-                          <div className="flex items-center gap-2 mb-2 text-[#a9a9b2]">
+                          <div className="flex items-center gap-2 mb-2 text-[#c0aebb]">
                             <Eye size={16} />
                             <span className="text-sm font-bold uppercase">{t('admin.telegram.preview')}</span>
                             <span className="text-xs">({t('admin.telegram.previewSample')})</span>
@@ -942,7 +942,7 @@ const TelegramSection = ({ showSaved }) => {
             ))}
           </ul>
           <div className="pt-2 border-t border-[rgba(255,255,255,0.08)]">
-            <h4 className="text-sm font-bold text-[#a9a9b2] mb-2">{t('admin.telegram.addCustomMessage')}</h4>
+            <h4 className="text-sm font-bold text-[#c0aebb] mb-2">{t('admin.telegram.addCustomMessage')}</h4>
             <div className="flex flex-wrap gap-2 items-end">
               <div className="min-w-[160px]">
                 <label className={labelCls}>{t('admin.telegram.messageName')}</label>
@@ -994,10 +994,10 @@ const TelegramSection = ({ showSaved }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>{t('admin.telegram.selectBots')}</label>
-              <div className="space-y-2 p-3 bg-[#121218]/60 rounded-xl border border-[rgba(255,255,255,0.08)]">
+              <div className="space-y-2 p-3 bg-[#20151e]/60 rounded-xl border border-[rgba(255,255,255,0.08)]">
                 {bots.length === 0 && <span className="text-[#94A3B8] text-sm">—</span>}
                 {bots.map((b) => (
-                  <label key={b.id} className="flex items-center gap-3 cursor-pointer hover:bg-[#1f1f23]/40 p-2 rounded-lg transition-colors">
+                  <label key={b.id} className="flex items-center gap-3 cursor-pointer hover:bg-[#2a1a24]/40 p-2 rounded-lg transition-colors">
                     <input
                       type="checkbox"
                       checked={sendMsgBotIds.includes(b.id)}
@@ -1019,10 +1019,10 @@ const TelegramSection = ({ showSaved }) => {
 
             <div>
               <label className={labelCls}>{t('admin.telegram.selectChannels')}</label>
-              <div className="space-y-2 p-3 bg-[#121218]/60 rounded-xl border border-[rgba(255,255,255,0.08)]">
+              <div className="space-y-2 p-3 bg-[#20151e]/60 rounded-xl border border-[rgba(255,255,255,0.08)]">
                 {channels.length === 0 && <span className="text-[#94A3B8] text-sm">—</span>}
                 {channels.map((c) => (
-                  <label key={c.id} className="flex items-center gap-3 cursor-pointer hover:bg-[#1f1f23]/40 p-2 rounded-lg transition-colors">
+                  <label key={c.id} className="flex items-center gap-3 cursor-pointer hover:bg-[#2a1a24]/40 p-2 rounded-lg transition-colors">
                     <input
                       type="checkbox"
                       checked={sendMsgChannelIds.includes(c.id)}
@@ -1056,7 +1056,7 @@ const TelegramSection = ({ showSaved }) => {
 
           {sendMsgText.trim() && (
             <div className="border border-[rgba(255,255,255,0.08)] rounded-xl p-4 bg-[#0e0e12]/80">
-              <div className="flex items-center gap-2 mb-2 text-[#a9a9b2]">
+              <div className="flex items-center gap-2 mb-2 text-[#c0aebb]">
                 <Eye size={16} />
                 <span className="text-sm font-bold uppercase">{t('admin.telegram.preview')}</span>
               </div>
@@ -1071,7 +1071,7 @@ const TelegramSection = ({ showSaved }) => {
                   ? 'bg-green-900/40 text-green-300 border border-green-700'
                   : sendMsgResult.type === 'partial'
                     ? 'bg-amber-900/40 text-amber-300 border border-amber-700'
-                    : 'bg-[#93000a]/40 text-[#ffdada] border border-[#ff5708]'
+                    : 'bg-[#93000a]/40 text-[#ffdada] border border-[#ff438b]'
               }`}
             >
               {sendMsgResult.text}
@@ -1082,7 +1082,7 @@ const TelegramSection = ({ showSaved }) => {
             type="button"
             onClick={handleSendMessage}
             disabled={sendingMsg}
-            className="bg-[#ff5708] hover:bg-[#ff7a29] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
+            className="bg-[#ff438b] hover:bg-[#ff5596] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2"
           >
             <Send size={16} />
             {sendingMsg ? t('admin.telegram.sending') : t('admin.telegram.sendNow')}
@@ -1092,7 +1092,7 @@ const TelegramSection = ({ showSaved }) => {
 
       {activePanel !== 'sendMessage' && (
         <form onSubmit={handleSave} className="pt-4 border-t border-[rgba(255,255,255,0.08)]">
-          <button type="submit" disabled={saving} className="bg-[#ff5708] hover:bg-[#ff7a29] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
+          <button type="submit" disabled={saving} className="bg-[#ff438b] hover:bg-[#ff5596] disabled:opacity-50 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2">
             <Send size={16} /> {saving ? t('saving') : t('save')}
           </button>
         </form>

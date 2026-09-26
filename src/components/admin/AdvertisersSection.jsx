@@ -69,7 +69,7 @@ const AdvertisersSection = ({ showSaved }) => {
   };
 
   return (
-    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#20151e] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <h2 className="text-xl md:text-2xl font-bold">ניהול מפרסמים</h2>
         <button
@@ -83,24 +83,24 @@ const AdvertisersSection = ({ showSaved }) => {
       {!loading && advertisers.length > 0 && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
               <p className="text-[#94A3B8] text-xs font-bold">סה״כ מפרסמים</p>
               <p className="text-2xl font-bold mt-1">{advertisers.length}</p>
             </div>
-            <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
               <p className="text-[#94A3B8] text-xs font-bold">ממתינים לאישור</p>
               <p className="text-2xl font-bold mt-1" style={{ color: '#f59e0b' }}>{counts.pending || 0}</p>
             </div>
-            <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
               <p className="text-[#94A3B8] text-xs font-bold">מאושרים</p>
               <p className="text-2xl font-bold mt-1" style={{ color: '#10B981' }}>{counts.approved || 0}</p>
             </div>
-            <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+            <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
               <p className="text-[#94A3B8] text-xs font-bold">נדחו</p>
               <p className="text-2xl font-bold mt-1" style={{ color: '#ffb4ab' }}>{counts.rejected || 0}</p>
             </div>
           </div>
-          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-3 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+          <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-3 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
             <div className="relative flex-1">
               <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
               <input
@@ -108,7 +108,7 @@ const AdvertisersSection = ({ showSaved }) => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="חיפוש לפי שם עסק, איש קשר או טלפון..."
-                className="w-full bg-[#121218] rounded-xl pr-9 pl-3 py-2 text-white placeholder:text-[#94A3B8] outline-none focus:ring-1 focus:ring-[#ff5708]"
+                className="w-full bg-[#20151e] rounded-xl pr-9 pl-3 py-2 text-white placeholder:text-[#94A3B8] outline-none focus:ring-1 focus:ring-[#ff438b]"
               />
             </div>
             <div className="flex items-center gap-1.5 overflow-x-auto">
@@ -118,7 +118,7 @@ const AdvertisersSection = ({ showSaved }) => {
                   type="button"
                   onClick={() => setStatusFilter(f.id)}
                   className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap"
-                  style={statusFilter === f.id ? { background: '#ff5708', color: '#fff' } : { background: '#121218', color: '#a9a9b2' }}
+                  style={statusFilter === f.id ? { background: '#ff438b', color: '#fff' } : { background: '#20151e', color: '#c0aebb' }}
                 >
                   {f.label}
                 </button>
@@ -140,7 +140,7 @@ const AdvertisersSection = ({ showSaved }) => {
       ) : (
         <div className="space-y-4">
           {filteredAdvertisers.map((adv) => (
-            <div key={adv.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
+            <div key={adv.id} className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
               <div className="flex justify-between items-start gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -150,9 +150,9 @@ const AdvertisersSection = ({ showSaved }) => {
                       {STATUS_LABEL[adv.status] || adv.status}
                     </span>
                   </div>
-                  {adv.contactName && <p className="text-[#a9a9b2] text-sm">איש קשר: {adv.contactName}</p>}
+                  {adv.contactName && <p className="text-[#c0aebb] text-sm">איש קשר: {adv.contactName}</p>}
                   {adv.phoneNumber && (
-                    <p className="text-[#a9a9b2] text-sm">
+                    <p className="text-[#c0aebb] text-sm">
                       טלפון: <PhoneLink phone={adv.phoneNumber}>{adv.phoneNumber}</PhoneLink>
                     </p>
                   )}
@@ -190,7 +190,7 @@ const AdvertisersSection = ({ showSaved }) => {
                   </button>
                   <button
                     onClick={() => handleDelete(adv.id, adv.businessName)}
-                    className="bg-[#1f1f23] hover:bg-[#93000a] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+                    className="bg-[#2a1a24] hover:bg-[#93000a] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
                   >
                     <Trash2 size={14} /> מחיקה
                   </button>

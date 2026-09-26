@@ -26,21 +26,21 @@ const AdminHeader = ({
           this block would just duplicate it there, so it's mobile-only. */}
       <div
         className="mb-6 p-3 flex items-center justify-between gap-3 md:hidden"
-        style={{ background: 'linear-gradient(180deg,#101014,#0a0a0c)', border: '1px solid #2d2d34', borderRadius: 18 }}
+        style={{ background: 'linear-gradient(180deg,#241722,#160d16)', border: '1px solid #f4bfd733', borderRadius: 18 }}
       >
         <div className="flex items-center gap-3 min-w-0">
           <img src="/assets/logo-new.png" alt="" style={{ width: 68, height: 'auto', objectFit: 'contain', flexShrink: 0 }} />
           <div className="min-w-0">
             <h1 className="truncate" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 700, fontSize: 17, lineHeight: 1.25 }}>
-              LIBRAL PARTY <span style={{ color: '#ff5708' }}>ניהול</span>
+              LIBRAL PARTY <span style={{ color: '#ff438b' }}>ניהול</span>
             </h1>
-            <p className="truncate" style={{ color: '#a9a9b2', fontSize: 12 }}>{t('admin.panelSubtitle')}</p>
+            <p className="truncate" style={{ color: '#c0aebb', fontSize: 12 }}>{t('admin.panelSubtitle')}</p>
           </div>
         </div>
         <button
           onClick={onLogout}
           className="text-white text-sm font-bold flex items-center gap-2 shrink-0"
-          style={{ background: 'transparent', border: '1px solid #ff5708', borderRadius: 15, padding: '8px 14px' }}
+          style={{ background: 'transparent', border: '1px solid #ff438b', borderRadius: 15, padding: '8px 14px' }}
         >
           <X size={16} /> {t('admin.logout')}
         </button>
@@ -55,19 +55,19 @@ const AdminHeader = ({
 
       <div
         className="mb-6 p-4"
-        style={{ background: 'linear-gradient(180deg,#101014,#0a0a0c)', border: '1px solid #2d2d34', borderRadius: 20 }}
+        style={{ background: 'linear-gradient(180deg,#241722,#160d16)', border: '1px solid #f4bfd733', borderRadius: 20 }}
       >
         <div className="flex flex-wrap items-start gap-x-8 gap-y-4">
 
           <div>
-            <p className="text-xs font-bold uppercase mb-2" style={{ color: '#8f8f97', letterSpacing: 1 }}>כללי</p>
+            <p className="text-xs font-bold uppercase mb-2" style={{ color: '#9c8a97', letterSpacing: 1 }}>כללי</p>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={onViewSite}
                 title={t('admin.editSite')}
                 className="text-white text-sm font-bold flex items-center gap-2"
-                style={{ background: '#15151a', border: '1px solid #2d2d34', borderRadius: 15, padding: '10px 16px' }}
+                style={{ background: '#1c1120', border: '1px solid #f4bfd733', borderRadius: 15, padding: '10px 16px' }}
               >
                 <Eye size={16} style={{ color: '#3ecf6d' }} /> {t('admin.editSite')}
               </button>
@@ -75,14 +75,14 @@ const AdminHeader = ({
           </div>
 
           <div>
-            <p className="text-xs font-bold uppercase mb-2" style={{ color: '#8f8f97', letterSpacing: 1 }}>פרסום מסיבות</p>
+            <p className="text-xs font-bold uppercase mb-2" style={{ color: '#9c8a97', letterSpacing: 1 }}>פרסום מסיבות</p>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={onPostParties}
                 disabled={postingParties}
                 title="שולח עכשיו את כל המסיבות הפעילות באתר לטלגרם, בלי לחכות ללו&quot;ז האוטומטי"
                 className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
-                style={{ background: '#15151a', border: '1px solid #2d2d34', borderRadius: 15, padding: '10px 16px' }}
+                style={{ background: '#1c1120', border: '1px solid #f4bfd733', borderRadius: 15, padding: '10px 16px' }}
               >
                 {postingParties ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Megaphone size={16} style={{ color: '#ad43ff' }} />}
                 {postingParties ? 'מפרסם...' : 'טלגרם'}
@@ -92,23 +92,23 @@ const AdminHeader = ({
                 disabled={postingPartiesInstagram}
                 title="מפרסם רק את המסיבות המסומנות &quot;כלול באינסטגרם&quot; (פוסט + סטורי לכל אחת), דרך Windsor.ai"
                 className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
-                style={{ background: '#15151a', border: '1px solid #2d2d34', borderRadius: 15, padding: '10px 16px' }}
+                style={{ background: '#1c1120', border: '1px solid #f4bfd733', borderRadius: 15, padding: '10px 16px' }}
               >
-                {postingPartiesInstagram ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Instagram size={16} style={{ color: '#f3b82d' }} />}
+                {postingPartiesInstagram ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Instagram size={16} style={{ color: '#f6c887' }} />}
                 {postingPartiesInstagram ? 'מפרסם...' : 'אינסטגרם'}
               </button>
             </div>
           </div>
 
           <div>
-            <p className="text-xs font-bold uppercase mb-2" style={{ color: '#8f8f97', letterSpacing: 1 }}>נתונים</p>
+            <p className="text-xs font-bold uppercase mb-2" style={{ color: '#9c8a97', letterSpacing: 1 }}>נתונים</p>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={onImport}
                 disabled={importing}
                 title={t('admin.importTitle')}
                 className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
-                style={{ background: '#15151a', border: '1px solid #2d2d34', borderRadius: 15, padding: '10px 16px' }}
+                style={{ background: '#1c1120', border: '1px solid #f4bfd733', borderRadius: 15, padding: '10px 16px' }}
               >
                 {importing ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Download size={16} />}
                 {importing ? t('admin.importing') : t('admin.import')}

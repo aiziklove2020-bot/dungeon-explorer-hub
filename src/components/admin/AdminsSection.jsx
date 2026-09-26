@@ -120,11 +120,11 @@ const AdminsSection = ({ showSaved }) => {
   };
 
   return (
-    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#20151e] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
         <div className="flex items-center gap-3">
           <h2 className="text-xl md:text-2xl font-bold">{t('admin.admins.managementTitle')}</h2>
-          <span className="px-2.5 py-1 rounded-full bg-[#1f1f23] text-[#94A3B8] text-xs font-bold">
+          <span className="px-2.5 py-1 rounded-full bg-[#2a1a24] text-[#94A3B8] text-xs font-bold">
             {admins.filter(a => a.isActive).length} פעילים מתוך {admins.length}
           </span>
         </div>
@@ -148,7 +148,7 @@ const AdminsSection = ({ showSaved }) => {
       </div>
 
       {showAddAdmin && (
-        <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-4 rounded-xl mb-4">
+        <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-4 rounded-xl mb-4">
           <h3 className="text-lg font-bold mb-4">{t('admin.admins.addAdminTitle')}</h3>
           <form onSubmit={handleAddAdmin} className="space-y-4">
             <div>
@@ -156,7 +156,7 @@ const AdminsSection = ({ showSaved }) => {
               <select
                 value={selectedUserId}
                 onChange={(e) => handleUserSelection(e.target.value)}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+                className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
                 required
               >
                 <option value="">{t('admin.admins.selectUserPlaceholder')}</option>
@@ -186,7 +186,7 @@ const AdminsSection = ({ showSaved }) => {
                   setAdminPassword(e.target.value);
                   setAddAdminError('');
                 }}
-                className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+                className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
                 placeholder={t('admin.admins.passwordPlaceholder')}
                 autoComplete="new-password"
                 minLength={4}
@@ -216,7 +216,7 @@ const AdminsSection = ({ showSaved }) => {
                   setAdminPassword('');
                   setAddAdminError('');
                 }}
-                className="bg-[#1f1f23] hover:bg-[#2a292e] text-white px-6 py-2 rounded-xl font-bold"
+                className="bg-[#2a1a24] hover:bg-[#2a292e] text-white px-6 py-2 rounded-xl font-bold"
               >
                 {t('admin.admins.cancel')}
               </button>
@@ -234,7 +234,7 @@ const AdminsSection = ({ showSaved }) => {
       ) : (
         <div className="space-y-4">
           {admins.map(admin => (
-            <div key={admin.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
+            <div key={admin.id} className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -253,16 +253,16 @@ const AdminsSection = ({ showSaved }) => {
                     </span>
                   </div>
                   {admin.name && (
-                    <p className="text-[#a9a9b2] text-sm">{t('admin.admins.nameLabel')} {admin.name}</p>
+                    <p className="text-[#c0aebb] text-sm">{t('admin.admins.nameLabel')} {admin.name}</p>
                   )}
                   {admin.phoneNumber && (
-                    <p className="text-[#a9a9b2] text-sm">{t('admin.admins.phoneLabel')} <PhoneLink phone={admin.phoneNumber}>{admin.phoneNumber}</PhoneLink></p>
+                    <p className="text-[#c0aebb] text-sm">{t('admin.admins.phoneLabel')} <PhoneLink phone={admin.phoneNumber}>{admin.phoneNumber}</PhoneLink></p>
                   )}
                   {admin.adminUsername && (
                     <p className="text-blue-400 text-sm font-bold">{t('admin.admins.telegramUsernameDisplay')} @{admin.adminUsername}</p>
                   )}
                   {admin.telegramUsername && admin.telegramUsername !== admin.adminUsername && (
-                    <p className="text-[#a9a9b2] text-sm">{t('admin.admins.telegramLabel')} @{admin.telegramUsername.replace(/^@+/, '')}</p>
+                    <p className="text-[#c0aebb] text-sm">{t('admin.admins.telegramLabel')} @{admin.telegramUsername.replace(/^@+/, '')}</p>
                   )}
                   {admin.isDefaultAdmin && (
                     <p className="text-yellow-400 text-sm mt-2">
@@ -277,7 +277,7 @@ const AdminsSection = ({ showSaved }) => {
                         onClick={() => handleToggleAdminActive(admin.id, admin.isActive)}
                         className={`px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 ${
                           admin.isActive
-                            ? 'bg-[#ff5708] hover:bg-[#ff7a29] text-white'
+                            ? 'bg-[#ff438b] hover:bg-[#ff5596] text-white'
                             : 'bg-green-600 hover:bg-green-500 text-white'
                         }`}
                       >

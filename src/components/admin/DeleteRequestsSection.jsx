@@ -95,14 +95,14 @@ const DeleteRequestsSection = ({ showSaved }) => {
           type="button"
           onClick={() => load()}
           disabled={loading}
-          className="inline-flex items-center gap-2 text-sm bg-[#1f1f23] hover:bg-[#2a292e] text-white px-3 py-2 rounded-lg disabled:opacity-50"
+          className="inline-flex items-center gap-2 text-sm bg-[#2a1a24] hover:bg-[#2a292e] text-white px-3 py-2 rounded-lg disabled:opacity-50"
         >
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
           רענן
         </button>
       </div>
 
-      <p className="text-[#a9a9b2] text-sm">
+      <p className="text-[#c0aebb] text-sm">
         משתמשים ששלחו בקשה למחוק את החשבון שלהם (מספר טלפון) מהאתר. אישור "טופל" כאן
         רק מסמן שהטיפול הושלם — המחיקה בפועל של הנתונים (משתמש, הרשמות, פורום וכו')
         היא פעולה נפרדת שצריך לבצע ידנית.
@@ -117,7 +117,7 @@ const DeleteRequestsSection = ({ showSaved }) => {
       ) : (
         <div className="overflow-x-auto border border-[rgba(255,255,255,0.08)] rounded-lg">
           <table className="w-full text-sm text-right min-w-[480px]">
-            <thead className="bg-[#121218] text-[#a9a9b2]">
+            <thead className="bg-[#20151e] text-[#c0aebb]">
               <tr>
                 <th className="p-2 font-medium">מתי</th>
                 <th className="p-2 font-medium">טלפון</th>
@@ -129,7 +129,7 @@ const DeleteRequestsSection = ({ showSaved }) => {
               {rows.map((r) => {
                 const status = r.status || 'pending';
                 return (
-                  <tr key={r.id} className="border-t border-[rgba(255,255,255,0.08)] hover:bg-[#121218]">
+                  <tr key={r.id} className="border-t border-[rgba(255,255,255,0.08)] hover:bg-[#20151e]">
                     <td className="p-2 text-[#e4e1e7] whitespace-nowrap align-top">{formatTime(r.createdAt)}</td>
                     <td className="p-2 align-top">
                       <span dir="ltr" className="font-mono">{r.phoneNumber}</span>
@@ -151,7 +151,7 @@ const DeleteRequestsSection = ({ showSaved }) => {
                           <button
                             type="button"
                             disabled={busyId === r.id}
-                            className="text-xs bg-[#1f1f23] hover:bg-[#2a292e] text-white px-2 py-1 rounded disabled:opacity-50"
+                            className="text-xs bg-[#2a1a24] hover:bg-[#2a292e] text-white px-2 py-1 rounded disabled:opacity-50"
                             onClick={() => setStatus(r.id, 'dismissed')}
                           >
                             דחה

@@ -125,7 +125,7 @@ const DBLoggerSection = () => {
   };
 
   return (
-    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#20151e] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
           <BarChart3 size={24} />
@@ -144,13 +144,13 @@ const DBLoggerSection = () => {
             {enabled ? <Power size={16} /> : <PowerOff size={16} />}
             {enabled ? 'מופעל' : 'כבוי'}
           </button>
-          <div className="flex gap-1 bg-[#1f1f23] rounded-lg p-1">
+          <div className="flex gap-1 bg-[#2a1a24] rounded-lg p-1">
             <button
               onClick={() => setViewMode('local')}
               className={`px-3 py-1 rounded text-xs font-bold ${
                 viewMode === 'local' 
                   ? 'bg-[#2a292e] text-white' 
-                  : 'text-[#a9a9b2] hover:text-white'
+                  : 'text-[#c0aebb] hover:text-white'
               }`}
             >
               מקומי
@@ -160,7 +160,7 @@ const DBLoggerSection = () => {
               className={`px-3 py-1 rounded text-xs font-bold flex items-center gap-1 ${
                 viewMode === 'firestore' 
                   ? 'bg-[#2a292e] text-white' 
-                  : 'text-[#a9a9b2] hover:text-white'
+                  : 'text-[#c0aebb] hover:text-white'
               }`}
             >
               <Database size={14} />
@@ -192,7 +192,7 @@ const DBLoggerSection = () => {
           </button>
           <button
             onClick={handleClear}
-            className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+            className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
           >
             <Trash2 size={16} />
             נקה הכל
@@ -213,21 +213,21 @@ const DBLoggerSection = () => {
       )}
 
       {loading && (
-        <div className="text-center py-4 text-[#a9a9b2]">
+        <div className="text-center py-4 text-[#c0aebb]">
           טוען לוגים...
         </div>
       )}
 
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-[#1f1f23]/50 p-4 rounded-lg">
+          <div className="bg-[#2a1a24]/50 p-4 rounded-lg">
             <h3 className="text-lg font-bold mb-3">היום</h3>
             <div className="space-y-2">
               <p><strong>סה"כ קריאות:</strong> {stats.today.totalReads.toLocaleString()}</p>
               <p><strong>סה"כ קריאות לפונקציות:</strong> {stats.today.totalCalls.toLocaleString()}</p>
             </div>
           </div>
-          <div className="bg-[#1f1f23]/50 p-4 rounded-lg">
+          <div className="bg-[#2a1a24]/50 p-4 rounded-lg">
             <h3 className="text-lg font-bold mb-3">כל הזמנים</h3>
             <div className="space-y-2">
               <p><strong>סה"כ קריאות:</strong> {stats.allTime.totalReads.toLocaleString()}</p>
@@ -238,11 +238,11 @@ const DBLoggerSection = () => {
       )}
 
       {stats && stats.today.byFunction.length > 0 && (
-        <div className="bg-[#1f1f23]/50 p-4 rounded-lg">
+        <div className="bg-[#2a1a24]/50 p-4 rounded-lg">
           <h3 className="text-lg font-bold mb-3">קריאות לפי פונקציה (היום)</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {stats.today.byFunction.map((item, index) => (
-              <div key={index} className="flex justify-between items-center p-2 bg-[#121218] rounded">
+              <div key={index} className="flex justify-between items-center p-2 bg-[#20151e] rounded">
                 <span className="font-mono text-sm">{item.function}</span>
                 <span className="font-bold text-yellow-400">{item.reads.toLocaleString()}</span>
               </div>
@@ -251,14 +251,14 @@ const DBLoggerSection = () => {
         </div>
       )}
 
-      <div className="bg-[#1f1f23]/50 p-4 rounded-lg">
+      <div className="bg-[#2a1a24]/50 p-4 rounded-lg">
         <h3 className="text-lg font-bold mb-3">לוג אחרון (100 קריאות אחרונות)</h3>
         <div className="space-y-1 max-h-96 overflow-y-auto">
           {logs.map((log, index) => (
             <div
               key={index}
               className={`p-2 rounded text-xs font-mono ${
-                log.success ? 'bg-[#121218]' : 'bg-[#93000a]/30'
+                log.success ? 'bg-[#20151e]' : 'bg-[#93000a]/30'
               }`}
             >
               <div className="flex justify-between items-start gap-2">
@@ -277,7 +277,7 @@ const DBLoggerSection = () => {
                     )}
                   </div>
                   {(log.caller || log.reason) && (
-                    <div className="mt-1 text-[10px] text-[#a9a9b2]">
+                    <div className="mt-1 text-[10px] text-[#c0aebb]">
                       {log.caller && log.caller !== 'unknown' && (
                         <span className="text-purple-400">📍 {log.caller}</span>
                       )}

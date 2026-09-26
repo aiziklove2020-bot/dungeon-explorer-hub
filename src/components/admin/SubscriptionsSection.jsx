@@ -553,7 +553,7 @@ const SubscriptionsSection = ({ showSaved }) => {
   };
 
   return (
-    <div className="bg-[#121218] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
+    <div className="bg-[#20151e] backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl space-y-4 md:space-y-6">
       
       {/* Header & Main Tabs */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
@@ -564,7 +564,7 @@ const SubscriptionsSection = ({ showSaved }) => {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => setShowNewSubscriber(true)} className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
+          <button onClick={() => setShowNewSubscriber(true)} className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
             <Plus size={14} /> מנוי חדש
           </button>
           <button onClick={reload} className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-2 text-sm">
@@ -593,14 +593,14 @@ const SubscriptionsSection = ({ showSaved }) => {
           </div>
           <div className="space-y-2">
             {pendingRequests.map((req) => (
-              <div key={req.id} className="flex flex-wrap items-center justify-between gap-2 bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-lg p-3">
+              <div key={req.id} className="flex flex-wrap items-center justify-between gap-2 bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-lg p-3">
                 <div>
                   <p className="font-bold text-white">{req.fullName}</p>
                   <PhoneLink phone={req.phoneNumber}>{req.phoneNumber}</PhoneLink>
                   {req.note && <p className="text-[#94A3B8] text-xs mt-1">{req.note}</p>}
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => handleApproveRequest(req)} className="flex items-center gap-1 bg-[#ff5708] hover:bg-[#ff7a29] text-white px-3 py-1.5 rounded-lg font-bold text-xs">
+                  <button onClick={() => handleApproveRequest(req)} className="flex items-center gap-1 bg-[#ff438b] hover:bg-[#ff5596] text-white px-3 py-1.5 rounded-lg font-bold text-xs">
                     <Check size={12} /> אשר מנוי
                   </button>
                   <button onClick={() => handleDismissRequest(req)} className="flex items-center gap-1 bg-[#2a292e] hover:bg-[#353439] text-white px-3 py-1.5 rounded-lg font-bold text-xs">
@@ -618,27 +618,27 @@ const SubscriptionsSection = ({ showSaved }) => {
 
       {!loading && (
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
-          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+          <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
             <p className="text-[#94A3B8] text-xs font-bold">כלל המשתמשים באתר</p>
             <p className="text-2xl font-bold mt-1">{users?.length || 0}</p>
           </div>
-          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+          <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
             <p className="text-[#94A3B8] text-xs font-bold">מנויים (סה״כ)</p>
             <p className="text-2xl font-bold mt-1">{stats.total}</p>
           </div>
-          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+          <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
             <p className="text-[#94A3B8] text-xs font-bold">מנויים פעילים</p>
             <p className="text-2xl font-bold mt-1" style={{ color: '#10B981' }}>{stats.active}</p>
           </div>
-          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+          <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
             <p className="text-[#94A3B8] text-xs font-bold">זהב</p>
             <p className="text-2xl font-bold mt-1" style={{ color: '#f59e0b' }}>{stats.gold}</p>
           </div>
-          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+          <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
             <p className="text-[#94A3B8] text-xs font-bold">מנויים שפגו</p>
             <p className="text-2xl font-bold mt-1" style={{ color: '#ffb4ab' }}>{stats.expired}</p>
           </div>
-          <div className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
+          <div className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
             <p className="text-[#94A3B8] text-xs font-bold">חסומים</p>
             <p className="text-2xl font-bold mt-1" style={{ color: '#ff5a72' }}>{users?.filter(u => u.level === 'blocked').length || 0}</p>
           </div>
@@ -649,19 +649,19 @@ const SubscriptionsSection = ({ showSaved }) => {
       <div className="flex gap-2 border-b border-[rgba(255,255,255,0.08)] pb-4">
         <button
           onClick={() => setActiveTab('all')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'all' ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'all' ? 'bg-[#ff438b] text-white' : 'bg-[#2a1a24] text-[#c0aebb] hover:text-white'}`}
         >
           כולם
         </button>
         <button
           onClick={() => setActiveTab('parties')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'parties' ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'parties' ? 'bg-[#ff438b] text-white' : 'bg-[#2a1a24] text-[#c0aebb] hover:text-white'}`}
         >
           מנויי מסיבות
         </button>
         <button
           onClick={() => setActiveTab('exchangeParties')}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'exchangeParties' ? 'bg-[#ff5708] text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:text-white'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'exchangeParties' ? 'bg-[#ff438b] text-white' : 'bg-[#2a1a24] text-[#c0aebb] hover:text-white'}`}
         >
           מנויי מסיבות חילופים
         </button>
@@ -670,13 +670,13 @@ const SubscriptionsSection = ({ showSaved }) => {
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="relative">
-          <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#a9a9b2]" />
+          <Search size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#c0aebb]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="חיפוש לפי שם או טלפון..."
-            className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#ff5708] outline-none text-white text-right"
+            className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 pr-10 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
           />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
@@ -690,7 +690,7 @@ const SubscriptionsSection = ({ showSaved }) => {
             <button
               key={f.id}
               onClick={() => setFilterStatus(f.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${filterStatus === f.id ? f.color + ' text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${filterStatus === f.id ? f.color + ' text-white' : 'bg-[#2a1a24] text-[#c0aebb] hover:bg-[#2a292e] hover:text-white'}`}
             >
               {f.label}
             </button>
@@ -700,16 +700,16 @@ const SubscriptionsSection = ({ showSaved }) => {
 
       <div className="flex flex-wrap gap-2 items-center">
         <span className="text-[#94A3B8] text-sm font-bold">סוג:</span>
-        {[{ id: '', label: 'הכל', color: 'bg-[#ff5708]' },
+        {[{ id: '', label: 'הכל', color: 'bg-[#ff438b]' },
           { id: 'male', label: 'גברים', color: 'bg-blue-600' },
           { id: 'female', label: 'נשים', color: 'bg-pink-600' },
           { id: 'blocked', label: 'חסומים', color: 'bg-[#93000a]' },
-          { id: 'admin', label: 'מנהלים', color: 'bg-[#ff5708]' },
+          { id: 'admin', label: 'מנהלים', color: 'bg-[#ff438b]' },
         ].map(f => (
           <button
             key={f.id || 'none'}
             onClick={() => setTypeFilter(f.id)}
-            className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${typeFilter === f.id ? f.color + ' text-white' : 'bg-[#1f1f23] text-[#a9a9b2] hover:bg-[#2a292e] hover:text-white'}`}
+            className={`px-3 py-1.5 rounded-xl text-xs md:text-sm font-bold transition-colors ${typeFilter === f.id ? f.color + ' text-white' : 'bg-[#2a1a24] text-[#c0aebb] hover:bg-[#2a292e] hover:text-white'}`}
           >
             {f.label}
           </button>
@@ -727,7 +727,7 @@ const SubscriptionsSection = ({ showSaved }) => {
         <div className="space-y-6">
           {groupedUsers.map(group => (
             <div key={group.id}>
-              <h3 className="text-sm font-bold text-[#a9a9b2] mb-2 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-[#c0aebb] mb-2 flex items-center gap-2">
                 {group.label}
                 <span className="text-xs font-normal text-[#64748B]">({group.users.length})</span>
               </h3>
@@ -736,19 +736,19 @@ const SubscriptionsSection = ({ showSaved }) => {
                   const payment = lastPayment(u);
                   if (editingUser?.id === u.id) {
                     return (
-                      <form key={u.id} onSubmit={handleSaveUser} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl space-y-3">
+                      <form key={u.id} onSubmit={handleSaveUser} className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl space-y-3">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
                             <label className="text-xs uppercase font-bold text-[#94A3B8]">שם מלא *</label>
-                            <input type="text" value={editUserForm.name} onChange={(e) => setEditUserForm((f) => ({ ...f, name: e.target.value }))} className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right" required />
+                            <input type="text" value={editUserForm.name} onChange={(e) => setEditUserForm((f) => ({ ...f, name: e.target.value }))} className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right" required />
                           </div>
                           <div>
                             <label className="text-xs uppercase font-bold text-[#94A3B8]">מספר טלפון *</label>
-                            <input type="tel" value={editUserForm.phoneNumber} onChange={handlePhoneChange} placeholder="05XXXXXXXX" maxLength="10" className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right" required />
+                            <input type="tel" value={editUserForm.phoneNumber} onChange={handlePhoneChange} placeholder="05XXXXXXXX" maxLength="10" className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right" required />
                           </div>
                           <div>
                             <label className="text-xs uppercase font-bold text-[#94A3B8]">מין</label>
-                            <select value={editUserForm.gender} onChange={(e) => setEditUserForm((f) => ({ ...f, gender: e.target.value }))} className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right">
+                            <select value={editUserForm.gender} onChange={(e) => setEditUserForm((f) => ({ ...f, gender: e.target.value }))} className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right">
                               <option value="">בחר מין</option>
                               <option value="male">זכר</option>
                               <option value="female">נקבה</option>
@@ -757,33 +757,33 @@ const SubscriptionsSection = ({ showSaved }) => {
                           </div>
                           <div>
                             <label className="text-xs uppercase font-bold text-[#94A3B8]">טלגרם</label>
-                            <input type="text" value={editUserForm.telegramUsername || ''} onChange={(e) => setEditUserForm((f) => ({ ...f, telegramUsername: e.target.value.replace(/^@+/g, '') }))} placeholder="username (ללא @)" className="w-full bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff5708] outline-none text-white text-right" />
+                            <input type="text" value={editUserForm.telegramUsername || ''} onChange={(e) => setEditUserForm((f) => ({ ...f, telegramUsername: e.target.value.replace(/^@+/g, '') }))} placeholder="username (ללא @)" className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right" />
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <button type="submit" className="bg-[#ff5708] hover:bg-[#ff7a29] text-white px-6 py-2 rounded-xl font-bold">שמור</button>
+                          <button type="submit" className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-6 py-2 rounded-xl font-bold">שמור</button>
                           <button type="button" onClick={handleCancelEdit} className="bg-[#2a292e] hover:bg-[#353439] text-white px-6 py-2 rounded-xl font-bold">ביטול</button>
                         </div>
                       </form>
                     );
                   }
                   return (
-                  <div key={u.id} className="bg-[#1f1f23] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div key={u.id} className="bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div className="flex items-start gap-3 min-w-0">
                       {u.photoUrl ? (
                         <img src={u.photoUrl} alt="" className="w-11 h-11 rounded-full object-cover shrink-0 border border-[rgba(255,255,255,0.08)]" />
                       ) : (
-                        <div className="w-11 h-11 rounded-full bg-[#2a292e] flex items-center justify-center shrink-0 text-[#a9a9b2] font-bold text-lg">
+                        <div className="w-11 h-11 rounded-full bg-[#2a292e] flex items-center justify-center shrink-0 text-[#c0aebb] font-bold text-lg">
                           {(u.name || '?').trim().charAt(0)}
                         </div>
                       )}
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <strong className="text-lg text-white">{u.name}</strong>
-                          {u.level === 'admin' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#ff5708]">Admin</span>}
+                          {u.level === 'admin' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#ff438b]">Admin</span>}
                           {u.level === 'blocked' && <span className="px-2 py-0.5 rounded text-xs font-bold bg-[#93000a]">Blocked</span>}
                         </div>
-                        <div className="text-sm text-[#a9a9b2] flex gap-3">
+                        <div className="text-sm text-[#c0aebb] flex gap-3">
                           <span><PhoneLink phone={u.phoneNumber}>{u.phoneNumber}</PhoneLink></span>
                           {u.telegramUsername && <span>@{u.telegramUsername}</span>}
                         </div>
