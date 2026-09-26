@@ -356,9 +356,9 @@ function lpWirePushBanner() {
   el.id = "lpPushBanner";
   el.setAttribute("role", "status");
   el.innerHTML = `
-    <span>רוצים לדעת ראשונים על מסיבות חדשות והתאמות איזון? </span>
-    <button type="button" id="lpPushBannerYes" class="btn gold">הפעלת התראות</button>
-    <button type="button" id="lpPushBannerNo" aria-label="סגירה" style="background:none;border:0;color:inherit;font-size:22px;line-height:1;cursor:pointer;padding:0 6px">×</button>
+    <span>רוצים לקבל התראות לנייד על מסיבות חדשות ועל התאמות איזון? מי שלא יאשר לא יקבל אותן. </span>
+    <button type="button" id="lpPushBannerYes" class="btn gold">כן, רוצה התראות</button>
+    <button type="button" id="lpPushBannerNo" class="btn">לא, תודה</button>
   `;
   // bottom offset clears the fixed mobile-bottom nav bar (64px + safe area)
   // instead of stacking on top of it; on desktop, where that bar is hidden,
