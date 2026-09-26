@@ -59,6 +59,10 @@
       "destination": "/create-event.html"
     },
     {
+      "source": "/delete-account",
+      "destination": "/delete-account.html"
+    },
+    {
       "source": "/event",
       "destination": "/event.html"
     },
@@ -77,6 +81,10 @@
     {
       "source": "/gallery",
       "destination": "/gallery.html"
+    },
+    {
+      "source": "/liberal-suite",
+      "destination": "/liberal-suite.html"
     },
     {
       "source": "/login",
@@ -101,6 +109,10 @@
     {
       "source": "/privacy",
       "destination": "/privacy.html"
+    },
+    {
+      "source": "/producer-info",
+      "destination": "/producer-info.html"
     },
     {
       "source": "/profile",
@@ -161,6 +173,11 @@
       "permanent": true
     },
     {
+      "source": "/delete-account.html",
+      "destination": "/delete-account",
+      "permanent": true
+    },
+    {
       "source": "/event.html",
       "destination": "/event",
       "permanent": true
@@ -186,6 +203,11 @@
       "permanent": true
     },
     {
+      "source": "/liberal-suite.html",
+      "destination": "/liberal-suite",
+      "permanent": true
+    },
+    {
       "source": "/login.html",
       "destination": "/login",
       "permanent": true
@@ -203,6 +225,11 @@
     {
       "source": "/privacy.html",
       "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/producer-info.html",
+      "destination": "/producer-info",
       "permanent": true
     },
     {

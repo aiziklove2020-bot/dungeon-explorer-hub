@@ -84,29 +84,45 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
   }
 
-  // Experimental animated starfield background — remove the block below to disable.
-  (() => {
-    const field = document.createElement("div");
-    field.id = "starfield";
-    field.style.cssText = "position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden";
-    const N = 70;
-    let stars = "";
-    for (let i = 0; i < N; i++) {
-      const x = Math.random() * 100, y = Math.random() * 100;
-      const size = Math.random() * 2 + 1;
-      const delay = Math.random() * 4;
-      const dur = Math.random() * 3 + 2;
-      stars += `<span style="position:absolute;left:${x}%;top:${y}%;width:${size}px;height:${size}px;border-radius:50%;background:#fff;opacity:.6;animation:starTwinkle ${dur}s ease-in-out ${delay}s infinite"></span>`;
-    }
-    field.innerHTML = stars;
-    document.body.prepend(field);
-    document.body.style.position = "relative";
-  })();
-  const menuBtn=document.querySelector("[data-menu]"), drawer=document.querySelector(".drawer"), scrim=document.querySelector(".scrim");
-  const close=()=>{drawer?.classList.remove("open");scrim?.classList.remove("show")}
-  menuBtn?.addEventListener("click",()=>{drawer.classList.add("open");scrim.classList.add("show")});
-  document.querySelector("[data-close]")?.addEventListener("click",close); scrim?.addEventListener("click",close);
-  drawer?.querySelectorAll("a").forEach(a=>a.addEventListener("click",close));
+  // Header "כניסה" dropdown offering subscriber vs advertiser login — the
+  // header itself has no way to know which the visitor wants, so it opens a
+  // small picker rather than guessing. Purely a UI toggle; which link the
+  // visitor picks (/login vs /advertiser-login) is unchanged.
+  document.querySelectorAll(".login-picker").forEach(picker => {
+    const btn = picker.querySelector(".member-login");
+    const menu = picker.querySelector(".login-options");
+    if (!btn || !menu) return;
+    const closePicker = () => { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); };
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const willOpen = menu.hidden;
+      document.querySelectorAll(".login-options").forEach(m => { m.hidden = true; });
+      document.querySelectorAll(".member-login").forEach(b => b.setAttribute("aria-expanded", "false"));
+      menu.hidden = !willOpen;
+      btn.setAttribute("aria-expanded", String(willOpen));
+    });
+    document.addEventListener("click", (e) => { if (!picker.contains(e.target)) closePicker(); });
+  });
+  // Mobile hamburger menu — toggles on tap, closes on an outside tap or on
+  // picking a link. The header markup used to also carry an inline
+  // onclick="...classList.toggle('open')" on this same button (copied
+  // verbatim from the design file); with this listener also attached, every
+  // tap toggled the class twice and the menu never visibly opened. The
+  // inline onclick has been removed from every page's header.
+  document.querySelectorAll(".mobile-menu").forEach(btn => {
+    const nav = btn.closest(".nav");
+    if (!nav) return;
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      nav.classList.toggle("open");
+    });
+    nav.querySelector("nav")?.addEventListener("click", (e) => {
+      if (e.target.closest("a")) nav.classList.remove("open");
+    });
+    document.addEventListener("click", (e) => {
+      if (!nav.contains(e.target)) nav.classList.remove("open");
+    });
+  });
 
   const c=LP.current();
   document.querySelectorAll("[data-auth-label]").forEach(el=>el.textContent=c?c.name:"כניסה");
@@ -119,27 +135,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     el.title = "מחובר/ת בתור " + displayName;
     el.classList.add("connected");
   });
-
-  // Logout lives inside the drawer (a scrollable list) instead of the fixed
-  // header, so the header's icon cluster never grows/shifts when a user logs
-  // in — every header icon keeps the same spot on every page.
-  if (c && drawer && !drawer.querySelector("[data-logout]")) {
-    const nav = drawer.querySelector("nav");
-    if (nav) {
-      const logoutLink = document.createElement("a");
-      logoutLink.href = "#";
-      logoutLink.setAttribute("data-logout", "1");
-      logoutLink.innerHTML = '<span class="dr-ic-wrap"><span class="material-symbols-outlined dr-ic">logout</span></span><span class="dr-tx">התנתקות</span>';
-      logoutLink.addEventListener("click", e => {
-        e.preventDefault();
-        close();
-        localStorage.removeItem("lp_current");
-        toast("התנתקת בהצלחה");
-        setTimeout(() => location.href = "index.html", 500);
-      });
-      nav.appendChild(logoutLink);
-    }
-  }
 
   document.querySelectorAll("[data-fav]").forEach(btn=>{
     let id=btn.dataset.fav, favs=LP.favorites();
@@ -176,7 +171,6 @@ async function lpWireFavHearts(container) {
   const buttons = [...root.querySelectorAll("[data-fav-btn]")];
   if (buttons.length === 0) return;
   const identity = lpFavIdentity();
-  const iconOf = (btn) => btn.querySelector(".material-symbols-outlined") || btn;
 
   // Favorites are a subscriber-only feature — a forum login alone isn't
   // enough (see toggleFavorite in site-bridge.ts). Hide the hearts entirely
@@ -196,10 +190,15 @@ async function lpWireFavHearts(container) {
   if (identity && window.LPData?.loadMyFavorites) {
     myFavIds = await window.LPData.loadMyFavorites(identity).catch(() => []);
   }
+  const paint = (btn, on) => {
+    btn.classList.toggle("saved", on);
+    btn.textContent = on ? "♥" : "♡";
+    btn.setAttribute("aria-pressed", on);
+  };
+
   buttons.forEach((btn) => {
     const id = btn.dataset.favBtn;
-    const icon = iconOf(btn);
-    icon.textContent = myFavIds.includes(id) ? "favorite" : "favorite_border";
+    paint(btn, myFavIds.includes(id));
     btn.addEventListener("click", async (ev) => {
       ev.preventDefault();
       // addFavorite writes via setDoc on a deterministic doc id, and the
@@ -214,15 +213,15 @@ async function lpWireFavHearts(container) {
         setTimeout(() => (location.href = "/login"), 900);
         return;
       }
-      const nowFav = icon.textContent === "favorite";
+      const nowFav = btn.classList.contains("saved");
       const next = !nowFav;
-      icon.textContent = next ? "favorite" : "favorite_border"; // optimistic
+      paint(btn, next); // optimistic
       btn.dataset.favPending = "1";
       try {
         await window.LPData.toggleFavorite(current, id, next);
         toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
       } catch (err) {
-        icon.textContent = nowFav ? "favorite" : "favorite_border"; // revert
+        paint(btn, nowFav); // revert
         toast(err?.message || "שגיאה בשמירת מועדף", "error");
       } finally {
         delete btn.dataset.favPending;

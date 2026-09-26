@@ -9,7 +9,7 @@ const DELETE_REQUESTS_COLLECTION = 'deleteRequests';
  * @param {string} phoneNumber - 10 digits, must start with 05
  * @returns {{ success: boolean, requestId?: string, error?: string }}
  */
-export const submitDeleteRequest = async (phoneNumber) => {
+export const submitDeleteRequest = async (phoneNumber, name = '', reason = '') => {
   const cleaned = (phoneNumber || '').replace(/\D/g, '');
   if (cleaned.length !== 10 || !cleaned.startsWith('05')) {
     return { success: false, error: 'invalid_phone' };
@@ -20,6 +20,8 @@ export const submitDeleteRequest = async (phoneNumber) => {
       phoneNumber: cleaned,
       status: 'pending',
       createdAt: new Date().toISOString(),
+      ...(name ? { name: String(name).trim() } : {}),
+      ...(reason ? { reason: String(reason).trim() } : {}),
     });
     return { success: true, requestId: docRef.id };
   } catch (err) {
