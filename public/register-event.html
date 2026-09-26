@@ -198,6 +198,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function showStep2(party) {
+    // Reached directly via a /register-event?partyId= link (e.g. a preselected
+    // party from the URL) — same external-link redirect as the picker's own
+    // click handler, so this entry point can't be used to reach the dead-end
+    // internal form for a party that isn't actually registered here.
+    if (party.partyType === "external" && party.registrationLink) {
+      location.href = party.registrationLink;
+      return;
+    }
     selectedParty = party;
     document.getElementById("selectedPartyTitle").textContent = party.title;
     // selectedPartyBanner is a single persistent element reused across every
@@ -257,14 +265,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="card-body">
         <h3>${escapeHtml(e.title)}</h3>
         ${(e.day || e.date) ? `<div class="meta">${escapeHtml(e.day) || ""}${e.day && e.date ? ", " : ""}${escapeHtml(e.date) || ""}</div>` : ""}
-        <div class="card-bottom"><button type="button" class="btn gold full" data-party="${e.id}">בחרו למסיבה זו</button></div>
+        <div class="card-bottom"><button type="button" class="btn gold full" data-party="${e.id}">${e.partyType === "external" && e.registrationLink ? "לרכישת כרטיסים" : "בחרו למסיבה זו"}</button></div>
       </div>
     </article>`).join("");
   lpFrameEventImages(picker);
   picker.querySelectorAll("[data-party]").forEach(btn => {
     btn.addEventListener("click", () => {
       const party = events.find(e => String(e.id) === btn.dataset.party);
-      if (party) showStep2(party);
+      if (!party) return;
+      // Advertiser-posted parties with their own external ticketing link have
+      // no internal registration to fill in — send the visitor straight
+      // there instead of showing our couple/single form, which they'd fill
+      // out for nothing since it's never submitted anywhere for this party.
+      if (party.partyType === "external" && party.registrationLink) {
+        window.open(party.registrationLink, "_blank", "noopener,noreferrer");
+        return;
+      }
+      showStep2(party);
     });
   });
 

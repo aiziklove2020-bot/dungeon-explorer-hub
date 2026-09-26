@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ${e.category ? `<span class="tag">${escapeHtml(e.category)}</span>` : ""}
         <h3><a href="/event?id=${encodeURIComponent(e.id)}">${escapeHtml(e.title)}</a></h3>
         <div class="meta">${escapeHtml(e.city||"")}${e.city && (e.day||e.date) ? " · " : ""}${escapeHtml(e.day||"")}${e.day && e.date ? ", " : ""}${escapeHtml(e.date||"")}</div>
-        <div class="card-bottom"><a class="btn gold event-register-card" href="/register-event?partyId=${encodeURIComponent(e.id)}">הרשמה למסיבה <span>←</span></a></div>
+        <div class="card-bottom"><a class="btn gold event-register-card" href="${e.partyType === "external" && e.registrationLink ? escapeHtml(e.registrationLink) : "/register-event?partyId=" + encodeURIComponent(e.id)}" ${e.partyType === "external" && e.registrationLink ? 'target="_blank" rel="noopener noreferrer"' : ""}>${e.partyType === "external" && e.registrationLink ? "לרכישת כרטיסים" : "הרשמה למסיבה"} <span>←</span></a></div>
       </div>
     </article>`;
   }
