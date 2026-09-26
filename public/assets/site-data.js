@@ -24033,29 +24033,16 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 		return Number.isFinite(r) ? N.fromMillis(r) : null;
 	}, iM = "parties";
 	async function notifyAllSubscribersOfNewParty_(party) {
+		// Fire-and-forget call to a dedicated server job instead of building the
+		// push payload and calling the admin-gated /api/send-push directly: this
+		// runs from the public advertiser-posting flow, which has no admin
+		// session and therefore no way to pass that gate, so every push here
+		// silently 401'd and no one who opted in ever got a "new party" push.
+		// The server job looks the party and subscriptions up itself and only
+		// ever sends its own fixed message, so it's safe to leave open.
+		if (!party?.id) return;
 		try {
-			let subsSnap = await k(T(H, "pushSubscriptions")),
-				phones = [...new Set(subsSnap.docs.map((d) => d.data().phone).filter(Boolean))];
-			if (!phones.length) return;
-			let title = "🎉 מסיבה חדשה!",
-				body = (party?.name || party?.title || "מסיבה חדשה") + " נוספה לאתר",
-				url = party?.id ? `/event?id=${party.id}` : "/events";
-			await Promise.all(phones.map(async (phone) => {
-				let subsQuery = D(T(H, "pushSubscriptions"), O("phone", "==", phone)),
-					subs = (await k(subsQuery)).docs.map((d) => ({ id: d.id, ...d.data() }));
-				if (!subs.length) return;
-				let res = await fetch("/api/send-push", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						subscriptions: subs.map((s) => ({ id: s.id, endpoint: s.endpoint, keys: s.keys })),
-						title,
-						body,
-						url
-					})
-				}).then((r) => r.json()).catch(() => null);
-				res?.deadIds?.length && await Promise.all(res.deadIds.map((id) => ed(E(T(H, "pushSubscriptions"), id)).catch(() => {})));
-			}));
+			await fetch(`/api/telegram-webhook?job=notify-new-party&partyId=${encodeURIComponent(party.id)}`).catch(() => {});
 		} catch {}
 	}
 	aM = async (e) => {

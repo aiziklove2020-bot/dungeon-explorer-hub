@@ -42,12 +42,18 @@
   </div>
 
   <form id="regForm" novalidate>
-    <label>סוג הרשמה ואיזון מגדרי</label>
-    <div class="type-options" role="radiogroup" aria-label="סוג הרשמה ואיזון מגדרי">
-      <button type="button" class="btn type-option is-active" data-type="couple" role="radio" aria-checked="true">זוג המעוניין להירשם</button>
-      <button type="button" class="btn type-option" data-type="single-male-balance" role="radio" aria-checked="false">סינגל המחפש איזון</button>
-      <button type="button" class="btn type-option" data-type="single-female-balance" role="radio" aria-checked="false">סינגלית המחפשת איזון</button>
-      <button type="button" class="btn type-option" data-type="single-female-discount" role="radio" aria-checked="false">סינגלית בהנחה</button>
+    <label id="typeDropdownLabelFor">סוג הרשמה ואיזון מגדרי</label>
+    <div class="type-dropdown" id="typeDropdown">
+      <button type="button" id="typeDropdownBtn" class="type-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="typeDropdownLabelFor">
+        <span id="typeDropdownLabel">זוג המעוניין להירשם</span>
+        <svg class="type-dropdown-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <ul class="type-dropdown-list" id="typeDropdownList" role="listbox" hidden>
+        <li role="option" data-type="couple" aria-selected="true">זוג המעוניין להירשם</li>
+        <li role="option" data-type="single-male-balance" aria-selected="false">סינגל המחפש איזון</li>
+        <li role="option" data-type="single-female-balance" aria-selected="false">סינגלית המחפשת איזון</li>
+        <li role="option" data-type="single-female-discount" aria-selected="false">סינגלית בהנחה</li>
+      </ul>
     </div>
     <input type="hidden" name="registrationType" id="typeSelect" value="couple">
 
@@ -158,7 +164,7 @@ let selectedParty = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202609261946");
+    await import("./assets/site-data.js?v=202609261959");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
@@ -296,16 +302,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  const typeOptions = Array.from(document.querySelectorAll(".type-option"));
-  typeOptions.forEach(opt => {
-    opt.addEventListener("click", () => {
-      typeSelect.value = opt.dataset.type;
-      typeOptions.forEach(o => {
-        o.classList.toggle("is-active", o === opt);
-        o.setAttribute("aria-checked", o === opt ? "true" : "false");
-      });
+  const typeDropdown = document.getElementById("typeDropdown");
+  const typeDropdownBtn = document.getElementById("typeDropdownBtn");
+  const typeDropdownList = document.getElementById("typeDropdownList");
+  const typeDropdownLabel = document.getElementById("typeDropdownLabel");
+  const typeItems = Array.from(typeDropdownList.querySelectorAll("[data-type]"));
+
+  const closeTypeDropdown = () => {
+    typeDropdownList.hidden = true;
+    typeDropdownBtn.setAttribute("aria-expanded", "false");
+  };
+  const openTypeDropdown = () => {
+    typeDropdownList.hidden = false;
+    typeDropdownBtn.setAttribute("aria-expanded", "true");
+  };
+  typeDropdownBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (typeDropdownList.hidden) openTypeDropdown(); else closeTypeDropdown();
+  });
+  typeItems.forEach(item => {
+    item.addEventListener("click", () => {
+      typeSelect.value = item.dataset.type;
+      typeDropdownLabel.textContent = item.textContent;
+      typeItems.forEach(o => o.setAttribute("aria-selected", o === item ? "true" : "false"));
+      closeTypeDropdown();
       typeSelect.dispatchEvent(new Event("change"));
     });
+  });
+  document.addEventListener("click", (e) => {
+    if (!typeDropdown.contains(e.target)) closeTypeDropdown();
   });
 
   typeSelect.addEventListener("change", () => {

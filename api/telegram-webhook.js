@@ -840,6 +840,72 @@ async function handleCleanupExpiredParties(req, res) {
   }
 }
 
+// Same public half /api/send-push.js hardcodes — safe to expose.
+const VAPID_PUBLIC_KEY = 'BEKO6poc32JAn1MYTdwdvzRve1BRIwZ85AgtEUQe_JqWLTYal5sdwJK-TossqFQzWmnE9Hoj0nxRQtA4nMjTb7Y';
+
+/**
+ * Pushes "new party" to every subscriber, given only a partyId — called
+ * right after a party is created, from both the admin panel and (the actual
+ * bug this exists to fix) the public advertiser-posting flow, which has no
+ * admin session and therefore no way to call the admin-gated /api/send-push
+ * directly. That endpoint has to stay admin-only (it accepts arbitrary
+ * subscriptions/title/body from the caller, so opening it up would turn this
+ * deploy's VAPID identity into a free open push relay for anyone). This job
+ * is safe to leave open instead: it accepts nothing but a partyId, looks the
+ * party and every subscription up itself via the Admin SDK, and only ever
+ * sends the one fixed "new party" message about a party that actually exists
+ * — there is no way to make it push arbitrary content to arbitrary endpoints.
+ */
+async function handleNotifyNewParty(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  try {
+    const partyId = req.query?.partyId || new URL(req.url, 'http://x').searchParams.get('partyId');
+    if (!partyId) return res.status(400).json({ ok: false, error: 'Missing partyId' });
+
+    const privateKey = process.env.VAPID_PRIVATE_KEY;
+    if (!privateKey) return res.status(200).json({ ok: false, error: 'Push not configured' });
+
+    const admin = await initAdmin();
+    const db = admin.firestore();
+    const partySnap = await db.collection('parties').doc(partyId).get();
+    if (!partySnap.exists) return res.status(200).json({ ok: false, error: 'Party not found' });
+    const party = partySnap.data();
+
+    const subsSnap = await db.collection('pushSubscriptions').get();
+    const subs = subsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    if (!subs.length) return res.status(200).json({ ok: true, sent: 0, total: 0 });
+
+    const webpush = (await import('web-push')).default;
+    webpush.setVapidDetails('mailto:admin@libralparty.co.il', VAPID_PUBLIC_KEY, privateKey);
+    const payload = JSON.stringify({
+      title: '🎉 מסיבה חדשה!',
+      body: `${party.name || party.title || 'מסיבה חדשה'} נוספה לאתר`,
+      url: `/event?id=${partyId}`,
+    });
+
+    const results = await Promise.allSettled(
+      subs.map((s) =>
+        webpush
+          .sendNotification({ endpoint: s.endpoint, keys: s.keys }, payload)
+          .then(() => ({ id: s.id, ok: true }))
+          .catch((err) => ({ id: s.id, ok: false, statusCode: err.statusCode }))
+      )
+    );
+    const items = results.map((r) => (r.status === 'fulfilled' ? r.value : { ok: false }));
+    const sent = items.filter((i) => i.ok).length;
+    const deadIds = items.filter((i) => !i.ok && (i.statusCode === 404 || i.statusCode === 410)).map((i) => i.id);
+    if (deadIds.length) {
+      const batch = db.batch();
+      deadIds.forEach((id) => batch.delete(db.collection('pushSubscriptions').doc(id)));
+      await batch.commit();
+    }
+
+    return res.status(200).json({ ok: true, sent, total: subs.length });
+  } catch (err) {
+    return res.status(200).json({ ok: false, error: String(err?.message || err) });
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
@@ -879,6 +945,9 @@ export default async function handler(req, res) {
     }
     if (job === 'cleanup-parties') {
       return handleCleanupExpiredParties(req, res);
+    }
+    if (job === 'notify-new-party') {
+      return handleNotifyNewParty(req, res);
     }
     if (job === 'process-delete-request') {
       return handleProcessDeleteRequest(req, res);
