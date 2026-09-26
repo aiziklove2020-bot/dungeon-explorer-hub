@@ -103,10 +103,24 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
     document.addEventListener("click", (e) => { if (!picker.contains(e.target)) closePicker(); });
   });
+  // Mobile hamburger menu — toggles on tap, closes on an outside tap or on
+  // picking a link. The header markup used to also carry an inline
+  // onclick="...classList.toggle('open')" on this same button (copied
+  // verbatim from the design file); with this listener also attached, every
+  // tap toggled the class twice and the menu never visibly opened. The
+  // inline onclick has been removed from every page's header.
   document.querySelectorAll(".mobile-menu").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const nav = btn.closest(".nav");
-      nav?.classList.toggle("open");
+    const nav = btn.closest(".nav");
+    if (!nav) return;
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      nav.classList.toggle("open");
+    });
+    nav.querySelector("nav")?.addEventListener("click", (e) => {
+      if (e.target.closest("a")) nav.classList.remove("open");
+    });
+    document.addEventListener("click", (e) => {
+      if (!nav.contains(e.target)) nav.classList.remove("open");
     });
   });
 

@@ -83,6 +83,10 @@
       "destination": "/gallery.html"
     },
     {
+      "source": "/liberal-suite",
+      "destination": "/liberal-suite.html"
+    },
+    {
       "source": "/login",
       "destination": "/login.html"
     },
@@ -196,6 +200,11 @@
     {
       "source": "/gallery.html",
       "destination": "/gallery",
+      "permanent": true
+    },
+    {
+      "source": "/liberal-suite.html",
+      "destination": "/liberal-suite",
       "permanent": true
     },
     {
