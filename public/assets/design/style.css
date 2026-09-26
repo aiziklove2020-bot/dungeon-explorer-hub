@@ -204,3 +204,13 @@ body{padding-bottom:72px}.wrap{padding-left:16px;padding-right:16px}.nav{height:
    low contrast, hard to read. Restoring white here has one more class
    in the selector than that rule, so it wins regardless of source order. */
 .card-bottom .btn.gold{color:#fff}
+
+/* /events' second filter row (search input, city/date pickers, reset) reused
+   the same .filters class as the category chip row above it, so on mobile it
+   inherited that row's "no-wrap, horizontal-scroll, hidden scrollbar"
+   treatment — meant for a row of short chips, not for actual form controls.
+   Real inputs scrolling off-screen with no visible scrollbar looked broken
+   (edges cut off mid-field, no indication there was more to scroll to).
+   .filters-form has one more class than the plain .filters rules that set
+   this, so it wins regardless of source order and just wraps normally. */
+.filters.filters-form{flex-wrap:wrap!important;overflow-x:visible!important}
