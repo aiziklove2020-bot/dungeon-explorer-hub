@@ -42,13 +42,14 @@
   </div>
 
   <form id="regForm" novalidate>
-    <label for="typeSelect">סוג הרשמה ואיזון מגדרי</label>
-    <select name="registrationType" id="typeSelect" required>
-      <option value="couple">זוג המעוניין להירשם</option>
-      <option value="single-male-balance">סינגל המחפש איזון</option>
-      <option value="single-female-balance">סינגלית המחפשת איזון</option>
-      <option value="single-female-discount">סינגלית בהנחה</option>
-    </select>
+    <label>סוג הרשמה ואיזון מגדרי</label>
+    <div class="type-options" role="radiogroup" aria-label="סוג הרשמה ואיזון מגדרי">
+      <button type="button" class="btn type-option is-active" data-type="couple" role="radio" aria-checked="true">זוג המעוניין להירשם</button>
+      <button type="button" class="btn type-option" data-type="single-male-balance" role="radio" aria-checked="false">סינגל המחפש איזון</button>
+      <button type="button" class="btn type-option" data-type="single-female-balance" role="radio" aria-checked="false">סינגלית המחפשת איזון</button>
+      <button type="button" class="btn type-option" data-type="single-female-discount" role="radio" aria-checked="false">סינגלית בהנחה</button>
+    </div>
+    <input type="hidden" name="registrationType" id="typeSelect" value="couple">
 
     <div id="singleFields">
       <label for="fullName">שם מלא</label>
@@ -275,6 +276,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       step2.style.display = "none";
       step1.style.display = "";
       setStep(1);
+    });
+  });
+
+  const typeOptions = Array.from(document.querySelectorAll(".type-option"));
+  typeOptions.forEach(opt => {
+    opt.addEventListener("click", () => {
+      typeSelect.value = opt.dataset.type;
+      typeOptions.forEach(o => {
+        o.classList.toggle("is-active", o === opt);
+        o.setAttribute("aria-checked", o === opt ? "true" : "false");
+      });
+      typeSelect.dispatchEvent(new Event("change"));
     });
   });
 

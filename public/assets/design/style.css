@@ -177,3 +177,11 @@ body{padding-bottom:72px}.wrap{padding-left:16px;padding-right:16px}.nav{height:
 .brand-title{font-size:24px!important}
 .hero .eyebrow{font-size:20px!important}
 }
+/* Registration-type picker (register-event.html): replaces a native <select>
+   that defaulted silently to "couple" — people didn't realize a closed
+   dropdown even had other options, so singles looking for a balance match
+   never switched it. A row of always-visible buttons makes every option
+   equally discoverable without an extra click to open anything. */
+.type-options{display:flex;flex-direction:column;gap:8px;margin:8px 0 18px}
+.type-options .type-option{width:100%;justify-content:flex-start;text-align:right;background:var(--surface);border-color:var(--border);font-size:14px}
+.type-options .type-option.is-active{background:var(--gold);color:#171410;border-color:var(--gold);font-weight:700}
