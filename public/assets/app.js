@@ -340,13 +340,17 @@ function lpPushIdentity() {
 // Site-wide "enable notifications" banner — every previous entry point to
 // lpEnablePushNotifications lived deep inside /my-area or /profile, which a
 // first-time or anonymous visitor has no reason to ever open. This surfaces
-// the same opt-in on every page, for every visitor, dismissible and shown
-// at most once (per browser) so it never nags someone who already decided.
+// the same opt-in on every page, for every visitor. It should keep greeting
+// someone who hasn't actually decided yet, so closing it with the × only
+// hides it for this page view — it comes back on the next visit. Once a real
+// decision exists (granted or denied, tracked natively by the browser via
+// Notification.permission, not our own storage) the "!== 'default'" check
+// below is what stops it from ever showing again — no separate "dismissed"
+// flag needed, and none is set here.
 function lpWirePushBanner() {
   if (lpIsIosNotInstalled()) return; // can't work here at all; nothing to offer
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
   if (typeof Notification === "undefined" || Notification.permission !== "default") return;
-  if (localStorage.getItem("lp_push_banner_dismissed")) return;
 
   const el = document.createElement("div");
   el.id = "lpPushBanner";
@@ -362,21 +366,17 @@ function lpWirePushBanner() {
   el.style.cssText = "position:fixed;z-index:21;bottom:calc(64px + env(safe-area-inset-bottom,0px));inset-inline:0;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;padding:12px 16px;background:#1c1120ee;backdrop-filter:blur(10px);border-top:1px solid #ffffff22;font-size:14px;color:#e5e1e4";
   document.body.appendChild(el);
 
-  const dismiss = () => {
-    localStorage.setItem("lp_push_banner_dismissed", "1");
-    el.remove();
-  };
-  document.getElementById("lpPushBannerNo").addEventListener("click", dismiss);
+  document.getElementById("lpPushBannerNo").addEventListener("click", () => el.remove());
   document.getElementById("lpPushBannerYes").addEventListener("click", async () => {
     const btn = document.getElementById("lpPushBannerYes");
     btn.disabled = true;
     const result = await lpEnablePushNotifications(lpPushIdentity());
     if (result === "ok") {
       toast("התראות הופעלו בהצלחה");
-      dismiss();
+      el.remove();
     } else if (result === "denied") {
       toast("ההתראות נחסמו בדפדפן — אפשר לאשר אותן דרך הגדרות האתר", "error");
-      dismiss();
+      el.remove();
     } else {
       btn.disabled = false;
     }
