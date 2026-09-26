@@ -34,6 +34,7 @@
     <button type="button" class="btn" id="backToParties2">שינוי מסיבה</button>
   </div>
   <p class="meta" id="selectedPartyMeta"></p>
+  <p id="selectedPartyDesc" style="white-space:pre-line;line-height:1.7;margin:0 0 18px"></p>
 
   <div id="whatsappOnly" style="display:none;text-align:center;padding:20px 0">
     <p>ההרשמה למסיבה זו מתבצעת ישירות דרך וואטסאפ.</p>
@@ -250,6 +251,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const metaEl = document.getElementById("selectedPartyMeta");
     const metaParts = [party.day, party.date].filter(Boolean);
     metaEl.textContent = metaParts.join(", ");
+    const descEl = document.getElementById("selectedPartyDesc");
+    descEl.textContent = party.desc || "";
+    descEl.style.display = party.desc ? "" : "none";
     step1.style.display = "none";
     step2.style.display = "";
     setStep(2);
