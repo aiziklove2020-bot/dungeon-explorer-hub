@@ -538,6 +538,20 @@ async function loadFavoriteAlerts(userId: string, withinDays = 3) {
 }
 
 /**
+ * /my-area's phone gate has no password — anyone who knows or guesses a
+ * phone number can see that number's registrations, balance match (which
+ * can include the other side's shared phone number!) and favorites. That's
+ * fine for a one-time party registrant who never made an account, but a
+ * real forum member (phone + password) must not be reachable that way —
+ * they have to go through the real login. Checked before loadMyPersonalArea
+ * ever runs for a typed-in phone.
+ */
+async function checkPhoneHasForumAccount(phoneNumber: string) {
+  const user = await getForumUserByPhone(phoneNumber).catch(() => null) as any;
+  return !!user;
+}
+
+/**
  * Unified personal area, keyed by the phone number typed in (no login) —
  * one call combining registrations (with status), balance match, favorited
  * parties and profile/subscription info, so the page needs a single load.
@@ -642,6 +656,7 @@ async function loadNewsFeed() {
   loadMyBalanceMatch,
   shareMyBalancePhone,
   loadMyPersonalArea,
+  checkPhoneHasForumAccount,
   uploadMyProfilePhoto,
   loadMyForumPersonalArea,
   removeMyForumFavorite,

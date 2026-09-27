@@ -35461,6 +35461,9 @@ async function sW(e, t = 3) {
 		return Number.isFinite(t) && t >= i - 1440 * 60 * 1e3 && t <= a;
 	});
 }
+async function lpCheckPhoneHasForumAccount_(e) {
+	return !!await getByPhone_(e).catch(() => null);
+}
 async function cW(e) {
 	let [t, n, r, i] = await Promise.all([
 		MM(e).catch(() => []),
@@ -35547,6 +35550,7 @@ window.LPData = {
 	loadMyBalanceMatch: rW,
 	shareMyBalancePhone: iW,
 	loadMyPersonalArea: cW,
+	checkPhoneHasForumAccount: lpCheckPhoneHasForumAccount_,
 	uploadMyProfilePhoto: lW,
 	loadMyForumPersonalArea: dW,
 	removeMyForumFavorite: lpRemoveMyForumFavorite_,
