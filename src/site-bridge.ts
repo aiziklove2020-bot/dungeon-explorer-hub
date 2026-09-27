@@ -761,10 +761,11 @@ function mountSupportChatWidget() {
     msgsBox.innerHTML = messages
       .map((m) => {
         const own = m.role === "user";
+        const senderLabel = own ? "את/ה" : m.role === "bot" ? `התמיכה <span class="bot-tag">תשובה אוטומטית</span>` : "התמיכה";
         const time = m.createdAt instanceof Date
           ? m.createdAt.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })
           : "";
-        return `<div class="chat-msg${own ? " own" : ""}"><span class="chat-sender">${own ? "את/ה" : "התמיכה"}</span><div class="chat-bubble"></div><span class="chat-time">${time}</span></div>`;
+        return `<div class="chat-msg${own ? " own" : ""}"><span class="chat-sender">${senderLabel}</span><div class="chat-bubble"></div><span class="chat-time">${time}</span></div>`;
       })
       .join("");
     [...msgsBox.querySelectorAll(".chat-bubble")].forEach((el, i) => {
