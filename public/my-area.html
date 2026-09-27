@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function renderBalanceMatch(match, hasActiveSubscription) {
     const box = document.getElementById("balanceMatch");
     if (!match) {
-      box.innerHTML = '<p class="meta">אין לכם איזון פעיל כרגע. אם נרשמתם לאיזון מגדרי, האיזון מתבצע ידנית ועשוי לקחת זמן.</p>';
+      box.innerHTML = '<p class="meta">אין לכם איזון פעיל כרגע. אם נרשמתם לאיזון מגדרי, האיזון מתבצע ידנית ועשוי לקחת זמן. שימו לב: איזונים ניתן לקבל עד השעה 21:00 בלבד — לאחר השעה הזו האיזונים נסגרים.</p>';
       return;
     }
     if (!hasActiveSubscription && match.matchType !== "manual") {
