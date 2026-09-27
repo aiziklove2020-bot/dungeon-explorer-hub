@@ -126,6 +126,19 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   const c=LP.current();
   document.querySelectorAll("[data-auth-label]").forEach(el=>el.textContent=c?c.name:"כניסה");
+  // Header "כניסה" button: once logged into a real forum account, swap the
+  // generic person icon for a small initial-letter avatar so it's obvious at
+  // a glance that this profile is signed in (not just relabeled text).
+  document.querySelectorAll(".member-login").forEach(btn=>{
+    const avatar = btn.querySelector("[data-auth-avatar]");
+    if (!avatar) return;
+    if (c) {
+      btn.classList.add("connected");
+      avatar.textContent = (c.name || "?").trim().charAt(0).toUpperCase();
+    } else {
+      btn.classList.remove("connected");
+    }
+  });
   document.querySelectorAll("[data-dashboard-link]").forEach(el=>{
     if (!c) return; // keep the anchor's own href (/login) — it's only a dashboard link once logged in
     el.href = c.role==="advertiser" ? "/advertiser-dashboard" : c.role==="admin" ? "/admin" : "/profile";

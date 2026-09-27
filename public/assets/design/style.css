@@ -228,3 +228,6 @@ body{padding-bottom:72px}.wrap{padding-left:16px;padding-right:16px}.nav{height:
 .chat-bubble{padding:10px 14px;border-radius:16px;border-bottom-left-radius:4px;font-size:14px;line-height:1.5;word-break:break-word;background:#241722;color:#f4f1eb}
 .chat-msg.own .chat-bubble{background:linear-gradient(135deg,#ee2775,#ff5596);color:#fff;border-bottom-left-radius:16px;border-bottom-right-radius:4px}
 .chat-time{font-size:10px;color:#8a7887;margin-top:3px;padding:0 4px}
+.member-login .member-avatar{display:none;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#bd3578,#4c245f);color:#fff;font-size:12px;font-weight:600;align-items:center;justify-content:center;flex-shrink:0}
+.member-login.connected .member-avatar{display:flex}
+.member-login.connected .nav-icon{display:none}

@@ -35484,16 +35484,33 @@ async function uW(e, t, n) {
 }
 async function dW(e) {
 	let t = await nN(e).catch(() => null);
-	return t ? {
-		phone: t,
-		...await cW(t)
-	} : {
+	if (!t) return {
 		phone: null,
 		registrations: [],
 		balanceMatch: null,
 		profile: null,
 		favorites: []
 	};
+	let n = await cW(t);
+	// Favorites can be saved under two identities: phone (the /my-area hearts,
+	// no login) or forum account id (the events.html/index.html hearts, gated
+	// to a real login) — merge both so a forum-account subscriber sees every
+	// party they've favorited, whichever page they used.
+	let r = await wU(e).catch(() => []), i = new Set(n.favorites.map((e) => e.id)), a = r.filter((e) => !i.has(e));
+	if (a.length > 0) {
+		let o = await PU().catch(() => []);
+		n.favorites = [...n.favorites, ...o.filter((e) => a.includes(e.id))];
+	}
+	return {
+		phone: t,
+		...n
+	};
+}
+async function lpRemoveMyForumFavorite_(e, t, n) {
+	await Promise.all([
+		CU(e, n).catch(() => {}),
+		t ? CU(t, n).catch(() => {}) : Promise.resolve()
+	]);
 }
 async function fW() {
 	return (await bk().catch(() => []) || []).filter((e) => e?.enabled !== !1 && e?.text).map((e) => e.text);
@@ -35532,6 +35549,7 @@ window.LPData = {
 	loadMyPersonalArea: cW,
 	uploadMyProfilePhoto: lW,
 	loadMyForumPersonalArea: dW,
+	removeMyForumFavorite: lpRemoveMyForumFavorite_,
 	changeMyForumPassword: uW,
 	registerPushSubscription: registerPushSubscription_,
 	submitDeleteRequest: submitDeleteRequest_
