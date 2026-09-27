@@ -25,6 +25,7 @@ import {
   DEFAULT_PARTY_RETENTION_HOURS,
   computePartyExpirationIso,
   isPartyExpiredByDate,
+  isRegistrationClosedForPartyDate,
 } from '../../shared/partyExpiry.js';
 import { getPartySettings } from './partySettings';
 
@@ -250,6 +251,16 @@ export const registerToPartyNew = async (partyId, registrationData) => {
       const snap = await tx.get(partyRef);
       if (!snap.exists()) throw new Error('Party not found');
       const partyData = snap.data();
+
+      // Internal parties (our own registration form, not an advertiser's
+      // external ticket link) close to new registrations at 21:00 on the
+      // party's own day — balance matching needs a runway before the party
+      // starts. Checked fresh here (not just client-side) so the cutoff
+      // can't be bypassed by calling this function directly.
+      if (partyData.partyType !== 'external' && isRegistrationClosedForPartyDate(partyData.date)) {
+        throw new Error('ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד');
+      }
+
       const registrations = partyData.registrations || [];
 
       const existingRegistration = registrations.find(
@@ -439,7 +450,15 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(partyRef);
     if (!snap.exists()) throw new Error('Party not found');
-    const registrations = [...(snap.data().registrations || [])];
+    const partyData = snap.data();
+
+    // Same 21:00 cutoff as the single-registration path above, checked here
+    // too since couples go through this separate transaction.
+    if (partyData.partyType !== 'external' && isRegistrationClosedForPartyDate(partyData.date)) {
+      throw new Error('ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד');
+    }
+
+    const registrations = [...(partyData.registrations || [])];
 
     const findByPhone = (phone) =>
       registrations.find(

@@ -230,3 +230,32 @@ export function isPartyExpiredByExpiration(expiration, fallbackDateStr, retentio
   }
   return isPartyExpiredByDdMm(fallbackDateStr, retentionHours, nowMs);
 }
+
+/**
+ * On-site registration cutoff hour (Israel local time) for internal parties.
+ * Once the clock passes this hour on the party's own labeled day, on-site
+ * registration (and therefore new balance requests) closes — balance
+ * matching needs a runway before the party starts. External parties (their
+ * own ticket link) are unaffected — this only ever gates our own form.
+ */
+export const REGISTRATION_CUTOFF_HOUR = 21;
+
+/** The UTC instant (ms) at which registration closes for a labeled Israel-local date. */
+export function registrationCutoffInstantMs(year, month, day, cutoffHour = REGISTRATION_CUTOFF_HOUR) {
+  const offsetMin = offsetStringToMinutes(getIsraelOffsetForWallTime(year, month, day, cutoffHour, 0));
+  return Date.UTC(year, month - 1, day, cutoffHour, 0, 0, 0) - offsetMin * 60 * 1000;
+}
+
+/**
+ * Whether registration for a party labeled with the given date is closed
+ * right now. Accepts a `Date`, a Firestore `Timestamp`-like object with
+ * `.toDate()`, or anything `getIsraelLocalDateComponents` can parse.
+ * Returns `false` for invalid/missing input so callers don't accidentally
+ * block registration because of a parsing failure.
+ */
+export function isRegistrationClosedForPartyDate(date, nowMs = Date.now(), cutoffHour = REGISTRATION_CUTOFF_HOUR) {
+  const d = date && typeof date.toDate === 'function' ? date.toDate() : date;
+  const comps = getIsraelLocalDateComponents(d);
+  if (!comps) return false;
+  return nowMs >= registrationCutoffInstantMs(comps.year, comps.month, comps.day, cutoffHour);
+}

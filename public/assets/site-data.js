@@ -20227,6 +20227,18 @@ function jO(e, t, n = 48, r = Date.now()) {
 	}
 	return kO(t, n, r);
 }
+function lpIsRegistrationClosedForPartyDate_(e, t = Date.now(), n = 21) {
+	try {
+		let r = e && typeof e.toDate == "function" ? e.toDate() : e instanceof Date ? e : new Date(e);
+		if (isNaN(r.getTime())) return !1;
+		let i = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jerusalem", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(r), g = (t) => parseInt(i.find((e) => e.type === t)?.value, 10), y = g("year"), m = g("month"), d = g("day");
+		if (!y || !m || !d) return !1;
+		let a = new Date(Date.UTC(y, m - 1, d, n, 0)), z = (new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Jerusalem", timeZoneName: "longOffset" }).formatToParts(a).find((e) => e.type === "timeZoneName")?.value || "").match(/GMT([+\-−])(\d{1,2})(?::?(\d{2}))?/), off = z ? (z[1] === "−" ? -1 : 1) * (parseInt(z[2], 10) * 60 + parseInt(z[3] || "0", 10)) : 120;
+		return t >= Date.UTC(y, m - 1, d, n, 0, 0, 0) - off * 60 * 1e3;
+	} catch {
+		return !1;
+	}
+}
 var MO, NO, PO, FO = o((() => {
 	MO = "Asia/Jerusalem", NO = 1, PO = 720;
 })), IO = /* @__PURE__ */ c({
@@ -24114,6 +24126,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				let snap = await tx.get(o);
 				if (!snap.exists()) throw Error("Party not found");
 				let a = snap.data();
+				if (a.partyType !== "external" && lpIsRegistrationClosedForPartyDate_(a.date)) throw Error("ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד");
 				if (a.registrations?.find((e) => XE(e.phoneNumber) === s || r && e.userId === r)) throw Error("Already registered to this party");
 				if (t.gender !== "couple") {
 					let e = a.registrations?.filter((e) => e.gender === t.gender) || [], n = t.gender === "male" ? a.maleLimit : a.femaleLimit;
@@ -24186,7 +24199,9 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 		await hd(H, async (tx) => {
 			let snap = await tx.get(s);
 			if (!snap.exists()) throw Error("Party not found");
-			let c = [...snap.data().registrations || []], l = (e) => c.find((t) => r(t.phoneNumber) === e || t.userId && String(t.userId) === e), u = l(i), d = l(a);
+			let partyData = snap.data();
+			if (partyData.partyType !== "external" && lpIsRegistrationClosedForPartyDate_(partyData.date)) throw Error("ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד");
+			let c = [...partyData.registrations || []], l = (e) => c.find((t) => r(t.phoneNumber) === e || t.userId && String(t.userId) === e), u = l(i), d = l(a);
 			if (u && d) {
 				let e = /* @__PURE__ */ Error("Both partners are already registered to this party");
 				throw e.code = uM, e;
