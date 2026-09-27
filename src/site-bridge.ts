@@ -508,6 +508,19 @@ async function toggleFavorite(userId: string, partyId: string, isFavorite: boole
       throw new Error("סימון מועדפים זמין רק למנויים שנתיים");
     }
     await addFavorite(userId, partyId);
+    // Favoriting one party from a producer implicitly "follows" them —
+    // every other currently-active party from that same producer is
+    // favorited too, silently. No advertiser identity is ever shown for
+    // this; it's purely a side effect of favoriting.
+    const party: any = await getPartyById(partyId).catch(() => null);
+    if (party?.createdBy) {
+      const activeParties = await getActiveParties().catch(() => []);
+      const existingFavoriteIds = new Set(await getFavoritePartyIds(userId).catch(() => []));
+      const siblingParties = activeParties.filter(
+        (p: any) => p.id !== partyId && p.createdBy === party.createdBy && !existingFavoriteIds.has(p.id)
+      );
+      await Promise.all(siblingParties.map((p: any) => addFavorite(userId, p.id).catch(() => {})));
+    }
   } else {
     await removeFavorite(userId, partyId);
   }
