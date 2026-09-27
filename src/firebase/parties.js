@@ -1738,6 +1738,13 @@ export const runBalanceMatchingForParty = async (partyId) => {
   );
   if (unmatchedRegistrations.length === 0) return null;
 
+  // getAllUsers() is cached for 10 minutes — long enough that testing two
+  // registrations back-to-back in the same session can have this read a
+  // stale list from moments earlier, missing the person who *just* got
+  // registered (their own users/ doc, or someone else's, created seconds
+  // ago). This check needs to be as fresh as possible every time, so force
+  // a real read instead of trusting whatever's cached.
+  await invalidateCache('allUsers');
   const { getAllUsers } = await import('./users');
   const allUsers = await getAllUsers();
   const usersByPhone = new Map();

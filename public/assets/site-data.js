@@ -35685,6 +35685,11 @@ async function lpRunBalanceMatchingForParty_(partyId) {
 	});
 	const unmatchedRegistrations = party.registrations.filter((reg) => !matchedPhones.has(reg.phoneNumber));
 	if (unmatchedRegistrations.length === 0) return null;
+	// getAllUsers (Ij) is cached for 10 minutes — long enough that two
+	// registrations tested back-to-back in the same page load can read a
+	// stale list missing whoever was just registered a moment ago. Force a
+	// real read every time instead of trusting the cache here.
+	await q("allUsers");
 	const allUsers = await Ij();
 	const usersByPhone = /* @__PURE__ */ new Map();
 	allUsers.forEach((user) => { if (user.phoneNumber) usersByPhone.set(user.phoneNumber, user); });
