@@ -315,6 +315,25 @@ const SubscriptionsSection = ({ showSaved }) => {
     }
   };
 
+  // Bulk cleanup for the "ללא גישה (חשבון ישן)" filter: these accounts have
+  // no linked forum login (phone+password) at all, so there's no way for
+  // them to sign in anywhere — pure leftover clutter from before the current
+  // login system existed. One confirmation naming the exact count, then
+  // deletes each one the same way the per-row delete button already does.
+  const handleDeleteAllNoAccess = async (usersToDelete) => {
+    if (usersToDelete.length === 0) return;
+    if (!window.confirm(`למחוק לצמיתות ${usersToDelete.length} חשבונות ללא גישה? לא ניתן לשחזר.`)) return;
+    for (const u of usersToDelete) {
+      try {
+        await deleteUser(u.id);
+      } catch (error) {
+        window.alert(`מחיקת "${u.name}" נכשלה: ${error.message || error} — ממשיך עם השאר.`);
+      }
+    }
+    reload();
+    showSaved();
+  };
+
   const handleImportUsers = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -378,6 +397,10 @@ const SubscriptionsSection = ({ showSaved }) => {
       if (typeFilter === 'female' && user.gender !== 'female') return false;
       if (typeFilter === 'blocked' && user.level !== 'blocked') return false;
       if (typeFilter === 'admin' && user.level !== 'admin') return false;
+      // No linked forum login (phone+password) at all — a leftover account
+      // from before the current login system existed. It can't sign in
+      // anywhere, so it's pure clutter unless it's kept on purpose.
+      if (typeFilter === 'noAccess' && loginAccountsByUserId[user.id]) return false;
 
       // Status filter
       if (filterStatus !== 'all') {
@@ -409,7 +432,7 @@ const SubscriptionsSection = ({ showSaved }) => {
 
       return true;
     });
-  }, [users, activeTab, filterStatus, typeFilter, searchQuery]);
+  }, [users, activeTab, filterStatus, typeFilter, searchQuery, loginAccountsByUserId]);
 
   // Group + sort so it's obvious at a glance who holds which tier — the
   // admin's actual complaint was "I can't tell who has a year vs a month, and
@@ -705,6 +728,7 @@ const SubscriptionsSection = ({ showSaved }) => {
           { id: 'female', label: 'נשים', color: 'bg-pink-600' },
           { id: 'blocked', label: 'חסומים', color: 'bg-[#93000a]' },
           { id: 'admin', label: 'מנהלים', color: 'bg-[#ff438b]' },
+          { id: 'noAccess', label: 'ללא גישה (חשבון ישן)', color: 'bg-[#6b6b6b]' },
         ].map(f => (
           <button
             key={f.id || 'none'}
@@ -714,6 +738,14 @@ const SubscriptionsSection = ({ showSaved }) => {
             {f.label}
           </button>
         ))}
+        {typeFilter === 'noAccess' && processedUsers.length > 0 && (
+          <button
+            onClick={() => handleDeleteAllNoAccess(processedUsers)}
+            className="flex items-center gap-1 bg-[#93000a] hover:bg-[#be0037] text-white px-3 py-1.5 rounded-xl font-bold text-xs md:text-sm"
+          >
+            <Trash2 size={14} /> מחק את כל {processedUsers.length} החשבונות ללא הגישה
+          </button>
+        )}
       </div>
 
       {/* List */}
