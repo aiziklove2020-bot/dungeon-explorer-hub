@@ -1922,6 +1922,11 @@ export const getMyRegistrations = async (phoneNumber) => {
       registrationType: myReg.registrationType,
       status,
       userName: myReg.fullName || myReg.userName || '',
+      // Only a couple-half registration (single-male-couple/single-female-couple)
+      // carries the other side's name — surfaced so a couple's own personal
+      // area can show "registered together with X" instead of a bare
+      // "registered" that gives no indication they're part of a pair.
+      partnerName: myReg.partnerName || null,
     });
   }
 

@@ -24663,7 +24663,8 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				image: e.imageURL || "",
 				registrationType: a.registrationType,
 				status: s,
-				userName: a.fullName || a.userName || ""
+				userName: a.fullName || a.userName || "",
+				partnerName: a.partnerName || null
 			});
 		}
 		return i;
