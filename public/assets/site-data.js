@@ -24157,7 +24157,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				};
 				tx.update(o, { registrations: vd(f) });
 			});
-			return await q(`party_${e}`), await q("activeParties"), f.gender === "female" && !f.userId && Rj(f, "registered", "year").catch(() => {}), c && f.gender === "male" && !f.userId && Rj(f, "registered", "day").catch(() => {}), f;
+			return await q(`party_${e}`), await q("activeParties"), f.gender === "female" && !f.userId && Rj(f, "registered", "year").catch(() => {}), c && f.gender === "male" && !f.userId && Rj(f, "registered", "day").catch(() => {}), ["single-male-balance", "single-female-balance", "single-female-discount"].includes(t.registrationType) && lpRunBalanceMatchingForParty_(e).catch(() => {}), f;
 		} catch (e) {
 			throw e;
 		}
@@ -35514,6 +35514,158 @@ async function lpRemoveMyForumFavorite_(e, t, n) {
 		CU(e, n).catch(() => {}),
 		t ? CU(t, n).catch(() => {}) : Promise.resolve()
 	]);
+}
+// Same single-balance matching algorithm as the admin's manual "צור איזון"
+// button (src/utils/balanceMatching.js's createBalanceForParty, never
+// previously ported here since matching used to be an admin-only action).
+// Ported as-is so the auto-match trigger below reuses the exact same,
+// already-tested pairing rules: only a registrant who already has a real
+// `users` record (i.e. an actual account — men only get one by actually
+// subscribing; women get one auto-provisioned free, see registerToPartyNew)
+// is eligible to be paired at all. A one-off phone-only male registrant is
+// simply skipped, not paired, and stays unmatched until an admin manually
+// creates one via the admin panel.
+async function lpCreateBalanceForParty_(regs, usersByPhoneArg) {
+	if (!regs || regs.length === 0) return [];
+	const couples = regs.filter((reg) => reg.registrationType === "couple" || reg.gender === "couple" || reg.coupleId);
+	const couplesByCoupleId = {};
+	couples.forEach((couple) => {
+		if (couple.coupleId) {
+			if (!couplesByCoupleId[couple.coupleId]) couplesByCoupleId[couple.coupleId] = [];
+			couplesByCoupleId[couple.coupleId].push(couple);
+		}
+	});
+	let usersMap = usersByPhoneArg;
+	if (!usersMap || !(usersMap instanceof Map)) {
+		const allUsers = await Ij();
+		usersMap = /* @__PURE__ */ new Map();
+		allUsers.forEach((user) => { if (user.phoneNumber) usersMap.set(user.phoneNumber, user); });
+	}
+	const userExistsInUsersTable = (phoneNumber) => {
+		if (!phoneNumber) return false;
+		const user = usersMap.get(phoneNumber);
+		return user !== null && user !== void 0;
+	};
+	const isClient = (reg) => {
+		if (!reg) return true;
+		if (!(reg.registrationType !== "couple" && reg.gender !== "couple")) return false;
+		return !userExistsInUsersTable(reg.phoneNumber);
+	};
+	const isRegisteredUser = (reg) => {
+		if (!reg) return false;
+		if (!(reg.registrationType !== "couple" && reg.gender !== "couple")) return false;
+		return userExistsInUsersTable(reg.phoneNumber);
+	};
+	const singleMen = regs.filter((reg) => {
+		if (!reg) return false;
+		if (!(reg.registrationType === "single-male-balance" || reg.gender === "male")) return false;
+		if (!(reg.registrationType !== "couple" && reg.gender !== "couple")) return false;
+		if (!isRegisteredUser(reg)) return false;
+		if (isClient(reg)) return false;
+		return true;
+	});
+	const singleWomen = regs.filter((reg) => {
+		if (!reg) return false;
+		if (!(reg.registrationType === "single-female-balance" || reg.registrationType === "single-female-discount" || reg.gender === "female")) return false;
+		if (!(reg.registrationType !== "couple" && reg.gender !== "couple")) return false;
+		if (!isRegisteredUser(reg)) return false;
+		if (isClient(reg)) return false;
+		return true;
+	});
+	const matches = [];
+	Object.values(couplesByCoupleId).forEach((coupleGroup) => {
+		const maleCouple = coupleGroup.find((c) => c.gender === "male"), femaleCouple = coupleGroup.find((c) => c.gender === "female");
+		if (maleCouple && femaleCouple) matches.push({
+			partyId: maleCouple.partyId || null, partyName: maleCouple.partyName || null,
+			maleName: maleCouple.fullName || maleCouple.userName || "", malePhone: maleCouple.phoneNumber || "", maleTelegram: maleCouple.telegramUsername || "",
+			femaleName: femaleCouple.fullName || femaleCouple.userName || "", femalePhone: femaleCouple.phoneNumber || "", femaleTelegram: femaleCouple.telegramUsername || "",
+			isCouple: true, isMatched: true, matchType: "couple", coupleId: maleCouple.coupleId, registrationId: maleCouple.id || null
+		});
+	});
+	couples.forEach((couple) => {
+		if (couple.coupleId && couplesByCoupleId[couple.coupleId]) return;
+		const fullName = couple.fullName || couple.userName || "", partnerName = couple.partnerName || "";
+		let maleName = fullName, femaleName = partnerName;
+		if (fullName.includes("&") || fullName.includes("ו")) {
+			const names = fullName.split(/[&ו]/).map((n) => n.trim()).filter((n) => n);
+			if (names.length >= 2) { maleName = names[0]; femaleName = names[1]; }
+			else if (names.length === 1) { maleName = names[0]; femaleName = partnerName || "זוג"; }
+		}
+		matches.push({
+			partyId: couple.partyId || null, partyName: couple.partyName || null,
+			maleName: maleName || "זוג", malePhone: couple.phoneNumber || "", maleTelegram: couple.telegramUsername || "",
+			femaleName: femaleName || "זוג", femalePhone: couple.partnerPhone || "", femaleTelegram: "",
+			femalePickupAddress: couple.pickupAddress || "",
+			isCouple: true, isMatched: true, matchType: "couple", registrationId: couple.id || null
+		});
+	});
+	const minMatches = Math.min(singleMen.length, singleWomen.length);
+	for (let i = 0; i < minMatches; i++) {
+		const man = singleMen[i], woman = singleWomen[i];
+		const manIsMale = man.gender === "male" || man.registrationType === "single-male-balance";
+		const womanIsFemale = woman.gender === "female" || woman.registrationType === "single-female-balance" || woman.registrationType === "single-female-discount";
+		if (!manIsMale || !womanIsFemale) continue;
+		if (isClient(man) || isClient(woman)) continue;
+		if (!userExistsInUsersTable(man.phoneNumber) || !userExistsInUsersTable(woman.phoneNumber)) continue;
+		matches.push({
+			partyId: man.partyId || woman.partyId || null, partyName: man.partyName || woman.partyName || null,
+			maleName: man.fullName || man.userName || "", malePhone: man.phoneNumber || "", maleTelegram: man.telegramUsername || "",
+			femaleName: woman.fullName || woman.userName || "", femalePhone: woman.phoneNumber || "", femaleTelegram: woman.telegramUsername || "",
+			femalePickupAddress: woman.pickupAddress || "",
+			isCouple: false, isMatched: true, matchType: "balance", maleRegistrationId: man.id || null, femaleRegistrationId: woman.id || null
+		});
+	}
+	for (let i = minMatches; i < singleMen.length; i++) {
+		const man = singleMen[i];
+		if (isClient(man)) continue;
+		if (!userExistsInUsersTable(man.phoneNumber)) continue;
+		matches.push({
+			partyId: man.partyId || null, partyName: man.partyName || null,
+			maleName: man.fullName || man.userName || "", malePhone: man.phoneNumber || "", maleTelegram: man.telegramUsername || "",
+			femaleName: "", femalePhone: "", femaleTelegram: "",
+			isCouple: false, isMatched: false, matchType: "unmatched", maleRegistrationId: man.id || null
+		});
+	}
+	for (let i = minMatches; i < singleWomen.length; i++) {
+		const woman = singleWomen[i];
+		if (isClient(woman)) continue;
+		if (!userExistsInUsersTable(woman.phoneNumber)) continue;
+		matches.push({
+			partyId: woman.partyId || null, partyName: woman.partyName || null,
+			maleName: "", malePhone: "", maleTelegram: "",
+			femaleName: woman.fullName || woman.userName || "", femalePhone: woman.phoneNumber || "", femaleTelegram: woman.telegramUsername || "",
+			femalePickupAddress: woman.pickupAddress || "",
+			isCouple: false, isMatched: false, matchType: "unmatched", femaleRegistrationId: woman.id || null
+		});
+	}
+	return matches;
+}
+// Runs the above right after a solo balance-eligible registration — see the
+// call site in registerToPartyNew (lM). Only ever ADDS new matches for
+// people not already matched; never touches or reshuffles an existing one.
+async function lpRunBalanceMatchingForParty_(partyId) {
+	const party = await SM(partyId).catch(() => null);
+	if (!party || !party.registrations || party.registrations.length === 0) return null;
+	const existingBalance = await kM(partyId).catch(() => []);
+	const matchedPhones = /* @__PURE__ */ new Set();
+	existingBalance.forEach((match) => {
+		if (match.isMatched) {
+			if (match.malePhone) matchedPhones.add(match.malePhone);
+			if (match.femalePhone) matchedPhones.add(match.femalePhone);
+		}
+	});
+	const unmatchedRegistrations = party.registrations.filter((reg) => !matchedPhones.has(reg.phoneNumber));
+	if (unmatchedRegistrations.length === 0) return null;
+	const allUsers = await Ij();
+	const usersByPhone = /* @__PURE__ */ new Map();
+	allUsers.forEach((user) => { if (user.phoneNumber) usersByPhone.set(user.phoneNumber, user); });
+	const newBalanceMatches = await lpCreateBalanceForParty_(
+		unmatchedRegistrations.map((reg) => ({ ...reg, partyId: party.id, partyName: party.name || party.title })),
+		usersByPhone
+	);
+	const newMatchedPairs = newBalanceMatches.filter((m) => m.isMatched), newUnmatchedPairs = newBalanceMatches.filter((m) => !m.isMatched);
+	if (newMatchedPairs.length === 0 && newUnmatchedPairs.length === 0) return null;
+	return OM(partyId, (current) => [...current.filter((m) => m.isMatched), ...newMatchedPairs, ...newUnmatchedPairs]);
 }
 async function fW() {
 	return (await bk().catch(() => []) || []).filter((e) => e?.enabled !== !1 && e?.text).map((e) => e.text);

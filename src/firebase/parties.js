@@ -28,6 +28,7 @@ import {
   isRegistrationClosedForPartyDate,
 } from '../../shared/partyExpiry.js';
 import { getPartySettings } from './partySettings';
+import { createBalanceForParty } from '../utils/balanceMatching';
 
 /**
  * Resolve the current admin-configured retention window. Used internally
@@ -352,6 +353,18 @@ export const registerToPartyNew = async (partyId, registrationData) => {
     // Best-effort: a failure here shouldn't fail the registration itself.
     if (finalGender === 'female' && !userId) {
       createUserFromRegistration(registration, 'registered', 'year').catch(() => {});
+    }
+
+    // Auto-match: the same algorithm behind the admin's manual "צור איזון"
+    // button, run right after every solo balance-eligible registration —
+    // a subscriber (a man with a real `users` account) gets matched with an
+    // already-waiting woman immediately, instead of waiting for an admin to
+    // click the button. A one-off male registrant (no account) is simply
+    // skipped by the algorithm and stays unmatched until an admin creates
+    // one manually. Best-effort: a failure here must never fail the
+    // registration itself.
+    if (['single-male-balance', 'single-female-balance', 'single-female-discount'].includes(registrationData.registrationType)) {
+      runBalanceMatchingForParty(partyId).catch(() => {});
     }
 
     // Registration notifications are sent only from RegistrationForm to the
@@ -1683,6 +1696,61 @@ export const saveBalanceMatches = async (partyId, balanceMatchesOrMutator) => {
 
 // Re-export from dataAccess for backward compatibility
 export const getBalanceMatches = getBalanceMatchesFromDataAccess;
+
+/**
+ * Runs the same single-balance matching algorithm as the admin's manual
+ * "צור איזון" button (createBalanceForParty), for one party, right after a
+ * relevant registration — so a subscriber (a man who already has a real
+ * `users` record, i.e. an actual paying account, not a one-off phone-only
+ * registrant) gets matched with a waiting woman immediately, instead of
+ * waiting for an admin to click the button. Only ever ADDS new matches for
+ * people not already matched — never touches or reshuffles an existing one
+ * (same safety property as the manual flow it reuses).
+ */
+export const runBalanceMatchingForParty = async (partyId) => {
+  const party = await getPartyById(partyId).catch(() => null);
+  if (!party || !party.registrations || party.registrations.length === 0) return null;
+
+  const existingBalance = await getBalanceMatches(partyId).catch(() => []);
+  const matchedPhones = new Set();
+  existingBalance.forEach((match) => {
+    if (match.isMatched) {
+      if (match.malePhone) matchedPhones.add(match.malePhone);
+      if (match.femalePhone) matchedPhones.add(match.femalePhone);
+    }
+  });
+
+  const unmatchedRegistrations = party.registrations.filter(
+    (reg) => !matchedPhones.has(reg.phoneNumber)
+  );
+  if (unmatchedRegistrations.length === 0) return null;
+
+  const { getAllUsers } = await import('./users');
+  const allUsers = await getAllUsers();
+  const usersByPhone = new Map();
+  allUsers.forEach((user) => {
+    if (user.phoneNumber) usersByPhone.set(user.phoneNumber, user);
+  });
+
+  const newBalanceMatches = await createBalanceForParty(
+    unmatchedRegistrations.map((reg) => ({
+      ...reg,
+      partyId: party.id,
+      partyName: party.name || party.title,
+    })),
+    usersByPhone
+  );
+
+  const newMatchedPairs = newBalanceMatches.filter((m) => m.isMatched);
+  const newUnmatchedPairs = newBalanceMatches.filter((m) => !m.isMatched);
+  if (newMatchedPairs.length === 0 && newUnmatchedPairs.length === 0) return null;
+
+  return saveBalanceMatches(partyId, (current) => [
+    ...current.filter((m) => m.isMatched),
+    ...newMatchedPairs,
+    ...newUnmatchedPairs,
+  ]);
+};
 
 /**
  * Public lookup: "who is my balance match" for a solo registrant, by the
