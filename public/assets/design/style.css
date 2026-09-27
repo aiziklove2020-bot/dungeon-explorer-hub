@@ -214,3 +214,17 @@ body{padding-bottom:72px}.wrap{padding-left:16px;padding-right:16px}.nav{height:
    .filters-form has one more class than the plain .filters rules that set
    this, so it wins regardless of source order and just wraps normally. */
 .filters.filters-form{flex-wrap:wrap!important;overflow-x:visible!important}
+
+/* Support-chat message bubbles (.chat-window/.chat-msg/.chat-bubble) — the
+   widget's own code (site-data.js) already used these classes, but nothing
+   in this file ever defined them, so every message rendered as plain
+   unstyled stacked text with no bubble, no color, no left/right distinction
+   between "own" and support/bot messages. */
+.chat-window{display:flex;flex-direction:column;gap:10px}
+.chat-msg{display:flex;flex-direction:column;max-width:80%;align-self:flex-start;align-items:flex-start}
+.chat-msg.own{align-self:flex-end;align-items:flex-end}
+.chat-sender{font-size:11px;color:#9c8a97;margin-bottom:3px;padding:0 4px;display:flex;align-items:center;gap:5px}
+.chat-sender .bot-tag{font-size:9px;font-weight:700;letter-spacing:.3px;color:#f6c887;background:#f6c88722;border:1px solid #f6c88755;border-radius:999px;padding:1px 6px}
+.chat-bubble{padding:10px 14px;border-radius:16px;border-bottom-left-radius:4px;font-size:14px;line-height:1.5;word-break:break-word;background:#241722;color:#f4f1eb}
+.chat-msg.own .chat-bubble{background:linear-gradient(135deg,#ee2775,#ff5596);color:#fff;border-bottom-left-radius:16px;border-bottom-right-radius:4px}
+.chat-time{font-size:10px;color:#8a7887;margin-top:3px;padding:0 4px}
