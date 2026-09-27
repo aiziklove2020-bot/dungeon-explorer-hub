@@ -579,7 +579,31 @@ async function loadMyForumPersonalArea(forumUserId: string) {
   const phone = await getMyLinkedPhoneNumber(forumUserId).catch(() => null);
   if (!phone) return { phone: null, registrations: [], balanceMatch: null, profile: null, favorites: [] };
   const data = await loadMyPersonalArea(phone);
+  // Favorites can be saved under two different identities: phone number
+  // (the heart buttons on /my-area, which has no login) or forum account id
+  // (the heart buttons on events.html/index.html, gated to a real login via
+  // lpFavIdentity()). Merge both so a forum-account subscriber sees every
+  // party they've favorited, regardless of which page they used.
+  const forumFavoriteIds = await getFavoritePartyIds(forumUserId).catch(() => []);
+  const existingIds = new Set(data.favorites.map((e: any) => e.id));
+  const missingIds = forumFavoriteIds.filter((id: string) => !existingIds.has(id));
+  if (missingIds.length > 0) {
+    const events = await loadEvents().catch(() => []);
+    data.favorites = [...data.favorites, ...events.filter((e: any) => missingIds.includes(e.id))];
+  }
   return { phone, ...data };
+}
+
+/**
+ * Removing a favorite from /profile: it may have been saved under either
+ * identity above, so clear both — deleting a document that doesn't exist is
+ * a no-op, so this is safe regardless of which one it was actually under.
+ */
+async function removeMyForumFavorite(forumUserId: string, phone: string | null, partyId: string) {
+  await Promise.all([
+    removeFavorite(forumUserId, partyId).catch(() => {}),
+    phone ? removeFavorite(phone, partyId).catch(() => {}) : Promise.resolve(),
+  ]);
 }
 
 async function loadNewsFeed() {
@@ -620,6 +644,7 @@ async function loadNewsFeed() {
   loadMyPersonalArea,
   uploadMyProfilePhoto,
   loadMyForumPersonalArea,
+  removeMyForumFavorite,
   changeMyForumPassword,
   registerPushSubscription,
 };
