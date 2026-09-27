@@ -35536,6 +35536,37 @@ window.LPData = {
 	registerPushSubscription: registerPushSubscription_,
 	submitDeleteRequest: submitDeleteRequest_
 };
+const LP_SUPPORT_FAQ_KB = [
+	{ keywords: ["נרשם", "נרשמים", "נרשמת", "להצטרף", "מנוי חדש", "הצטרפות"], answer: "ממלאים טופס הרשמה למנויים דרך העמוד 'הרשמה למנויים'. הצוות בודק את הבקשה, מאשר את המנוי ויוצר עבורכם חשבון כניסה באופן אישי." },
+	{ keywords: ["צריך חשבון", "חייב חשבון", "בלי חשבון", "לפני שנרשמים"], answer: "לא צריך חשבון כדי להירשם למסיבה — ההרשמה למסיבה נפרדת לגמרי מחשבון הכניסה לאזור האישי." },
+	{ keywords: ["סינגלים", "סינגל", "סינגלית"], answer: "כדי לשמור על איזון מגדרי, לכל אירוע יש מכסות נפרדות, והצוות יכול לסגור הרשמה לסינגלים כשהמכסה מתמלאת." },
+	{ keywords: ["תשלום", "לשלם", "אשראי", "סליקה", "עולה", "מחיר"], answer: "התשלום מתואם ישירות מול הצוות. באתר עצמו אין סליקה או חיוב בכרטיס אשראי." },
+	{ keywords: ["סיסמה"], answer: "פונים לצוות דרך עמוד 'יצירת קשר' — איפוס הסיסמה מתבצע ידנית על ידי מנהל." },
+	{ keywords: ["גישה לנשים", "נשים בחינם", "מנוי לנשים", "לנשים"], answer: "הגישה לנשים היא ללא תשלום, בהתאם למדיניות המנויים. הרשמה וכניסה לאירוע כפופות לתנאי האירוע." },
+	{ keywords: ["מה זה איזון", "מה זה האיזון", "איזון מגדרי"], answer: "'איזון' הוא שיבוץ שנעשה ידנית על ידי הצוות כדי לשמור על יחס מאוזן בין גברים לנשים בכל מסיבה. אחרי ההרשמה נכנסים לאזור האישי כדי לראות את פרטי האיזון שלכם." },
+	{ keywords: ["נסגר", "עד איזו שעה", "עד מתי", "שעת סגירה", "21:00", "תשע בערב"], answer: "איזונים והרשמה למסיבות פנימיות ניתן לקבל עד השעה 21:00 בלבד באותו יום — לאחר השעה הזו ההרשמה נסגרת אוטומטית." },
+	{ keywords: ["אזור אישי", "איפה רואים", "ההרשמות שלי"], answer: "כל הפרטים שלכם — הרשמות, איזון ומועדפים — נמצאים ב'אזור האישי' באתר." }
+];
+
+/** Free, zero-dependency FAQ auto-responder — see LP_SUPPORT_FAQ_KB above. No paid API. */
+function lpMatchFaqAnswer_(text) {
+	let t = (text || "").trim();
+	if (!t) return null;
+	let best = null;
+	for (let entry of LP_SUPPORT_FAQ_KB) {
+		let score = 0;
+		for (let kw of entry.keywords) if (t.includes(kw)) score++;
+		if (score > 0 && (!best || score > best.score)) best = { answer: entry.answer, score };
+	}
+	return best ? best.answer : null;
+}
+
+/** Writes an automated FAQ-bot reply into the thread; role !== "user" renders as "התמיכה". */
+function lpSendSupportBotMessage_(sessionId, text) {
+	if (!text || !text.trim()) return Promise.resolve(null);
+	return td(T(H, oN, sessionId, "messages"), { role: "bot", text: text.trim(), createdAt: _d() }).catch(() => null);
+}
+
 function pW() {
 	if (document.getElementById("lpSupportChat")) return;
 	let e = document.createElement("div");
@@ -35577,6 +35608,8 @@ function pW() {
 			u.value = "";
 			try {
 				await f.send(e), f.notifyTelegram(e, g());
+				let faqAnswer = lpMatchFaqAnswer_(e);
+				if (faqAnswer) lpSendSupportBotMessage_(f.sessionId, faqAnswer).catch(() => {});
 			} catch {}
 		}
 	};

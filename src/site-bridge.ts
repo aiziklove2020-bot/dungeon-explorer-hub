@@ -17,6 +17,7 @@ import { registerForumUser, loginForumUser, getForumUserByPhone, updateForumUser
 import {
   getSessionId,
   sendSupportMessage,
+  sendSupportBotMessage,
   sendSupportToTelegram,
   subscribeToSupportMessages,
   fetchSupportMessages,
@@ -624,6 +625,65 @@ async function loadNewsFeed() {
 };
 
 /**
+ * Free, zero-dependency FAQ auto-responder for the support chat — no paid
+ * API, no external service, just keyword matching against real answers
+ * already published on the site (faq.html, the homepage's balance-cutoff
+ * rule). Every match still relays to Telegram too (a human always sees the
+ * full conversation and can jump in), this only adds an instant reply while
+ * they're offline. Returns null (no auto-reply, human-only) when nothing
+ * matches well enough — never guesses.
+ */
+const SUPPORT_FAQ_KB: { keywords: string[]; answer: string }[] = [
+  {
+    keywords: ["נרשם", "נרשמים", "נרשמת", "להצטרף", "מנוי חדש", "הצטרפות"],
+    answer: "ממלאים טופס הרשמה למנויים דרך העמוד 'הרשמה למנויים'. הצוות בודק את הבקשה, מאשר את המנוי ויוצר עבורכם חשבון כניסה באופן אישי.",
+  },
+  {
+    keywords: ["צריך חשבון", "חייב חשבון", "בלי חשבון", "לפני שנרשמים"],
+    answer: "לא צריך חשבון כדי להירשם למסיבה — ההרשמה למסיבה נפרדת לגמרי מחשבון הכניסה לאזור האישי.",
+  },
+  {
+    keywords: ["סינגלים", "סינגל", "סינגלית"],
+    answer: "כדי לשמור על איזון מגדרי, לכל אירוע יש מכסות נפרדות, והצוות יכול לסגור הרשמה לסינגלים כשהמכסה מתמלאת.",
+  },
+  {
+    keywords: ["תשלום", "לשלם", "אשראי", "סליקה", "עולה", "מחיר"],
+    answer: "התשלום מתואם ישירות מול הצוות. באתר עצמו אין סליקה או חיוב בכרטיס אשראי.",
+  },
+  {
+    keywords: ["סיסמה"],
+    answer: "פונים לצוות דרך עמוד 'יצירת קשר' — איפוס הסיסמה מתבצע ידנית על ידי מנהל.",
+  },
+  {
+    keywords: ["גישה לנשים", "נשים בחינם", "מנוי לנשים", "לנשים"],
+    answer: "הגישה לנשים היא ללא תשלום, בהתאם למדיניות המנויים. הרשמה וכניסה לאירוע כפופות לתנאי האירוע.",
+  },
+  {
+    keywords: ["מה זה איזון", "מה זה האיזון", "איזון מגדרי"],
+    answer: "'איזון' הוא שיבוץ שנעשה ידנית על ידי הצוות כדי לשמור על יחס מאוזן בין גברים לנשים בכל מסיבה. אחרי ההרשמה נכנסים לאזור האישי כדי לראות את פרטי האיזון שלכם.",
+  },
+  {
+    keywords: ["נסגר", "עד איזו שעה", "עד מתי", "שעת סגירה", "21:00", "תשע בערב"],
+    answer: "איזונים והרשמה למסיבות פנימיות ניתן לקבל עד השעה 21:00 בלבד באותו יום — לאחר השעה הזו ההרשמה נסגרת אוטומטית.",
+  },
+  {
+    keywords: ["אזור אישי", "איפה רואים", "ההרשמות שלי"],
+    answer: "כל הפרטים שלכם — הרשמות, איזון ומועדפים — נמצאים ב'אזור האישי' באתר.",
+  },
+];
+
+function matchFaqAnswer(userText: string): string | null {
+  const text = (userText || "").trim();
+  if (!text) return null;
+  let best: { answer: string; score: number } | null = null;
+  for (const entry of SUPPORT_FAQ_KB) {
+    const score = entry.keywords.reduce((n, kw) => (text.includes(kw) ? n + 1 : n), 0);
+    if (score > 0 && (!best || score > best.score)) best = { answer: entry.answer, score };
+  }
+  return best?.answer || null;
+}
+
+/**
  * Site-wide floating support chat — same real Firestore-backed widget the old
  * site had (messages relay to the team's Telegram), restyled to the new
  * site's chat-bubble language (see .chat-window/.chat-msg in styles.css).
@@ -752,6 +812,8 @@ function mountSupportChatWidget() {
     try {
       await chat.send(text);
       chat.notifyTelegram(text, currentDisplayName());
+      const faqAnswer = matchFaqAnswer(text);
+      if (faqAnswer) sendSupportBotMessage(faqAnswer, chat.sessionId!).catch(() => {});
     } catch (err) {
       // Message is already written to Firestore even if the Telegram relay fails.
     }
