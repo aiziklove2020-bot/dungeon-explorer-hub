@@ -35445,6 +35445,15 @@ async function aW(e, t, n) {
 		let r = await tN(e).catch(() => null), i = r?.phone, a = i ? await Oj(i).catch(() => null) : null;
 		if (!a?.isPrivilegedSubscriber) throw Error("סימון מועדפים זמין רק למנויים שנתיים");
 		await SU(e, t);
+		// Favoriting one party from a producer implicitly "follows" them —
+		// every other currently-active party from that same producer is
+		// favorited too, silently. No advertiser identity is ever shown for
+		// this; it's purely a side effect of favoriting.
+		let party = await SM(t).catch(() => null);
+		if (party?.createdBy) {
+			let activeParties = await oM().catch(() => []), existingFavoriteIds = new Set(await wU(e).catch(() => [])), siblingParties = activeParties.filter((p) => p.id !== t && p.createdBy === party.createdBy && !existingFavoriteIds.has(p.id));
+			await Promise.all(siblingParties.map((p) => SU(e, p.id).catch(() => {})));
+		}
 	} else await CU(e, t);
 }
 async function oW(e) {
