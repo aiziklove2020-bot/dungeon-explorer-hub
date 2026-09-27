@@ -239,12 +239,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function renderFavorites(phone, currentFavoriteIds, hasActiveSubscription) {
-    const box = document.getElementById("favorites");
-    document.getElementById("fav-count").textContent = String((currentFavoriteIds||[]).length);
+    const section = document.getElementById("my-favorites");
+    const navLink = document.querySelector('.personal-nav a[href="#my-favorites"]');
+    // Favorites are a paid-subscriber feature — someone who only ever
+    // registered for a single party by phone shouldn't see this section at
+    // all, not even as a locked upsell.
     if (!hasActiveSubscription) {
-      box.innerHTML = '<div class="fav-empty"><span>🔒</span><h3>סימון מועדפים למנויים שנתיים</h3><p>רכשו מנוי שנתי כדי לשמור מסיבות למעקב.</p><a class="btn gold" href="/membership">לרכישת מנוי ←</a></div>';
+      section.style.display = "none";
+      if (navLink) navLink.style.display = "none";
       return;
     }
+    section.style.display = "";
+    if (navLink) navLink.style.display = "";
+    const box = document.getElementById("favorites");
+    document.getElementById("fav-count").textContent = String((currentFavoriteIds||[]).length);
     if (!currentFavoriteIds || currentFavoriteIds.length === 0) {
       box.innerHTML = '<div class="fav-empty"><span>♡</span><h3>הלילה הבא שלך עוד מחכה לך</h3><p>לחיצה על הלב בעמוד מסיבה תשמור אותה כאן.</p><a class="btn gold" href="/events">למציאת מסיבה ←</a></div>';
       return;
@@ -290,15 +298,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function wirePhotoUpload(phone, hasActiveSubscription) {
-    const label = document.querySelector("label.avatar");
+    const avatarWrap = document.querySelector(".avatar-wrap");
+    // Profile photos are a paid-subscriber feature — someone who only ever
+    // registered for a single party by phone shouldn't see the avatar/photo
+    // upload UI at all, not even as a locked control.
+    if (!hasActiveSubscription) {
+      avatarWrap.style.display = "none";
+      return;
+    }
+    avatarWrap.style.display = "";
     const input = document.getElementById("photoInput");
-    label.addEventListener("click", (ev) => {
-      if (!hasActiveSubscription) {
-        ev.preventDefault();
-        toast("נרשמת למסיבה? מעולה! תמונה תוכלו להעלות רק לאחר שתהיו מנויים", "error");
-        return;
-      }
-    });
     input.addEventListener("change", async () => {
       const file = input.files && input.files[0];
       if (!file) return;
