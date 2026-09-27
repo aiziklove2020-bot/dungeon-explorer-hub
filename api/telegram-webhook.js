@@ -711,7 +711,19 @@ async function sendAllPartyReminders(targetChatId) {
         if (!partyAllowedFor(party, dest.allowedAdvertiserIds)) continue;
         const data = await sendReminderToChat(botToken, dest.chatId, party);
         results.push({ party: party.title || party.name, chatId: dest.chatId, ok: data.ok, description: data.description });
-        await sleep(400); // each send targets a different chat, so Telegram's ~1/sec-per-chat limit doesn't apply; this just stays well under the ~30/sec global limit
+        // Each send targets a different chat, so Telegram's ~1/sec-per-chat
+        // limit doesn't apply — only the ~30/sec global limit does, which
+        // needs ~34ms between sends, not 400ms. The old 400ms delay was the
+        // real cause of "only some parties posted": this loop runs serially
+        // for every party x every destination with no maxDuration override
+        // on this function (see vercel.json), and sendPhoto (used whenever a
+        // party has an image) is itself slow because Telegram fetches the
+        // photo URL before delivering it — a handful of parties across a
+        // couple of channels easily pushed total runtime past the platform's
+        // default timeout, silently cutting the loop off partway with no
+        // error surfaced anywhere. 80ms keeps a wide safety margin under the
+        // rate limit while cutting total runtime by ~5x.
+        await sleep(80);
       }
     }
 
