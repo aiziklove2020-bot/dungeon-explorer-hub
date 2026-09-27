@@ -43,6 +43,24 @@ export const sendSupportMessage = async (text, sessionId = getOrCreateSessionId(
 };
 
 /**
+ * Writes an automated FAQ-bot reply into the same thread, styled identically
+ * to a real support reply (role !== 'user' renders as "התמיכה" in the
+ * widget). firestore.rules' `create` rule for this subcollection only checks
+ * `text`/`createdAt`, not `role`, so this is an already-open write, not a
+ * rules change — see mountSupportChatWidget's matchFaqAnswer.
+ */
+export const sendSupportBotMessage = async (text, sessionId = getOrCreateSessionId()) => {
+  if (!text || !text.trim()) return null;
+  const messagesRef = collection(db, SUPPORT_CHAT_COLLECTION, sessionId, 'messages');
+  const docRef = await addDoc(messagesRef, {
+    role: 'bot',
+    text: text.trim(),
+    createdAt: serverTimestamp()
+  });
+  return docRef.id;
+};
+
+/**
  * Notify Telegram via same-origin API (Telegram Bot API has no CORS; token stays server-side).
  * displayName is optional.
  */
