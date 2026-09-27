@@ -1,9 +1,58 @@
 
+// A logged-in session (advertiser or forum account) used to live only in
+// localStorage — but that gets wiped on its own in several real cases: iOS
+// Safari's Intelligent Tracking Prevention caps script-writable storage at 7
+// days of inactivity, and in-app browsers (the webview WhatsApp/Telegram
+// open when someone taps a shared link) frequently don't persist
+// localStorage across app restarts at all. Reported live as "an advertiser
+// has to type phone+password in again every single time". A long-lived
+// cookie survives both of those cases, so it's kept as a second copy and
+// used to silently restore the session (re-hydrating localStorage) whenever
+// localStorage itself comes back empty.
+function lpSetSessionCookie_(value) {
+  try {
+    const maxAgeSeconds = 365 * 24 * 60 * 60;
+    document.cookie = `lp_current=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; SameSite=Lax`;
+  } catch {}
+}
+function lpGetSessionCookie_() {
+  try {
+    const match = document.cookie.split("; ").find((row) => row.startsWith("lp_current="));
+    return match ? decodeURIComponent(match.slice("lp_current=".length)) : null;
+  } catch {
+    return null;
+  }
+}
+function lpClearSessionCookie_() {
+  try { document.cookie = "lp_current=; path=/; max-age=0; SameSite=Lax"; } catch {}
+}
+
 const LP = {
   getUsers(){ return JSON.parse(localStorage.getItem("lp_users") || "[]"); },
   setUsers(v){ localStorage.setItem("lp_users", JSON.stringify(v)); },
-  current(){ return JSON.parse(localStorage.getItem("lp_current") || "null"); },
-  setCurrent(v){ localStorage.setItem("lp_current", JSON.stringify(v)); },
+  current(){
+    try {
+      const raw = localStorage.getItem("lp_current");
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    try {
+      const cookieRaw = lpGetSessionCookie_();
+      if (cookieRaw) {
+        localStorage.setItem("lp_current", cookieRaw);
+        return JSON.parse(cookieRaw);
+      }
+    } catch {}
+    return null;
+  },
+  setCurrent(v){
+    const raw = JSON.stringify(v);
+    localStorage.setItem("lp_current", raw);
+    lpSetSessionCookie_(raw);
+  },
+  clearCurrent(){
+    localStorage.removeItem("lp_current");
+    lpClearSessionCookie_();
+  },
   events(){ return JSON.parse(localStorage.getItem("lp_events") || "[]"); },
   setEvents(v){ localStorage.setItem("lp_events", JSON.stringify(v)); },
   favorites(){ return JSON.parse(localStorage.getItem("lp_favs") || "[]"); },
