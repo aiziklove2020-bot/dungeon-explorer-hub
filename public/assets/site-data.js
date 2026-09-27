@@ -35495,6 +35495,24 @@ async function dW(e) {
 		favorites: []
 	};
 	let n = await cW(t);
+	// getMyLinkedPhoneNumber (nN) prefers the phone on the *linked site user*
+	// record over the phone the account actually logs in with — if that link
+	// points at the wrong (or a blank) site user, every registration,
+	// favorite and balance match filed under the real login phone silently
+	// doesn't show up here. Whenever the two differ, also load under the raw
+	// login phone and merge in anything the linked-phone lookup missed.
+	let forumUser = await tN(e).catch(() => null), loginPhone = forumUser?.phone || null;
+	if (loginPhone && loginPhone !== t) {
+		let loginPhoneData = await cW(loginPhone).catch(() => null);
+		if (loginPhoneData) {
+			let existingRegIds = new Set(n.registrations.map((r) => r.partyId || r.id));
+			n.registrations = [...n.registrations, ...loginPhoneData.registrations.filter((r) => !existingRegIds.has(r.partyId || r.id))];
+			if (!n.balanceMatch && loginPhoneData.balanceMatch) n.balanceMatch = loginPhoneData.balanceMatch;
+			if (!n.profile && loginPhoneData.profile) n.profile = loginPhoneData.profile;
+			let existingFavIds2 = new Set(n.favorites.map((e2) => e2.id));
+			n.favorites = [...n.favorites, ...loginPhoneData.favorites.filter((e2) => !existingFavIds2.has(e2.id))];
+		}
+	}
 	// Favorites can be saved under two identities: phone (the /my-area hearts,
 	// no login) or forum account id (the events.html/index.html hearts, gated
 	// to a real login) — merge both so a forum-account subscriber sees every
