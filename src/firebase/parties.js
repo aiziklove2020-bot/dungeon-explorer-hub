@@ -909,7 +909,16 @@ export const adminRegisterUserToParty = async (partyId, userId, userName, userGe
     await updateDoc(partyRef, {
       registrations: arrayUnion(registration)
     });
-    
+
+    // Same auto-match trigger as the public registerToPartyNew — an admin
+    // manually adding a subscriber to a party (e.g. over the phone) should
+    // get them matched immediately if a waiting match already exists,
+    // exactly like a self-service registration does. Best-effort: a
+    // failure here must never fail the registration itself.
+    if (['single-male-balance', 'single-female-balance', 'single-female-discount'].includes(finalRegistrationType)) {
+      runBalanceMatchingForParty(partyId).catch(() => {});
+    }
+
     return registration;
   } catch (error) {
     throw error;
