@@ -24157,7 +24157,9 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				};
 				tx.update(o, { registrations: vd(f) });
 			});
-			return await q(`party_${e}`), await q("activeParties"), f.gender === "female" && !f.userId && Rj(f, "registered", "year").catch(() => {}), c && f.gender === "male" && !f.userId && Rj(f, "registered", "day").catch(() => {}), ["single-male-balance", "single-female-balance", "single-female-discount"].includes(t.registrationType) && lpRunBalanceMatchingForParty_(e).catch(() => {}), f;
+			await q(`party_${e}`), await q("activeParties"), c && f.gender === "male" && !f.userId && Rj(f, "registered", "day").catch(() => {});
+			f.gender === "female" && !f.userId && await Rj(f, "registered", "year").catch(() => {});
+			return ["single-male-balance", "single-female-balance", "single-female-discount"].includes(t.registrationType) && lpRunBalanceMatchingForParty_(e).catch(() => {}), f;
 		} catch (e) {
 			throw e;
 		}
@@ -35683,6 +35685,11 @@ async function lpRunBalanceMatchingForParty_(partyId) {
 	});
 	const unmatchedRegistrations = party.registrations.filter((reg) => !matchedPhones.has(reg.phoneNumber));
 	if (unmatchedRegistrations.length === 0) return null;
+	// getAllUsers (Ij) is cached for 10 minutes — long enough that two
+	// registrations tested back-to-back in the same page load can read a
+	// stale list missing whoever was just registered a moment ago. Force a
+	// real read every time instead of trusting the cache here.
+	await q("allUsers");
 	const allUsers = await Ij();
 	const usersByPhone = /* @__PURE__ */ new Map();
 	allUsers.forEach((user) => { if (user.phoneNumber) usersByPhone.set(user.phoneNumber, user); });

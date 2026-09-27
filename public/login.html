@@ -31,7 +31,7 @@ document.getElementById("loginForm").addEventListener("submit", async e => {
   }
   btn.disabled = true;
   try {
-    await import("./assets/site-data.js?v=202609271353");
+    await import("./assets/site-data.js?v=202609271528");
     const u = await window.LPData.login(phone, password);
     LP.setCurrent(u);
     toast("התחברת בהצלחה");
