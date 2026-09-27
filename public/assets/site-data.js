@@ -24157,7 +24157,9 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				};
 				tx.update(o, { registrations: vd(f) });
 			});
-			return await q(`party_${e}`), await q("activeParties"), f.gender === "female" && !f.userId && Rj(f, "registered", "year").catch(() => {}), c && f.gender === "male" && !f.userId && Rj(f, "registered", "day").catch(() => {}), ["single-male-balance", "single-female-balance", "single-female-discount"].includes(t.registrationType) && lpRunBalanceMatchingForParty_(e).catch(() => {}), f;
+			await q(`party_${e}`), await q("activeParties"), c && f.gender === "male" && !f.userId && Rj(f, "registered", "day").catch(() => {});
+			f.gender === "female" && !f.userId && await Rj(f, "registered", "year").catch(() => {});
+			return ["single-male-balance", "single-female-balance", "single-female-discount"].includes(t.registrationType) && lpRunBalanceMatchingForParty_(e).catch(() => {}), f;
 		} catch (e) {
 			throw e;
 		}

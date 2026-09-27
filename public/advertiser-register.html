@@ -30,7 +30,7 @@ document.getElementById("advReg").addEventListener("submit", async e => {
   if (!document.getElementById("advRegTerms").checked) { msg.textContent = "יש לאשר את תנאי הפרסום באתר"; return; }
   btn.disabled = true;
   try {
-    await import("./assets/site-data.js?v=202609271353");
+    await import("./assets/site-data.js?v=202609271505");
     await window.LPData.registerAdvertiserAccount({
       businessName,
       contactName,

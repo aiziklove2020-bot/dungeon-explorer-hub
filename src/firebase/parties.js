@@ -350,9 +350,13 @@ export const registerToPartyNew = async (partyId, registrationData) => {
     // Women get free full access automatically (see getSubscription's
     // gender bypass) — provision the account right here instead of making
     // an admin click "צור משתמש" for every single female registrant.
-    // Best-effort: a failure here shouldn't fail the registration itself.
+    // Awaited (unlike a purely best-effort side effect) because the
+    // auto-match trigger right below reads the `users` collection to decide
+    // who's eligible — firing it before this write lands would make a
+    // female registrant invisible to her own registration's matching pass.
+    // Still never fails the registration itself.
     if (finalGender === 'female' && !userId) {
-      createUserFromRegistration(registration, 'registered', 'year').catch(() => {});
+      await createUserFromRegistration(registration, 'registered', 'year').catch(() => {});
     }
 
     // Auto-match: the same algorithm behind the admin's manual "צור איזון"
