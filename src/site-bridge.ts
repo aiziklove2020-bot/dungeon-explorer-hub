@@ -593,6 +593,33 @@ async function loadMyForumPersonalArea(forumUserId: string) {
   const phone = await getMyLinkedPhoneNumber(forumUserId).catch(() => null);
   if (!phone) return { phone: null, registrations: [], balanceMatch: null, profile: null, favorites: [] };
   const data = await loadMyPersonalArea(phone);
+
+  // getMyLinkedPhoneNumber prefers the phone on the *linked site user*
+  // record over the phone the account actually logs in with — if that link
+  // points at the wrong (or a blank) site user, every party registration,
+  // favorite and balance match the person actually has, filed under their
+  // real login phone, silently doesn't show up here. Whenever the two
+  // differ, also load under the raw login phone and merge in anything the
+  // linked-phone lookup missed, rather than trusting one phone blindly.
+  const forumUser = await getForumUserById(forumUserId).catch(() => null) as any;
+  const loginPhone = forumUser?.phone || null;
+  if (loginPhone && loginPhone !== phone) {
+    const loginPhoneData = await loadMyPersonalArea(loginPhone).catch(() => null);
+    if (loginPhoneData) {
+      const existingRegIds = new Set(data.registrations.map((r: any) => r.partyId || r.id));
+      data.registrations = [
+        ...data.registrations,
+        ...loginPhoneData.registrations.filter((r: any) => !existingRegIds.has(r.partyId || r.id)),
+      ];
+      if (!data.balanceMatch && loginPhoneData.balanceMatch) data.balanceMatch = loginPhoneData.balanceMatch;
+      if (!data.profile && loginPhoneData.profile) data.profile = loginPhoneData.profile;
+      const existingFavIds = new Set(data.favorites.map((e: any) => e.id));
+      data.favorites = [
+        ...data.favorites,
+        ...loginPhoneData.favorites.filter((e: any) => !existingFavIds.has(e.id)),
+      ];
+    }
+  }
   // Favorites can be saved under two different identities: phone number
   // (the heart buttons on /my-area, which has no login) or forum account id
   // (the heart buttons on events.html/index.html, gated to a real login via
