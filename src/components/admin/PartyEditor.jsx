@@ -49,6 +49,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
       registrationLink: party.registrationLink || '',
       whatsappNumber: party.whatsappNumber || '',
       partyType: party.partyType || 'internal',
+      allowBalanceRegistration: party.allowBalanceRegistration === true,
       category: party.category || '',
       city: party.city || '',
       badge: party.badge || '',
@@ -119,7 +120,8 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
     const dataToSave = {
       ...formData,
       imageURL: finalImageUrl,
-      date: localMidnight
+      date: localMidnight,
+      allowBalanceRegistration: formData.partyType === 'external' && formData.allowBalanceRegistration === true
     };
     
     try {
@@ -402,6 +404,18 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           />
           <p className="text-[#94A3B8] text-xs mt-1">
             {t('admin.externalPartyUrlRequired')}
+          </p>
+          <label className="flex items-start gap-2 mt-3 cursor-pointer text-white text-sm">
+            <input
+              type="checkbox"
+              checked={!!formData.allowBalanceRegistration}
+              onChange={e => setFormData(prev => ({...prev, allowBalanceRegistration: e.target.checked}))}
+              className="mt-1 accent-[#ff438b]"
+            />
+            <span>לאפשר גם הרשמה לאיזון מגדרי דרך האתר</span>
+          </label>
+          <p className="text-[#94A3B8] text-xs">
+            סינגלים וסינגליות יוכלו להירשם לאיזון מגדרי דרך האתר, והכרטיסים ימשיכו להימכר בלינק החיצוני. זוגות שיאוזנו יופיעו אצל המפיק באזור המפרסם עם שם, כינוי טלגרם ומספר טלפון.
           </p>
         </div>
       )}

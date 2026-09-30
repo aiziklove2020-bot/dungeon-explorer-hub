@@ -26,6 +26,12 @@ const RETENTION_OPTIONS = [
   { value: 168, labelKey: 'admin.partyRetention.option168' },
 ];
 
+// An external (ticket-link) party only has on-site registrations when it
+// opted into gender-balance registration through the site.
+const takesOnSiteRegistrations = (party) =>
+  ['internal', 'exchange'].includes(party.partyType || 'internal') ||
+  (party.partyType === 'external' && party.allowBalanceRegistration === true);
+
 const PartiesSection = ({ showSaved, refreshKey }) => {
   const { t } = useLanguage();
   const [activeParties, setActiveParties] = useState([]);
@@ -639,7 +645,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                           <p className="text-xs text-[#94A3B8] truncate mt-0.5">
                             {formatDate(party.date)}{party.dj ? ` · DJ ${party.dj}` : ''}
                           </p>
-                          {!party.whatsappNumber && ['internal', 'exchange'].includes(party.partyType || 'internal') && (
+                          {!party.whatsappNumber && takesOnSiteRegistrations(party) && (
                             <div className="w-full h-1.5 rounded-full bg-[#2a292e] overflow-hidden flex mt-2">
                               <div className="h-full" style={{ width: `${malePct}%`, background: '#ff438b' }} />
                               <div className="h-full" style={{ width: `${femalePct}%`, background: '#ff9fc3' }} />
@@ -716,7 +722,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                       {selectedParty.dj && <p><strong>DJ:</strong> {selectedParty.dj}</p>}
                     </div>
                     {selectedParty.description && <p className="mb-3"><strong>{t('description') || 'תיאור'}:</strong> {selectedParty.description}</p>}
-                    {!selectedParty.whatsappNumber && ['internal', 'exchange'].includes(selectedParty.partyType || 'internal') && (() => {
+                    {!selectedParty.whatsappNumber && takesOnSiteRegistrations(selectedParty) && (() => {
                       const maleCount = getGenderCount(selectedParty, 'male');
                       const femaleCount = getGenderCount(selectedParty, 'female');
                       const maleLimit = Number(selectedParty.maleLimit) || 0;
@@ -740,7 +746,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                         </div>
                       );
                     })()}
-                    {!selectedParty.whatsappNumber && ['internal', 'exchange'].includes(selectedParty.partyType || 'internal') && (
+                    {!selectedParty.whatsappNumber && takesOnSiteRegistrations(selectedParty) && (
                       <div className="mb-3 rounded-xl bg-[#20151e] p-3 flex flex-col gap-3">
                         <span className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">שליטה מהירה</span>
                         <label className="flex items-center justify-between gap-2 cursor-pointer">
@@ -791,7 +797,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                         <span dir="ltr">{selectedParty.whatsappNumber}</span>
                       </p>
                     )}
-                    {!selectedParty.whatsappNumber && selectedParty.registrations && selectedParty.registrations.length > 0 && ['internal', 'exchange'].includes(selectedParty.partyType || 'internal') && (
+                    {!selectedParty.whatsappNumber && selectedParty.registrations && selectedParty.registrations.length > 0 && takesOnSiteRegistrations(selectedParty) && (
                       <div className="mt-4 space-y-4">
                         <button
                           onClick={() => exportRegistrationsByType(selectedParty)}
