@@ -7,7 +7,7 @@ vi.mock('../Loader', () => ({ default: () => null }));
 
 const { default: PartyEditor } = await import('./PartyEditor');
 
-const LABEL = 'לאפשר גם הרשמה לאיזון מגדרי דרך האתר';
+const LABEL = 'לאפשר גם הרשמה דרך האתר (זוגות וסינגלים לאיזון מגדרי)';
 const render = (party) =>
   renderToStaticMarkup(<PartyEditor party={{ date: new Date(2030, 0, 1), ...party }} onSave={() => {}} onCancel={() => {}} />);
 

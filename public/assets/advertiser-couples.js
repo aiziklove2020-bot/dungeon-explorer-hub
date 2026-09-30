@@ -168,20 +168,25 @@ async function renderCouplesForEvent(eventId, targetEl) {
     const balanced = balancePairs(registrations, data.balanceMatches);
     const balancedPhones = new Set(balanced.flat().map((p) => p.phoneNumber));
 
+    // On an external party that opted into on-site registration, couples
+    // registered knowing their details go to the producer — show them all.
+    // Elsewhere keep the old rule: only couples where both have an account.
+    const showAllCouples = data.partyType === "external" && data.allowBalanceRegistration === true;
     const couples = [];
     for (const [male, female] of couplePairsFromRegistrations(registrations)) {
       if (balancedPhones.has(male.phoneNumber) || balancedPhones.has(female.phoneNumber)) continue;
+      if (showAllCouples) { couples.push([male, female]); continue; }
       const [maleOk, femaleOk] = await Promise.all([isRealUser(male.phoneNumber), isRealUser(female.phoneNumber)]);
       if (maleOk && femaleOk) couples.push([male, female]);
     }
 
     if (balanced.length) targetEl.appendChild(pairsBox("איזונים מגדריים", balanced));
     if (couples.length) targetEl.appendChild(pairsBox("זוגות רשומים", couples));
-    if (!balanced.length && data.allowBalanceRegistration) {
+    if (!balanced.length && !couples.length && showAllCouples) {
       const empty = document.createElement("p");
       empty.className = "meta";
       empty.style.cssText = "margin-top:12px";
-      empty.textContent = "עדיין אין זוגות מאוזנים למסיבה הזו. ברגע שייווצר איזון הוא יופיע כאן.";
+      empty.textContent = "עדיין אין הרשמות דרך האתר למסיבה הזו. זוגות שנרשמים וזוגות שמאוזנים יופיעו כאן.";
       targetEl.appendChild(empty);
     }
   } catch (e) {

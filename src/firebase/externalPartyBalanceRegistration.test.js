@@ -56,11 +56,16 @@ describe('registering on an advertiser external-ticket party', () => {
     expect(txUpdate).not.toHaveBeenCalled();
   });
 
-  it('only accepts the solo balance types when opted in', async () => {
+  it('refuses the discount type even when opted in', async () => {
     partyDoc.allowBalanceRegistration = true;
-    await expect(registerToPartyNew('p1', reg('single-male-couple', 'male'))).rejects.toThrow('לאיזון מגדרי בלבד');
-    await expect(registerToPartyNew('p1', reg('single-female-discount', 'female'))).rejects.toThrow('לאיזון מגדרי בלבד');
+    await expect(registerToPartyNew('p1', reg('single-female-discount', 'female'))).rejects.toThrow('או כזוג בלבד');
     expect(txUpdate).not.toHaveBeenCalled();
+  });
+
+  it('accepts a couple half when opted in', async () => {
+    partyDoc.allowBalanceRegistration = true;
+    await registerToPartyNew('p1', { ...reg('single-male-couple', 'male'), partnerPhone: '0500000002', coupleId: 'c1' });
+    expect(txUpdate).toHaveBeenCalledTimes(1);
   });
 
   it('accepts a solo balance registration when opted in', async () => {
