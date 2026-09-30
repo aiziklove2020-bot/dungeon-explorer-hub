@@ -31,8 +31,23 @@ document.getElementById("advLogin").addEventListener("submit", async e => {
   }
   btn.disabled = true;
   try {
-    await import("./assets/site-data.js?v=202609302040");
-    const u = await window.LPData.loginAdvertiser(phoneNumber, password);
+    const res = await fetch("/api/advertiser-auth?action=login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "login", phoneNumber, password })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data?.authenticated || !data?.advertiser) {
+      throw new Error(data?.error || "פרטי התחברות שגויים");
+    }
+    const a = data.advertiser;
+    const u = {
+      id: a.id,
+      businessName: a.businessName,
+      name: a.contactName,
+      phoneNumber: a.phoneNumber,
+      role: "advertiser"
+    };
     LP.setCurrent(u);
     toast("ברוכים הבאים למערכת המפרסמים");
     setTimeout(() => location = "/advertiser-dashboard", 700);

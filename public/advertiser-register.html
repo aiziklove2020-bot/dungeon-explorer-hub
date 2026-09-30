@@ -30,13 +30,15 @@ document.getElementById("advReg").addEventListener("submit", async e => {
   if (!document.getElementById("advRegTerms").checked) { msg.textContent = "יש לאשר את תנאי הפרסום באתר"; return; }
   btn.disabled = true;
   try {
-    await import("./assets/site-data.js?v=202609302040");
-    await window.LPData.registerAdvertiserAccount({
-      businessName,
-      contactName,
-      phoneNumber,
-      password,
+    const res = await fetch("/api/advertiser-auth?action=register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "register", businessName, contactName, phoneNumber, password })
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data?.advertiser) {
+      throw new Error(data?.error || "שגיאה בפתיחת החשבון, נסו שוב");
+    }
     document.getElementById("advRegCard").innerHTML = `
       <div class="eyebrow">מסיבות ליברליות בישראל</div>
       <h1>הבקשה נשלחה!</h1>
