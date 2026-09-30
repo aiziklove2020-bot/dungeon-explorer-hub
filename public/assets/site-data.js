@@ -24126,7 +24126,11 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				let snap = await tx.get(o);
 				if (!snap.exists()) throw Error("Party not found");
 				let a = snap.data();
-				if (a.partyType !== "external" && lpIsRegistrationClosedForPartyDate_(a.date)) throw Error("ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד");
+				if (a.partyType === "external") {
+					if (!a.allowBalanceRegistration) throw Error("ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק");
+					if (!["single-male-balance", "single-female-balance"].includes(t.registrationType)) throw Error("במסיבה זו ניתן להירשם דרך האתר לאיזון מגדרי בלבד");
+				}
+				if ((a.partyType !== "external" || a.allowBalanceRegistration) && lpIsRegistrationClosedForPartyDate_(a.date)) throw Error("ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד");
 				if (a.registrations?.find((e) => XE(e.phoneNumber) === s || r && e.userId === r)) throw Error("Already registered to this party");
 				if (t.gender !== "couple") {
 					let e = a.registrations?.filter((e) => e.gender === t.gender) || [], n = t.gender === "male" ? a.maleLimit : a.femaleLimit;
@@ -24528,7 +24532,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				let n = await nM(), i = rM(e, n);
 				i && (r.expiration = i);
 			}
-			return t.maleLimit !== void 0 && (r.maleLimit = t.maleLimit), t.femaleLimit !== void 0 && (r.femaleLimit = t.femaleLimit), t.day !== void 0 && (r.day = t.day), t.time !== void 0 && (r.time = t.time), t.dj !== void 0 && (r.dj = t.dj), t.title !== void 0 && (r.title = t.title), t.registrationLink !== void 0 && (r.registrationLink = t.registrationLink), t.whatsappNumber !== void 0 && (r.whatsappNumber = t.whatsappNumber), t.category !== void 0 && (r.category = t.category || ""), t.city !== void 0 && (r.city = t.city || ""), t.partyType === void 0 ? r.partyType = "internal" : r.partyType = t.partyType, t.publishToInstagram !== void 0 && (r.publishToInstagram = t.publishToInstagram === !0), t.soloMenSalesLocked !== void 0 && (r.soloMenSalesLocked = t.soloMenSalesLocked === !0), t.autoApproveVerifiedCouples !== void 0 && (r.autoApproveVerifiedCouples = t.autoApproveVerifiedCouples === !0), t.guardians !== void 0 && (r.guardians = Array.isArray(t.guardians) ? t.guardians : []), t.imageURL !== void 0 && (r.imageURL = t.imageURL, t.imageDeleteUrl && (r.imageDeleteUrl = t.imageDeleteUrl)), r.needsPublish = !0, await A(n, r), await q(`party_${e}`), await q(`balanceMatches_${e}`), await q("activeParties"), !0;
+			return t.maleLimit !== void 0 && (r.maleLimit = t.maleLimit), t.femaleLimit !== void 0 && (r.femaleLimit = t.femaleLimit), t.day !== void 0 && (r.day = t.day), t.time !== void 0 && (r.time = t.time), t.dj !== void 0 && (r.dj = t.dj), t.title !== void 0 && (r.title = t.title), t.registrationLink !== void 0 && (r.registrationLink = t.registrationLink), t.whatsappNumber !== void 0 && (r.whatsappNumber = t.whatsappNumber), t.allowBalanceRegistration !== void 0 && (r.allowBalanceRegistration = t.allowBalanceRegistration === !0), t.category !== void 0 && (r.category = t.category || ""), t.city !== void 0 && (r.city = t.city || ""), t.partyType === void 0 ? r.partyType = "internal" : r.partyType = t.partyType, t.publishToInstagram !== void 0 && (r.publishToInstagram = t.publishToInstagram === !0), t.soloMenSalesLocked !== void 0 && (r.soloMenSalesLocked = t.soloMenSalesLocked === !0), t.autoApproveVerifiedCouples !== void 0 && (r.autoApproveVerifiedCouples = t.autoApproveVerifiedCouples === !0), t.guardians !== void 0 && (r.guardians = Array.isArray(t.guardians) ? t.guardians : []), t.imageURL !== void 0 && (r.imageURL = t.imageURL, t.imageDeleteUrl && (r.imageDeleteUrl = t.imageDeleteUrl)), r.needsPublish = !0, await A(n, r), await q(`party_${e}`), await q(`balanceMatches_${e}`), await q("activeParties"), !0;
 		} catch (e) {
 			throw e;
 		}
@@ -35110,7 +35114,8 @@ function MU(e) {
 		desc: n,
 		registrationLink: e.registrationLink || "",
 		whatsappNumber: e.whatsappNumber || "",
-		partyType: e.partyType || "internal"
+		partyType: e.partyType || "internal",
+		allowBalanceRegistration: e.allowBalanceRegistration === !0
 	};
 }
 function NU(e) {
@@ -35373,6 +35378,7 @@ async function YU(e, t) {
 		description: t.description,
 		category: t.category || "",
 		partyType: t.registrationLink ? "external" : "internal",
+		allowBalanceRegistration: !!t.registrationLink && t.allowBalanceRegistration === !0,
 		createdBy: e
 	});
 }
@@ -35402,7 +35408,8 @@ async function QU(e, t, n) {
 		city: n.city || "",
 		partyType: n.registrationLink ? "external" : "internal",
 		registrationLink: n.registrationLink || "",
-		whatsappNumber: n.whatsappNumber || ""
+		whatsappNumber: n.whatsappNumber || "",
+		allowBalanceRegistration: !!n.registrationLink && n.allowBalanceRegistration === !0
 	}), !0;
 }
 async function $U(e, t) {
