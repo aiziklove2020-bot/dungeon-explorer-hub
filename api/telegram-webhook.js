@@ -846,7 +846,38 @@ async function handleCleanupExpiredParties(req, res) {
       }
     }
 
-    return res.status(200).json({ ok: true, deleted: deletedParties, deletedDayPassUsers: deletedUsers });
+    // Every woman gets the lifetime ("gold") parties subscription. The public
+    // registration form can't grant gold itself (firestore.rules rejects any
+    // client write setting a gold tier), so a newly registered woman starts on
+    // the yearly tier, which already gives full access, and is moved to gold
+    // here. Idempotent: only touches women not already on gold, and leaves
+    // an exchange-parties subscription and an admin/blocked level alone.
+    let upgradedWomen = 0;
+    const womenSnap = await db.collection('users').where('gender', '==', 'female').get();
+    const needGold = womenSnap.docs.filter((d) => d.data()?.subscriptions?.parties?.tier !== 'gold');
+    for (let i = 0; i < needGold.length; i += 400) {
+      const batch = db.batch();
+      needGold.slice(i, i + 400).forEach((d) => {
+        const data = d.data() || {};
+        const subs = data.subscriptions && typeof data.subscriptions === 'object' && !Array.isArray(data.subscriptions)
+          ? data.subscriptions : {};
+        const startDate = typeof subs.parties?.startDate === 'string' ? subs.parties.startDate : nowIso;
+        const update = {
+          subscriptions: {
+            parties: { tier: 'gold', expiry: null, startDate, lastRenewedAt: nowIso, lastRenewalTier: 'gold' },
+            exchangeParties: subs.exchangeParties || null,
+          },
+          registrationExpiry: null,
+          registrationStartDate: startDate,
+        };
+        if (data.level !== 'admin' && data.level !== 'blocked' && !data.isAdmin) update.level = 'gold';
+        batch.update(d.ref, update);
+      });
+      await batch.commit();
+    }
+    upgradedWomen = needGold.length;
+
+    return res.status(200).json({ ok: true, deleted: deletedParties, deletedDayPassUsers: deletedUsers, upgradedWomen });
   } catch (err) {
     return res.status(200).json({ ok: false, deleted: 0, error: String(err?.message || err) });
   }
