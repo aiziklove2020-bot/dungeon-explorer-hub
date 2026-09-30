@@ -334,6 +334,37 @@ const SubscriptionsSection = ({ showSaved }) => {
     showSaved();
   };
 
+  // Every woman gets the lifetime ("gold") parties subscription. Goes
+  // through the same admin endpoint as granting it to one person by hand, so
+  // an existing exchange-parties subscription is left untouched.
+  const [grantingWomenGold, setGrantingWomenGold] = useState(false);
+  const womenWithoutGold = useMemo(
+    () => (users || []).filter((u) => u.gender === 'female' && getSubscription(u, 'parties').tier !== 'gold'),
+    [users]
+  );
+  const handleGrantAllWomenGold = async () => {
+    const targets = womenWithoutGold;
+    if (targets.length === 0) return;
+    if (!window.confirm(`להעביר ${targets.length} נשים למנוי מסיבות לכל החיים (זהב)?`)) return;
+    setGrantingWomenGold(true);
+    const failed = [];
+    for (const u of targets) {
+      try {
+        await addOrExtendSubscription(u.id, 'parties', 'gold');
+      } catch (error) {
+        failed.push(`${u.name || u.phoneNumber}: ${error.message || error}`);
+      }
+    }
+    setGrantingWomenGold(false);
+    reload();
+    showSaved();
+    if (failed.length) {
+      window.alert(`${targets.length - failed.length} עודכנו. ${failed.length} נכשלו:\n${failed.join('\n')}`);
+    } else {
+      window.alert(`כל ${targets.length} הנשים הועברו למנוי מסיבות לכל החיים.`);
+    }
+  };
+
   const handleImportUsers = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -744,6 +775,15 @@ const SubscriptionsSection = ({ showSaved }) => {
             className="flex items-center gap-1 bg-[#93000a] hover:bg-[#be0037] text-white px-3 py-1.5 rounded-xl font-bold text-xs md:text-sm"
           >
             <Trash2 size={14} /> מחק את כל {processedUsers.length} החשבונות ללא הגישה
+          </button>
+        )}
+        {typeFilter === 'female' && womenWithoutGold.length > 0 && (
+          <button
+            onClick={handleGrantAllWomenGold}
+            disabled={grantingWomenGold}
+            className="flex items-center gap-1 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-60 text-white px-3 py-1.5 rounded-xl font-bold text-xs md:text-sm"
+          >
+            {grantingWomenGold ? 'מעדכן...' : `העבר את כל ${womenWithoutGold.length} הנשים למנוי מסיבות לכל החיים`}
           </button>
         )}
       </div>
