@@ -42,6 +42,7 @@
  */
 import { requireTelegramWebhookSecret, requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
+import { TELEGRAM_CAMPAIGNS } from '../shared/telegramCampaigns.js';
 
 // Sending every active party to every allowed destination can take longer
 // than Vercel Hobby's default 10s function timeout, which caused the
@@ -740,13 +741,79 @@ async function sendAllPartyReminders(targetChatId) {
   }
 }
 
+
+// ── Campaign posts ─────────────────────────────────────────────────────────
+// A designed image + caption (see scripts/campaigns/make_campaigns.py and
+// shared/telegramCampaigns.js) goes to the community channel on Sun/Tue/Thu,
+// a different one each time, in rotation. Piggybacks on the daily reminders
+// cron (Hobby plans cap the number of crons). A short lock window on
+// lastSentAt keeps a retried run from posting twice.
+const CAMPAIGN_DAYS = [0, 2, 4]; // Sunday, Tuesday, Thursday (Israel time)
+const CAMPAIGN_MIN_GAP_MS = 20 * 60 * 60 * 1000;
+
+function israelWeekday(date = new Date()) {
+  const name = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Jerusalem', weekday: 'short' }).format(date);
+  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(name);
+}
+
+async function sendCampaignPost({ force = false } = {}) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) throw new Error('Server not configured (missing TELEGRAM_BOT_TOKEN)');
+  if (!TELEGRAM_CAMPAIGNS.length) return { ok: false, skipped: 'no campaigns' };
+  if (!force && !CAMPAIGN_DAYS.includes(israelWeekday())) return { ok: true, skipped: 'not a campaign day' };
+
+  const admin = await initAdmin();
+  const db = admin.firestore();
+  const ref = db.collection('settings').doc('telegramCampaigns');
+  const now = Date.now();
+  const claimed = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const data = snap.exists ? snap.data() || {} : {};
+    if (!force && data.lastSentAt && now - data.lastSentAt < CAMPAIGN_MIN_GAP_MS) return null;
+    const index = Number.isInteger(data.nextIndex) ? data.nextIndex % TELEGRAM_CAMPAIGNS.length : 0;
+    tx.set(ref, { nextIndex: (index + 1) % TELEGRAM_CAMPAIGNS.length, lastSentAt: now, lastId: TELEGRAM_CAMPAIGNS[index].id }, { merge: true });
+    return { index, previous: { nextIndex: data.nextIndex ?? 0, lastSentAt: data.lastSentAt ?? null } };
+  });
+  if (!claimed) return { ok: true, skipped: 'already posted recently' };
+
+  const campaign = TELEGRAM_CAMPAIGNS[claimed.index];
+  const res = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: REMINDER_CHANNEL_CHAT_ID, photo: campaign.image, caption: campaign.caption })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!data.ok) {
+    // Give the slot back so the next run retries the same campaign.
+    await ref.set(claimed.previous, { merge: true }).catch(() => {});
+    return { ok: false, id: campaign.id, description: data.description || `HTTP ${res.status}` };
+  }
+  return { ok: true, id: campaign.id };
+}
+
+// GET ?job=campaign&key=<TELEGRAM_PROMO_SECRET>[&force=1] — manual run/test;
+// force=1 posts the next campaign now, ignoring the weekday and the gap.
+async function handleCampaign(req, res) {
+  if (!isPromoAuthorized(req) && !isCronAuthorized(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const force = (req.query?.force || new URL(req.url, 'http://x').searchParams.get('force')) === '1';
+    return res.status(200).json(await sendCampaignPost({ force }));
+  } catch (err) {
+    console.error('campaign:', err);
+    return res.status(500).json({ ok: false, error: err.message || 'Internal error' });
+  }
+}
+
 async function handlePartyReminders(req, res) {
   if (!isCronAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
     const { partiesSent, results, instagramResults, whatsappResult } = await sendAllPartyReminders();
-    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult });
+    const campaign = await sendCampaignPost().catch((err) => ({ ok: false, error: String(err?.message || err) }));
+    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, campaign });
   } catch (err) {
     console.error('party-reminders:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
@@ -1008,6 +1075,9 @@ export default async function handler(req, res) {
         keyReceived: Boolean(req.query?.key || new URL(req.url, 'http://x').searchParams.get('key')),
         authorized: isPromoAuthorized(req)
       });
+    }
+    if (job === 'campaign') {
+      return handleCampaign(req, res);
     }
     if (job === 'promo') {
       return handleGroupPromo(req, res);
