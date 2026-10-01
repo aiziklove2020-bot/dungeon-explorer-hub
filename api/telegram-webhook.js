@@ -854,21 +854,21 @@ async function handleCampaign(req, res) {
 const PROMO_DAYS = [1, 4];
 const PROMO_MIN_GAP_MS = 20 * 60 * 60 * 1000;
 
-export async function sendGroupPromoIfDue() {
+export async function sendGroupPromoIfDue({ force = false } = {}) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) return { ok: false, error: 'missing TELEGRAM_BOT_TOKEN' };
   const admin = await initAdmin();
   const db = admin.firestore();
   const agentCfg = (await getAgentConfig(db)).recruiter || {};
-  if (agentCfg.paused) return { ok: true, skipped: 'paused by the owner' };
+  if (!force && agentCfg.paused) return { ok: true, skipped: 'paused by the owner' };
   const promoDays = Array.isArray(agentCfg.days) && agentCfg.days.length ? agentCfg.days : PROMO_DAYS;
-  if (!promoDays.includes(israelWeekday())) return { ok: true, skipped: 'not a promo day' };
+  if (!force && !promoDays.includes(israelWeekday())) return { ok: true, skipped: 'not a promo day' };
   const ref = db.collection('settings').doc('telegramGroupPromo');
   const now = Date.now();
   const previous = await db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
     const last = snap.exists ? snap.data()?.lastSentAt : null;
-    if (last && now - last < PROMO_MIN_GAP_MS) return undefined;
+    if (!force && last && now - last < PROMO_MIN_GAP_MS) return undefined;
     tx.set(ref, { lastSentAt: now }, { merge: true });
     return last ?? null;
   });
@@ -1287,6 +1287,10 @@ export default async function handler(req, res) {
         keyReceived: Boolean(req.query?.key || new URL(req.url, 'http://x').searchParams.get('key')),
         authorized: isPromoAuthorized(req)
       });
+    }
+    if (job === 'promo-now') {
+      if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+      try { return res.status(200).json(await sendGroupPromoIfDue({ force: true })); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
     }
     if (job === 'health') {
       return handleHealth(req, res);

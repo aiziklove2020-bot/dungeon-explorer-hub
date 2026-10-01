@@ -8,13 +8,27 @@ export const DAY_LABELS = ['ראשון', 'שני', 'שלישי', 'רביעי', '
 
 // What each server-run agent accepts.
 export const CONTROLLABLE = {
-  publisher: { days: true, pause: true },
-  recruiter: { days: true, pause: true },
+  publisher: { days: true, pause: true, now: 'campaign' },
+  recruiter: { days: true, pause: true, now: 'promo' },
   secretary: { pause: true },
+  cleaner: { now: 'cleanup' },
+  doctor: { now: 'health' },
 };
+
+// Agents that run by themselves and have nothing to start by hand.
+const AUTOMATIC = new Set(['support', 'matcher', 'notifier']);
+const CLAUDE_AGENTS = new Set(['creator', 'fixer']);
 
 const PAUSE_RE = /(עצור|תעצור|עצירה|תפסיק|הפסק|השהה|תשהה)/;
 const RESUME_RE = /(המשך|תמשיך|תחזור|חזור|הפעל|תפעיל|תתחיל|התחל)/;
+// What counts as "do it now" for each agent. The cleaner only starts on an
+// explicit "now" (or a bare "תנקה"), so "תנקה גם הרשמות ישנות" stays a request.
+const NOW_BY_AGENT = {
+  publisher: /(עכשיו|מיד|תפרסם|תשלח|תריץ|תעבוד)/,
+  recruiter: /(עכשיו|מיד|תשלח|תריץ|תעבוד)/,
+  doctor: /(עכשיו|מיד|תבדוק|בדוק|תריץ|תעבוד)/,
+  cleaner: /(עכשיו|מיד|^\s*(תנקה|נקה)\s*$)/,
+};
 
 export function parseDays(text) {
   const tokens = String(text || '').split(/[\s,.;!?]+/);
@@ -48,7 +62,17 @@ export function applyAgentCommand(agentId, text, current = {}) {
       return { config: { ...current, paused: false }, handled: true, reply: 'חזרתי לעבודה ✅' };
     }
   }
+  if (rules?.now && NOW_BY_AGENT[agentId]?.test(t)) {
+    const say = { campaign: 'מפרסם עכשיו קמפיין בערוץ, תראה את זה כאן בצ׳אט בעוד רגע.', promo: 'שולח עכשיו לקבוצה את ההודעה למפרסמים.', health: 'בודק את האתר עכשיו, אכתוב כאן מה מצאתי בעוד רגע.', cleanup: 'מנקה עכשיו, אכתוב כאן מה עשיתי.' };
+    return { config: current, handled: true, runNow: rules.now, reply: say[rules.now] };
+  }
   const agent = agentById(agentId);
+  if (CLAUDE_AGENTS.has(agentId)) {
+    return { config: current, handled: false, reply: 'אני סוכן Claude ורץ בזמנים קבועים' + (agentId === 'fixer' ? ' (כל יום ב-13:37)' : ' (פעם בחודש)') + '. רשמתי את הבקשה, ואטפל בה בריצה הבאה. אם אתה רוצה שזה יקרה עכשיו, כתוב את זה למנהל הצוות בשיחה עם Claude.' };
+  }
+  if (AUTOMATIC.has(agentId)) {
+    return { config: current, handled: false, reply: 'אני עובד אוטומטית ולא צריך להפעיל אותי ידנית. אם צריך לשנות איך אני עובד, רשמתי את הבקשה למנהל הצוות.' };
+  }
   return {
     config: current,
     handled: false,
