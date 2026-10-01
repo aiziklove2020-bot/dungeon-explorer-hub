@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 let usersDocs = [];
+let forumDocs = [];
+const created = [];
 const updates = [];
 const doc = (id, data) => ({ id, data: () => data, ref: { id } });
 const db = {
   collection: (name) => ({
+    get: async () => ({ empty: forumDocs.length === 0, size: forumDocs.length, docs: name === 'forumUsers' ? forumDocs : [] }),
+    doc: () => ({ id: 'new-' + created.length }),
     where: (field, op, value) => ({
       get: async () => {
         let docs = [];
@@ -13,7 +17,7 @@ const db = {
       },
     }),
   }),
-  batch: () => ({ update: (ref, data) => updates.push([ref.id, data]), delete: () => {}, commit: async () => {} }),
+  batch: () => ({ set: (ref, data) => created.push([ref.id, data]), update: (ref, data) => updates.push([ref.id, data]), delete: () => {}, commit: async () => {} }),
 };
 vi.mock('firebase-admin', () => ({
   default: { firestore: Object.assign(() => db, { Timestamp: { now: () => 'NOW' } }), apps: [1] },
@@ -29,7 +33,7 @@ const run = async () => {
 };
 
 describe('nightly cleanup job: lifetime subscription for every woman', () => {
-  beforeEach(() => { updates.length = 0; });
+  beforeEach(() => { updates.length = 0; created.length = 0; forumDocs = []; });
 
   it('moves women without gold to gold, keeping their other subscription and admin/blocked level', async () => {
     usersDocs = [
@@ -62,5 +66,28 @@ describe('nightly cleanup job: lifetime subscription for every woman', () => {
     const body = await run();
     expect(body.upgradedWomen).toBe(0);
     expect(updates).toHaveLength(0);
+  });
+});
+
+
+describe('nightly cleanup job: starter password account for every woman', () => {
+  beforeEach(() => { updates.length = 0; created.length = 0; });
+
+  it('creates an account with the shared starter password only for women without one', async () => {
+    const bcrypt = (await import('bcryptjs')).default;
+    usersDocs = [
+      doc('w-new', { gender: 'female', level: 'gold', phoneNumber: '0501111111', subscriptions: { parties: { tier: 'gold' } } }),
+      doc('w-has', { gender: 'female', level: 'gold', phoneNumber: '0502222222', subscriptions: { parties: { tier: 'gold' } } }),
+      doc('w-blocked', { gender: 'female', level: 'blocked', phoneNumber: '0503333333', subscriptions: { parties: { tier: 'gold' } } }),
+      doc('w-badphone', { gender: 'female', level: 'gold', phoneNumber: '123', subscriptions: { parties: { tier: 'gold' } } }),
+      doc('man', { gender: 'male', level: 'gold', phoneNumber: '0504444444' }),
+    ];
+    forumDocs = [{ id: 'f1', data: () => ({ phone: '0502222222', nicknameLower: 'sara' }) }];
+    const body = await run();
+    expect(body.createdWomenAccounts).toBe(1);
+    expect(created).toHaveLength(1);
+    const acct = created[0][1];
+    expect(acct).toMatchObject({ phone: '0501111111', gender: 'female', isApproved: true, isBlocked: false, linkedUserId: 'w-new', mustResetPassword: true, role: 'user' });
+    expect(await bcrypt.compare('102040', acct.password)).toBe(true);
   });
 });
