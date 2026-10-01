@@ -51,6 +51,9 @@ const SubscriptionsSection = ({ showSaved }) => {
 
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'parties', 'exchangeParties'
   const [searchQuery, setSearchQuery] = useState('');
+  // Rendering every subscriber row at once froze the screen on entry; show a page at a time.
+  const [groupLimits, setGroupLimits] = useState({});
+  const GROUP_PAGE = 40;
   const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'active', 'gold', 'expiringSoon', 'expired'
   const [typeFilter, setTypeFilter] = useState(''); // '', 'male', 'female', 'blocked', 'admin'
   const [showNewSubscriber, setShowNewSubscriber] = useState(false);
@@ -811,7 +814,7 @@ const SubscriptionsSection = ({ showSaved }) => {
                 <span className="text-xs font-normal text-[#64748B]">({group.users.length})</span>
               </h3>
               <div className="space-y-3">
-                {group.users.map(u => {
+                {group.users.slice(0, searchQuery ? group.users.length : (groupLimits[group.id] || GROUP_PAGE)).map(u => {
                   const payment = lastPayment(u);
                   if (editingUser?.id === u.id) {
                     return (
@@ -929,6 +932,15 @@ const SubscriptionsSection = ({ showSaved }) => {
                   </div>
                   );
                 })}
+                {!searchQuery && group.users.length > (groupLimits[group.id] || GROUP_PAGE) && (
+                  <button
+                    type="button"
+                    onClick={() => setGroupLimits(l => ({ ...l, [group.id]: (l[group.id] || GROUP_PAGE) + GROUP_PAGE * 2 }))}
+                    className="w-full py-2.5 rounded-lg text-sm font-bold bg-[#2a1a24] text-[#ff9fc3] border border-[rgba(255,255,255,0.08)]"
+                  >
+                    הצג עוד ({group.users.length - (groupLimits[group.id] || GROUP_PAGE)})
+                  </button>
+                )}
               </div>
             </div>
           ))}
