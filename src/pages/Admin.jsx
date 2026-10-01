@@ -1,4 +1,4 @@
-import { useState, useTransition, useEffect, useRef } from 'react';
+import { useState, useTransition, useEffect, useRef, lazy, Suspense } from 'react';
 import {
   ChevronDown, ChevronUp, Heart, PartyPopper, Users, Palette, UserCog, CreditCard,
   Info, Phone, Link2, Trash2,
@@ -18,23 +18,27 @@ import SEO from '../components/SEO';
 import AdminAuthForm from '../components/admin/AdminAuthForm';
 import AdminHeader from '../components/admin/AdminHeader';
 import { adminTabs } from '../components/admin/adminTabs';
-import PartiesSection from '../components/admin/PartiesSection';
-import MatchesSection from '../components/admin/MatchesSection';
-import RssSection from '../components/admin/RssSection';
-import AboutSection from '../components/admin/AboutSection';
-import ContactSection from '../components/admin/ContactSection';
-import LinksSection from '../components/admin/LinksSection';
-import AdminsSection from '../components/admin/AdminsSection';
-import AdvertisersSection from '../components/admin/AdvertisersSection';
-import TelegramSection from '../components/admin/TelegramSection';
-import DBLoggerSection from '../components/admin/DBLoggerSection';
-import DBSection from '../components/admin/DBSection';
-import GitHistorySection from '../components/admin/GitHistorySection';
-import ForumUsersSection from '../components/admin/ForumUsersSection';
-import DeleteRequestsSection from '../components/admin/DeleteRequestsSection';
-import SubscriptionsSection from '../components/admin/SubscriptionsSection';
-import SiteDesignSection from '../components/admin/SiteDesignSection';
 import { adminAuthHeader } from '../utils/adminApi';
+import AdminLoader from '../components/admin/AdminLoader';
+
+// Each tab's code is fetched only when it's opened — the panel used to download
+// all sixteen sections up front just to show the first one.
+const PartiesSection = lazy(() => import('../components/admin/PartiesSection'));
+const MatchesSection = lazy(() => import('../components/admin/MatchesSection'));
+const RssSection = lazy(() => import('../components/admin/RssSection'));
+const AboutSection = lazy(() => import('../components/admin/AboutSection'));
+const ContactSection = lazy(() => import('../components/admin/ContactSection'));
+const LinksSection = lazy(() => import('../components/admin/LinksSection'));
+const AdminsSection = lazy(() => import('../components/admin/AdminsSection'));
+const AdvertisersSection = lazy(() => import('../components/admin/AdvertisersSection'));
+const TelegramSection = lazy(() => import('../components/admin/TelegramSection'));
+const DBLoggerSection = lazy(() => import('../components/admin/DBLoggerSection'));
+const DBSection = lazy(() => import('../components/admin/DBSection'));
+const GitHistorySection = lazy(() => import('../components/admin/GitHistorySection'));
+const ForumUsersSection = lazy(() => import('../components/admin/ForumUsersSection'));
+const DeleteRequestsSection = lazy(() => import('../components/admin/DeleteRequestsSection'));
+const SubscriptionsSection = lazy(() => import('../components/admin/SubscriptionsSection'));
+const SiteDesignSection = lazy(() => import('../components/admin/SiteDesignSection'));
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -348,6 +352,7 @@ const Admin = () => {
         {!showAdvancedTabs && <div className="mb-6 md:mb-8" />}
 
         <div className="space-y-6">
+          <Suspense fallback={<AdminLoader />}>
           {activeSection === 'siteDesign' && <SiteDesignSection showSaved={showSaved} />}
           {activeSection === 'parties'   && <PartiesSection showSaved={showSaved} refreshKey={partiesRefreshKey} />}
           {activeSection === 'about'     && <AboutSection showSaved={showSaved} />}
@@ -364,6 +369,7 @@ const Admin = () => {
           {activeSection === 'rss'       && <RssSection showSaved={showSaved} />}
           {activeSection === 'telegram'  && <TelegramSection showSaved={showSaved} />}
           {activeSection === 'gitHistory' && <GitHistorySection />}
+          </Suspense>
         </div>
       </div>
       </div>

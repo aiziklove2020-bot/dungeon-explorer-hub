@@ -1,49 +1,22 @@
 import './Loader.css';
 
-const Loader = ({ size = 'large' }) => {
-  
-  const text = 'LP';
-  const letterColors = [
-    { letter: 'L', color: '#dc2626' },
-    { letter: 'P', color: '#ffffff' }
-  ];
+const LOGO_SRC = '/assets/design/couples-logo-128.png';
 
-  const sizeClasses = {
-    small: 'loader-small',
-    medium: 'loader-medium',
-    large: 'loader-large'
-  };
-
-  return (
-    <div className={`loader-container ${sizeClasses[size]}`}>
-      <div className="loader-text" dir="ltr">
-        {text.split('').map((letter, index) => {
-          const colorInfo = letterColors[index % letterColors.length];
-          const letterColor = colorInfo ? colorInfo.color : '#ffffff';
-          return (
-            <span
-              key={index}
-              className="loader-letter"
-              style={{
-                color: letterColor,
-                textShadow: letterColor === '#dc2626' 
-                  ? '0 0 20px rgba(220, 38, 38, 0.8), 0 0 40px rgba(220, 38, 38, 0.4)'
-                  : '0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px rgba(255, 255, 255, 0.3)'
-              }}
-            >
-              {letter}
-            </span>
-          );
-        })}
-      </div>
-      <div className="loader-dots">
-        <span className="loader-dot"></span>
-        <span className="loader-dot"></span>
-        <span className="loader-dot"></span>
-      </div>
-    </div>
-  );
+const SIZES = {
+  small: 'loader-small',
+  medium: 'loader-medium',
+  large: 'loader-large',
 };
 
-export default Loader;
+const Loader = ({ size = 'large' }) => (
+  <div className={`loader-container ${SIZES[size] || SIZES.large}`} role="status" aria-label="טוען">
+    <img className="loader-logo" src={LOGO_SRC} alt="" width="128" height="128" decoding="async" />
+    <div className="loader-dots" aria-hidden="true">
+      <span className="loader-dot"></span>
+      <span className="loader-dot"></span>
+      <span className="loader-dot"></span>
+    </div>
+  </div>
+);
 
+export default Loader;

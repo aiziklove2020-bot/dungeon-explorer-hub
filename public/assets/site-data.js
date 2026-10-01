@@ -24126,10 +24126,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				let snap = await tx.get(o);
 				if (!snap.exists()) throw Error("Party not found");
 				let a = snap.data();
-				if (a.partyType === "external") {
-					if (!a.allowBalanceRegistration) throw Error("ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק");
-					if (!["single-male-balance", "single-female-balance", "single-male-couple", "single-female-couple"].includes(t.registrationType)) throw Error("במסיבה זו ניתן להירשם דרך האתר כסינגל/ית לאיזון מגדרי או כזוג בלבד");
-				}
+				if (a.partyType === "external" && !a.allowBalanceRegistration) throw Error("ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק");
 				if ((a.partyType !== "external" || a.allowBalanceRegistration) && lpIsRegistrationClosedForPartyDate_(a.date)) throw Error("ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד");
 				if (a.registrations?.find((e) => XE(e.phoneNumber) === s || r && e.userId === r)) throw Error("Already registered to this party");
 				if (t.gender !== "couple") {

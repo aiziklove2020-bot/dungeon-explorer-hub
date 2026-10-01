@@ -47,7 +47,7 @@ const lastPayment = (u) => {
 
 const SubscriptionsSection = ({ showSaved }) => {
   const { t } = useLanguage();
-  const { data: users, loading, reload } = useAdminSection(getAllUsers);
+  const { data: users, loading, error: loadError, reload } = useAdminSection(getAllUsers);
 
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'parties', 'exchangeParties'
   const [searchQuery, setSearchQuery] = useState('');
@@ -791,6 +791,13 @@ const SubscriptionsSection = ({ showSaved }) => {
       {/* List */}
       {loading ? (
         <AdminLoader />
+      ) : loadError ? (
+        <div className="text-center py-12 text-[#94A3B8] space-y-3">
+          <p>הטעינה נכשלה (בדרך כלל בעיית חיבור לרשת).</p>
+          <button onClick={reload} className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-4 py-2 rounded-xl font-bold text-sm">
+            נסה שוב
+          </button>
+        </div>
       ) : processedUsers.length === 0 ? (
         <div className="text-center py-12 text-[#94A3B8]">
           <p>לא נמצאו מנויים התואמים לסינון.</p>

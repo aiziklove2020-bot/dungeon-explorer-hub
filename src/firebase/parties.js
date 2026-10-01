@@ -259,16 +259,10 @@ export const registerToPartyNew = async (partyId, registrationData) => {
       // starts. Checked fresh here (not just client-side) so the cutoff
       // can't be bypassed by calling this function directly.
       // An advertiser's external-ticket party only takes on-site
-      // registrations when the advertiser opted into gender-balance
-      // registration, and then only solo balance registrations and couples
-      // (the public form registers each partner as single-*-couple).
-      if (partyData.partyType === 'external') {
-        if (!partyData.allowBalanceRegistration) {
-          throw new Error('ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק');
-        }
-        if (!['single-male-balance', 'single-female-balance', 'single-male-couple', 'single-female-couple'].includes(registrationData.registrationType)) {
-          throw new Error('במסיבה זו ניתן להירשם דרך האתר כסינגל/ית לאיזון מגדרי או כזוג בלבד');
-        }
+      // registrations when the advertiser opted into on-site registration;
+      // then every registration type is accepted, same as an internal party.
+      if (partyData.partyType === 'external' && !partyData.allowBalanceRegistration) {
+        throw new Error('ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק');
       }
       if ((partyData.partyType !== 'external' || partyData.allowBalanceRegistration) && isRegistrationClosedForPartyDate(partyData.date)) {
         throw new Error('ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד');
