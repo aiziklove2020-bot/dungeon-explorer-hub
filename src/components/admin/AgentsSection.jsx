@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { RefreshCw } from 'lucide-react';
 import { db } from '../../firebase/config';
@@ -17,6 +17,14 @@ const AgentsSection = () => {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
+  const formRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const writeTo = (id) => {
+    setTo(id);
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => inputRef.current?.focus(), 400);
+  };
 
   const load = useCallback(async () => {
     try {
@@ -70,6 +78,14 @@ const AgentsSection = () => {
                     </div>
                     <p className="text-sm text-[#e4d9e0]">{a.desc}</p>
                     <p className="text-xs text-[#94A3B8] mt-1">{a.schedule}</p>
+                    <button
+                      type="button"
+                      onClick={() => writeTo(a.id)}
+                      className="mt-2 px-3 py-1.5 rounded-lg text-sm font-bold text-white"
+                      style={{ background: 'linear-gradient(135deg,#ff438b,#ff5596)' }}
+                    >
+                      כתוב ל{a.name}
+                    </button>
                   </div>
                 ))}
               </div>
@@ -85,7 +101,7 @@ const AgentsSection = () => {
             <RefreshCw size={16} /> רענון
           </button>
         </div>
-        <form onSubmit={send} className="mb-4 space-y-2">
+        <form ref={formRef} onSubmit={send} className="mb-4 space-y-2">
           <div className="flex gap-2">
             <select
               value={to}
@@ -98,6 +114,7 @@ const AgentsSection = () => {
               ))}
             </select>
             <input
+              ref={inputRef}
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="מה לעשות? למשל: תפרסם רק בימי שני וחמישי"
