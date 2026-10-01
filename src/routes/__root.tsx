@@ -106,8 +106,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
+        // Non-blocking: print media loads without delaying first paint, the
+        // inline script in the shell flips it to "all" once it arrives.
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap",
+        media: "print",
       },
     ],
   }),
@@ -130,7 +133,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})});}",
+              "(function(){var l=document.querySelector('link[media=print][href*=\\'fonts.googleapis\\']');if(l){var f=function(){l.media='all'};l.sheet?f():l.addEventListener('load',f);setTimeout(f,3000)}})();if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})});}",
           }}
         />
         <Scripts />
