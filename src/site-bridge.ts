@@ -809,13 +809,13 @@ function mountSupportChatWidget() {
   wrap.id = "lpSupportChat";
   wrap.innerHTML = `
     <button id="lpSupportChatToggle" aria-label="תמיכה" style="position:fixed;left:16px;bottom:86px;z-index:300;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#e11d48,#be0037);border:0;color:#fff;box-shadow:0 10px 30px rgba(225,29,72,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
-      <span class="material-symbols-outlined" style="font-size:26px">chat_bubble</span>
+      <svg viewBox='0 0 24 24' width='26' height='26' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true' style='flex-shrink:0;'><path d='M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 20.5l1.7-5.4A8.4 8.4 0 1 1 21 11.5Z'/></svg>
     </button>
     <div id="lpSupportChatPanel" style="display:none;position:fixed;left:16px;bottom:150px;z-index:300;width:min(360px,calc(100vw - 32px));max-height:65vh;background:rgba(19,19,23,.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.55);overflow:hidden;flex-direction:column;font-family:'Inter',Arial,sans-serif">
       <div style="padding:14px 16px;background:linear-gradient(135deg,#e11d48,#be0037);display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;gap:10px;align-items:center">
           <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center">
-            <span class="material-symbols-outlined" style="font-size:19px;color:#fff">support_agent</span>
+            <svg viewBox='0 0 24 24' width='19' height='19' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true' style='flex-shrink:0;color:#fff'><path d='M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v4H4zM17 14h3v4h-3zM20 18c0 2-2 3-5 3'/></svg>
           </div>
           <div>
             <b style="font-size:15px;display:block;color:#fff">צ'אט תמיכה</b>
@@ -823,14 +823,14 @@ function mountSupportChatWidget() {
           </div>
         </div>
         <div style="display:flex;gap:6px;align-items:center">
-          <button id="lpSupportChatMin" title="מזעור" style="background:rgba(255,255,255,.16);border:0;color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center"><span class="material-symbols-outlined" style="font-size:17px">remove</span></button>
-          <button id="lpSupportChatClose" title="סגירה" style="background:rgba(255,255,255,.16);border:0;color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center"><span class="material-symbols-outlined" style="font-size:17px">close</span></button>
+          <button id="lpSupportChatMin" title="מזעור" style="background:rgba(255,255,255,.16);border:0;color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg viewBox='0 0 24 24' width='17' height='17' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true' style='flex-shrink:0;'><path d='M5 12h14'/></svg></button>
+          <button id="lpSupportChatClose" title="סגירה" style="background:rgba(255,255,255,.16);border:0;color:#fff;width:28px;height:28px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg viewBox='0 0 24 24' width='17' height='17' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true' style='flex-shrink:0;'><path d='M6 6l12 12M18 6 6 18'/></svg></button>
         </div>
       </div>
 
       <div id="lpSupportChatGate" style="padding:26px 20px;text-align:center">
         <div style="width:48px;height:48px;border-radius:50%;background:rgba(225,29,72,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
-          <span class="material-symbols-outlined" style="font-size:24px;color:#e11d48">waving_hand</span>
+          <svg viewBox='0 0 24 24' width='24' height='24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true' style='flex-shrink:0;color:#e11d48'><path d='M7 11V6a1.5 1.5 0 0 1 3 0v4M10 10V4.5a1.5 1.5 0 0 1 3 0V10M13 10V5.5a1.5 1.5 0 0 1 3 0V12l1.5-1.5a1.6 1.6 0 0 1 2.3 2.2L16 18a6 6 0 0 1-9-1l-2-3.5a1.5 1.5 0 0 1 2.6-1.5L7 13'/></svg>
         </div>
         <p style="margin:0 0 14px;font-size:14px;color:#e4e1e7">הזן את שמך כדי להתחיל את הצ'אט</p>
         <input id="lpSupportChatName" placeholder="שם" style="width:100%;box-sizing:border-box;text-align:center;margin-bottom:14px;background:#1f1f23;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;padding:12px;font-size:14px;outline:none">
@@ -842,7 +842,7 @@ function mountSupportChatWidget() {
         <div style="display:flex;gap:8px;padding:10px 12px;align-items:center">
           <input id="lpSupportChatInput" placeholder="כתבו הודעה..." style="flex:1;background:#1f1f23;border:1px solid rgba(255,255,255,.1);border-radius:999px;color:#fff;padding:10px 16px;font-size:14px;outline:none">
           <button id="lpSupportChatSend" aria-label="שליחה" style="flex-shrink:0;width:40px;height:40px;border-radius:50%;border:0;background:linear-gradient(135deg,#e11d48,#be0037);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center">
-            <span class="material-symbols-outlined" style="font-size:19px;transform:scaleX(-1)">send</span>
+            <svg viewBox='0 0 24 24' width='19' height='19' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true' style='flex-shrink:0;transform:scaleX(-1)'><path d='M3 11.5 21 3l-5 18-4.5-7zM11.5 14 21 3'/></svg>
           </button>
         </div>
       </div>
