@@ -64,7 +64,7 @@
     <p class="notice" id="typeExplain" style="margin:10px 0 18px"></p>
     <div class="notice" id="producerNotice" style="display:none;margin:0 0 18px">
       <strong>מסיבה של מפיק:</strong>
-      <span id="producerTicketPart">כאן נרשמים כזוג או כסינגל/ית לאיזון מגדרי. את הכרטיס עצמו רוכשים דרך <a id="producerTicketLink" class="text-link" target="_blank" rel="noopener noreferrer">לינק הכרטיסים של המפיק</a>.<br></span>
+      <span id="producerTicketPart">כאן נרשמים להרשמה למסיבה, בכל סוגי ההרשמה. את הכרטיס עצמו רוכשים דרך <a id="producerTicketLink" class="text-link" target="_blank" rel="noopener noreferrer">לינק הכרטיסים של המפיק</a>.<br></span>
       הפרטים שלכם (שם, כינוי טלגרם ומספר טלפון) יועברו למפיק המסיבה — לזוגות עם ההרשמה, לסינגלים ברגע שנמצא איזון.
     </div>
 
@@ -316,19 +316,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // typeItems/typeSelect wiring further down — showStep2 can run for a
   // ?partyId= link before that wiring's consts are initialized.
   function applyBalanceOnly(party, balanceOnly) {
-    // "couple" is the form's couple option (registered as single-*-couple halves).
-    const BALANCE_TYPES = ["couple", "single-male-balance", "single-female-balance"];
-    const items = Array.from(document.querySelectorAll("#typeDropdownList [data-type]"));
-    items.forEach((li) => {
-      li.style.display = balanceOnly && !BALANCE_TYPES.includes(li.dataset.type) ? "none" : "";
-    });
-    if (balanceOnly && !BALANCE_TYPES.includes(typeSelect.value)) {
-      const first = items.find((li) => li.dataset.type === "single-male-balance");
-      typeSelect.value = "single-male-balance";
-      document.getElementById("typeDropdownLabel").textContent = first.textContent;
-      items.forEach((li) => li.setAttribute("aria-selected", li === first ? "true" : "false"));
-      typeSelect.dispatchEvent(new Event("change"));
-    }
     // Any party posted by a producer, with or without its own ticket link:
     // registrants are told up front their details go to the producer.
     document.getElementById("producerNotice").style.display = (balanceOnly || party.producerParty) ? "" : "none";

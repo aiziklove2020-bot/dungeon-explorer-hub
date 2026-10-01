@@ -37,7 +37,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     await import("./assets/site-data.js?v=202610010605");
-    const { renderAdvertiserCouples } = await import("./assets/advertiser-couples.js?v=202610010508");
+    const { renderAdvertiserCouples } = await import("./assets/advertiser-couples.js?v=202610010605");
     window.__renderAdvertiserCouples = renderAdvertiserCouples;
   } catch (err) {
     console.error("Failed to load site-data.js / advertiser-couples.js:", err);

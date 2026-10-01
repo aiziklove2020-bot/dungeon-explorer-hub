@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ${e.city ? `<div class="row"><span>מיקום</span><span>${escapeHtml(e.city)}</span></div>` : ""}
         ${e.dj ? `<div class="row"><span>DJ</span><span>${escapeHtml(e.dj)}</span></div>` : ""}
         <a class="btn gold full" href="${escapeHtml(ticketHref)}" target="${e.partyType === 'external' ? '_blank' : '_self'}">${e.partyType === 'external' && e.registrationLink ? 'לרכישת כרטיסים' : 'להרשמה למסיבה'} ←</a>
-        ${e.partyType === 'external' && e.allowBalanceRegistration ? `<a class="btn full" style="margin-top:8px" href="/register-event?partyId=${encodeURIComponent(e.id)}">הרשמה דרך האתר — זוגות וסינגלים לאיזון ←</a>` : ""}
+        ${e.partyType === 'external' && e.allowBalanceRegistration ? `<a class="btn full" style="margin-top:8px" href="/register-event?partyId=${encodeURIComponent(e.id)}">הרשמה למסיבה דרך האתר ←</a>` : ""}
         <button type="button" class="btn full" id="favBtn" style="margin-top:8px;display:none">שמירה למועדפים</button>
         <p class="meta">הרשמה למסיבה נפרדת מהרשמה למנוי. אין תשלום אונליין.</p>
       </aside>

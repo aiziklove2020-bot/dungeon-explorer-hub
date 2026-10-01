@@ -56,10 +56,11 @@ describe('registering on an advertiser external-ticket party', () => {
     expect(txUpdate).not.toHaveBeenCalled();
   });
 
-  it('refuses the discount type even when opted in', async () => {
+  it('accepts every registration type when opted in', async () => {
     partyDoc.allowBalanceRegistration = true;
-    await expect(registerToPartyNew('p1', reg('single-female-discount', 'female'))).rejects.toThrow('או כזוג בלבד');
-    expect(txUpdate).not.toHaveBeenCalled();
+    await registerToPartyNew('p1', reg('single-female-discount', 'female'));
+    await registerToPartyNew('p1', { ...reg('single-male-balance', 'male'), phoneNumber: '0500000003' });
+    expect(txUpdate).toHaveBeenCalledTimes(2);
   });
 
   it('accepts a couple half when opted in', async () => {
