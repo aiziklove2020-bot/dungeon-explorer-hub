@@ -71,6 +71,8 @@ import bcrypt from 'bcryptjs';
 import { FieldValue } from 'firebase-admin/firestore';
 import { requireAdminApiSecret } from '../lib/apiAuth.js';
 import { getFirebaseAdmin } from '../lib/forumAuthApi.js';
+import { agentById } from '../shared/agentsRoster.js';
+import { applyAgentCommand } from '../shared/agentCommands.js';
 
 // ── Subscription logic, ported from src/firebase/subscriptions.js ──────────
 // Pure computation only (no Firestore calls) — kept in lockstep with that
@@ -276,6 +278,33 @@ export default async function handler(req, res) {
       }
       await db.collection('settings').doc(docId).set(data, { merge: true });
       return res.status(200).json({ ok: true });
+    }
+
+    // POST { action: 'agent-chat-post', to, text }: the owner writes to an agent
+    // in the admin tab "צוות הסוכנים". The owner's line and the agent's answer
+    // are appended to settings/agentChat; commands the server can run itself
+    // (pause/resume, working days) update settings/agentConfig, anything else
+    // is kept as a request (kind: 'request') for the team manager (Claude).
+    if (action === 'agent-chat-post') {
+      const { to } = body;
+      const text = typeof body.text === 'string' ? body.text.trim().slice(0, 500) : '';
+      const agent = typeof to === 'string' ? agentById(to) : null;
+      if (!agent || !text) return res.status(400).json({ error: 'Unknown agent or empty message' });
+      const cfgRef = db.collection('settings').doc('agentConfig');
+      const chatRef = db.collection('settings').doc('agentChat');
+      const result = await db.runTransaction(async (tx) => {
+        const [cfgSnap, chatSnap] = await Promise.all([tx.get(cfgRef), tx.get(chatRef)]);
+        const cfg = cfgSnap.exists ? cfgSnap.data() || {} : {};
+        const prev = chatSnap.exists && Array.isArray(chatSnap.data()?.messages) ? chatSnap.data().messages : [];
+        const out = applyAgentCommand(agent.id, text, cfg[agent.id] || {});
+        const now = Date.now();
+        const ownerLine = { agent: 'owner', name: 'אתה', role: 'מנהל', text: `@${agent.name} ${text}`, ts: now, to: agent.id, ...(out.handled ? {} : { kind: 'request' }) };
+        const agentLine = { agent: agent.id, name: agent.name, role: agent.role, text: out.reply, ts: now + 1 };
+        if (out.handled) tx.set(cfgRef, { [agent.id]: out.config }, { merge: true });
+        tx.set(chatRef, { messages: [...prev, ownerLine, agentLine].slice(-150) });
+        return out;
+      });
+      return res.status(200).json({ ok: true, handled: result.handled, reply: result.reply });
     }
 
     if (action === 'add-rss-feed') {

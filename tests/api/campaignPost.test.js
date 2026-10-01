@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 let stored = null;
 const sent = [];
-const ref = { set: async (data, opts) => { stored = { ...(stored || {}), ...data }; } };
+const ref = {
+  get: async () => ({ exists: stored !== null, data: () => stored }),
+  set: async (data, opts) => { stored = { ...(stored || {}), ...data }; },
+};
 const db = {
   collection: () => ({ doc: () => ref }),
   runTransaction: async (fn) => fn({ get: async () => ({ exists: stored !== null, data: () => stored }), set: (r, data) => { stored = { ...(stored || {}), ...data }; } }),
@@ -74,5 +77,17 @@ describe('campaign posts to the channel', () => {
       expect(c.caption).not.toContain('utm_');
       expect(c.caption.length).toBeLessThanOrEqual(1024);
     }
+  });
+});
+
+describe('owner switches for the publisher', () => {
+  beforeEach(() => { stored = null; sent.length = 0; telegramOk = true; });
+
+  it('a paused publisher does not post on its own, but a forced manual post still works', async () => {
+    stored = { publisher: { paused: true } };
+    expect((await run({})).body.skipped).toBe('paused by the owner');
+    expect(sent).toHaveLength(0);
+    expect((await run({ force: '1' })).body.ok).toBe(true);
+    expect(sent).toHaveLength(1);
   });
 });

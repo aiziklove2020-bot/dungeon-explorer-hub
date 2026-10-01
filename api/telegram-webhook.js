@@ -766,6 +766,18 @@ export async function agentSay(agentId, text, to = null) {
   }
 }
 
+
+// Owner-set switches for the agents (see shared/agentCommands.js, written by
+// api/admin-settings.js action 'agent-chat-post').
+async function getAgentConfig(db) {
+  try {
+    const snap = await db.collection('settings').doc('agentConfig').get();
+    return snap.exists ? snap.data() || {} : {};
+  } catch {
+    return {};
+  }
+}
+
 // ── Campaign posts ─────────────────────────────────────────────────────────
 // A designed image + caption (see scripts/campaigns/make_campaigns.py and
 // shared/telegramCampaigns.js) goes to the community channel on Sun/Tue/Thu,
@@ -784,10 +796,12 @@ async function sendCampaignPost({ force = false } = {}) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) throw new Error('Server not configured (missing TELEGRAM_BOT_TOKEN)');
   if (!TELEGRAM_CAMPAIGNS.length) return { ok: false, skipped: 'no campaigns' };
-  if (!force && !CAMPAIGN_DAYS.includes(israelWeekday())) return { ok: true, skipped: 'not a campaign day' };
-
   const admin = await initAdmin();
   const db = admin.firestore();
+  const agentCfg = (await getAgentConfig(db)).publisher || {};
+  if (!force && agentCfg.paused) return { ok: true, skipped: 'paused by the owner' };
+  const campaignDays = Array.isArray(agentCfg.days) && agentCfg.days.length ? agentCfg.days : CAMPAIGN_DAYS;
+  if (!force && !campaignDays.includes(israelWeekday())) return { ok: true, skipped: 'not a campaign day' };
   const ref = db.collection('settings').doc('telegramCampaigns');
   const now = Date.now();
   const claimed = await db.runTransaction(async (tx) => {
@@ -843,9 +857,12 @@ const PROMO_MIN_GAP_MS = 20 * 60 * 60 * 1000;
 export async function sendGroupPromoIfDue() {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) return { ok: false, error: 'missing TELEGRAM_BOT_TOKEN' };
-  if (!PROMO_DAYS.includes(israelWeekday())) return { ok: true, skipped: 'not a promo day' };
   const admin = await initAdmin();
   const db = admin.firestore();
+  const agentCfg = (await getAgentConfig(db)).recruiter || {};
+  if (agentCfg.paused) return { ok: true, skipped: 'paused by the owner' };
+  const promoDays = Array.isArray(agentCfg.days) && agentCfg.days.length ? agentCfg.days : PROMO_DAYS;
+  if (!promoDays.includes(israelWeekday())) return { ok: true, skipped: 'not a promo day' };
   const ref = db.collection('settings').doc('telegramGroupPromo');
   const now = Date.now();
   const previous = await db.runTransaction(async (tx) => {
@@ -992,8 +1009,13 @@ async function handlePartyReminders(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
-    const { partiesSent, results, instagramResults, whatsappResult } = await sendAllPartyReminders();
-    await agentSay('secretary', partiesSent ? `שלחתי תזכורות על ${partiesSent} מסיבות לערוצים ולקבוצות ✅` : 'אין מסיבות פעילות היום, לא נשלחו תזכורות.');
+    let secretaryPaused = false;
+    try { secretaryPaused = Boolean((await getAgentConfig((await initAdmin()).firestore())).secretary?.paused); } catch { /* keep sending */ }
+    const { partiesSent, results, instagramResults, whatsappResult } = secretaryPaused
+      ? { partiesSent: 0, results: [], instagramResults: [], whatsappResult: null }
+      : await sendAllPartyReminders();
+    if (secretaryPaused) await agentSay('secretary', 'אני בהפסקה לפי הבקשה שלך, לא שלחתי תזכורות היום.');
+    else await agentSay('secretary', partiesSent ? `שלחתי תזכורות על ${partiesSent} מסיבות לערוצים ולקבוצות ✅` : 'אין מסיבות פעילות היום, לא נשלחו תזכורות.');
     const campaign = await sendCampaignPost().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const groupPromo = await sendGroupPromoIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const health = await runHealthCheck().catch((err) => ({ ok: false, error: String(err?.message || err) }));
