@@ -881,7 +881,7 @@ async function handleCleanupExpiredParties(req, res) {
 
     // Every woman can sign in to the personal area: women without a community
     // (forumUsers) account get one with the shared starter password the owner
-    // chose (marked mustResetPassword). Idempotent — a woman who already has an
+    // chose. Idempotent — a woman who already has an
     // account (found by phone) is left untouched, so a password she set herself
     // is never overwritten. Blocked women are skipped.
     const forumSnap = await db.collection('forumUsers').get();
@@ -910,7 +910,6 @@ async function handleCleanupExpiredParties(req, res) {
             nicknameLower: nickname,
             displayName: String(d.data().name || '').trim(),
             password: starterHash,
-            mustResetPassword: true,
             phone,
             gender: 'female',
             role: 'user',

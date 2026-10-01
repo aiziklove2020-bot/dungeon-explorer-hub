@@ -87,7 +87,7 @@ describe('nightly cleanup job: starter password account for every woman', () => 
     expect(body.createdWomenAccounts).toBe(1);
     expect(created).toHaveLength(1);
     const acct = created[0][1];
-    expect(acct).toMatchObject({ phone: '0501111111', gender: 'female', isApproved: true, isBlocked: false, linkedUserId: 'w-new', mustResetPassword: true, role: 'user' });
+    expect(acct).toMatchObject({ phone: '0501111111', gender: 'female', isApproved: true, isBlocked: false, linkedUserId: 'w-new', role: 'user' });
     expect(await bcrypt.compare('102040', acct.password)).toBe(true);
   });
 });
