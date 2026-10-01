@@ -225,7 +225,8 @@ function lpFavIdentity() {
   // (LP.current()) counts, not the phone-only personal-area lookup
   // (my-area.html), which has no password and isn't a subscriber login.
   const user = LP.current();
-  return user ? user.id : null;
+  // Producers (advertisers) have no favourites.
+  return user && user.role !== "advertiser" ? user.id : null;
 }
 
 async function lpWireFavHearts(container) {
@@ -243,7 +244,9 @@ async function lpWireFavHearts(container) {
     const area = await window.LPData.loadMyForumPersonalArea(identity).catch(() => null);
     isSubscriber = !!area?.profile?.isPrivilegedSubscriber;
   }
-  if (!isSubscriber) {
+  let isProducer = false;
+  try { isProducer = LP.current()?.role === "advertiser"; } catch {}
+  if (!isSubscriber || isProducer) {
     buttons.forEach((btn) => { btn.style.display = "none"; });
     return;
   }

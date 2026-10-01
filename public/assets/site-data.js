@@ -35113,7 +35113,8 @@ function MU(e) {
 		whatsappNumber: e.whatsappNumber || "",
 		partyType: e.partyType || "internal",
 		allowBalanceRegistration: e.allowBalanceRegistration === !0,
-		producerParty: !!e.createdBy
+		producerParty: !!e.createdBy,
+		producerId: e.createdBy || ""
 	};
 }
 function NU(e) {
@@ -35499,6 +35500,13 @@ async function sW(e, t = 3) {
 async function lpCheckPhoneHasForumAccount_(e) {
 	return !!await getByPhone_(e).catch(() => null);
 }
+// Favouriting a party posted by a producer also brings in that producer's other
+// upcoming parties, shown as plain parties (no producer name). A party is never
+// listed twice, and the extras disappear when the favourite is removed.
+function lpExpandProducerFavorites_(all, favIds) {
+	let picked = all.filter((e) => favIds.includes(e.id)), producers = new Set(picked.map((e) => e.producerId).filter(Boolean)), seen = new Set(picked.map((e) => e.id));
+	return [...picked, ...all.filter((e) => e.producerId && producers.has(e.producerId) && !seen.has(e.id)).map((e) => ({ ...e, viaProducer: !0 }))];
+}
 async function cW(e) {
 	let [t, n, r, i] = await Promise.all([
 		MM(e).catch(() => []),
@@ -35506,7 +35514,7 @@ async function cW(e) {
 		Oj(e).catch(() => null),
 		wU(e).catch(() => [])
 	]), a = [];
-	return i.length > 0 && (a = (await PU().catch(() => [])).filter((e) => i.includes(e.id))), {
+	return i.length > 0 && (a = lpExpandProducerFavorites_(await PU().catch(() => []), i)), {
 		registrations: t,
 		balanceMatch: n,
 		profile: r,
