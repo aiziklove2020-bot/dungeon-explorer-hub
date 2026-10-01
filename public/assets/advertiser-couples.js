@@ -168,10 +168,12 @@ async function renderCouplesForEvent(eventId, targetEl) {
     const balanced = balancePairs(registrations, data.balanceMatches);
     const balancedPhones = new Set(balanced.flat().map((p) => p.phoneNumber));
 
-    // On an external party that opted into on-site registration, couples
-    // registered knowing their details go to the producer — show them all.
-    // Elsewhere keep the old rule: only couples where both have an account.
-    const showAllCouples = data.partyType === "external" && data.allowBalanceRegistration === true;
+    // A producer's party that takes registrations through the site (an
+    // internal party, or an external one that opted in): couples registered
+    // knowing their details go to the producer — show them all, whether or
+    // not they have an account. A WhatsApp-only party has no on-site form.
+    const takesOnSite = !data.whatsappNumber && (data.partyType !== "external" || data.allowBalanceRegistration === true);
+    const showAllCouples = takesOnSite;
     const couples = [];
     for (const [male, female] of couplePairsFromRegistrations(registrations)) {
       if (balancedPhones.has(male.phoneNumber) || balancedPhones.has(female.phoneNumber)) continue;
