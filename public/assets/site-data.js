@@ -35192,13 +35192,31 @@ async function VU(e, t) {
 	let n = await getByPhone_(e).catch(() => null);
 	if (!n) throw Error("לא נמצא חשבון עם מספר הטלפון הזה");
 	let r = await eN(n.nickname, t);
+	let shownName = r.displayName || "";
+	if (!shownName) shownName = (await Oj(e).catch(() => null))?.name || "";
 	return {
 		id: r.id,
-		name: r.nickname,
+		name: shownName || r.nickname,
 		phone: r.phone || e,
 		gender: n.gender || null,
 		role: "user"
 	};
+}
+async function lpUpdateMyDetails_(forumId, phone, details) {
+	let name = String(details?.name || "").trim().slice(0, 60), telegram = String(details?.telegram || "").trim().replace(/^@+/, "").slice(0, 40);
+	if (name.length < 2) throw Error("נא להזין שם (לפחות 2 תווים)");
+	let n = await Ej(XE(phone) || phone), patch = { name };
+	if (telegram) patch.telegramUsername = telegram;
+	if (n) {
+		await A(E(H, Tj, n.id), patch);
+		await q(`userByPhone_${XE(phone) || phone}`);
+		await q(`userById_${n.id}`);
+	}
+	if (forumId) {
+		await A(E(H, PM, forumId), { displayName: name });
+		BM(forumId);
+	}
+	return { name };
 }
 async function HU(e, t) {
 	await rN(e, {
@@ -35727,6 +35745,7 @@ window.LPData = {
 	checkMyAccountStatus: checkMyAccountStatus_,
 	getMembershipStatus: UU,
 	updateMyProfile: HU,
+	updateMyDetails: lpUpdateMyDetails_,
 	uploadImage: JU,
 	createAdvertiserParty: YU,
 	loadAdvertiserParties: XU,

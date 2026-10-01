@@ -908,6 +908,7 @@ async function handleCleanupExpiredParties(req, res) {
           batch.set(db.collection('forumUsers').doc(), {
             nickname,
             nicknameLower: nickname,
+            displayName: String(d.data().name || '').trim(),
             password: starterHash,
             mustResetPassword: true,
             phone,
