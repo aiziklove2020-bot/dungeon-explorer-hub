@@ -9,7 +9,7 @@ const TAB_ICONS = {
   matching: Heart, parties: PartyPopper, users: Users, siteDesign: Palette,
   forumUsers: UserCog, subscriptions: CreditCard, about: Info, contact: Phone,
   links: Link2, deleteRequests: Trash2, admins: ShieldCheck, advertisers: Megaphone,
-  rss: Rss, telegram: Send, db: Database, dbLogger: FileClock, gitHistory: GitBranch,
+  rss: Rss, telegram: Send, agents: UserCog, db: Database, dbLogger: FileClock, gitHistory: GitBranch,
 };
 import { useNavigate } from '@tanstack/react-router';
 import { useContent } from '../context/ContentContext';
@@ -32,6 +32,7 @@ const LinksSection = lazy(() => import('../components/admin/LinksSection'));
 const AdminsSection = lazy(() => import('../components/admin/AdminsSection'));
 const AdvertisersSection = lazy(() => import('../components/admin/AdvertisersSection'));
 const TelegramSection = lazy(() => import('../components/admin/TelegramSection'));
+const AgentsSection = lazy(() => import('../components/admin/AgentsSection'));
 const DBLoggerSection = lazy(() => import('../components/admin/DBLoggerSection'));
 const DBSection = lazy(() => import('../components/admin/DBSection'));
 const GitHistorySection = lazy(() => import('../components/admin/GitHistorySection'));
@@ -368,6 +369,7 @@ const Admin = () => {
           {activeSection === 'advertisers' && <AdvertisersSection showSaved={showSaved} />}
           {activeSection === 'rss'       && <RssSection showSaved={showSaved} />}
           {activeSection === 'telegram'  && <TelegramSection showSaved={showSaved} />}
+          {activeSection === 'agents'    && <AgentsSection />}
           {activeSection === 'gitHistory' && <GitHistorySection />}
           </Suspense>
         </div>
