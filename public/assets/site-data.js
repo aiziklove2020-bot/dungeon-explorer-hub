@@ -35115,7 +35115,8 @@ function MU(e) {
 		registrationLink: e.registrationLink || "",
 		whatsappNumber: e.whatsappNumber || "",
 		partyType: e.partyType || "internal",
-		allowBalanceRegistration: e.allowBalanceRegistration === !0
+		allowBalanceRegistration: e.allowBalanceRegistration === !0,
+		producerParty: !!e.createdBy
 	};
 }
 function NU(e) {
