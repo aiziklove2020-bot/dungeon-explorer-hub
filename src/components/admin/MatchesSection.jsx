@@ -519,6 +519,32 @@ const MatchesSection = ({ showSaved }) => {
     showSaved();
   };
 
+  // Names-only balance list (no phone numbers) as plain WhatsApp text.
+  // Copies it to the clipboard and opens WhatsApp's own "choose a chat"
+  // screen (wa.me/?text=) — the admin picks any contact or group there.
+  const buildBalanceNamesText = (partyId, partyName) => {
+    const matched = (partyBalances[partyId] || []).filter((m) => m.isMatched === true);
+    if (matched.length === 0) {
+      alert(t('admin.balanceTables.noMatchedCouplesToExport'));
+      return null;
+    }
+    const lines = matched.map(
+      (m, i) => `${i + 1}. ${m.maleName || '-'} + ${m.femaleName || '-'}${m.isCouple ? ' (זוג)' : ''}`
+    );
+    return `איזון — ${partyName || 'מסיבה'}\n\n${lines.join('\n')}`;
+  };
+
+  const shareBalanceNamesWhatsApp = async (partyId, partyName) => {
+    const text = buildBalanceNamesText(partyId, partyName);
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Clipboard can be blocked — the WhatsApp link below still carries the text.
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+  };
+
   // Opens the recipient picker for a party's balance and eagerly loads the
   // bot's saved recipients + groups (best-effort — if the local bot isn't
   // running, the picker still opens with just the manual-phone-number option).
@@ -708,10 +734,10 @@ const MatchesSection = ({ showSaved }) => {
                     {partyBalance.length > 0 && (
                       <button
                         type="button"
-                        onClick={() => openWhatsappPicker(party.id, party.name || party.title)}
+                        onClick={() => shareBalanceNamesWhatsApp(party.id, party.name || party.title)}
                         className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
                       >
-                        <MessageCircle size={16} /> שלח אקסל בוואטסאפ
+                        <MessageCircle size={16} /> שלח שמות בוואטסאפ
                       </button>
                     )}
                     <button
