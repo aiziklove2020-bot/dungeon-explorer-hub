@@ -445,3 +445,15 @@ function lpWirePushBanner() {
   });
 }
 document.addEventListener("DOMContentLoaded", lpWirePushBanner);
+
+// sw.js was only ever registered when someone tapped "enable notifications",
+// so every other visit had no service worker and tools that check PWA
+// installability (PWABuilder, Lighthouse) reported the site as having none.
+// sw.js does no caching — every request passes straight through to the
+// network — so registering it everywhere changes nothing about what visitors
+// see; it just makes the site a complete installable PWA.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
