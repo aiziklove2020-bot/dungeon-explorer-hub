@@ -207,7 +207,7 @@ const PROMO_MESSAGE = [
   'בואו באהבה 🩶 כל פרסום מסיבות בקבוצה נעשה רק דרך לינק אחד — אתר הקהילה. ככה כולם רואים את כל המסיבות במקום אחד, מסודר וברור.',
   '',
   'להרשמה כמפרסם ופרסום המסיבה שלכם:',
-  'https://www.libralparty.net/advertiser/register'
+  'https://www.libralparty.net/advertiser-register'
 ].join('\n');
 
 function isPromoAuthorized(req) {
@@ -807,6 +807,43 @@ async function handleCampaign(req, res) {
   }
 }
 
+
+// ── Weekly "want to advertise your party?" message to the group ────────────
+// Used to depend on an external pinger (cron-job.org) hitting ?job=promo; now
+// the daily reminders cron also posts it on Mondays and Thursdays (Israel
+// time), with the same short lock as the campaigns so a retry never doubles it.
+const PROMO_DAYS = [1, 4];
+const PROMO_MIN_GAP_MS = 20 * 60 * 60 * 1000;
+
+export async function sendGroupPromoIfDue() {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) return { ok: false, error: 'missing TELEGRAM_BOT_TOKEN' };
+  if (!PROMO_DAYS.includes(israelWeekday())) return { ok: true, skipped: 'not a promo day' };
+  const admin = await initAdmin();
+  const db = admin.firestore();
+  const ref = db.collection('settings').doc('telegramGroupPromo');
+  const now = Date.now();
+  const previous = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const last = snap.exists ? snap.data()?.lastSentAt : null;
+    if (last && now - last < PROMO_MIN_GAP_MS) return undefined;
+    tx.set(ref, { lastSentAt: now }, { merge: true });
+    return last ?? null;
+  });
+  if (previous === undefined) return { ok: true, skipped: 'already sent recently' };
+  const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: REMINDER_GROUP_CHAT_ID, text: PROMO_MESSAGE })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!data.ok) {
+    await ref.set({ lastSentAt: previous }, { merge: true }).catch(() => {});
+    return { ok: false, description: data.description || `HTTP ${res.status}` };
+  }
+  return { ok: true };
+}
+
 async function handlePartyReminders(req, res) {
   if (!isCronAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -814,7 +851,8 @@ async function handlePartyReminders(req, res) {
   try {
     const { partiesSent, results, instagramResults, whatsappResult } = await sendAllPartyReminders();
     const campaign = await sendCampaignPost().catch((err) => ({ ok: false, error: String(err?.message || err) }));
-    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, campaign });
+    const groupPromo = await sendGroupPromoIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
+    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, campaign, groupPromo });
   } catch (err) {
     console.error('party-reminders:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
