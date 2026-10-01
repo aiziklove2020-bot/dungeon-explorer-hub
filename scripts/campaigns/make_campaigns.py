@@ -166,7 +166,7 @@ def main():
     for n, (_, bg, head, sub, btn, page, caption) in enumerate(CAMPAIGNS, 1):
         cid = f"c{n:02d}"
         size = make(cid, bg, head, sub, btn, page)
-        url = f"{SITE}{page}?utm_source=telegram&utm_medium=channel&utm_campaign={cid}"
+        url = f"{SITE}{page}"
         items.append({"id": cid, "image": f"{SITE}/assets/campaigns/{cid}.jpg", "caption": f"{caption}\n{url}"})
         print(cid, size // 1024, "KB")
     version = datetime.date.today().strftime("%Y-%m")  # a new month's pool starts again from its first campaign

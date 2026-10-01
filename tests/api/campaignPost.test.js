@@ -67,10 +67,11 @@ describe('campaign posts to the channel', () => {
     expect(stored.version).toBe(TELEGRAM_CAMPAIGNS_VERSION);
   });
 
-  it('every campaign has an image URL under the site and a caption with a tracked link', () => {
+  it('every campaign has an image URL under the site and a caption with a plain site link', () => {
     for (const c of TELEGRAM_CAMPAIGNS) {
       expect(c.image).toMatch(/^https:\/\/www\.libralparty\.net\/assets\/campaigns\/c\d+\.jpg$/);
-      expect(c.caption).toContain('utm_campaign=' + c.id);
+      expect(c.caption).toMatch(/https:\/\/www\.libralparty\.net\/[a-z-]*(\n|$)/);
+      expect(c.caption).not.toContain('utm_');
       expect(c.caption.length).toBeLessThanOrEqual(1024);
     }
   });
