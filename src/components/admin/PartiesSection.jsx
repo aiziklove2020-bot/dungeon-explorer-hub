@@ -11,6 +11,7 @@ import PartyEditor from './PartyEditor';
 import RegistrationItem from './RegistrationItem';
 import CoupleRegistrationItem from './CoupleRegistrationItem';
 import PartyImage from '../PartyImage';
+import { normalizeCoupleRegistrations } from '../../utils/coupleRegistrations';
 
 /**
  * Retention-hours preset options shown in the admin select. Picked to cover the
@@ -142,7 +143,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
   };
 
   const getGenderCount = (party, gender) => {
-    const regs = party.registrations || [];
+    const regs = normalizeCoupleRegistrations(party.registrations);
     if (gender === 'male') {
       return regs.filter(reg => reg.gender === 'male').length || 0;
     }
@@ -153,7 +154,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
   };
 
   const getRegistrationDisplayItems = (registrations) => {
-    const regs = registrations || [];
+    const regs = normalizeCoupleRegistrations(registrations);
     const couplesByCoupleId = {};
     regs.forEach(reg => {
       if (reg.coupleId) {

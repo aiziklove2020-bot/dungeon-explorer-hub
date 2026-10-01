@@ -288,6 +288,7 @@ async function registerForParty(partyId: string, data: {
   partnerName?: string;
   partnerPhone?: string;
   pickupAddress?: string;
+  coupleId?: string;
 }) {
   const registrationType = data.registrationType;
   const gender = registrationType === "couple" ? "couple" : registrationType.startsWith("single-female") ? "female" : "male";
@@ -300,6 +301,8 @@ async function registerForParty(partyId: string, data: {
     partnerName: data.partnerName || null,
     partnerPhone: data.partnerPhone || null,
     pickupAddress: data.pickupAddress || "",
+    // Both halves of a couple share this id so the admin groups them as one couple.
+    coupleId: data.coupleId || null,
   });
 
   // Same client-side Telegram alert the old site's registration form sent —

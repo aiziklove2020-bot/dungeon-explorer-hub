@@ -234,7 +234,13 @@ export const registerToPartyNew = async (partyId, registrationData) => {
     const partyRef = doc(db, PARTIES_COLLECTION, partyId);
 
     const normalizedIncomingPhone = normalizeIsraeliPhone(registrationData.phoneNumber) || registrationData.phoneNumber;
-    const finalGender = userData?.gender || registrationData.gender;
+    // A couple half's role (man/woman) is explicit in the form — never let an
+    // account's stored gender override it (bulk-imported accounts default to
+    // "male", which turned the woman of a couple into a second man).
+    const isCoupleHalf = registrationData.registrationType === 'single-male-couple' || registrationData.registrationType === 'single-female-couple';
+    const finalGender = isCoupleHalf
+      ? (registrationData.registrationType === 'single-female-couple' ? 'female' : 'male')
+      : (userData?.gender || registrationData.gender);
     const finalName = userData?.name || registrationData.fullName;
     const finalTelegram = userData?.telegramUsername || registrationData.telegramUsername || '';
 

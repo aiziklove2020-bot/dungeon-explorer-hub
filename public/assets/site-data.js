@@ -24138,7 +24138,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 					let e = await ik(t.partnerPhone);
 					e && e.level !== "blocked" && (c = !0);
 				} catch {}
-				let l = i?.gender || t.gender, u = i?.name || t.fullName, d = i?.telegramUsername || t.telegramUsername || "";
+				let l = t.registrationType === "single-female-couple" ? "female" : t.registrationType === "single-male-couple" ? "male" : (i?.gender || t.gender), u = i?.name || t.fullName, d = i?.telegramUsername || t.telegramUsername || "";
 				f = {
 					userId: r || null,
 					userName: u,

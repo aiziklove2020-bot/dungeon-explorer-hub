@@ -34,7 +34,13 @@ function withTelegram(person, byPhone, fallbackTelegram) {
 
 // Couples who registered together (either record shape) — unchanged from
 // before: only shown once both partners have a real, unblocked account.
-function couplePairsFromRegistrations(registrations) {
+function couplePairsFromRegistrations(rawRegistrations) {
+  // A couple half's role comes from its registrationType, not the account's
+  // stored gender (imported accounts default to "male").
+  const registrations = rawRegistrations.map((r) =>
+    r.registrationType === "single-female-couple" ? { ...r, gender: "female" }
+    : r.registrationType === "single-male-couple" ? { ...r, gender: "male" }
+    : r);
   const byPhone = new Map();
   registrations.forEach((r) => { if (r.phoneNumber) byPhone.set(r.phoneNumber, r); });
 

@@ -7,6 +7,7 @@ import { normalizeIsraeliPhone } from '../../utils/phone';
 import Loader from '../Loader';
 import PhoneLink from '../PhoneLink';
 import './BalanceTables.css';
+import { normalizeCoupleRegistrations } from '../../utils/coupleRegistrations';
 
 const BalanceTables = ({ 
   party, 
@@ -125,14 +126,7 @@ const BalanceTables = ({
   // coupleId on that path. Synthesize one here (from the sorted phone
   // pair) so this component's existing coupleId-keyed grouping picks
   // them up as a couple instead of two unrelated singles.
-  const phoneToReg = new Map();
-  (party.registrations || []).forEach(reg => { if (reg.phoneNumber) phoneToReg.set(reg.phoneNumber, reg); });
-  const registrations = (party.registrations || []).map(reg => {
-    if (reg.coupleId || !reg.partnerPhone || !reg.phoneNumber) return reg;
-    const partner = phoneToReg.get(reg.partnerPhone);
-    if (!partner || partner.partnerPhone !== reg.phoneNumber) return reg;
-    return { ...reg, coupleId: [reg.phoneNumber, reg.partnerPhone].sort().join('_') };
-  });
+  const registrations = normalizeCoupleRegistrations(party.registrations);
 
   const couples = registrations?.filter(reg =>
     reg.registrationType === 'couple' || reg.gender === 'couple' || reg.coupleId
