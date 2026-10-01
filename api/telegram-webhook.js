@@ -43,6 +43,7 @@
 import { requireTelegramWebhookSecret, requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 import { TELEGRAM_CAMPAIGNS, TELEGRAM_CAMPAIGNS_VERSION } from '../shared/telegramCampaigns.js';
+import { agentById } from '../shared/agentsRoster.js';
 
 // Sending every active party to every allowed destination can take longer
 // than Vercel Hobby's default 10s function timeout, which caused the
@@ -742,6 +743,29 @@ async function sendAllPartyReminders(targetChatId) {
 }
 
 
+
+// ── Team chat ──────────────────────────────────────────────────────────────
+// The agents report what they did in settings/agentChat (last 150 lines),
+// shown in the admin tab "צוות הסוכנים". Best effort: never breaks a job.
+export async function agentSay(agentId, text, to = null) {
+  try {
+    const agent = agentById(agentId);
+    if (!agent || !text) return;
+    const admin = await initAdmin();
+    const db = admin.firestore();
+    const ref = db.collection('settings').doc('agentChat');
+    const toAgent = to ? agentById(to) : null;
+    const line = { agent: agentId, name: agent.name, role: agent.role, text: toAgent ? `@${toAgent.name} ${text}` : text, ts: Date.now() };
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      const prev = snap.exists && Array.isArray(snap.data()?.messages) ? snap.data().messages : [];
+      tx.set(ref, { messages: [...prev, line].slice(-150) });
+    });
+  } catch (err) {
+    console.error('agentSay:', err?.message || err);
+  }
+}
+
 // ── Campaign posts ─────────────────────────────────────────────────────────
 // A designed image + caption (see scripts/campaigns/make_campaigns.py and
 // shared/telegramCampaigns.js) goes to the community channel on Sun/Tue/Thu,
@@ -789,6 +813,7 @@ async function sendCampaignPost({ force = false } = {}) {
     await ref.set(claimed.previous, { merge: true }).catch(() => {});
     return { ok: false, id: campaign.id, description: data.description || `HTTP ${res.status}` };
   }
+  await agentSay('publisher', `פרסמתי בערוץ את הקמפיין "${campaign.caption.split('\n')[0].replace(/^[^\p{L}\p{N}]+/u, '')}" ✅`);
   return { ok: true, id: campaign.id };
 }
 
@@ -841,6 +866,7 @@ export async function sendGroupPromoIfDue() {
     await ref.set({ lastSentAt: previous }, { merge: true }).catch(() => {});
     return { ok: false, description: data.description || `HTTP ${res.status}` };
   }
+  await agentSay('recruiter', 'שלחתי לקבוצה "מסיבות בישראל" את ההודעה למפרסמים ✅');
   return { ok: true };
 }
 
@@ -919,6 +945,13 @@ export async function runHealthCheck({ alert = true } = {}) {
   }
 
   const result = { ok: problems.length === 0, problems };
+  if (result.ok) {
+    await agentSay('doctor', 'בדקתי את האתר: 11 דפים, קבצים, בסיס נתונים, בוט הטלגרם וקמפיינים. הכל תקין ✅');
+  } else {
+    await agentSay('doctor', `מצאתי ${problems.length} בעיות באתר: ${problems.slice(0, 3).join('; ')}`);
+    await agentSay('doctor', 'יש בעיות באתר, תבדוק בבקשה היום ב-13:37 ותתקן אם זה בקוד.', 'fixer');
+    if (problems.some((x) => x.includes('קמפיין'))) await agentSay('doctor', 'לא יצא קמפיין זמן רב, תבדוק מה קורה.', 'publisher');
+  }
   if (db) {
     await db.collection('settings').doc('healthCheck').set({ lastRunAt: Date.now(), ok: result.ok, problems }, { merge: true }).catch(() => {});
   }
@@ -960,6 +993,7 @@ async function handlePartyReminders(req, res) {
   }
   try {
     const { partiesSent, results, instagramResults, whatsappResult } = await sendAllPartyReminders();
+    await agentSay('secretary', partiesSent ? `שלחתי תזכורות על ${partiesSent} מסיבות לערוצים ולקבוצות ✅` : 'אין מסיבות פעילות היום, לא נשלחו תזכורות.');
     const campaign = await sendCampaignPost().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const groupPromo = await sendGroupPromoIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const health = await runHealthCheck().catch((err) => ({ ok: false, error: String(err?.message || err) }));
@@ -1141,6 +1175,12 @@ async function handleCleanupExpiredParties(req, res) {
       }
     }
 
+    const parts = [];
+    if (deletedParties) parts.push(`${deletedParties} מסיבות שעבר זמנן`);
+    if (deletedUsers) parts.push(`${deletedUsers} מנויי יום שפג תוקפם`);
+    if (upgradedWomen) parts.push(`${upgradedWomen} נשים עברו למנוי לכל החיים`);
+    if (createdWomenAccounts) parts.push(`${createdWomenAccounts} חשבונות כניסה חדשים לנשים`);
+    await agentSay('cleaner', parts.length ? `סיימתי ניקיון לילי: ${parts.join(', ')}.` : 'ניקיון לילי: אין מה לנקות, הכל מסודר ✅');
     return res.status(200).json({ ok: true, deleted: deletedParties, deletedDayPassUsers: deletedUsers, upgradedWomen, createdWomenAccounts });
   } catch (err) {
     return res.status(200).json({ ok: false, deleted: 0, error: String(err?.message || err) });

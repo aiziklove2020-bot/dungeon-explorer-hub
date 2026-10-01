@@ -23,6 +23,7 @@ export const adminTabs = [
   { id: 'advertisers', label: 'מפרסמים' },
   { id: 'rss',      label: 'RSS Feeds' },
   { id: 'telegram', label: 'טלגרם' },
+  { id: 'agents',   label: 'צוות הסוכנים' },
   // These three are real, working recovery/monitoring tools (backup+restore,
   // Firestore read-volume tracking, git publish audit log) — not dead code,
   // just rarely-clicked technical/ops tools that clutter the main tab row.
