@@ -30,6 +30,10 @@ function createMainFirestore() {
   }
   try {
     return initializeFirestore(app, {
+      // Falls back to long polling when the default streaming connection
+      // can't be established (some mobile/Safari networks) instead of
+      // leaving requests pending forever.
+      experimentalAutoDetectLongPolling: true,
       localCache: persistentLocalCache({
         tabManager: persistentMultipleTabManager()
       })

@@ -6,7 +6,7 @@
 // this is exposed as callable functions instead and invoked right after
 // each page renders its cards (see events.html / index.html / etc.).
 (() => {
-  const fallback = "assets/design/lounge.png";
+  const fallback = "assets/design/lounge.webp";
 
   function frameImage(frame, src, alt) {
     if (frame.classList.contains("event-image-frame")) return;
