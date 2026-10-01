@@ -165,3 +165,4 @@
 @utility btn-glow {
   box-shadow: var(--red-glow);
 }
+@keyframes lp-btn-spin{to{transform:rotate(360deg)}}

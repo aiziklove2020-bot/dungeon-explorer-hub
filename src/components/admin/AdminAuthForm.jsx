@@ -1,6 +1,5 @@
 import { useId, useState } from 'react';
 import { Lock } from 'lucide-react';
-import Loader from '../Loader';
 import SEO from '../SEO';
 import { authenticateAdmin, setAdminPassword } from '../../firebase/users';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -10,6 +9,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
  * Calls onAuthenticated(admin) once the admin is fully authenticated.
  */
 const AdminAuthForm = ({ onAuthenticated }) => {
+  // keyframes for the in-button spinner (scoped name, injected once with the form)
   const { t } = useLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -155,11 +155,11 @@ const AdminAuthForm = ({ onAuthenticated }) => {
               type="submit"
               disabled={loading}
               aria-disabled={loading}
-              className="w-full text-white font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full text-white font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-80"
               style={{ background: 'linear-gradient(135deg,#f6c887,#dab064)', borderRadius: 15, minHeight: 54 }}
             >
               {loading ? (
-                <div className="loader-inline"><Loader size="small" /></div>
+                <><span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: '50%', border: '3px solid rgba(255,255,255,.35)', borderTopColor: '#fff', display: 'inline-block', animation: 'lp-btn-spin .8s linear infinite' }} /> {t('adminLogin.loggingIn') === 'adminLogin.loggingIn' ? 'מתחבר…' : t('adminLogin.loggingIn')}</>
               ) : (
                 <><Lock size={20} aria-hidden="true" /> {t('adminLogin.savePassword')}</>
               )}
@@ -233,7 +233,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
             type="submit"
             disabled={loading}
             aria-disabled={loading}
-            className="w-full text-white font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full text-white font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-80"
             style={{
               background: 'linear-gradient(135deg,#ff438b,#ff5596)',
               borderRadius: 15,
@@ -241,7 +241,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
             }}
           >
             {loading ? (
-              <div className="loader-inline"><Loader size="small" /></div>
+              <><span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: '50%', border: '3px solid rgba(255,255,255,.35)', borderTopColor: '#fff', display: 'inline-block', animation: 'lp-btn-spin .8s linear infinite' }} /> {t('adminLogin.loggingIn') === 'adminLogin.loggingIn' ? 'מתחבר…' : t('adminLogin.loggingIn')}</>
             ) : (
               <><Lock size={20} aria-hidden="true" /> {t('adminLogin.loginButton')}</>
             )}
