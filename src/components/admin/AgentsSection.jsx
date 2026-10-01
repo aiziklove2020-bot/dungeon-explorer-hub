@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { RefreshCw } from 'lucide-react';
 import { db } from '../../firebase/config';
+import { callAdminSettings } from '../../utils/adminApi';
 import { AGENTS, AGENT_CATEGORIES, agentById } from '../../../shared/agentsRoster.js';
 
 const timeLabel = (ts) =>
@@ -12,6 +13,10 @@ const timeLabel = (ts) =>
 const AgentsSection = () => {
   const [messages, setMessages] = useState(null);
   const [error, setError] = useState('');
+  const [to, setTo] = useState(AGENTS[0].id);
+  const [text, setText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
 
   const load = useCallback(async () => {
     try {
@@ -24,6 +29,22 @@ const AgentsSection = () => {
     }
   }, []);
 
+  const send = async (e) => {
+    e.preventDefault();
+    if (!text.trim() || sending) return;
+    setSending(true);
+    setSendError('');
+    try {
+      await callAdminSettings('agent-chat-post', { to, text });
+      setText('');
+      await load();
+    } catch (err) {
+      setSendError(err.message || 'השליחה נכשלה, נסה שוב.');
+    } finally {
+      setSending(false);
+    }
+  };
+
   useEffect(() => {
     load();
     const timer = setInterval(load, 60000);
@@ -34,7 +55,7 @@ const AgentsSection = () => {
     <div className="space-y-6" dir="rtl">
       <div className="bg-[#20151e] border border-white/5 p-4 md:p-6 rounded-xl md:rounded-2xl">
         <h2 className="text-xl font-bold mb-1">צוות הסוכנים</h2>
-        <p className="text-sm text-[#c0aebb] mb-4">כל סוכן והתפקיד שלו. כדי לתת לסוכן הוראה, כותבים לי בצ׳אט את השם שלו ומה לעשות.</p>
+        <p className="text-sm text-[#c0aebb] mb-4">כל סוכן והתפקיד שלו. כדי לתת לסוכן הוראה, כותבים לו בצ׳אט שלמטה.</p>
         <div className="space-y-5">
           {AGENT_CATEGORIES.map((cat) => (
             <div key={cat.id}>
@@ -64,6 +85,32 @@ const AgentsSection = () => {
             <RefreshCw size={16} /> רענון
           </button>
         </div>
+        <form onSubmit={send} className="mb-4 space-y-2">
+          <div className="flex gap-2">
+            <select
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              className="bg-[#2a1a24] text-white border border-white/10 rounded-lg px-3 py-2 text-sm"
+              aria-label="למי לכתוב"
+            >
+              {AGENTS.map((a) => (
+                <option key={a.id} value={a.id}>{a.name} – {a.role}</option>
+              ))}
+            </select>
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="מה לעשות? למשל: תפרסם רק בימי שני וחמישי"
+              maxLength={500}
+              className="flex-1 min-w-0 bg-[#2a1a24] text-white border border-white/10 rounded-lg px-3 py-2 text-sm"
+            />
+            <button type="submit" disabled={sending || !text.trim()} className="px-4 py-2 rounded-lg text-sm font-bold text-white disabled:opacity-60" style={{ background: 'linear-gradient(135deg,#ff438b,#ff5596)' }}>
+              {sending ? 'שולח…' : 'שלח'}
+            </button>
+          </div>
+          <p className="text-xs text-[#94A3B8]">עומר וליאור מבינים: "תעצור", "תמשיך", "תעבוד רק בימי שני וחמישי". אדם מבין "תעצור" ו"תמשיך". כל שאר הבקשות נרשמות למנהל הצוות (Claude).</p>
+          {sendError && <p className="text-sm text-[#f87171]">{sendError}</p>}
+        </form>
         {error && <p className="text-sm text-[#f87171] mb-2">{error}</p>}
         {messages === null ? (
           <p className="text-sm text-[#94A3B8]">טוען...</p>
@@ -72,7 +119,7 @@ const AgentsSection = () => {
         ) : (
           <div className="space-y-2 max-h-[60vh] overflow-y-auto">
             {[...messages].reverse().map((m, i) => {
-              const color = agentById(m.agent)?.color || '#c0aebb';
+              const color = m.agent === 'owner' ? '#ffffff' : agentById(m.agent)?.color || '#c0aebb';
               return (
                 <div key={`${m.ts}-${i}`} className="rounded-xl p-3 bg-[#2a1a24] border-r-4" style={{ borderColor: color }}>
                   <div className="flex items-center gap-2 text-xs mb-1">
