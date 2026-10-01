@@ -802,6 +802,8 @@ async function handleManualPost(req, res) {
  *     this is someone's actual community account's site-user record, so it
  *     stays regardless of subscription tier.
  */
+const WOMEN_STARTER_PASSWORD = '102040';
+
 async function handleCleanupExpiredParties(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
@@ -877,7 +879,52 @@ async function handleCleanupExpiredParties(req, res) {
     }
     upgradedWomen = needGold.length;
 
-    return res.status(200).json({ ok: true, deleted: deletedParties, deletedDayPassUsers: deletedUsers, upgradedWomen });
+    // Every woman can sign in to the personal area: women without a community
+    // (forumUsers) account get one with the shared starter password the owner
+    // chose (marked mustResetPassword). Idempotent — a woman who already has an
+    // account (found by phone) is left untouched, so a password she set herself
+    // is never overwritten. Blocked women are skipped.
+    const forumSnap = await db.collection('forumUsers').get();
+    const takenPhones = new Set(forumSnap.docs.map((d) => String(d.data()?.phone || '').replace(/\D/g, '')));
+    const takenNicks = new Set(forumSnap.docs.map((d) => String(d.data()?.nicknameLower || '')));
+    const needAccount = womenSnap.docs.filter((d) => {
+      const data = d.data() || {};
+      const phone = String(data.phoneNumber || '').replace(/\D/g, '');
+      return /^05\d{8}$/.test(phone) && data.level !== 'blocked' && !takenPhones.has(phone);
+    });
+    let createdWomenAccounts = 0;
+    if (needAccount.length > 0) {
+      const bcrypt = (await import('bcryptjs')).default;
+      const starterHash = await bcrypt.hash(WOMEN_STARTER_PASSWORD, 10);
+      for (let i = 0; i < needAccount.length; i += 400) {
+        const batch = db.batch();
+        needAccount.slice(i, i + 400).forEach((d) => {
+          const phone = String(d.data().phoneNumber).replace(/\D/g, '');
+          if (takenPhones.has(phone)) return;
+          const nickname = `lp${phone}`;
+          if (takenNicks.has(nickname)) return;
+          takenPhones.add(phone);
+          takenNicks.add(nickname);
+          batch.set(db.collection('forumUsers').doc(), {
+            nickname,
+            nicknameLower: nickname,
+            password: starterHash,
+            mustResetPassword: true,
+            phone,
+            gender: 'female',
+            role: 'user',
+            isBlocked: false,
+            isApproved: true,
+            linkedUserId: d.id,
+            createdAt: admin.firestore.Timestamp.now(),
+          });
+          createdWomenAccounts += 1;
+        });
+        await batch.commit();
+      }
+    }
+
+    return res.status(200).json({ ok: true, deleted: deletedParties, deletedDayPassUsers: deletedUsers, upgradedWomen, createdWomenAccounts });
   } catch (err) {
     return res.status(200).json({ ok: false, deleted: 0, error: String(err?.message || err) });
   }
