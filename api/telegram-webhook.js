@@ -844,6 +844,116 @@ export async function sendGroupPromoIfDue() {
   return { ok: true };
 }
 
+
+// ── Daily health check ─────────────────────────────────────────────────────
+// Runs with the daily reminders cron: opens the key pages and assets of the
+// live site, checks Firestore and the Telegram bot, and that the campaign
+// posts are still going out. Problems are sent to the admin as a Telegram
+// message (same chat the other agent alerts use) and the result is stored in
+// settings/healthCheck so a follow-up agent can read it and prepare a fix.
+const HEALTH_SITE = 'https://www.libralparty.net';
+const HEALTH_PAGES = ['/', '/events', '/calendar', '/membership', '/register', '/login', '/about', '/contact', '/advertiser-register', '/my-area', '/profile'];
+const HEALTH_ASSETS = ['/assets/app.js', '/assets/site-data.js', '/assets/design/style.css', '/assets/design/hero-v3-800.webp'];
+const CAMPAIGN_MAX_SILENCE_MS = 9 * 24 * 60 * 60 * 1000;
+
+async function healthFetch(path) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 12000);
+  try {
+    const res = await fetch(`${HEALTH_SITE}${path}`, { signal: ctrl.signal, headers: { 'user-agent': 'libral-health-check' } });
+    return { status: res.status, text: path.startsWith('/assets/') ? '' : await res.text() };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function runHealthCheck({ alert = true } = {}) {
+  const problems = [];
+  for (const path of HEALTH_PAGES) {
+    try {
+      const { status, text } = await healthFetch(path);
+      if (status !== 200) problems.push(`הדף ${path} החזיר שגיאה ${status}`);
+      else if (!text.includes('</html>')) problems.push(`הדף ${path} נטען חלקית`);
+    } catch (err) {
+      problems.push(`הדף ${path} לא נטען (${String(err?.message || err).slice(0, 60)})`);
+    }
+  }
+  for (const path of HEALTH_ASSETS) {
+    try {
+      const { status } = await healthFetch(path);
+      if (status !== 200) problems.push(`הקובץ ${path} לא נמצא (${status})`);
+    } catch (err) {
+      problems.push(`הקובץ ${path} לא נטען`);
+    }
+  }
+
+  let db = null;
+  try {
+    const admin = await initAdmin();
+    db = admin.firestore();
+    await db.collection('settings').doc('telegramCampaigns').get();
+  } catch (err) {
+    problems.push(`בסיס הנתונים לא זמין (${String(err?.message || err).slice(0, 60)})`);
+    db = null;
+  }
+
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    problems.push('חסר טוקן של בוט הטלגרם בשרת');
+  } else {
+    try {
+      const r = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+      const data = await r.json();
+      if (!data.ok) problems.push('בוט הטלגרם לא מגיב (הטוקן לא תקין?)');
+    } catch (err) {
+      problems.push('אין חיבור לטלגרם');
+    }
+  }
+
+  if (db) {
+    try {
+      const snap = await db.collection('settings').doc('telegramCampaigns').get();
+      const last = snap.exists ? snap.data()?.lastSentAt : null;
+      if (last && Date.now() - last > CAMPAIGN_MAX_SILENCE_MS) problems.push('לא פורסם קמפיין בערוץ יותר מ-9 ימים');
+    } catch (err) { /* already reported above */ }
+  }
+
+  const result = { ok: problems.length === 0, problems };
+  if (db) {
+    await db.collection('settings').doc('healthCheck').set({ lastRunAt: Date.now(), ok: result.ok, problems }, { merge: true }).catch(() => {});
+  }
+  if (!result.ok && alert) {
+    try {
+      const admin = await initAdmin();
+      const snap = await admin.firestore().collection('settings').doc('private').collection('supportChat').doc('config').get();
+      const cfg = snap.exists ? snap.data() : null;
+      if (cfg?.botToken && cfg?.chatId) {
+        await fetch(`https://api.telegram.org/bot${cfg.botToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: cfg.chatId, text: `⚠️ בדיקה יומית של האתר מצאה ${problems.length} בעיות:\n\n${problems.map((x) => `• ${x}`).join('\n')}` })
+        });
+      }
+    } catch (err) {
+      console.error('health alert:', err);
+    }
+  }
+  return result;
+}
+
+// GET ?job=health&key=<TELEGRAM_PROMO_SECRET>[&noalert=1] — manual run.
+async function handleHealth(req, res) {
+  if (!isPromoAuthorized(req) && !isCronAuthorized(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const noAlert = (req.query?.noalert || new URL(req.url, 'http://x').searchParams.get('noalert')) === '1';
+  try {
+    return res.status(200).json(await runHealthCheck({ alert: !noAlert }));
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message || 'Internal error' });
+  }
+}
+
 async function handlePartyReminders(req, res) {
   if (!isCronAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -852,7 +962,8 @@ async function handlePartyReminders(req, res) {
     const { partiesSent, results, instagramResults, whatsappResult } = await sendAllPartyReminders();
     const campaign = await sendCampaignPost().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const groupPromo = await sendGroupPromoIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
-    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, campaign, groupPromo });
+    const health = await runHealthCheck().catch((err) => ({ ok: false, error: String(err?.message || err) }));
+    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, campaign, groupPromo, health });
   } catch (err) {
     console.error('party-reminders:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
@@ -1114,6 +1225,9 @@ export default async function handler(req, res) {
         keyReceived: Boolean(req.query?.key || new URL(req.url, 'http://x').searchParams.get('key')),
         authorized: isPromoAuthorized(req)
       });
+    }
+    if (job === 'health') {
+      return handleHealth(req, res);
     }
     if (job === 'campaign') {
       return handleCampaign(req, res);
