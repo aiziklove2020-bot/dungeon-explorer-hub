@@ -115,11 +115,53 @@
     });
   }
 
+  // Desktop: keep every row full. On a 6-column track each card spans 2; a
+  // last row of 2 cards spans 3 each, and a lone last card becomes a wide
+  // horizontal card, instead of leaving blank slots next to it.
+  const balancedGrids = new Set();
+  function balanceGrid(grid) {
+    if (!grid || !grid.classList || !grid.classList.contains("grid")) return;
+    if (grid.classList.contains("grid-few") || grid.classList.contains("grid-two")) return;
+    const cards = [...grid.children];
+    cards.forEach((el) => { el.style.gridColumn = ""; el.classList.remove("card-wide"); });
+    grid.classList.remove("grid-six");
+    if (!window.matchMedia("(min-width:801px)").matches) return;
+    if (!cards.some((el) => el.classList.contains("card"))) return;
+    grid.classList.add("grid-six");
+    let run = [];
+    const flush = () => {
+      const rest = run.length % 3;
+      run.forEach((el) => { el.style.gridColumn = "span 2"; });
+      if (rest === 1) {
+        const last = run[run.length - 1];
+        last.style.gridColumn = "1 / -1";
+        last.classList.add("card-wide");
+      } else if (rest === 2) {
+        run.slice(-2).forEach((el) => { el.style.gridColumn = "span 3"; });
+      }
+      run = [];
+    };
+    cards.forEach((el) => {
+      if (el.classList.contains("card")) run.push(el);
+      else { flush(); el.style.gridColumn = "1 / -1"; }
+    });
+    flush();
+  }
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => balancedGrids.forEach(balanceGrid), 150);
+  });
+
   window.lpFrameEventImages = function lpFrameEventImages(container) {
     const root = container || document;
     frameCards(root);
     adaptImages(root);
     wireExpand(root);
+    if (root.classList && root.classList.contains("grid")) {
+      balancedGrids.add(root);
+      balanceGrid(root);
+    }
   };
 
   window.lpFrameCoverImage = function lpFrameCoverImage(container, src, alt) {
