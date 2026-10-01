@@ -242,3 +242,12 @@ body{padding-bottom:72px}.wrap{padding-left:16px;padding-right:16px}.nav{height:
 
 .hero-v3-social{max-width:860px;padding-top:14px}.hero-v3-social .social-hub{margin:0}
 .hero-v3-social .portal-invite.social-hub{position:static!important;left:auto!important;bottom:auto!important;width:100%!important;max-width:100%!important;margin:0!important;padding:18px 0 0!important;align-self:auto!important;border:0!important}
+.hero-v3-social .social-hub{border:1.5px solid #ff4fa3!important;border-radius:18px!important;background:linear-gradient(180deg,#0d0610f2,#1a0814f2)!important;box-shadow:0 0 22px #ff2d8a55,inset 0 0 18px #ff2d8a22!important;padding:16px 10px 12px!important;backdrop-filter:none!important}
+.hero-v3-social .social-list{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:0!important}
+.hero-v3-social .social-row{display:flex!important;flex-direction:column!important;align-items:center!important;gap:8px!important;padding:6px 4px!important;background:none!important;border:0!important;box-shadow:none!important;border-inline-start:1px solid #ff4fa366!important;border-radius:0!important;min-height:0!important;text-align:center!important}
+.hero-v3-social .social-row:first-child{border-inline-start:0!important}
+.hero-v3-social .social-icon{width:54px!important;height:54px!important;border-radius:50%!important;display:grid!important;place-items:center!important;background:#12060d!important;border:2px solid #ff4fa3!important;color:#ff7bb8!important;box-shadow:0 0 14px #ff2d8a77,inset 0 0 10px #ff2d8a33!important}
+.hero-v3-social .social-icon svg{width:28px!important;height:28px!important;color:#ff7bb8!important;fill:currentColor}
+.hero-v3-social .social-copy small,.hero-v3-social .social-go{display:none!important}
+.hero-v3-social .social-copy strong{display:block!important;font-size:14px!important;font-weight:800!important;line-height:1.2!important;color:#fff!important;letter-spacing:0!important}
+@media(max-width:800px){.hero-v3-social{padding-inline:12px}.hero-v3-social .social-icon{width:46px!important;height:46px!important}.hero-v3-social .social-icon svg{width:24px!important;height:24px!important}.hero-v3-social .social-copy strong{font-size:12px!important}}
