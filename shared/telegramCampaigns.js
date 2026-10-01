@@ -3,61 +3,81 @@ export const TELEGRAM_CAMPAIGNS = [
   {
     "id": "c01",
     "image": "https://www.libralparty.net/assets/campaigns/c01.jpg",
-    "caption": "💃 סינגליות, האיזון שלכן מחכה!\nנרשמות למסיבה דרך האתר, ואנחנו דואגים לאיזון מגדרי. ללא עלות, ובלי להתאמץ.\n\n👇 בוחרות מסיבה ונרשמות:\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c01"
+    "caption": "📲 חדש באתר: התראות ישירות לנייד!\nמאשרים התראות פעם אחת, ומקבלים עדכון ברגע שנמצא לכם איזון ובכל פעם שעולה מסיבה חדשה.\n\n👇 נכנסים לאתר ומאשרים התראות:\nhttps://www.libralparty.net/?utm_source=telegram&utm_medium=channel&utm_campaign=c01"
   },
   {
     "id": "c02",
     "image": "https://www.libralparty.net/assets/campaigns/c02.jpg",
-    "caption": "⏰ סוף השבוע מתקרב וחבל לפספס איזון!\nאפשר להירשם לאיזון מגדרי עד 21:00 ביום המסיבה.\n\n👇 כל המסיבות באתר:\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c02"
+    "caption": "⚡ חדש באתר: הרשמה מהירה!\nמנויים שמחוברים לא צריכים להקליד שוב שם וטלפון — בוחרים מסיבה, ונרשמים.\n\n👇 לוחצים ונרשמים:\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c02"
   },
   {
     "id": "c03",
     "image": "https://www.libralparty.net/assets/campaigns/c03.jpg",
-    "caption": "🔥 מסיבות חדשות עלו עכשיו לאתר!\nכל התאריכים, המקומות וההרשמה — הכל במקום אחד.\n\n👇 מה מתאים לכם הלילה?\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c03"
+    "caption": "👤 חדש באתר: אזור אישי מלא!\nאפשר לערוך שם, להחליף סיסמה ותמונה, לראות את ההרשמות שלכם ולדעת מתי יש לכם איזון.\n\n👇 נכנסים לאזור האישי:\nhttps://www.libralparty.net/my-area?utm_source=telegram&utm_medium=channel&utm_campaign=c03"
   },
   {
     "id": "c04",
     "image": "https://www.libralparty.net/assets/campaigns/c04.jpg",
-    "caption": "💑 זוגות — הרשמה למסיבה לוקחת דקה!\nבוחרים מסיבה, ממלאים פרטים ומגיעים ליהנות.\n\n👇 מסיבות פתוחות להרשמה:\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c04"
+    "caption": "💗 חדש באתר: מועדפים!\nלוחצים על הלב ליד מסיבה, והיא נשמרת באזור האישי. מסיבות נוספות של אותו מפיק מופיעות שם גם הן.\n\n👇 בוחרים מסיבות:\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c04"
   },
   {
     "id": "c05",
     "image": "https://www.libralparty.net/assets/campaigns/c05.jpg",
-    "caption": "✨ פחות שגרה, יותר לילה!\nהמסיבה הבאה שלכם כבר מחכה באתר.\n\n👇 לוחצים ונרשמים:\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c05"
+    "caption": "✨ האתר התחדש!\nעיצוב חדש, טעינה מהירה בהרבה ותצוגה נוחה גם במחשב.\n\n👇 בואו להתרשם:\nhttps://www.libralparty.net/?utm_source=telegram&utm_medium=channel&utm_campaign=c05"
   },
   {
     "id": "c06",
     "image": "https://www.libralparty.net/assets/campaigns/c06.jpg",
-    "caption": "🤝 סינגלים — גם לכם יש איזון מגדרי!\nמצטרפים כמנויים ומקבלים התאמה למסיבה.\n\n👇 כל הפרטים והמחירים:\nhttps://www.libralparty.net/membership?utm_source=telegram&utm_medium=channel&utm_campaign=c06"
+    "caption": "💃 סינגליות, האיזון שלכן מחכה!\nנרשמות למסיבה דרך האתר, ואנחנו דואגים לאיזון מגדרי. ללא עלות ובלי להתאמץ.\n\n👇 בוחרות מסיבה ונרשמות:\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c06"
   },
   {
     "id": "c07",
     "image": "https://www.libralparty.net/assets/campaigns/c07.jpg",
-    "caption": "🩶 קהילה מכבדת, חיבורים מעניינים.\nמרחב של חופש ושל כבוד הדדי — להכיר, לרקוד ולצאת מהרגיל.\n\n👇 קצת עלינו:\nhttps://www.libralparty.net/about?utm_source=telegram&utm_medium=channel&utm_campaign=c07"
+    "caption": "⏰ סוף השבוע מתקרב, וחבל לפספס איזון!\nאפשר להירשם לאיזון מגדרי עד 21:00 ביום המסיבה.\n\n👇 כל המסיבות באתר:\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c07"
   },
   {
     "id": "c08",
     "image": "https://www.libralparty.net/assets/campaigns/c08.jpg",
-    "caption": "📅 כל המסיבות בלוח אחד!\nמפנים מקום ביומן ובוחרים את הלילה הבא.\n\n👇 ללוח האירועים:\nhttps://www.libralparty.net/calendar?utm_source=telegram&utm_medium=channel&utm_campaign=c08"
+    "caption": "🔥 מסיבות חדשות עלו עכשיו לאתר!\nכל התאריכים, המקומות וההרשמה, הכל במקום אחד.\n\n👇 מה מתאים לכם הלילה?\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c08"
   },
   {
     "id": "c09",
     "image": "https://www.libralparty.net/assets/campaigns/c09.jpg",
-    "caption": "📣 מפיקים — מעוניינים לפרסם את המסיבה שלכם?\nנרשמים כמפרסמים, מעלים את המסיבה, והיא מופיעה באתר ובערוצים שלנו.\n\n👇 להרשמה כמפרסם:\nhttps://www.libralparty.net/advertiser-register?utm_source=telegram&utm_medium=channel&utm_campaign=c09"
+    "caption": "💑 זוגות, ההרשמה למסיבה לוקחת דקה!\nבוחרים מסיבה, ממלאים פרטים ומגיעים ליהנות.\n\n👇 מסיבות פתוחות להרשמה:\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c09"
   },
   {
     "id": "c10",
     "image": "https://www.libralparty.net/assets/campaigns/c10.jpg",
-    "caption": "👤 האזור האישי שלכם באתר:\nההרשמות, האיזון והפרטים שלכם — הכל במקום אחד.\n\n👇 נכנסים:\nhttps://www.libralparty.net/my-area?utm_source=telegram&utm_medium=channel&utm_campaign=c10"
+    "caption": "✨ פחות שגרה, יותר לילה!\nהמסיבה הבאה שלכם כבר מחכה באתר.\n\n👇 לוחצים ונרשמים:\nhttps://www.libralparty.net/events?utm_source=telegram&utm_medium=channel&utm_campaign=c10"
   },
   {
     "id": "c11",
     "image": "https://www.libralparty.net/assets/campaigns/c11.jpg",
-    "caption": "🎁 לנשים — מנוי למסיבות חינם, לכל החיים!\nנרשמות פעם אחת ונהנות מהכל.\n\n👇 להרשמה:\nhttps://www.libralparty.net/register?utm_source=telegram&utm_medium=channel&utm_campaign=c11"
+    "caption": "🤝 סינגלים, גם לכם יש איזון מגדרי!\nמצטרפים כמנויים ומקבלים התאמה למסיבה.\n\n👇 כל הפרטים והמחירים:\nhttps://www.libralparty.net/membership?utm_source=telegram&utm_medium=channel&utm_campaign=c11"
   },
   {
     "id": "c12",
     "image": "https://www.libralparty.net/assets/campaigns/c12.jpg",
-    "caption": "🌙 הלילה הבא מתחיל כאן!\nמסיבות, איזונים וקהילה — הכל באתר LIBRAL PARTY.\n\n👇 כניסה לאתר:\nhttps://www.libralparty.net/?utm_source=telegram&utm_medium=channel&utm_campaign=c12"
+    "caption": "🩶 קהילה מכבדת, חיבורים מעניינים.\nמרחב של חופש ושל כבוד הדדי, להכיר, לרקוד ולצאת מהרגיל.\n\n👇 קצת עלינו:\nhttps://www.libralparty.net/about?utm_source=telegram&utm_medium=channel&utm_campaign=c12"
+  },
+  {
+    "id": "c13",
+    "image": "https://www.libralparty.net/assets/campaigns/c13.jpg",
+    "caption": "📅 כל המסיבות בלוח אחד!\nמפנים מקום ביומן ובוחרים את הלילה הבא.\n\n👇 ללוח האירועים:\nhttps://www.libralparty.net/calendar?utm_source=telegram&utm_medium=channel&utm_campaign=c13"
+  },
+  {
+    "id": "c14",
+    "image": "https://www.libralparty.net/assets/campaigns/c14.jpg",
+    "caption": "📣 מפיקים, מעוניינים לפרסם את המסיבה שלכם?\nנרשמים כמפרסמים, מעלים את המסיבה, והיא מופיעה באתר ובערוצים שלנו.\n\n👇 להרשמה כמפרסם:\nhttps://www.libralparty.net/advertiser-register?utm_source=telegram&utm_medium=channel&utm_campaign=c14"
+  },
+  {
+    "id": "c15",
+    "image": "https://www.libralparty.net/assets/campaigns/c15.jpg",
+    "caption": "🎁 לנשים, מנוי למסיבות חינם לכל החיים!\nנרשמות פעם אחת ונהנות מהכל.\n\n👇 להרשמה:\nhttps://www.libralparty.net/register?utm_source=telegram&utm_medium=channel&utm_campaign=c15"
+  },
+  {
+    "id": "c16",
+    "image": "https://www.libralparty.net/assets/campaigns/c16.jpg",
+    "caption": "🌙 הלילה הבא מתחיל כאן!\nמסיבות, איזונים וקהילה, הכל באתר LIBRAL PARTY.\n\n👇 כניסה לאתר:\nhttps://www.libralparty.net/?utm_source=telegram&utm_medium=channel&utm_campaign=c16"
   }
 ];
