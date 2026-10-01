@@ -290,6 +290,7 @@ export default async function handler(req, res) {
       const text = typeof body.text === 'string' ? body.text.trim().slice(0, 500) : '';
       const agent = typeof to === 'string' ? agentById(to) : null;
       if (!agent || !text) return res.status(400).json({ error: 'Unknown agent or empty message' });
+      const NOW_JOBS = { campaign: 'job=campaign&force=1', promo: 'job=promo-now', health: 'job=health&noalert=1', cleanup: 'job=cleanup-parties' };
       const cfgRef = db.collection('settings').doc('agentConfig');
       const chatRef = db.collection('settings').doc('agentChat');
       const result = await db.runTransaction(async (tx) => {
@@ -304,6 +305,16 @@ export default async function handler(req, res) {
         tx.set(chatRef, { messages: [...prev, ownerLine, agentLine].slice(-150) });
         return out;
       });
+      // "Do it now": start the agent's job on the server right away. The job
+      // writes its own result line into the team chat when it finishes.
+      if (result.runNow && NOW_JOBS[result.runNow] && process.env.TELEGRAM_PROMO_SECRET) {
+        try {
+          const url = `https://www.libralparty.net/api/telegram-webhook?${NOW_JOBS[result.runNow]}&key=${encodeURIComponent(process.env.TELEGRAM_PROMO_SECRET)}`;
+          await Promise.race([fetch(url), new Promise((r) => setTimeout(r, 6000))]);
+        } catch (err) {
+          console.error('agent run-now:', err?.message || err);
+        }
+      }
       return res.status(200).json({ ok: true, handled: result.handled, reply: result.reply });
     }
 

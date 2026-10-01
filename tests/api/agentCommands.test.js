@@ -29,6 +29,20 @@ describe('owner commands to agents', () => {
     expect(applyAgentCommand('secretary', 'תעצור', {}).config.paused).toBe(true);
   });
 
+  it('"do it now" starts the right job for the agents that have one', () => {
+    expect(applyAgentCommand('recruiter', 'תעשה עכשיו', {}).runNow).toBe('promo');
+    expect(applyAgentCommand('recruiter', 'תעבוד עכשיו', {}).runNow).toBe('promo');
+    expect(applyAgentCommand('publisher', 'תפרסם עכשיו', {}).runNow).toBe('campaign');
+    expect(applyAgentCommand('doctor', 'תבדוק שהכל תקין באתר', {}).runNow).toBe('health');
+    expect(applyAgentCommand('cleaner', 'תנקה עכשיו', {}).runNow).toBe('cleanup');
+    expect(applyAgentCommand('publisher', 'תעבוד רק בימי שני', {}).runNow).toBeUndefined();
+  });
+
+  it('Claude agents and automatic systems explain what they can do', () => {
+    expect(applyAgentCommand('fixer', 'תעבוד', {}).reply).toContain('13:37');
+    expect(applyAgentCommand('notifier', 'תבדוק שהכל תקין', {}).reply).toContain('אוטומטית');
+  });
+
   it('anything else becomes a request for the team manager', () => {
     const r = applyAgentCommand('cleaner', 'תנקה גם הרשמות ישנות', {});
     expect(r.handled).toBe(false);
