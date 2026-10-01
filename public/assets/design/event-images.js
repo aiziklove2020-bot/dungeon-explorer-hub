@@ -8,17 +8,33 @@
 (() => {
   const fallback = "assets/design/lounge.webp";
 
-  function frameImage(frame, src, alt) {
+  // Party flyers are raw Cloudinary uploads (up to 5MB). On a phone they
+  // often stall half-way, leaving a half-drawn flyer. Ask Cloudinary for a
+  // resized, auto-compressed version instead (same picture, ~10x smaller).
+  function optimizeImg(src, width) {
+    if (!src || typeof src !== "string") return src;
+    const m = src.match(/^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)$/);
+    if (!m) return src;
+    if (/^(?:[a-z]{1,3}_[^/,]+,?)+\//.test(m[2])) return src; // already transformed
+    return `${m[1]}f_auto,q_auto,c_limit,w_${width || 1200}/${m[2]}`;
+  }
+  window.lpOptimizeImg = optimizeImg;
+
+  function frameImage(frame, rawSrc, alt) {
     if (frame.classList.contains("event-image-frame")) return;
+    const src = optimizeImg(rawSrc);
     frame.classList.add("event-image-frame");
     frame.style.setProperty("--event-image", `url("${src}")`);
     const image = document.createElement("img");
     image.className = "event-image-content";
     image.src = src;
+    image.dataset.full = optimizeImg(rawSrc, 2000);
     image.alt = alt;
     image.loading = "lazy";
     image.decoding = "async";
-    image.addEventListener("error", () => {
+    image.addEventListener("error", function onErr() {
+      if (src !== rawSrc && image.src !== rawSrc) { image.src = rawSrc; return; }
+      image.removeEventListener("error", onErr);
       frame.classList.add("image-unavailable");
       frame.style.removeProperty("--event-image");
       image.remove();
@@ -26,7 +42,7 @@
       label.className = "image-fallback";
       label.textContent = "תמונת המסיבה תעודכן בקרוב";
       frame.prepend(label);
-    }, { once: true });
+    });
     frame.prepend(image);
   }
 
@@ -106,7 +122,7 @@
       button.setAttribute("aria-label", "הגדלת הפלייר: " + img.alt);
       button.onclick = () => {
         const d = ensureDialog();
-        d.querySelector("img").src = img.src;
+        d.querySelector("img").src = img.dataset.full || img.src;
         d.querySelector("img").alt = img.alt;
         d.querySelector("strong").textContent = img.alt;
         d.showModal();

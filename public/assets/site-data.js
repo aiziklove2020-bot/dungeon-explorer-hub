@@ -35113,6 +35113,7 @@ function MU(e) {
 		whatsappNumber: e.whatsappNumber || "",
 		partyType: e.partyType || "internal",
 		allowBalanceRegistration: e.allowBalanceRegistration === !0,
+		registrationClosed: (e.partyType !== "external" || e.allowBalanceRegistration === !0) && lpIsRegistrationClosedForPartyDate_(e.date),
 		producerParty: !!e.createdBy,
 		producerId: e.createdBy || ""
 	};
