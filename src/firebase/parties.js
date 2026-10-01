@@ -270,7 +270,9 @@ export const registerToPartyNew = async (partyId, registrationData) => {
       if (partyData.partyType === 'external' && !partyData.allowBalanceRegistration) {
         throw new Error('ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק');
       }
-      if ((partyData.partyType !== 'external' || partyData.allowBalanceRegistration) && isRegistrationClosedForPartyDate(partyData.date)) {
+      // Couples can always register — only singles' balance registration closes at 21:00.
+      const isCoupleType = ['couple', 'single-male-couple', 'single-female-couple'].includes(registrationData.registrationType);
+      if ((partyData.partyType !== 'external' || partyData.allowBalanceRegistration) && !isCoupleType && isRegistrationClosedForPartyDate(partyData.date)) {
         throw new Error('ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד');
       }
 
@@ -483,9 +485,6 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
 
     // Same 21:00 cutoff as the single-registration path above, checked here
     // too since couples go through this separate transaction.
-    if (partyData.partyType !== 'external' && isRegistrationClosedForPartyDate(partyData.date)) {
-      throw new Error('ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד');
-    }
 
     const registrations = [...(partyData.registrations || [])];
 

@@ -46,7 +46,7 @@ const CHANNEL_LABEL = {
 document.addEventListener("DOMContentLoaded", async () => {
   const box = document.getElementById("socialLinksBox");
   try {
-    await import("./assets/site-data.js?v=202610012132");
+    await import("./assets/site-data.js?v=202610012134");
     const links = await window.LPData.loadSocialLinks();
     box.innerHTML = links.length
       ? links.map(l => `<a class="social-row ${escapeHtml(l.type||"")}" href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer">

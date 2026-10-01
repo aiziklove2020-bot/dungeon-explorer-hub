@@ -17,7 +17,7 @@
 <script type="module">
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202610012132");
+    await import("./assets/site-data.js?v=202610012134");
   } catch (err) {
     const box = document.getElementById("event-grid");
     if (box) box.innerHTML = '<p class="meta">שגיאה בטעינת האתר — נסו לרענן את הדף.</p>';
@@ -78,10 +78,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         ${e.category ? `<span class="tag">${escapeHtml(e.category)}</span>` : ""}
         <h3><a href="/event?id=${encodeURIComponent(e.id)}">${escapeHtml(e.title)}</a></h3>
         <div class="meta">${escapeHtml(e.city||"")}${e.city && (e.day||e.date) ? " · " : ""}${escapeHtml(e.day||"")}${e.day && e.date ? ", " : ""}${escapeHtml(e.date||"")}${e.time ? " &nbsp;·&nbsp; " + escapeHtml(e.time) : ""}</div>
-        ${e.registrationClosed ? `<div class="status closed">ההרשמה נסגרה</div>` : `<div class="status">ההרשמה פתוחה</div>`}
-        <div class="card-bottom">${e.registrationClosed
-          ? `<a class="btn event-register-card" href="/event?id=${encodeURIComponent(e.id)}">לפרטי המסיבה</a>`
-          : `<a class="btn gold event-register-card" href="${e.partyType === "external" && e.registrationLink ? "/event?id=" + encodeURIComponent(e.id) : "/register-event?partyId=" + encodeURIComponent(e.id)}">${e.partyType === "external" && e.registrationLink ? "לרכישת כרטיסים" : "הרשמה למסיבה"}</a>`}</div>
+        ${e.singlesClosed ? `<div class="status closed">הרשמת סינגלים נסגרה · פתוח לזוגות</div>` : `<div class="status">ההרשמה פתוחה</div>`}
+        <div class="card-bottom"><a class="btn gold event-register-card" href="${e.partyType === "external" && e.registrationLink ? "/event?id=" + encodeURIComponent(e.id) : "/register-event?partyId=" + encodeURIComponent(e.id)}">${e.partyType === "external" && e.registrationLink ? "לרכישת כרטיסים" : "הרשמה למסיבה"}</a></div>
       </div>
     </article>`;
   }

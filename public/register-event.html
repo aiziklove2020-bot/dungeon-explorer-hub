@@ -47,6 +47,7 @@
   </div>
 
   <form id="regForm" novalidate>
+    <p id="couplesOnlyNote" class="notice" style="display:none">הרשמת סינגלים לאיזון נסגרה (עד 21:00). זוגות יכולים עדיין להירשם.</p>
     <label id="typeDropdownLabelFor">סוג הרשמה ואיזון מגדרי</label>
     <div class="type-dropdown" id="typeDropdown">
       <button type="button" id="typeDropdownBtn" class="type-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="typeDropdownLabelFor">
@@ -177,7 +178,7 @@ let selectedParty = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202610012132");
+    await import("./assets/site-data.js?v=202610012134");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
@@ -335,22 +336,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     step2.style.display = "";
     setStep(2);
 
+    // After the 21:00 cutoff only gender-balance (singles) registration
+    // closes — couples can always register.
     const closed = (party.partyType !== "external" || balanceOnly) && isRegistrationClosedForDateISO(party.dateISO);
-    if (closed) {
-      form.style.display = "none";
-      whatsappOnly.style.display = "none";
-      regClosed.style.display = "";
-    } else if (party.whatsappNumber) {
+    regClosed.style.display = "none";
+    if (party.whatsappNumber) {
       form.style.display = "none";
       whatsappOnly.style.display = "";
-      regClosed.style.display = "none";
       const digits = String(party.whatsappNumber).replace(/\D/g, "").replace(/^0/, "972");
       whatsappLink.href = `https://wa.me/${digits}?text=${encodeURIComponent("היי, אני מעוניין/ת להירשם למסיבה: " + party.title)}`;
     } else {
       form.style.display = "";
       whatsappOnly.style.display = "none";
-      regClosed.style.display = "none";
     }
+    applyCouplesOnly(closed);
+  }
+
+  // Hides the single/balance options (and forces "couple") once singles
+  // registration has closed for the night.
+  function applyCouplesOnly(couplesOnly) {
+    const items = Array.from(document.querySelectorAll("#typeDropdownList [data-type]"));
+    items.forEach(i => { i.hidden = couplesOnly && i.dataset.type !== "couple"; });
+    const note = document.getElementById("couplesOnlyNote");
+    if (note) note.style.display = couplesOnly ? "" : "none";
+    if (!couplesOnly) return;
+    const coupleItem = items.find(i => i.dataset.type === "couple");
+    const typeInput = document.getElementById("typeSelect");
+    items.forEach(i => i.setAttribute("aria-selected", i === coupleItem ? "true" : "false"));
+    typeInput.value = "couple";
+    if (coupleItem) document.getElementById("typeDropdownLabel").textContent = coupleItem.textContent;
+    typeInput.dispatchEvent(new Event("change"));
   }
 
   // Queries the dropdown straight from the DOM rather than through the

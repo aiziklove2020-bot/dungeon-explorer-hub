@@ -20227,6 +20227,9 @@ function jO(e, t, n = 48, r = Date.now()) {
 	}
 	return kO(t, n, r);
 }
+function lpIsCoupleRegType_(e) {
+	return e === "couple" || e === "single-male-couple" || e === "single-female-couple";
+}
 function lpIsRegistrationClosedForPartyDate_(e, t = Date.now(), n = 21) {
 	try {
 		let r = e && typeof e.toDate == "function" ? e.toDate() : e instanceof Date ? e : new Date(e);
@@ -24127,7 +24130,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				if (!snap.exists()) throw Error("Party not found");
 				let a = snap.data();
 				if (a.partyType === "external" && !a.allowBalanceRegistration) throw Error("ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק");
-				if ((a.partyType !== "external" || a.allowBalanceRegistration) && lpIsRegistrationClosedForPartyDate_(a.date)) throw Error("ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד");
+				if ((a.partyType !== "external" || a.allowBalanceRegistration) && !lpIsCoupleRegType_(t.registrationType) && lpIsRegistrationClosedForPartyDate_(a.date)) throw Error("ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד");
 				if (a.registrations?.find((e) => XE(e.phoneNumber) === s || r && e.userId === r)) throw Error("Already registered to this party");
 				if (t.gender !== "couple") {
 					let e = a.registrations?.filter((e) => e.gender === t.gender) || [], n = t.gender === "male" ? a.maleLimit : a.femaleLimit;
@@ -24203,7 +24206,6 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 			let snap = await tx.get(s);
 			if (!snap.exists()) throw Error("Party not found");
 			let partyData = snap.data();
-			if (partyData.partyType !== "external" && lpIsRegistrationClosedForPartyDate_(partyData.date)) throw Error("ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד");
 			let c = [...partyData.registrations || []], l = (e) => c.find((t) => r(t.phoneNumber) === e || t.userId && String(t.userId) === e), u = l(i), d = l(a);
 			if (u && d) {
 				let e = /* @__PURE__ */ Error("Both partners are already registered to this party");
@@ -35113,7 +35115,7 @@ function MU(e) {
 		whatsappNumber: e.whatsappNumber || "",
 		partyType: e.partyType || "internal",
 		allowBalanceRegistration: e.allowBalanceRegistration === !0,
-		registrationClosed: (e.partyType !== "external" || e.allowBalanceRegistration === !0) && lpIsRegistrationClosedForPartyDate_(e.date),
+		singlesClosed: (e.partyType !== "external" || e.allowBalanceRegistration === !0) && lpIsRegistrationClosedForPartyDate_(e.date),
 		producerParty: !!e.createdBy,
 		producerId: e.createdBy || ""
 	};
