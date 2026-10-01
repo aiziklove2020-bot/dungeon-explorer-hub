@@ -18,7 +18,7 @@ globalThis.fetch = vi.fn(async (url, init) => {
 });
 
 const { default: handler } = await import('../../api/telegram-webhook.js');
-const { TELEGRAM_CAMPAIGNS } = await import('../../shared/telegramCampaigns.js');
+const { TELEGRAM_CAMPAIGNS, TELEGRAM_CAMPAIGNS_VERSION } = await import('../../shared/telegramCampaigns.js');
 
 const run = async (query) => {
   let body, status;
@@ -58,6 +58,13 @@ describe('campaign posts to the channel', () => {
     telegramOk = true;
     const retry = await run({ force: '1' });
     expect(retry.body.id).toBe(TELEGRAM_CAMPAIGNS[0].id);
+  });
+
+  it('a refreshed pool (new version) starts again from its first campaign', async () => {
+    stored = { nextIndex: 5, lastSentAt: 0, version: 'older-month' };
+    const r = await run({ force: '1' });
+    expect(r.body.id).toBe(TELEGRAM_CAMPAIGNS[0].id);
+    expect(stored.version).toBe(TELEGRAM_CAMPAIGNS_VERSION);
   });
 
   it('every campaign has an image URL under the site and a caption with a tracked link', () => {

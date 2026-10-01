@@ -42,7 +42,7 @@
  */
 import { requireTelegramWebhookSecret, requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
-import { TELEGRAM_CAMPAIGNS } from '../shared/telegramCampaigns.js';
+import { TELEGRAM_CAMPAIGNS, TELEGRAM_CAMPAIGNS_VERSION } from '../shared/telegramCampaigns.js';
 
 // Sending every active party to every allowed destination can take longer
 // than Vercel Hobby's default 10s function timeout, which caused the
@@ -770,9 +770,10 @@ async function sendCampaignPost({ force = false } = {}) {
     const snap = await tx.get(ref);
     const data = snap.exists ? snap.data() || {} : {};
     if (!force && data.lastSentAt && now - data.lastSentAt < CAMPAIGN_MIN_GAP_MS) return null;
-    const index = Number.isInteger(data.nextIndex) ? data.nextIndex % TELEGRAM_CAMPAIGNS.length : 0;
-    tx.set(ref, { nextIndex: (index + 1) % TELEGRAM_CAMPAIGNS.length, lastSentAt: now, lastId: TELEGRAM_CAMPAIGNS[index].id }, { merge: true });
-    return { index, previous: { nextIndex: data.nextIndex ?? 0, lastSentAt: data.lastSentAt ?? null } };
+    // A refreshed pool (new version) starts again from its first campaign.
+    const index = data.version === TELEGRAM_CAMPAIGNS_VERSION && Number.isInteger(data.nextIndex) ? data.nextIndex % TELEGRAM_CAMPAIGNS.length : 0;
+    tx.set(ref, { nextIndex: (index + 1) % TELEGRAM_CAMPAIGNS.length, lastSentAt: now, lastId: TELEGRAM_CAMPAIGNS[index].id, version: TELEGRAM_CAMPAIGNS_VERSION }, { merge: true });
+    return { index, previous: { nextIndex: data.nextIndex ?? 0, lastSentAt: data.lastSentAt ?? null, version: data.version ?? null } };
   });
   if (!claimed) return { ok: true, skipped: 'already posted recently' };
 
