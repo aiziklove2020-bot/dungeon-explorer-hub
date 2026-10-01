@@ -35113,7 +35113,8 @@ function MU(e) {
 		whatsappNumber: e.whatsappNumber || "",
 		partyType: e.partyType || "internal",
 		allowBalanceRegistration: e.allowBalanceRegistration === !0,
-		producerParty: !!e.createdBy
+		producerParty: !!e.createdBy,
+		producerId: e.createdBy || ""
 	};
 }
 function NU(e) {
@@ -35506,7 +35507,15 @@ async function cW(e) {
 		Oj(e).catch(() => null),
 		wU(e).catch(() => [])
 	]), a = [];
-	return i.length > 0 && (a = (await PU().catch(() => [])).filter((e) => i.includes(e.id))), {
+	if (i.length > 0) {
+		let all = await PU().catch(() => []), picked = all.filter((e) => i.includes(e.id));
+		// Favouriting a party posted by a producer also brings in that producer's
+		// other upcoming parties — shown as plain parties, without the producer.
+		let producers = new Set(picked.map((e) => e.producerId).filter(Boolean));
+		let extra = all.filter((e) => e.producerId && producers.has(e.producerId) && !i.includes(e.id)).map((e) => ({ ...e, viaProducer: !0 }));
+		a = [...picked, ...extra];
+	}
+	return {
 		registrations: t,
 		balanceMatch: n,
 		profile: r,
