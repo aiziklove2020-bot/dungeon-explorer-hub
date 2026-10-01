@@ -258,7 +258,19 @@ export const registerToPartyNew = async (partyId, registrationData) => {
       // party's own day — balance matching needs a runway before the party
       // starts. Checked fresh here (not just client-side) so the cutoff
       // can't be bypassed by calling this function directly.
-      if (partyData.partyType !== 'external' && isRegistrationClosedForPartyDate(partyData.date)) {
+      // An advertiser's external-ticket party only takes on-site
+      // registrations when the advertiser opted into gender-balance
+      // registration, and then only solo balance registrations and couples
+      // (the public form registers each partner as single-*-couple).
+      if (partyData.partyType === 'external') {
+        if (!partyData.allowBalanceRegistration) {
+          throw new Error('ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק');
+        }
+        if (!['single-male-balance', 'single-female-balance', 'single-male-couple', 'single-female-couple'].includes(registrationData.registrationType)) {
+          throw new Error('במסיבה זו ניתן להירשם דרך האתר כסינגל/ית לאיזון מגדרי או כזוג בלבד');
+        }
+      }
+      if ((partyData.partyType !== 'external' || partyData.allowBalanceRegistration) && isRegistrationClosedForPartyDate(partyData.date)) {
         throw new Error('ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד');
       }
 
@@ -1381,6 +1393,7 @@ export const updateParty = async (partyId, partyData) => {
     if (partyData.title !== undefined) updateData.title = partyData.title;
     if (partyData.registrationLink !== undefined) updateData.registrationLink = partyData.registrationLink;
     if (partyData.whatsappNumber !== undefined) updateData.whatsappNumber = partyData.whatsappNumber;
+    if (partyData.allowBalanceRegistration !== undefined) updateData.allowBalanceRegistration = partyData.allowBalanceRegistration === true;
     // category/city drive the site's filter pills and were missing here
     // entirely — editing them on an existing party silently never saved,
     // only a brand-new party (createParty spreads every field) picked them up.

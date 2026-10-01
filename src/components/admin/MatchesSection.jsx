@@ -292,7 +292,12 @@ const MatchesSection = ({ showSaved }) => {
       setLoading(true);
       // Parties are already loaded in ContentContext on app init, so this will use cache
       const parties = await getActiveParties();
-      const filteredParties = parties.filter(party => ['internal', 'exchange'].includes(party.partyType || 'internal'));
+      // An external (ticket-link) party normally has no on-site registrations,
+      // except when it opted into gender-balance registration through the site.
+      const filteredParties = parties.filter(party =>
+        ['internal', 'exchange'].includes(party.partyType || 'internal') ||
+        (party.partyType === 'external' && party.allowBalanceRegistration === true)
+      );
       setActiveParties(filteredParties);
 
       // Load all users once to avoid multiple getUserByPhone calls in BalanceTables
