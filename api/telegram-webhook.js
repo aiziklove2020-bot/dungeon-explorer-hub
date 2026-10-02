@@ -847,6 +847,60 @@ async function handleCampaign(req, res) {
 }
 
 
+// ── Weekly Instagram campaign ──────────────────────────────────────────────
+// Once a week (Sunday, Israel time) one site campaign image goes to
+// Instagram as a single feed post — no stories, no party flyers. Only the
+// tame, site-feature campaigns below are allowed (no BDSM / swingers /
+// "singles" wording), and captions drop links (not clickable on Instagram).
+// A 6-day lock in Firestore guarantees at most one post per week even if the
+// cron retries. The old automatic party-to-Instagram posting stays disabled.
+const INSTAGRAM_CAMPAIGN_IDS = ['c01', 'c02', 'c03', 'c04', 'c05', 'c07', 'c09', 'c11', 'c14', 'c16', 'c17', 'c20', 'c21', 'c22'];
+const INSTAGRAM_CAMPAIGN_DAY = 0; // Sunday
+const INSTAGRAM_MIN_GAP_MS = 6 * 24 * 60 * 60 * 1000;
+
+function instagramCaption(caption) {
+  const lines = String(caption || '')
+    .split('\n')
+    .filter((l) => !/https?:\/\//.test(l) && !/👇/.test(l));
+  while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+  return `${lines.join('\n')}\n\n🔗 libralparty.net — הקישור בביו\n18+`;
+}
+
+export async function sendInstagramCampaignIfDue({ force = false } = {}) {
+  const pool = TELEGRAM_CAMPAIGNS.filter((c) => INSTAGRAM_CAMPAIGN_IDS.includes(c.id));
+  if (!pool.length) return { ok: false, skipped: 'no instagram campaigns' };
+  if (!force && israelWeekday() !== INSTAGRAM_CAMPAIGN_DAY) return { ok: true, skipped: 'not instagram day' };
+  const admin = await initAdmin();
+  const db = admin.firestore();
+  const ref = db.collection('settings').doc('instagramCampaigns');
+  const now = Date.now();
+  const claimed = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const data = snap.exists ? snap.data() || {} : {};
+    if (data.paused === true && !force) return { paused: true };
+    if (!force && data.lastSentAt && now - data.lastSentAt < INSTAGRAM_MIN_GAP_MS) return null;
+    const index = Number.isInteger(data.nextIndex) ? data.nextIndex % pool.length : 0;
+    tx.set(ref, { nextIndex: (index + 1) % pool.length, lastSentAt: now, lastId: pool[index].id }, { merge: true });
+    return { index, previous: { nextIndex: data.nextIndex ?? 0, lastSentAt: data.lastSentAt ?? null, lastId: data.lastId ?? null } };
+  });
+  if (!claimed) return { ok: true, skipped: 'already posted this week' };
+  if (claimed.paused) return { ok: true, skipped: 'paused (settings/instagramCampaigns.paused)' };
+
+  const campaign = pool[claimed.index];
+  try {
+    const { publishPartyToInstagram } = await import('./publish-content.js');
+    const { postId } = await publishPartyToInstagram(
+      { imageURL: campaign.image, description: instagramCaption(campaign.caption) },
+      { includeStory: false, rawCaption: true }
+    );
+    await agentSay('publisher', `פרסמתי באינסטגרם את הקמפיין השבועי "${campaign.caption.split('\n')[0].replace(/^[^\p{L}\p{N}]+/u, '')}" ✅`).catch(() => {});
+    return { ok: true, id: campaign.id, postId };
+  } catch (err) {
+    await ref.set(claimed.previous, { merge: true }).catch(() => {});
+    return { ok: false, id: campaign.id, error: String(err?.message || err) };
+  }
+}
+
 // ── Weekly "want to advertise your party?" message to the group ────────────
 // Used to depend on an external pinger (cron-job.org) hitting ?job=promo; now
 // the daily reminders cron also posts it on Mondays and Thursdays (Israel
@@ -1018,8 +1072,9 @@ async function handlePartyReminders(req, res) {
     else await agentSay('secretary', partiesSent ? `שלחתי תזכורות על ${partiesSent} מסיבות לערוצים ולקבוצות ✅` : 'אין מסיבות פעילות היום, לא נשלחו תזכורות.');
     const campaign = await sendCampaignPost().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const groupPromo = await sendGroupPromoIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
+    const instagramCampaign = await sendInstagramCampaignIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const health = await runHealthCheck().catch((err) => ({ ok: false, error: String(err?.message || err) }));
-    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, campaign, groupPromo, health });
+    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, campaign, groupPromo, instagramCampaign, health });
   } catch (err) {
     console.error('party-reminders:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
@@ -1297,6 +1352,12 @@ export default async function handler(req, res) {
     }
     if (job === 'campaign') {
       return handleCampaign(req, res);
+    }
+    // GET ?job=instagram-campaign&key=<TELEGRAM_PROMO_SECRET>[&force=1] — manual run/test.
+    if (job === 'instagram-campaign') {
+      if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+      const force = (req.query?.force || new URL(req.url, 'http://x').searchParams.get('force')) === '1';
+      try { return res.status(200).json(await sendInstagramCampaignIfDue({ force })); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
     }
     if (job === 'promo') {
       return handleGroupPromo(req, res);

@@ -68,7 +68,7 @@ const toFeedImageUrl = (imageUrl) => toCloudinaryPaddedUrl(imageUrl, 1080, 1350)
 // (handleInstagramPublish below, over HTTP) and the scheduled cron in
 // telegram-webhook.js (called in-process — same env vars, no HTTP hop).
 // Throws on failure; the caller decides how to report/aggregate that.
-export async function publishPartyToInstagram(party, { includeStory = true } = {}) {
+export async function publishPartyToInstagram(party, { includeStory = true, rawCaption = false } = {}) {
   const WINDSOR_API_KEY = process.env.WINDSOR_API_KEY;
   const IG_ACCOUNT_ID = process.env.WINDSOR_INSTAGRAM_ACCOUNT_ID;
   if (!WINDSOR_API_KEY || !IG_ACCOUNT_ID) {
@@ -79,7 +79,7 @@ export async function publishPartyToInstagram(party, { includeStory = true } = {
     throw new Error('Party has no imageURL to publish');
   }
 
-  const caption = buildInstagramCaption(party);
+  const caption = rawCaption ? String(party.description || '') : buildInstagramCaption(party);
   const postResult = await runWindsorAction({
     apiKey: WINDSOR_API_KEY,
     account: IG_ACCOUNT_ID,
