@@ -1,3 +1,4 @@
+import { registrationBlockedReason, REGISTRATION_CLOSED_MESSAGE, normalizeRegistrationMode } from '../../shared/registrationAccess.js';
 import {
   collection,
   doc,
@@ -270,11 +271,12 @@ export const registerToPartyNew = async (partyId, registrationData) => {
       if (partyData.partyType === 'external' && !partyData.allowBalanceRegistration) {
         throw new Error('ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק');
       }
-      // Couples can always register — only singles' balance registration closes at 21:00.
-      const isCoupleType = ['couple', 'single-male-couple', 'single-female-couple'].includes(registrationData.registrationType);
-      if ((partyData.partyType !== 'external' || partyData.allowBalanceRegistration) && !isCoupleType && isRegistrationClosedForPartyDate(partyData.date)) {
-        throw new Error('ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד');
-      }
+      // Manual open/close from the admin panel, then the 21:00 cutoff, which applies only to
+      // single men: couples and single women can register at any time.
+      const blocked = (partyData.partyType !== 'external' || partyData.allowBalanceRegistration)
+        ? registrationBlockedReason(partyData, registrationData.registrationType, isRegistrationClosedForPartyDate(partyData.date))
+        : null;
+      if (blocked) throw new Error(blocked);
 
       const registrations = partyData.registrations || [];
 
@@ -485,6 +487,7 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
 
     // Same 21:00 cutoff as the single-registration path above, checked here
     // too since couples go through this separate transaction.
+    if (normalizeRegistrationMode(partyData.registrationMode) === 'closed') throw new Error(REGISTRATION_CLOSED_MESSAGE);
 
     const registrations = [...(partyData.registrations || [])];
 
@@ -1393,6 +1396,7 @@ export const updateParty = async (partyId, partyData) => {
     if (partyData.registrationLink !== undefined) updateData.registrationLink = partyData.registrationLink;
     if (partyData.whatsappNumber !== undefined) updateData.whatsappNumber = partyData.whatsappNumber;
     if (partyData.allowBalanceRegistration !== undefined) updateData.allowBalanceRegistration = partyData.allowBalanceRegistration === true;
+    if (partyData.registrationMode !== undefined) updateData.registrationMode = normalizeRegistrationMode(partyData.registrationMode);
     // category/city drive the site's filter pills and were missing here
     // entirely — editing them on an existing party silently never saved,
     // only a brand-new party (createParty spreads every field) picked them up.

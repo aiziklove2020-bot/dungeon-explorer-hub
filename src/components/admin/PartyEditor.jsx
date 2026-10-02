@@ -50,6 +50,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
       whatsappNumber: party.whatsappNumber || '',
       partyType: party.partyType || 'internal',
       allowBalanceRegistration: party.allowBalanceRegistration === true,
+      registrationMode: ['open', 'closed'].includes(party.registrationMode) ? party.registrationMode : 'auto',
       category: party.category || '',
       city: party.city || '',
       badge: party.badge || '',
@@ -391,6 +392,20 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           onChange={(value) => setFormData(prev => ({...prev, imageURL: value}))}
         />
       </div>
+      <div>
+        <label className="block text-sm font-bold text-[#c0aebb] mb-1">מצב ההרשמה</label>
+        <select
+          value={formData.registrationMode || 'auto'}
+          onChange={e => setFormData(prev => ({ ...prev, registrationMode: e.target.value }))}
+          className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
+        >
+          <option value="auto">אוטומטי: זוגות וסינגליות תמיד, סינגלים עד 21:00 ביום המסיבה</option>
+          <option value="open">פתוחה לכולם (ידנית), בלי שעת סגירה</option>
+          <option value="closed">סגורה לכולם (ידנית)</option>
+        </select>
+        <p className="text-[#94A3B8] text-xs mt-1">אפשר לפתוח או לסגור את ההרשמה למסיבה הזו בכל רגע. שמירה מעדכנת את האתר מיד.</p>
+      </div>
+
       {formData.partyType === 'external' && (
         <div className="space-y-1 text-right">
           <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.partyPageUrl')} *</label>

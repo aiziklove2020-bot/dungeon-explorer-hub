@@ -20230,6 +20230,15 @@ function jO(e, t, n = 48, r = Date.now()) {
 function lpIsCoupleRegType_(e) {
 	return e === "couple" || e === "single-male-couple" || e === "single-female-couple";
 }
+// Manual open/close per party (registrationMode) and who the 21:00 cutoff applies to
+// (single men only). Same rules as shared/registrationAccess.js.
+function lpRegistrationBlockedReason_(party, type, cutoffClosed) {
+	let mode = party && (party.registrationMode === "open" || party.registrationMode === "closed") ? party.registrationMode : "auto";
+	if (mode === "closed") return "ההרשמה למסיבה זו סגורה כרגע.";
+	if (mode === "open") return null;
+	if (lpIsCoupleRegType_(type) || type === "single-female-balance" || type === "single-female-discount") return null;
+	return cutoffClosed ? "ההרשמה לסינגלים נסגרה — איזונים לגברים ניתן לקבל עד השעה 21:00 בלבד" : null;
+}
 function lpIsRegistrationClosedForPartyDate_(e, t = Date.now(), n = 21) {
 	try {
 		let r = e && typeof e.toDate == "function" ? e.toDate() : e instanceof Date ? e : new Date(e);
@@ -24130,7 +24139,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				if (!snap.exists()) throw Error("Party not found");
 				let a = snap.data();
 				if (a.partyType === "external" && !a.allowBalanceRegistration) throw Error("ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק");
-				if ((a.partyType !== "external" || a.allowBalanceRegistration) && !lpIsCoupleRegType_(t.registrationType) && lpIsRegistrationClosedForPartyDate_(a.date)) throw Error("ההרשמה למסיבה זו נסגרה — איזונים ניתן לקבל עד השעה 21:00 בלבד");
+				if (a.partyType !== "external" || a.allowBalanceRegistration) { let why = lpRegistrationBlockedReason_(a, t.registrationType, lpIsRegistrationClosedForPartyDate_(a.date)); if (why) throw Error(why); }
 				if (a.registrations?.find((e) => XE(e.phoneNumber) === s || r && e.userId === r)) throw Error("Already registered to this party");
 				if (t.gender !== "couple") {
 					let e = a.registrations?.filter((e) => e.gender === t.gender) || [], n = t.gender === "male" ? a.maleLimit : a.femaleLimit;
@@ -35115,7 +35124,9 @@ function MU(e) {
 		whatsappNumber: e.whatsappNumber || "",
 		partyType: e.partyType || "internal",
 		allowBalanceRegistration: e.allowBalanceRegistration === !0,
-		singlesClosed: (e.partyType !== "external" || e.allowBalanceRegistration === !0) && lpIsRegistrationClosedForPartyDate_(e.date),
+		registrationMode: e.registrationMode === "open" || e.registrationMode === "closed" ? e.registrationMode : "auto",
+		registrationClosed: e.registrationMode === "closed",
+		singlesClosed: e.registrationMode === "closed" || e.registrationMode !== "open" && (e.partyType !== "external" || e.allowBalanceRegistration === !0) && lpIsRegistrationClosedForPartyDate_(e.date),
 		producerParty: !!e.createdBy,
 		producerId: e.createdBy || ""
 	};
