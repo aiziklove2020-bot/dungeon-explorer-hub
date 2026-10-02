@@ -20230,14 +20230,10 @@ function jO(e, t, n = 48, r = Date.now()) {
 function lpIsCoupleRegType_(e) {
 	return e === "couple" || e === "single-male-couple" || e === "single-female-couple";
 }
-// Manual open/close per party (registrationMode) and who the 21:00 cutoff applies to
-// (single men only). Same rules as shared/registrationAccess.js.
-function lpRegistrationBlockedReason_(party, type, cutoffClosed) {
-	let mode = party && (party.registrationMode === "open" || party.registrationMode === "closed") ? party.registrationMode : "auto";
-	if (mode === "closed") return "ההרשמה למסיבה זו סגורה כרגע.";
-	if (mode === "open") return null;
-	if (lpIsCoupleRegType_(type) || type === "single-female-balance" || type === "single-female-discount") return null;
-	return cutoffClosed ? "ההרשמה לסינגלים נסגרה — איזונים לגברים ניתן לקבל עד השעה 21:00 בלבד" : null;
+// Registration stays open until the owner closes it by hand (party registrationMode: "closed").
+// Same rule as shared/registrationAccess.js; there is no automatic closing time.
+function lpRegistrationBlockedReason_(party) {
+	return party && party.registrationMode === "closed" ? "ההרשמה למסיבה זו סגורה כרגע." : null;
 }
 function lpIsRegistrationClosedForPartyDate_(e, t = Date.now(), n = 21) {
 	try {
@@ -24139,7 +24135,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 				if (!snap.exists()) throw Error("Party not found");
 				let a = snap.data();
 				if (a.partyType === "external" && !a.allowBalanceRegistration) throw Error("ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק");
-				if (a.partyType !== "external" || a.allowBalanceRegistration) { let why = lpRegistrationBlockedReason_(a, t.registrationType, lpIsRegistrationClosedForPartyDate_(a.date)); if (why) throw Error(why); }
+				if (a.partyType !== "external" || a.allowBalanceRegistration) { let why = lpRegistrationBlockedReason_(a); if (why) throw Error(why); }
 				if (a.registrations?.find((e) => XE(e.phoneNumber) === s || r && e.userId === r)) throw Error("Already registered to this party");
 				if (t.gender !== "couple") {
 					let e = a.registrations?.filter((e) => e.gender === t.gender) || [], n = t.gender === "male" ? a.maleLimit : a.femaleLimit;
@@ -35126,7 +35122,7 @@ function MU(e) {
 		allowBalanceRegistration: e.allowBalanceRegistration === !0,
 		registrationMode: e.registrationMode === "open" || e.registrationMode === "closed" ? e.registrationMode : "auto",
 		registrationClosed: e.registrationMode === "closed",
-		singlesClosed: e.registrationMode === "closed" || e.registrationMode !== "open" && (e.partyType !== "external" || e.allowBalanceRegistration === !0) && lpIsRegistrationClosedForPartyDate_(e.date),
+		singlesClosed: !1,
 		producerParty: !!e.createdBy,
 		producerId: e.createdBy || ""
 	};
@@ -35799,7 +35795,7 @@ const LP_SUPPORT_FAQ_KB = [
 	{ keywords: ["סיסמה"], answer: "פונים לצוות דרך עמוד 'יצירת קשר' — איפוס הסיסמה מתבצע ידנית על ידי מנהל." },
 	{ keywords: ["גישה לנשים", "נשים בחינם", "מנוי לנשים", "לנשים"], answer: "הגישה לנשים היא ללא תשלום, בהתאם למדיניות המנויים. הרשמה וכניסה לאירוע כפופות לתנאי האירוע." },
 	{ keywords: ["מה זה איזון", "מה זה האיזון", "איזון מגדרי"], answer: "'איזון' הוא שיבוץ שנעשה ידנית על ידי הצוות כדי לשמור על יחס מאוזן בין גברים לנשים בכל מסיבה. אחרי ההרשמה נכנסים לאזור האישי כדי לראות את פרטי האיזון שלכם." },
-	{ keywords: ["נסגר", "עד איזו שעה", "עד מתי", "שעת סגירה", "21:00", "תשע בערב"], answer: "איזונים והרשמה למסיבות פנימיות ניתן לקבל עד השעה 21:00 בלבד באותו יום — לאחר השעה הזו ההרשמה נסגרת אוטומטית." },
+	{ keywords: ["נסגר", "עד איזו שעה", "עד מתי", "שעת סגירה", "21:00", "תשע בערב"], answer: "ההרשמה למסיבות פתוחה עד שצוות האתר סוגר אותה. אם ההרשמה למסיבה סגורה, תראו על כך הודעה בדף ההרשמה." },
 	{ keywords: ["אזור אישי", "איפה רואים", "ההרשמות שלי"], answer: "כל הפרטים שלכם — הרשמות, איזון ומועדפים — נמצאים ב'אזור האישי' באתר." },
 	{ keywords: ["Liberal Suite", "סוויטה", "להשכיר מקום", "חדר פרטי", "פליירום"], answer: "Liberal Suite היא סוויטה פרטית להשכרה למפגשים ומסיבות, לזוג אחד ועד 10 זוגות — כוללת Playroom, מתחם אבזור וחדר רחצה מרהיב. כל הפרטים וההזמנה בעמוד 'Liberal Suite' באתר." },
 	{ keywords: ["מפיק", "לפרסם מסיבה", "מפרסם", "העלאת מסיבה", "לפרסם אירוע"], answer: "מפיקים ומפרסמים פותחים חשבון מפיק דרך עמוד 'למפיקים', ולאחר אישור יכולים להעלות ולנהל את המסיבות שלהם ישירות באזור המפרסם." },

@@ -271,10 +271,10 @@ export const registerToPartyNew = async (partyId, registrationData) => {
       if (partyData.partyType === 'external' && !partyData.allowBalanceRegistration) {
         throw new Error('ההרשמה למסיבה זו מתבצעת דרך לינק הכרטיסים של המפיק');
       }
-      // Manual open/close from the admin panel, then the 21:00 cutoff, which applies only to
-      // single men: couples and single women can register at any time.
+      // Registration stays open until the owner closes it by hand in the admin panel
+      // (party "registrationMode"); there is no automatic closing time.
       const blocked = (partyData.partyType !== 'external' || partyData.allowBalanceRegistration)
-        ? registrationBlockedReason(partyData, registrationData.registrationType, isRegistrationClosedForPartyDate(partyData.date))
+        ? registrationBlockedReason(partyData)
         : null;
       if (blocked) throw new Error(blocked);
 
@@ -485,7 +485,7 @@ export const registerCoupleToParty = async (partyId, maleRegistrationData, femal
     if (!snap.exists()) throw new Error('Party not found');
     const partyData = snap.data();
 
-    // Same 21:00 cutoff as the single-registration path above, checked here
+    // Same manual-close check as the single-registration path above, checked here
     // too since couples go through this separate transaction.
     if (normalizeRegistrationMode(partyData.registrationMode) === 'closed') throw new Error(REGISTRATION_CLOSED_MESSAGE);
 

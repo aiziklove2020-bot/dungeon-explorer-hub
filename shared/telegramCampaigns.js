@@ -39,7 +39,7 @@ export const TELEGRAM_CAMPAIGNS = [
   {
     "id": "c08",
     "image": "https://www.libralparty.net/assets/campaigns/c08.jpg",
-    "caption": "⏰ סוף השבוע מתקרב, וחבל לפספס איזון!\nאפשר להירשם לאיזון מגדרי עד 21:00 ביום המסיבה.\n\n👇 כל המסיבות באתר:\nhttps://www.libralparty.net/events"
+    "caption": "⏰ סוף השבוע מתקרב, וחבל לפספס איזון!\nאפשר להירשם לאיזון מגדרי דרך האתר בכל שעה.\n\n👇 כל המסיבות באתר:\nhttps://www.libralparty.net/events"
   },
   {
     "id": "c09",
