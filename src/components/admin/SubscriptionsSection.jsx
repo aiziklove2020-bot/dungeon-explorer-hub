@@ -5,6 +5,7 @@ import useAdminSection from '../../hooks/useAdminSection';
 import AdminLoader from './AdminLoader';
 import Loader from '../Loader';
 import PhoneLink from '../PhoneLink';
+import { normalizeIsraeliPhone } from '../../utils/phone';
 import { todayLocalStr } from '../../utils/dateFormat';
 import {
   createUser,
@@ -72,12 +73,25 @@ const SubscriptionsSection = ({ showSaved }) => {
   // linked to, so the subscriber card can offer a password reset without
   // sending the admin to a separate tab.
   const [loginAccountsByUserId, setLoginAccountsByUserId] = useState({});
+  const loginAccountFor = (u) => {
+    if (!u) return null;
+    const phone = normalizeIsraeliPhone(u.phoneNumber || '');
+    return loginAccountsByUserId[u.id] || (phone ? loginAccountsByUserId[`phone:${phone}`] : null) || null;
+  };
 
   const loadLoginAccounts = useCallback(async () => {
     try {
       const all = await getAllForumUsers();
       const map = {};
-      all.forEach((fu) => { if (fu.linkedUserId) map[fu.linkedUserId] = fu; });
+      all.forEach((fu) => {
+        if (fu.linkedUserId) map[fu.linkedUserId] = fu;
+        // Login accounts are created with linkedUserId: null and sign in by
+        // phone, so a subscriber whose login was never explicitly "linked"
+        // (e.g. women given a password) must still be found by phone —
+        // otherwise they wrongly show up under "ללא גישה (חשבון ישן)".
+        const phone = normalizeIsraeliPhone(fu.phone || '');
+        if (phone && !map[`phone:${phone}`]) map[`phone:${phone}`] = fu;
+      });
       setLoginAccountsByUserId(map);
     } catch {
       /* best-effort; the reset button just won't show a linked account yet */
@@ -274,7 +288,7 @@ const SubscriptionsSection = ({ showSaved }) => {
    *  "phone already registered" — which used to leave the admin stuck with
    *  no way to recover from this screen at all. */
   const handleResetLoginPassword = async (u) => {
-    let account = loginAccountsByUserId[u.id];
+    let account = loginAccountFor(u);
     if (!account && u.phoneNumber) {
       account = await getForumUserByPhone(u.phoneNumber).catch(() => null);
     }
@@ -434,7 +448,7 @@ const SubscriptionsSection = ({ showSaved }) => {
       // No linked forum login (phone+password) at all — a leftover account
       // from before the current login system existed. It can't sign in
       // anywhere, so it's pure clutter unless it's kept on purpose.
-      if (typeFilter === 'noAccess' && loginAccountsByUserId[user.id]) return false;
+      if (typeFilter === 'noAccess' && loginAccountFor(user)) return false;
 
       // Status filter
       if (filterStatus !== 'all') {
@@ -910,10 +924,10 @@ const SubscriptionsSection = ({ showSaved }) => {
                       </button>
                       <button
                         onClick={() => handleResetLoginPassword(u)}
-                        title={loginAccountsByUserId[u.id] ? `כינוי כניסה: ${loginAccountsByUserId[u.id].nickname}` : 'אין עדיין חשבון כניסה — הכפתור ייצור אחד'}
+                        title={loginAccountFor(u) ? `כינוי כניסה: ${loginAccountFor(u).nickname}` : 'אין עדיין חשבון כניסה — הכפתור ייצור אחד'}
                         className="flex items-center gap-1 bg-[#2a292e] hover:bg-[#353439] text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm"
                       >
-                        <KeyRound size={13} /> {loginAccountsByUserId[u.id] ? 'איפוס סיסמה' : 'צור כניסה + סיסמה'}
+                        <KeyRound size={13} /> {loginAccountFor(u) ? 'איפוס סיסמה' : 'צור כניסה + סיסמה'}
                       </button>
                       {u.level === 'blocked' ? (
                         <button onClick={() => handleUpdateUserLevel(u.id, 'regular')} className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-xl font-bold text-xs md:text-sm">
