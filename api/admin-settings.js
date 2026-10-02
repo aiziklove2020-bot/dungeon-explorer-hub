@@ -72,7 +72,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { requireAdminApiSecret } from '../lib/apiAuth.js';
 import { getFirebaseAdmin } from '../lib/forumAuthApi.js';
 import { agentById } from '../shared/agentsRoster.js';
-import { applyAgentCommand } from '../shared/agentCommands.js';
+import { runTask } from '../shared/a2a.js';
 
 // ── Subscription logic, ported from src/firebase/subscriptions.js ──────────
 // Pure computation only (no Firestore calls) — kept in lockstep with that
@@ -297,19 +297,17 @@ export default async function handler(req, res) {
         const [cfgSnap, chatSnap] = await Promise.all([tx.get(cfgRef), tx.get(chatRef)]);
         const cfg = cfgSnap.exists ? cfgSnap.data() || {} : {};
         const prev = chatSnap.exists && Array.isArray(chatSnap.data()?.messages) ? chatSnap.data().messages : [];
-        const out = applyAgentCommand(agent.id, text, cfg[agent.id] || {});
-        const now = Date.now();
-        const ownerLine = { agent: 'owner', name: 'אתה', role: 'מנהל', text: `@${agent.name} ${text}`, ts: now, to: agent.id, ...(out.handled ? {} : { kind: 'request' }) };
-        const agentLine = { agent: agent.id, name: agent.name, role: agent.role, text: out.reply, ts: now + 1 };
-        if (out.handled) tx.set(cfgRef, { [agent.id]: out.config }, { merge: true });
-        tx.set(chatRef, { messages: [...prev, ownerLine, agentLine].slice(-150) });
-        return out;
+        const task = runTask(agent.id, text, cfg);
+        if (Object.keys(task.configUpdates).length) tx.set(cfgRef, task.configUpdates, { merge: true });
+        tx.set(chatRef, { messages: [...prev, ...task.lines].slice(-150) });
+        return task;
       });
       // "Do it now": start the agent's job on the server right away. The job
       // writes its own result line into the team chat when it finishes.
-      if (result.runNow && NOW_JOBS[result.runNow] && process.env.TELEGRAM_PROMO_SECRET) {
+      for (const job of result.runNow) {
+        if (!NOW_JOBS[job] || !process.env.TELEGRAM_PROMO_SECRET) continue;
         try {
-          const url = `https://www.libralparty.net/api/telegram-webhook?${NOW_JOBS[result.runNow]}&key=${encodeURIComponent(process.env.TELEGRAM_PROMO_SECRET)}`;
+          const url = `https://www.libralparty.net/api/telegram-webhook?${NOW_JOBS[job]}&key=${encodeURIComponent(process.env.TELEGRAM_PROMO_SECRET)}`;
           await Promise.race([fetch(url), new Promise((r) => setTimeout(r, 6000))]);
         } catch (err) {
           console.error('agent run-now:', err?.message || err);

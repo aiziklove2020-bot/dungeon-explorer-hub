@@ -5,6 +5,17 @@ import { db } from '../../firebase/config';
 import { callAdminSettings } from '../../utils/adminApi';
 import { AGENTS, AGENT_CATEGORIES, agentById } from '../../../shared/agentsRoster.js';
 
+// Consecutive lines of the same task form one conversation (who spoke to whom).
+const groupThreads = (messages) => {
+  const threads = [];
+  for (const m of messages) {
+    const last = threads[threads.length - 1];
+    if (m.taskId && last && last[0].taskId === m.taskId) last.push(m);
+    else threads.push([m]);
+  }
+  return threads;
+};
+
 const timeLabel = (ts) =>
   new Date(ts).toLocaleString('he-IL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 
@@ -125,7 +136,7 @@ const AgentsSection = () => {
               {sending ? 'שולח…' : 'שלח'}
             </button>
           </div>
-          <p className="text-xs text-[#94A3B8]">עומר וליאור מבינים: "תעצור", "תמשיך", "תעבוד רק בימי שני וחמישי". אדם מבין "תעצור" ו"תמשיך". כל שאר הבקשות נרשמות למנהל הצוות (Claude).</p>
+          <p className="text-xs text-[#94A3B8]">עומר וליאור מבינים: "תעצור", "תמשיך", "תעבוד רק בימי שני וחמישי". אדם מבין "תעצור" ו"תמשיך". בקשה שמחוץ לתחום של הסוכן מועברת לסוכן שהכישורים שלו מתאימים (אפשר לראות את השיחה ביניהם בצ׳אט), ואם אין כזה היא נרשמת למנהל הצוות (Claude).</p>
           {sendError && <p className="text-sm text-[#f87171]">{sendError}</p>}
         </form>
         {error && <p className="text-sm text-[#f87171] mb-2">{error}</p>}
@@ -134,20 +145,32 @@ const AgentsSection = () => {
         ) : messages.length === 0 ? (
           <p className="text-sm text-[#94A3B8]">עדיין אין הודעות. הסוכנים כותבים כאן אחרי כל ריצה.</p>
         ) : (
-          <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-            {[...messages].reverse().map((m, i) => {
-              const color = m.agent === 'owner' ? '#ffffff' : agentById(m.agent)?.color || '#c0aebb';
-              return (
-                <div key={`${m.ts}-${i}`} className="rounded-xl p-3 bg-[#2a1a24] border-r-4" style={{ borderColor: color }}>
-                  <div className="flex items-center gap-2 text-xs mb-1">
-                    <strong style={{ color }}>{m.name}</strong>
-                    <span className="text-[#94A3B8]">{m.role}</span>
-                    <span className="text-[#64748B] mr-auto">{timeLabel(m.ts)}</span>
-                  </div>
-                  <p className="text-sm">{m.text}</p>
-                </div>
-              );
-            })}
+          <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+            {groupThreads(messages).reverse().map((thread) => (
+              <div key={thread[0].taskId || `${thread[0].ts}`} className={thread.length > 1 && thread[0].taskId ? 'rounded-xl p-2 border border-white/10 space-y-2' : ''}>
+                {thread.length > 1 && thread[0].taskId && (
+                  <p className="text-xs text-[#94A3B8] px-1">שיחה בין {[...new Set(thread.map((m) => m.name))].join(', ')}</p>
+                )}
+                {thread.map((m, i) => {
+                  const color = m.agent === 'owner' ? '#ffffff' : agentById(m.agent)?.color || '#c0aebb';
+                  const toName = m.to ? (m.to === 'owner' ? 'אתה' : agentById(m.to)?.name) : null;
+                  return (
+                    <div key={`${m.ts}-${i}`} className={`rounded-xl p-3 bg-[#2a1a24] border-r-4 ${m.delegation ? 'mr-6' : ''}`} style={{ borderColor: color }}>
+                      <div className="flex items-center gap-2 text-xs mb-1 flex-wrap">
+                        <strong style={{ color }}>{m.name}</strong>
+                        {toName && <span className="text-[#ff9fc3]">← {toName}</span>}
+                        <span className="text-[#94A3B8]">{m.role}</span>
+                        {m.delegation && <span className="px-1.5 rounded bg-[#ff438b33] text-[#ff9fc3]">העברה בין סוכנים</span>}
+                        {m.state === 'completed' && <span className="text-[#34d399]">✓ הושלם</span>}
+                        {m.state === 'input-required' && <span className="text-[#fbbf24]">ממתין למנהל הצוות</span>}
+                        <span className="text-[#64748B] mr-auto">{timeLabel(m.ts)}</span>
+                      </div>
+                      <p className="text-sm">{m.text}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         )}
       </div>
