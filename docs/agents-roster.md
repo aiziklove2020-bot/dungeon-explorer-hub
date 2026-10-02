@@ -41,3 +41,9 @@
 ## פריסה
 
 - שינויים עולים לאתר דרך מיזוג ל-main ב-GitHub (פריסה רגילה של Vercel). פריסה ידנית דרך "Create Deployment" מוגבלת ל-100 ביום ונחסמת (`api-deployments-free-per-day`), לכן משתמשים רק בדרך של git.
+
+## שיחות בין סוכנים (A2A)
+
+- לכל סוכן יש כרטיס עם הכישורים שלו (`skills` ב-`shared/agentsRoster.js`), והכרטיס של כל הצוות מפורסם ב-`/.well-known/agent-card.json`.
+- סוכן שמקבל בקשה מחוץ לכישורים שלו מעביר אותה לסוכן שהכישורים שלו מתאימים. השיחה מופיעה בצ'אט הצוות כשיחה אחת עם "מי ← למי" ומצב (הושלם / ממתין למנהל הצוות).
+- אחרי שמשנים כישורים: `node -e "import('./shared/a2a.js').then(m=>require('fs').writeFileSync('public/.well-known/agent-card.json',JSON.stringify(m.teamCard(),null,2)+'\n'))"`
