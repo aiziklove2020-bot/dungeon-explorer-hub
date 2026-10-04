@@ -20,6 +20,7 @@ const BalanceTables = ({
   onSwapPartner,
   onSwapCouplePartner,
   onToggleEntered,
+  onTogglePhoneShared,
   registeringClient,
   allUsersMap,
   onLoadBalance
@@ -573,6 +574,15 @@ const BalanceTables = ({
                         <PhoneLink phone={pair.female.phoneNumber}>{pair.female.phoneNumber || '-'}</PhoneLink>
                         {pair.female.telegramUsername && ` • @${pair.female.telegramUsername}`}
                       </div>
+                      {!pair.match?.isCouple && onTogglePhoneShared && (
+                        <button
+                          type="button"
+                          onClick={() => onTogglePhoneShared(party.id, pair.match)}
+                          className="px-2 py-1 mt-1 rounded text-xs font-bold bg-[#2a292e] text-white"
+                        >
+                          {pair.match?.phoneShared ? '📵 הסתר את הנייד מהגבר' : '📱 חשוף את הנייד לגבר'}
+                        </button>
+                      )}
                       {showingSwapFemale && (
                         <div className="swap-dropdown">
                           <p className="swap-dropdown__title">{t('admin.balanceTables.selectMan') || 'בחר גבר:'}</p>
