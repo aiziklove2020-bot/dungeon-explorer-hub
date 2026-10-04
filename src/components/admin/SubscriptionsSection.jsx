@@ -668,6 +668,7 @@ const SubscriptionsSection = ({ showSaved }) => {
                 <div>
                   <p className="font-bold text-white">{req.fullName}</p>
                   <PhoneLink phone={req.phoneNumber}>{req.phoneNumber}</PhoneLink>
+                  {req.plan && <p className="text-[#D4AF37] text-xs mt-1">מסלול: {({bdsm:'מנוי BDSM',swingers:'מנוי מסיבות סווינגרס',combined:'מנוי משולב'})[req.plan] || req.plan}</p>}
                   {req.note && <p className="text-[#94A3B8] text-xs mt-1">{req.note}</p>}
                 </div>
                 <div className="flex gap-2">

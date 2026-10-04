@@ -338,7 +338,7 @@ async function registerForParty(partyId: string, data: {
  * account or subscription created here. Shows up in the admin's "ניהול
  * מנויים" pending queue, and best-effort pings Telegram too.
  */
-async function requestSubscription(fullName: string, phoneNumber: string, note = "") {
+async function requestSubscription(fullName: string, phoneNumber: string, note = "", plan = "") {
   const result = await createSubscriptionRequest(fullName, phoneNumber, note);
   try {
     await sendSubscriptionRequestTelegram({ fullName, phoneNumber, note }, "he");
