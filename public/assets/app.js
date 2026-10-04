@@ -402,6 +402,31 @@ function lpPushIdentity() {
   return anon;
 }
 
+// Cookie notice, same look as the notifications banner below. The site only uses
+// a cookie that keeps a member signed in (lp_current), so the notice informs and
+// asks for an OK; the answer is remembered in this browser ("lp_cookie_ok").
+function lpCookieDecided() {
+  try { return !!localStorage.getItem("lp_cookie_ok"); } catch { return true; }
+}
+function lpWireCookieBanner() {
+  if (lpCookieDecided()) return;
+  const el = document.createElement("div");
+  el.id = "lpCookieBanner";
+  el.setAttribute("role", "status");
+  el.innerHTML = `
+    <span>האתר משתמש בעוגיות הכרחיות לתפקודו, למשל כדי לזכור שהתחברתם. פרטים ב<a href="/privacy" style="color:#ff9fc3;text-decoration:underline">מדיניות הפרטיות</a>. </span>
+    <button type="button" id="lpCookieBannerYes" class="btn gold">אישור</button>
+  `;
+  el.style.cssText = "position:fixed;z-index:22;bottom:calc(64px + env(safe-area-inset-bottom,0px));inset-inline:0;display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:10px;padding:12px 16px;background:#1c1120ee;backdrop-filter:blur(10px);border-top:1px solid #ffffff22;font-size:14px;color:#e5e1e4";
+  document.body.appendChild(el);
+  document.getElementById("lpCookieBannerYes").addEventListener("click", () => {
+    try { localStorage.setItem("lp_cookie_ok", "1"); } catch {}
+    el.remove();
+    document.dispatchEvent(new Event("lp-cookie-decided"));
+  });
+}
+document.addEventListener("DOMContentLoaded", lpWireCookieBanner);
+
 // Site-wide "enable notifications" banner — every previous entry point to
 // lpEnablePushNotifications lived deep inside /my-area or /profile, which a
 // first-time or anonymous visitor has no reason to ever open. This surfaces
@@ -413,6 +438,8 @@ function lpPushIdentity() {
 // below is what stops it from ever showing again — no separate "dismissed"
 // flag needed, and none is set here.
 function lpWirePushBanner() {
+  // One banner at a time: the cookie notice comes first, this one follows once it is answered.
+  if (!lpCookieDecided()) { document.addEventListener("lp-cookie-decided", lpWirePushBanner, { once: true }); return; }
   if (lpIsIosNotInstalled()) return; // can't work here at all; nothing to offer
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
   if (typeof Notification === "undefined" || Notification.permission !== "default") return;
