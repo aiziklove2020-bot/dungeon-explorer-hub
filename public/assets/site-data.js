@@ -35281,7 +35281,7 @@ async function WU(e, t) {
 	} catch {}
 	return i;
 }
-async function requestSubscription_(e, t, n = "") {
+async function requestSubscription_(e, t, n = "", plan = "") {
 	let r = String(e || "").trim(), i = String(t || "").trim();
 	if (!r || !i) throw Error("נא למלא שם וטלפון");
 	let a = E(T(H, "subscriptionRequests"));
@@ -35289,13 +35289,14 @@ async function requestSubscription_(e, t, n = "") {
 		fullName: r,
 		phoneNumber: i,
 		note: String(n || "").trim(),
+		plan: String(plan || ""),
 		status: "pending",
 		createdAt: N.now()
 	});
 	fetch("/api/support-chat-send", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ job: "subscription-request", name: r, phone: i, note: n })
+		body: JSON.stringify({ job: "subscription-request", name: r, phone: i, note: (plan ? "מסלול: " + ({bdsm:"מנוי BDSM",swingers:"מנוי מסיבות סווינגרס",combined:"מנוי משולב"}[plan] || plan) + (n ? " | " : "") : "") + n })
 	}).catch(() => {});
 	return { id: a.id };
 }
