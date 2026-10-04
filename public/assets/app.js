@@ -402,6 +402,94 @@ function lpPushIdentity() {
   return anon;
 }
 
+// Easier typing in every form on the site (also forms added later by scripts):
+// the right mobile keyboard per field (digits for phones), no auto-capitalising or
+// autocorrect for Telegram handles, links and passwords, a "next / done" key on the
+// keyboard, Enter moving to the next field instead of submitting half a form, the
+// focused field scrolled above the keyboard, and phone numbers cleaned up when
+// typed or pasted (spaces, dashes, "+972" and Hebrew-style digits).
+function lpNormalizePhone_(raw) {
+  let v = String(raw || "").replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 1632)).replace(/[^\d+]/g, "");
+  if (v.startsWith("+972")) v = "0" + v.slice(4);
+  else if (v.startsWith("972")) v = "0" + v.slice(3);
+  return v.replace(/\D/g, "");
+}
+function lpEnhanceField_(el) {
+  if (el.dataset.lpEasy) return;
+  el.dataset.lpEasy = "1";
+  const type = (el.getAttribute("type") || "text").toLowerCase();
+  const name = `${el.name || ""} ${el.id || ""}`.toLowerCase();
+  if (el.tagName === "INPUT") {
+    if (type === "tel") {
+      el.setAttribute("inputmode", "numeric");
+      if (!el.getAttribute("autocomplete")) el.setAttribute("autocomplete", "tel");
+      el.setAttribute("autocapitalize", "off");
+      const clean = () => { const v = lpNormalizePhone_(el.value); if (v !== el.value) el.value = v; };
+      el.addEventListener("input", clean);
+      el.addEventListener("paste", (e) => {
+        const text = (e.clipboardData || window.clipboardData)?.getData("text");
+        if (text == null) return;
+        e.preventDefault();
+        const v = lpNormalizePhone_(text);
+        const max = parseInt(el.getAttribute("maxlength"), 10);
+        el.value = max > 0 ? v.slice(0, max) : v;
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    } else if (type === "password") {
+      el.setAttribute("autocapitalize", "off");
+      el.setAttribute("autocorrect", "off");
+      el.setAttribute("spellcheck", "false");
+    } else if (type === "url") {
+      el.setAttribute("inputmode", "url");
+      el.setAttribute("autocapitalize", "off");
+      el.setAttribute("autocorrect", "off");
+      el.setAttribute("spellcheck", "false");
+    } else if (type === "search") {
+      el.setAttribute("enterkeyhint", "search");
+    } else if (type === "text") {
+      if (/telegram/.test(name) || el.getAttribute("dir") === "ltr") {
+        el.setAttribute("autocapitalize", "off");
+        el.setAttribute("autocorrect", "off");
+        el.setAttribute("spellcheck", "false");
+        if (!el.getAttribute("autocomplete")) el.setAttribute("autocomplete", "off");
+      } else if (/name|שם/.test(name) && !/business|nick/.test(name)) {
+        el.setAttribute("autocapitalize", "words");
+      }
+    }
+    // Enter on a text field moves to the next field; only the last one submits.
+    if (!["checkbox", "radio", "file", "hidden", "submit", "button", "date", "time"].includes(type) && type !== "search") {
+      el.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" || e.isComposing || !el.form) return;
+        const fields = [...el.form.querySelectorAll("input,select,textarea")].filter((f) => !f.disabled && f.type !== "hidden" && f.type !== "checkbox" && f.type !== "file" && f.offsetParent !== null);
+        const i = fields.indexOf(el);
+        if (i >= 0 && i < fields.length - 1) { e.preventDefault(); fields[i + 1].focus(); }
+      });
+    }
+  }
+  // Keyboard action key: "next" on every field but the last of a form, "send" on the last.
+  if (el.form && !el.hasAttribute("enterkeyhint") && el.tagName !== "SELECT") {
+    const fields = [...el.form.querySelectorAll("input,textarea")].filter((f) => f.type !== "hidden" && f.type !== "checkbox" && f.type !== "file");
+    if (el.tagName !== "TEXTAREA") el.setAttribute("enterkeyhint", fields[fields.length - 1] === el ? "send" : "next");
+  }
+  // Keep the focused field visible above the on-screen keyboard.
+  if (el.tagName !== "SELECT" && !["checkbox", "radio", "file", "hidden", "date", "time"].includes(type)) {
+    el.addEventListener("focus", () => {
+      if (window.matchMedia("(max-width:800px)").matches) setTimeout(() => { try { el.scrollIntoView({ block: "center", behavior: "smooth" }); } catch {} }, 350);
+    });
+  }
+}
+function lpEasyForms(root) {
+  (root || document).querySelectorAll("form input, form textarea, #regForm input, #regForm textarea").forEach(lpEnhanceField_);
+}
+document.addEventListener("DOMContentLoaded", () => {
+  lpEasyForms();
+  try {
+    new MutationObserver((muts) => {
+      for (const m of muts) m.addedNodes.forEach((n) => { if (n.nodeType === 1) lpEasyForms(n.matches?.("form") || n.closest?.("form") ? n.closest("form") || n : n); });
+    }).observe(document.body, { childList: true, subtree: true });
+  } catch {}
+});
+
 // Cookie notice, same look as the notifications banner below. The site only uses
 // a cookie that keeps a member signed in (lp_current), so the notice informs and
 // asks for an OK; the answer is remembered in this browser ("lp_cookie_ok").
