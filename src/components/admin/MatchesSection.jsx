@@ -251,6 +251,25 @@ const MatchesSection = ({ showSaved }) => {
     }
   };
 
+  // Admin override of the woman's own opt-in: reveals (or hides) her phone to
+  // her balance match when she forgot to do it herself.
+  const handleTogglePhoneShared = async (partyId, match) => {
+    try {
+      const same = (m) => (m.malePhone === match.malePhone && m.femalePhone === match.femalePhone) ||
+        (match.coupleId && m.coupleId === match.coupleId);
+      const result = await saveBalanceMatches(partyId, (current) => {
+        if (current.some(same)) {
+          return current.map(m => (same(m) ? { ...m, phoneShared: !m.phoneShared } : m));
+        }
+        return [...current, { ...match, phoneShared: !match.phoneShared }];
+      });
+      setPartyBalances(prev => ({ ...prev, [partyId]: result.matches }));
+      showSaved();
+    } catch (error) {
+      alert(`${t('admin.balanceTables.errorCreatingBalance')}: ${error.message}`);
+    }
+  };
+
   const handleToggleEntered = async (partyId, match) => {
     try {
       const result = await saveBalanceMatches(partyId, (current) => {
@@ -768,6 +787,7 @@ const MatchesSection = ({ showSaved }) => {
                     onSwapPartner={handleSwapPartner}
                     onSwapCouplePartner={handleSwapCouplePartner}
                     onToggleEntered={handleToggleEntered}
+                    onTogglePhoneShared={handleTogglePhoneShared}
                     onRefresh={loadActiveParties}
                     registeringClient={registeringClient}
                     allUsersMap={allUsersMap}
