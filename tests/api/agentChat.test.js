@@ -39,10 +39,10 @@ describe('team chat', () => {
     expect(chat).toBeNull();
   });
 
-  it('the roster has 10 named agents, each in a known category', () => {
-    expect(AGENTS).toHaveLength(10);
+  it('the roster has 11 named agents, each in a known category', () => {
+    expect(AGENTS).toHaveLength(11);
     const cats = AGENT_CATEGORIES.map((c) => c.id);
     for (const a of AGENTS) expect(cats).toContain(a.category);
-    expect(new Set(AGENTS.map((a) => a.name)).size).toBe(10);
+    expect(new Set(AGENTS.map((a) => a.name)).size).toBe(11);
   });
 });

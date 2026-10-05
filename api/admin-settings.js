@@ -290,7 +290,7 @@ export default async function handler(req, res) {
       const text = typeof body.text === 'string' ? body.text.trim().slice(0, 500) : '';
       const agent = typeof to === 'string' ? agentById(to) : null;
       if (!agent || !text) return res.status(400).json({ error: 'Unknown agent or empty message' });
-      const NOW_JOBS = { campaign: 'job=campaign&force=1', promo: 'job=promo-now', health: 'job=health&noalert=1', cleanup: 'job=cleanup-parties' };
+      const NOW_JOBS = { campaign: 'job=campaign&force=1', promo: 'job=promo-now', tiktok: 'job=tiktok&force=1', health: 'job=health&noalert=1', cleanup: 'job=cleanup-parties' };
       const cfgRef = db.collection('settings').doc('agentConfig');
       const chatRef = db.collection('settings').doc('agentChat');
       const result = await db.runTransaction(async (tx) => {
