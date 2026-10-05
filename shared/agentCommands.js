@@ -10,6 +10,7 @@ export const DAY_LABELS = ['ראשון', 'שני', 'שלישי', 'רביעי', '
 export const CONTROLLABLE = {
   publisher: { days: true, pause: true, now: 'campaign' },
   recruiter: { days: true, pause: true, now: 'promo' },
+  tiktok: { days: true, pause: true, now: 'tiktok' },
   secretary: { pause: true },
   cleaner: { now: 'cleanup' },
   doctor: { now: 'health' },
@@ -26,6 +27,7 @@ const RESUME_RE = /(המשך|תמשיך|תחזור|חזור|הפעל|תפעיל|
 const NOW_BY_AGENT = {
   publisher: /(עכשיו|מיד|תפרסם|תשלח|תריץ|תעבוד)/,
   recruiter: /(עכשיו|מיד|תשלח|תריץ|תעבוד)/,
+  tiktok: /(עכשיו|מיד|תכין|תשלח|תריץ|תעבוד)/,
   doctor: /(עכשיו|מיד|תבדוק|בדוק|תריץ|תעבוד)/,
   cleaner: /(עכשיו|מיד|^\s*(תנקה|נקה)\s*$)/,
 };
@@ -63,7 +65,7 @@ export function applyAgentCommand(agentId, text, current = {}) {
     }
   }
   if (rules?.now && NOW_BY_AGENT[agentId]?.test(t)) {
-    const say = { campaign: 'מפרסם עכשיו קמפיין בערוץ, תראה את זה כאן בצ׳אט בעוד רגע.', promo: 'שולח עכשיו לקבוצה את ההודעה למפרסמים.', health: 'בודק את האתר עכשיו, אכתוב כאן מה מצאתי בעוד רגע.', cleanup: 'מנקה עכשיו, אכתוב כאן מה עשיתי.' };
+    const say = { campaign: 'מפרסם עכשיו קמפיין בערוץ, תראה את זה כאן בצ׳אט בעוד רגע.', tiktok: 'מכין עכשיו פוסט לטיקטוק ושולח לך אותו בטלגרם.', promo: 'שולח עכשיו לקבוצה את ההודעה למפרסמים.', health: 'בודק את האתר עכשיו, אכתוב כאן מה מצאתי בעוד רגע.', cleanup: 'מנקה עכשיו, אכתוב כאן מה עשיתי.' };
     return { config: current, handled: true, runNow: rules.now, reply: say[rules.now] };
   }
   const agent = agentById(agentId);
