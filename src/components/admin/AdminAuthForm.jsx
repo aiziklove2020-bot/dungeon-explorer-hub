@@ -2,6 +2,7 @@ import { useId, useState } from 'react';
 import { Lock } from 'lucide-react';
 import SEO from '../SEO';
 import { authenticateAdmin, setAdminPassword } from '../../firebase/users';
+import { rememberAdminSession } from '../../utils/adminSession';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 /**
@@ -45,6 +46,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
         sessionStorage.setItem('admin_id', result.admin.id);
         const displayName = result.admin.adminUsername || result.admin.telegramUsername || result.admin.name || result.admin.id || username || 'admin';
         sessionStorage.setItem('admin_username', displayName);
+        rememberAdminSession(result.admin.id, displayName);
         setPassword('');
         setUsername('');
         onAuthenticated(result.admin);
@@ -79,6 +81,7 @@ const AdminAuthForm = ({ onAuthenticated }) => {
       sessionStorage.setItem('admin_id', currentAdmin.id);
       const displayName = currentAdmin.adminUsername || currentAdmin.telegramUsername || currentAdmin.name || currentAdmin.id || 'admin';
       sessionStorage.setItem('admin_username', displayName);
+      rememberAdminSession(currentAdmin.id, displayName);
       setNewPassword('');
       setConfirmPassword('');
       onAuthenticated(currentAdmin);
