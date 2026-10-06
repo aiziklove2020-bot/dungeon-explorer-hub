@@ -23575,6 +23575,7 @@ var zA, BA, VA, HA, UA, WA, GA, KA, qA, JA, YA, XA, ZA, QA = o((() => {
 		return {
 			userId: t.id,
 			name: t.name || "",
+			gender: t.gender === "female" || t.gender === "male" ? t.gender : "",
 			photoUrl: t.photoUrl || "",
 			hasActiveSubscription: i,
 			isPrivilegedSubscriber: s,
@@ -35282,6 +35283,25 @@ async function WU(e, t) {
 	} catch {}
 	return i;
 }
+// One-click registration for a signed-in member from the personal area: the member's name, phone and
+// gender are already known, so only the party is needed. Registers as a single seeking balance (the
+// normal member registration) and sends the usual "new registration" Telegram message through
+// registerForParty. Members whose gender is unknown are sent to the full form instead.
+async function lpRegisterMeQuick_(phone, partyId) {
+	let profile = await Oj(phone).catch(() => null);
+	if (!profile || !profile.name) throw Error("NEED_FORM");
+	let type = profile.gender === "female" ? "single-female-balance" : profile.gender === "male" ? "single-male-balance" : "";
+	if (!type) throw Error("NEED_FORM");
+	let normalized = XE(phone) || phone;
+	try {
+		return await WU(partyId, { fullName: profile.name, phoneNumber: normalized, telegramUsername: "", registrationType: type, pickupAddress: "" });
+	} catch (err) {
+		let m = String(err && err.message || "");
+		if (/Already registered/i.test(m)) throw Error("כבר נרשמת למסיבה הזו");
+		if (/spots are full/i.test(m)) throw Error("אין יותר מקום להרשמה למסיבה הזו");
+		throw err;
+	}
+}
 async function requestSubscription_(e, t, n = "", plan = "") {
 	let r = String(e || "").trim(), i = String(t || "").trim();
 	if (!r || !i) throw Error("נא למלא שם וטלפון");
@@ -35801,6 +35821,7 @@ window.LPData = {
 	deleteAdvertiserParty: $U,
 	publishPartyToTelegram: eW,
 	registerForParty: WU,
+	registerMeQuick: lpRegisterMeQuick_,
 	requestSubscription: requestSubscription_,
 	toggleFavorite: aW,
 	loadMyFavorites: oW,

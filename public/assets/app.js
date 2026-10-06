@@ -575,3 +575,32 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js").catch(() => {});
   });
 }
+
+// "הרשם אותי" buttons on the favourite cards of the personal area (data-quick-reg="<partyId>").
+window.lpQuickRegisterHtml = function (e) {
+  const canRegister = (e.partyType !== "external" || e.allowBalanceRegistration) && !e.registrationClosed;
+  return canRegister ? `<button type="button" class="btn gold" data-quick-reg="${String(e.id).replace(/"/g, "")}">הרשם אותי</button>` : "";
+};
+window.lpWireQuickRegister = function (container, phone) {
+  container.querySelectorAll("[data-quick-reg]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-quick-reg");
+      btn.disabled = true;
+      const label = btn.textContent;
+      btn.textContent = "נרשם...";
+      try {
+        await window.LPData.registerMeQuick(phone, id);
+        btn.textContent = "נרשמת ✓";
+        if (window.toast) toast("נרשמת למסיבה, ההודעה נשלחה");
+      } catch (err) {
+        if (String(err && err.message) === "NEED_FORM") {
+          location.href = "/event?id=" + encodeURIComponent(id);
+          return;
+        }
+        btn.disabled = false;
+        btn.textContent = label;
+        if (window.toast) toast(err && err.message ? err.message : "ההרשמה נכשלה, נסו שוב", "error");
+      }
+    });
+  });
+};
