@@ -158,7 +158,7 @@ const AgentsSection = () => {
                     <div key={`${m.ts}-${i}`} className={`rounded-xl p-3 bg-[#2a1a24] border-r-4 ${m.delegation ? 'mr-6' : ''}`} style={{ borderColor: color }}>
                       <div className="flex items-center gap-2 text-xs mb-1 flex-wrap">
                         <strong style={{ color }}>{m.name}</strong>
-                        {toName && <span className="text-[#ff9fc3]">← {toName}</span>}
+                        {toName && <span className="text-[#ff9fc3]">אל {toName}</span>}
                         <span className="text-[#94A3B8]">{m.role}</span>
                         {m.delegation && <span className="px-1.5 rounded bg-[#ff438b33] text-[#ff9fc3]">העברה בין סוכנים</span>}
                         {m.state === 'completed' && <span className="text-[#34d399]">✓ הושלם</span>}

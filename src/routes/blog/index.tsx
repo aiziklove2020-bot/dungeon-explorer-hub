@@ -68,7 +68,7 @@ function Blog() {
                     params={{ postId: p.id }}
                     className="self-start font-bold text-primary hover:underline"
                   >
-                    קרא עוד ←
+                    קרא עוד
                   </Link>
                 </article>
               ))}
