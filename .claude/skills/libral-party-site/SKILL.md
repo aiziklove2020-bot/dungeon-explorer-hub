@@ -1,314 +1,358 @@
 ---
 name: libral-party-site
-description: Use for ANY work on the LIBRAL PARTY codebase — swapping in a new visual design (public site or admin panel, e.g. from Stitch), debugging why a change isn't showing live, editing public/assets/site-data.js, or fixing a bug anywhere in the site. Covers the two-codebase architecture, the window.LPData data contract, and a running list of real bugs already found and fixed (so they don't get reintroduced).
+description: Use for ANY work on the LIBRAL PARTY codebase (libralparty.net) — public pages in public/*.html, the hand-maintained public/assets/site-data.js (window.LPData), the React admin panel in src/, the Vercel API in api/, the Telegram bot and campaign jobs, the agent team and its chat, TikTok/SEO content, mobile layout, and debugging why a change isn't live. This is the single, complete skill for the whole site and reflects its current state.
 ---
 
-# The LIBRAL PARTY site — architecture, data contract, and known pitfalls
+# LIBRAL PARTY — the complete map of the site (current state)
 
-This is the one skill for this whole repo. It replaces two earlier separate
-skills (`rewire-public-design`, `rewire-admin-design`) — merged here because
-a new visual design, a bug fix, and a Stitch-based redesign all need the same
-underlying map of the codebase, and keeping that map in one place is what
-stops it from drifting out of date.
+One skill for the whole repo. Read the section you need; every rule here exists
+because of a real incident or an explicit owner decision.
 
-## The two-codebase split — the single most important fact about this repo
+## 0. Working with the owner
 
-1. **`public/*.html`** — plain static HTML/CSS/vanilla-JS pages (home, about,
-   contact, events, my-area, event, register, login, advertiser pages, etc).
-   **This is the real, live public site every visitor sees.**
-2. **`src/`** — a React + TanStack Start SPA that is **only** the admin panel
-   at `/admin`, entered through `src/routes/admin.tsx` → `src/pages/Admin.jsx`.
-   The business owner manages parties, subscribers, balance matches, Telegram
-   settings, etc. here.
+- The owner writes Hebrew, short messages, and is "the manager": **do what is
+  asked, nothing extra**. Do not invent behaviour (a past example: adding a
+  forced password reset nobody asked for was rejected and removed).
+- If a request is genuinely ambiguous, ask one short question (use the
+  question tool with concrete options); otherwise act.
+- Answer in short Hebrew. Say plainly what was done, what was *not* verified,
+  and what only the owner can do (opening accounts, approvals, deleting data).
+- The owner pre-approved merging PRs automatically (also for the Claude
+  routines). Merge with the GitHub MCP tool `merge_pull_request`, method
+  `merge`, after tests/build pass. Never rewrite published history.
+- There is **no Lovable connection**. Do not mention Lovable.
+- Never put secrets (bot tokens, `ADMIN_API_SECRET`, `TELEGRAM_PROMO_SECRET`,
+  Firebase credentials) in code, commits, docs or chat. `settings/telegram`
+  holds bot tokens in Firestore — never print them.
+- Deleting production data (e.g. a Firestore party) is blocked by the auto-mode
+  classifier. Do the code fix, then tell the owner exactly what to delete in
+  the admin panel.
 
-**A visual redesign of one never touches the other.** They share data through
-one contract only (below) — never let a redesign reach into Firestore
-directly from new code, and never let "restyle the admin panel" turn into
-editing `public/*.html` or vice versa.
+## 1. The codebase
 
-**A third trap**: `src/routes/*.tsx` also defines routes like `/login`,
-`/register`, `/tickets` that predate the site's move to static `.html`
-pages. These can still be live and reachable (via routing/rewrites) even
-though they render completely different, stale functionality — e.g. a real
-incident where `/login` served a dead nickname-login form instead of the
-site's actual phone+password login on `public/login.html`. If a route file
-under `src/routes/` isn't the admin panel and isn't a deliberate redirect
-shim (`throw redirect({ href: "/whatever.html" })`), treat it as suspect and
-verify what it actually renders before assuming the `.html` file is what's
-live.
-
-## The data contract: `window.LPData`
-
-Every public page that needs live data does:
-
-```html
-<script type="module">
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    await import("./assets/site-data.js?v=<CURRENT_VERSION>");
-  } catch (err) {
-    console.error("site-data.js failed to load:", err);
-    return; // fail visibly, don't leave the page half-registered
-  }
-  // window.LPData.* is now available
-});
-</script>
-```
-
-`window.LPData` is the entire public API surface (defined at the bottom of
-`public/assets/site-data.js`). New page JS should call these by name — never
-reach into Firestore directly, never duplicate this logic:
-
-| Function | Used for |
+| Path | What it is |
 |---|---|
-| `loadEvents()` | homepage/events/calendar party listings |
-| `loadSocialLinks()` | footer/homepage social icons |
-| `loadNewsFeed()` | news page |
-| `loadAbout()` | about page copy |
-| `loadContact()` | contact page (description, WhatsApp link, alert text) |
-| `supportChat()` | the floating support-chat widget |
-| `loadStore()` / `createStoreOrder()` | merch store |
-| `communityChat()` | community page |
-| `registerAdvertiserAccount()` / `loginAdvertiser()` | advertiser signup/login |
-| `register()` / `login()` | forum (nickname+password) accounts |
-| `checkMyAccountStatus()` | forum session validity check |
-| `getMembershipStatus()` | subscription tier lookup |
-| `updateMyProfile()` / `uploadImage()` | forum profile editing |
-| `createAdvertiserParty()` / `loadAdvertiserParties()` / `getAdvertiserParty()` / `updateAdvertiserParty()` / `deleteAdvertiserParty()` | advertiser's own party CRUD |
-| `publishPartyToTelegram()` | manual Telegram publish button |
-| `registerForParty()` | party registration form |
-| `requestSubscription()` | "I want to be a subscriber" lead form — this is also where a login page's "don't have an account?" link should point, not `/contact` |
-| `toggleFavorite()` / `loadMyFavorites()` / `loadFavoriteAlerts()` | favorites (subscriber-only) |
-| `loadMyBalanceMatch()` / `shareMyBalancePhone()` | balance-match display + phone-share toggle |
-| `loadMyPersonalArea(phone)` | **the big one for `/my-area`** — returns `{profile, registrations, balanceMatch, favorites}` in one call, keyed by phone number, no login required |
-| `uploadMyProfilePhoto()` | personal-area avatar upload |
-| `loadMyForumPersonalArea()` / `changeMyForumPassword()` | forum-account personal area |
-| `registerPushSubscription()` | Web Push opt-in |
+| `public/*.html` | The **live public site** (static HTML + vanilla JS). Served with clean URLs via `vercel.json` rewrites. |
+| `public/assets/site-data.js` | ~1.25 MB hand-maintained, pre-minified bundle; exposes `window.LPData`. See §4. |
+| `public/assets/app.js` | Shared site JS (toast, session, favourite hearts, cookie/push banners, form enhancer). |
+| `public/assets/design/style.css` | The single stylesheet (many appended rule blocks; later rules win). |
+| `src/` | React + TanStack admin panel only (`/admin`, `src/pages/Admin.jsx`, tabs in `src/components/admin/`). |
+| `api/` | Vercel serverless functions, **one function per file**. `api/telegram-webhook.js` holds all scheduled/jobs (`?job=...`). `api/admin-settings.js` is the authenticated settings/agent-chat endpoint. |
+| `shared/` | Plain JS used by both server and admin: `agentsRoster.js`, `agentCommands.js`, `a2a.js`, `registrationAccess.js`, `telegramCampaigns.js` (generated), `tiktokPack.js` (generated). |
+| `scripts/campaigns/make_campaigns.py`, `scripts/tiktok/make_tiktok.py` | Generators for campaign / TikTok images and the generated `shared/*.js`. |
+| `tests/api/` | Vitest unit tests for the server/shared logic. |
+| `docs/` | `agents-roster.md`, `tiktok-pack.md`. |
+| `public/.well-known/agent-card.json` | Generated from `teamCard()` in `shared/a2a.js`; a test asserts it matches the roster. |
 
-Other globals a page can rely on (defined in `public/assets/app.js`, loaded
-via plain `<script src="assets/app.js?v=...">`, not a module):
+A redesign or fix of `public/` never touches `src/` and vice versa. `src/routes/*.tsx`
+may contain stale routes (`/login`, `/register`…) that predate the static pages;
+unless a route is the admin panel or a deliberate redirect shim, verify what it
+really renders before trusting the `.html` file is what's live.
 
-- `toast(msg, kind)` — the site's toast/snackbar notification
-- `window.LP.current()` / `LP.setCurrent()` — the **forum/advertiser** logged-in
-  session (localStorage-based, separate from the phone lookup below)
-- `window.lpWireFavHearts(container)` — wires up ♥ buttons inside a container
-- `window.lpEnablePushNotifications(phone)` — the "enable push" button handler
+## 2. Hosting, deploys, git
 
-## Two identity models — don't conflate them
+- Hosted on **Vercel** (domain libralparty.net, `www.` canonical). Firebase
+  project `tbdsm-5acca` (Firestore). Two Vercel projects exist.
+- Vercel caps **100 deployments / 24 h** (error `api-deployments-free-per-day`).
+  Symptom: merged code is correct but the site doesn't change; the admin panel
+  runs on the same Vercel site so it also stops updating. Fix: wait for the reset
+  or Vercel → Deployments → Create Deployment from `main`. **Push as little as
+  possible; batch work into few commits/PRs.** The owner was advised to add an
+  Ignored Build Step so docs-only pushes don't deploy.
+- Branch for this work: `claude/liberal-suite-followup` (or the branch the
+  session names). Flow: commit → push → PR (`create_pull_request`, base `main`)
+  → `merge_pull_request` (method `merge`). A merged branch must be restarted
+  from `main` before new work (never stack on a merged PR).
+- Commit messages end with the attribution lines the session specifies; PR
+  bodies end with the generated-with line. **Never name a model in
+  commits/PRs/code.**
+- Cron (`vercel.json`): `0 9 * * 0-4` → `/api/telegram-webhook` (daily jobs:
+  reminders, campaign, group promo, TikTok prep, instagram, health) and
+  `0 3 * * *` → `?job=cleanup-parties`.
+- The sandbox cannot reach libralparty.net. It *can* read Firestore REST for
+  public collections (`settings/*`, `parties`). Writes to `settings/*` need the
+  Admin SDK / `api/admin-settings.js` (bearer secret) — not available from the
+  sandbox. Job URLs (`?job=...&key=<TELEGRAM_PROMO_SECRET>`) are run by the owner.
 
-- **Phone-only lookup** (`/my-area`, and the real subscriber login flow):
-  the site's actual login is **phone number + password**, not a nickname.
-  `loadMyPersonalArea(phone)` looks up everything by that number — no
-  separate account needed. Session is just
-  `localStorage.setItem("lp_my_area_phone", phone)` for convenience, not
-  real auth.
-- **Forum accounts** (`login.html` / `register.html`, `forumUsers`
-  collection): nickname + password internally, but the login page bridges
-  this to phone+password by looking up a `forumUsers` doc by its `phone`
-  field first. Do not merge this with the phone-only lookup above — the
-  business owner confirmed these must stay separate, even though they now
-  share the same login page.
-- **Advertiser accounts**: their own login (`advertiser-login.html`), session
-  also via `LP.current()` with `role: "advertiser"`, admin-approved before
-  first use.
+## 3. Cache-busting (check all three every time)
 
-## The admin panel (`src/`)
-
-The panel isn't one page — it's ~25 independent tab sections, each wired to
-its own Firestore collection(s) through its own `firebase/*.js` functions.
-A "redesign" request is almost always about the **shell** (colors, sidebar,
-spacing, card chrome) — restyle it in place; treat every tab section as a
-black box you pass the same props to. Don't rewrite `Admin.jsx` wholesale.
-
-- **`src/pages/Admin.jsx`** owns the visual frame (sidebar, mobile tab pills,
-  header, "advanced" tools toggle). Restyle around
-  `{activeSection === 'X' && <XSection showSaved={showSaved} />}`, don't
-  restructure it. Keep: the `tab.advanced` filter split, `activeSection`
-  state (don't switch to per-tab routing), and every prop passed into a
-  section (`showSaved`, `refreshKey`, etc. — these drive real save-feedback
-  and refresh behavior, not decoration).
-- **`src/components/admin/adminTabs.js`** is the single source of truth for
-  which tabs exist, their Hebrew labels, and which are "advanced". Edit this
-  (and the `TAB_ICONS` map in `Admin.jsx`) — never hardcode a duplicate tab
-  list in new shell JSX.
-- **`AdminAuthForm.jsx`** gates the whole panel via
-  `sessionStorage.admin_authenticated`, checked only after mount (avoids an
-  SSR hydration mismatch) — not real routing-level auth.
-- Each `*Section.jsx` owns its own data fetching (usually
-  `useAdminSection(fetchFn)`), its own Firestore writes (always through
-  named `src/firebase/*.js` functions, never raw Firestore calls inline),
-  and its own modals. Restyling cards/forms is safe; removing a button or
-  reordering a multi-step submit handler is not, without checking first —
-  several exist to solve a specific reported pain point (read the section's
-  top-of-file comments before "simplifying" anything away).
-- **Two records behind "one subscriber"** — don't conflate or merge these:
-  - `users/{id}` — the subscriber/registration record (name, phone, gender,
-    subscription tier & expiry, payments). Managed in "ניהול משתמשים ומנויים"
-    (`SubscriptionsSection.jsx`).
-  - `forumUsers/{id}` — the site **login account** (nickname + bcrypt
-    password, role, block state), linked via `linkedUserId`. Managed in
-    "מנויי האתר" (`ForumUsersSection.jsx`). The "forum" naming is legacy (an
-    actual discussion forum was removed) — don't rename the collection or
-    merge the two tabs; that's a data-model migration, not a visual one.
-- Styling: Tailwind for layout/spacing, **inline `style={}` for actual color
-  values** (no CSS variable/theme layer — a new palette updates literal hex
-  values everywhere they appear). `lucide-react` icons. RTL + Hebrew
-  throughout.
-- Verify after any admin restyle: `npm run build`, then click through
-  **every** tab (not just the ones touched), and confirm the "advanced"
-  toggle and mobile pill row still match `adminTabs.js`.
-
-## Routing: keep `vercel.json` in sync
-
-Clean URLs are Vercel rewrites, not real folders:
-
-```json
-{ "source": "/about", "destination": "/about.html" }
-```
-
-If a redesign **renames** a page file, add/update the matching entry in both
-`rewrites` (clean URL → file) and `redirects` (old `.html` URL → clean URL,
-301), and delete stale entries whose target no longer exists. **Caveat**:
-this file's rewrites/redirects have not always matched observed live
-routing behavior during this project's history (a page's real behavior was
-once traced to a `src/routes/*.tsx` file shadowing the intended static
-page, not to anything in `vercel.json`) — verify a page's actual live
-behavior rather than assuming it from `vercel.json` alone.
-
-## `public/assets/site-data.js` — hand-maintained, edit with care
-
-This file is a **pre-minified bundle, not generated by any build step** —
-there is no `vite build` for it, and it has its **own independent
-implementations** of business logic (registration, phone normalization,
-Telegram sending, etc.) that can silently drift out of sync with the
-"canonical" logic in `src/firebase/*.js`. **Any bug fix made in `src/` that
-also has a live-site code path must be ported here too** — this has already
-been the root cause of multiple real incidents (see Known pitfalls below).
-
-If a new UI genuinely needs a new/changed backend function here:
-
-1. **Never** insert a new function as `name = async (x) => {...}` or
-   `let name = ...` in the middle of one of this file's many
-   `var a, b, c = o((() => { ...body... })())` lazy-init chunks. Those
-   chunks' variable names (`a, b, c, ...`) are the *only* legally declared
-   identifiers in that scope; anything else assigned there either throws
-   `ReferenceError` at module-load time (killing the **entire site**, not
-   just that feature) or silently shadows an exported variable if written
-   with `let`/`const`.
-2. **Always** add new logic as a standalone top-level declaration instead:
-   ```js
-   async function myNewHelper_(arg) { ... }
-   ```
-   A real function declaration hoists safely regardless of the surrounding
-   `var` chains, and can be referenced from anywhere below it in the file.
-   Existing top-level helper functions (e.g. the `isPartyExpiredByDate`
-   family, `OO`/`kO`/`jO`/etc. — see Known pitfalls) are already available
-   this way without re-importing anything.
-3. Add it to the `window.LPData = {...}` object at the end so pages can call
-   it as `window.LPData.myNewHelper`.
-4. After any edit: `node --check public/assets/site-data.js` (syntax only —
-   does **not** catch the ReferenceError class of bug above) and
-   `grep -c "myNewHelper_" public/assets/site-data.js` to confirm exactly
-   the expected number of occurrences (no accidental duplicate
-   declarations).
-
-## Cache-busting — bump the version on every site-data.js/app.js/style.css change
-
-Every `public/*.html` file imports these as
-`./assets/site-data.js?v=YYYYMMDDHHmm` (same pattern for `app.js` and for
-`assets/design/style.css`). `vercel.json` serves `/assets/(.*)` with a long
-cache lifetime keyed by the full URL including `?v=`. **If you edit any of
-these three files without bumping their query string on every page that
-imports them, visitors and the CDN can keep serving the old cached version
-indefinitely after deploy** — making a real fix look like it didn't work,
-or (this has actually happened) making a merged CSS fix for a real bug,
-like unreadable button text, invisible in production for a long time
-because only `site-data.js` got its version bumped and `style.css` did not.
-**`style.css` is edited constantly for design tweaks and is the one most
-likely to be forgotten — always check it too, not just the two JS files.**
-Bump all three together with one search-and-replace across all
-`public/*.html` files whenever any of their content changes:
+Every `public/*.html` loads `assets/site-data.js?v=YYYYMMDDHHmm`,
+`assets/app.js?v=…`, `assets/design/style.css?v=…`. `/assets/*` is cached for
+a day (+stale-while-revalidate); HTML is `no-store`. After editing any of the
+three files bump **all** pages:
 
 ```bash
-NEWV=$(date -u +%Y%m%d%H%M)
-for f in public/*.html; do sed -i -E "s/(site-data\.js|app\.js|design\/style\.css)\?v=[0-9]+/\1?v=$NEWV/g" "$f"; done
+V=$(date +%Y%m%d%H%M)
+sed -i -E "s/(site-data\.js\?v=)[0-9]{12}/\1$V/g; s/(assets\/app\.js\?v=)[0-9]{12}/\1$V/g; s/(design\/style\.css\?v=)[0-9]{12}/\1$V/g" public/*.html
 ```
 
-HTML pages themselves are served with `Cache-Control: no-store`, so this
-only matters for `/assets/*` (the two JS files and the CSS file).
+Replacing an image under the same name (e.g. the hero) needs a `?v=` on its URL
+too. Some pages import site-data.js inside a module with its own `?v=` — grep
+before assuming the bump reached it.
 
-## Deploy workflow
+## 4. `public/assets/site-data.js` — edit with care
 
-1. `npm run build` locally after any change — sanity-checks the whole repo
-   (Vite build of `src/`, plus copies `public/` through).
-2. `git status --short` — confirm only the intended files changed.
-3. Commit, push to the branch named in this session's system prompt.
-4. **Direct merge to `main` is blocked by an auto-mode classifier
-   ("Merge Without Review") — open a PR instead and have the site owner
-   click Merge in the GitHub UI.** A branch whose previous PR already
-   merged needs a fresh PR for new commits — never stack on a merged PR.
-5. A change that **removes or narrows an existing permission/auth check**
-   (even to fix a bug an unrelated tightening caused) is flagged as
-   "Security Weaken" and needs the owner's explicit approval **before**
-   attempting the edit, and every git command touching that file (add,
-   commit, even `node --check`) may still be blocked afterward regardless
-   of that approval — in that case the owner has to apply the diff
-   themselves directly on GitHub (give them the exact file content).
-6. Vercel auto-deploys `main` on merge — **but the project is on a plan
-   with a 100-deployments/24h cap**. If many small pushes happen in one
-   session, this cap can be hit, and both preview and production
-   auto-deploys go silently quiet (no error anywhere in GitHub) until it
-   resets ~24h later. Symptom: a merged PR's content is verifiably correct
-   on `main`, but the live site doesn't change. Fix: Vercel dashboard →
-   Deployments → "..." (top-level menu) → **Create Deployment** → `main` →
-   **Deploy to Production**.
+- Not generated by any build step; it duplicates logic from `src/firebase/*.js`.
+  **A fix in `src/` that also has a live-site path must be ported here.**
+- **Never** insert code in the middle of the giant `var a, b, c = o((...)())`
+  lazy-init chains (throws ReferenceError at load and kills the whole site).
+  Add a standalone top-level `function name_()` / `async function name_()` and
+  expose it on `window.LPData` at the end.
+- After editing: `node --check public/assets/site-data.js`, then grep that the
+  new name occurs the expected number of times. Syntax check does not catch
+  scope ReferenceErrors — also load a page in a browser with the real file
+  when the edit is non-trivial.
 
-## Known pitfalls already found and fixed — don't reintroduce these
+### `window.LPData` (the only API public pages use)
 
-- **Registration race condition**: both `registerToPartyNew`/
-  `registerCoupleToParty` (`src/firebase/parties.js`) and their live-bundle
-  copies (`lM`/`fM` in `site-data.js`) must do their duplicate-check,
-  capacity-check, and write **inside a single Firestore transaction**
-  (fresh `tx.get()`, not a cached read; `tx.update()`, not a plain
-  `updateDoc`). Without this, two near-simultaneous registrations for the
-  same last spot (or same phone) can both pass the checks and both
-  succeed — this happened live. The bundle's `runTransaction` alias is
-  `hd`; find it via `runTransaction: () => hd` in its exports map.
-- **Party `date` vs `expiration`**: a party's `date` field is Israel-midnight
-  of its *labeled* day (a "Friday" party is stored as Friday's own 00:00) —
-  comparing it directly against "now" makes the party look expired partway
-  through its own day, hours before it actually happens. Any "is this party
-  still current" check must prefer the stored `expiration` Timestamp
-  (already computed correctly elsewhere, accounting for the admin's
-  retention window) and only fall back to `isPartyExpiredByDate()` for
-  legacy parties without one. This broke `getMyRegistrations` (silently
-  hiding same-day registrations from "my area") in both `src/` and the
-  live bundle (where the equivalent helpers already exist as top-level
-  functions — no need to reimplement the Israel-timezone math there).
-- **`api/telegram-relay.js` / similar shared endpoints**: don't assume an
-  endpoint's only caller is the admin panel just because that's the only
-  *documented* caller — `sendMessage`/`sendPhoto` here are also called
-  anonymously by the public registration flow (with no admin secret
-  available, since that code is public). Gating a shared endpoint entirely
-  behind `requireAdminApiSecret` silently broke that flow. When narrowing
-  access to an endpoint, gate only the genuinely admin-only actions
-  (bot/webhook management) and keep the ones a public flow legitimately
-  needs open.
-- **`users/{userId}` delete is `allow delete: if false`** in
-  `firestore.rules` (no real per-user Firebase Auth for the rule to trust)
-  — a plain client `deleteDoc()` on a user always fails with "insufficient
-  permissions". Route any user-delete through `api/admin-settings.js`
-  (Admin SDK + `requireAdminApiSecret`), same pattern as every other
-  admin-only user mutation there (`admin-remove-admin`, `admin-set-level`,
-  etc.) — don't add a new direct client write/delete on `users` or
-  `forumUsers` without checking whether the rule already blocks it.
-- **`targetUserIsAdmin()`-style rule helpers**: dot-notation on a possibly-
-  missing field (`resource.data.isAdmin`) throws a runtime error inside a
-  Firestore security rule, and a thrown error denies the *whole* request —
-  use `.data.get('isAdmin', false)` for optional fields instead.
-- **Firestore query-provability**: a rule like
-  `allow read: if resource.data.isAdmin != true` looks fine for a
-  single-doc `get()`, but an unconstrained `getDocs(collection(...))` query
-  against that same rule fails entirely with permission-denied (Firestore
-  rules must be provable from the query's own filters, it never
-  fetch-then-filters) — this broke the entire admin subscriber list.
+`loadEvents`, `loadSocialLinks`, `loadNewsFeed`, `loadAbout`, `loadContact`,
+`supportChat`, `loadStore`/`createStoreOrder`, `communityChat`,
+`registerAdvertiserAccount`/`loginAdvertiser`, `register`/`login`,
+`checkMyAccountStatus`, `getMembershipStatus`, `updateMyProfile`/`uploadImage`,
+`createAdvertiserParty`/`loadAdvertiserParties`/`getAdvertiserParty`/
+`updateAdvertiserParty`/`deleteAdvertiserParty`, `publishPartyToTelegram`,
+`registerForParty`, **`requestSubscription(name, phone, note, plan)`**
+(plan = `bdsm` | `swingers` | `combined`), `toggleFavorite`/`loadMyFavorites`/
+`loadFavoriteAlerts`, `loadMyBalanceMatch`/`shareMyBalancePhone`,
+`loadMyPersonalArea(phone)`, `uploadMyProfilePhoto`, `loadMyForumPersonalArea`/
+`changeMyForumPassword`, `registerPushSubscription`.
+
+Globals from `app.js`: `toast(msg, kind)`, `window.LP.current()/setCurrent()`
+(forum/advertiser session), `lpWireFavHearts(container)`,
+`lpEnablePushNotifications(phone)`, `lpEasyForms` (form enhancer).
+
+## 5. Identity, accounts, personal area
+
+- Three separate identity models — never merge them: **members** (phone +
+  password; `users` + `forumUsers`), **advertisers/producers**
+  (`advertiser-login.html`, admin-approved, `LP.current()` with
+  `role:"advertiser"`), and the phone-only lookup used by `/my-area`.
+- `users/{id}` = subscriber record (tier, expiry, payments); `forumUsers/{id}` =
+  login account (linked via `linkedUserId`). Legacy name "forum"; do not rename
+  or merge the collections/tabs.
+- **Women**: free lifetime membership. Every woman gets an account with the
+  starter password **`102040`** (created by the nightly cleanup job,
+  `WOMEN_STARTER_PASSWORD`, with `displayName`). **Nobody is forced to change
+  the password** (no `mustResetPassword`) — owner decision.
+- **Personal area**: `/profile` lets a signed-in member edit name, password and
+  photo; `/my-area` redirects signed-in members there. Both pages exist.
+- **Favourites** (members only, never producers): a heart on a producer's party
+  saves *all* of that producer's parties in the member's favourites, without
+  showing the producer's name. Hearts are hidden for advertisers.
+- Producers receive registrations for their own parties in their own area.
+- Signed-in members never retype their details in registration forms
+  (`register-event.html` prefills/hides name/phone); only one-time customers
+  fill everything. Producer **ticket-link** parties start with no registration
+  type selected ("בחרו סוג הרשמה").
+- Membership signup (`/register`): the plan is a required field, prefilled from
+  `/membership` buttons (`/register?plan=bdsm|swingers|combined`), saved as
+  `plan` on `subscriptionRequests`, shown in the admin and in the Telegram
+  notification.
+
+## 6. Registration rules (parties)
+
+- `parties/{id}.registrationMode`: `auto` | `open` | `closed`, set per party in
+  the admin PartyEditor ("מצב ההרשמה"). **Only `closed` blocks**, for every
+  type including couples. **There is no time-based cutoff** (the old 21:00 rule
+  was removed; the party starts 23:30 and the owner opens/closes manually).
+- Single registration is allowed any time; shared logic in
+  `shared/registrationAccess.js` (`registrationBlockedReason`), used by
+  `src/firebase/parties.js` and mirrored in `site-data.js`
+  (`lpRegistrationBlockedReason_`; mapper fields `registrationMode`,
+  `registrationClosed`, `singlesClosed:false`). `register-event.html` shows
+  `#regClosed`.
+- Parties that are external links and not related to the site are not "ours".
+- Registrations must be done inside a Firestore **transaction** (duplicate +
+  capacity check + write together) in both `src/firebase/parties.js` and the
+  bundle copies — a race once let two people take the last spot.
+- A party's `date` is Israel-midnight of its labeled day; "is it still current"
+  must use the stored `expiration` first (`isPartyExpiredByDate` only as
+  fallback), or same-day registrations vanish from "my area".
+- **Producer duplicates**: `createAdvertiserParty` (`YU` in the bundle) refuses a
+  second party by the same producer with the same title within 24 h of the same
+  date; `create-event.html` keeps the submit button disabled after success and
+  shows a toast + scrolls to the message on error. A double-click once created
+  two identical parties one second apart.
+- **Balance (איזון)**: matches live in `parties.balanceMatches`. A woman may
+  reveal her phone to her match herself; the admin can also toggle it
+  ("📱 חשוף את הנייד לגבר" / "📵 הסתר…") on a matched pair in the matches tab
+  (`handleTogglePhoneShared`, only for non-couple matches).
+
+## 7. Public pages & front-end behaviour
+
+- **Home (`index.html`)**: hero image `assets/design/hero-v3(.webp|-800.webp)`
+  (square 1254²; text and icons are part of the image) with clickable hotspot
+  `<a class="hs">` areas positioned in % over it (two buttons, four feature
+  tiles, five social icons: Instagram, Facebook, Telegram group, Telegram
+  channel, WhatsApp). Social links come from `loadSocialLinks()`; an area with
+  `href="#"` and no configured link is disabled; Facebook defaults to the group
+  link. When the hero image changes, **re-measure every hotspot** and verify by
+  drawing the rectangles over the image.
+- **Banners** (WhatsApp, Instagram, Facebook group) are grid pieces rotating
+  between the party cards: one after every 2 cards on phones, after every full
+  row of 3 on desktop (a banner spans `grid-column:1/-1`). With few parties one
+  banner goes at the end. Facebook group link (clean, no tracking params):
+  `https://www.facebook.com/share/g/1D7ng47o28/`.
+- **Cookie notice** (`lpWireCookieBanner` in `app.js`) styled like the push
+  banner; the push banner is deferred so they don't collide. **Privacy policy**
+  `public/privacy.html` (draft Hebrew text — needs lawyer review).
+- **Forms**: `lpEasyForms` / `lpEnhanceField_` normalise phones (`lpNormalizePhone_`),
+  set correct `autocomplete`/`inputmode`/`type`, via a MutationObserver. New forms
+  get this for free; do not fight it.
+- **Support chat** widget (`pW()` in the bundle): header buttons are
+  **התנתקות** (clears `support_chat_session` + `lp_support_chat_name`, rebuilds the
+  widget), minimise and close. Icons are inline SVG (Material Symbols text once
+  rendered as raw words).
+- **SEO**: landing pages `/swingers-parties` and `/bdsm-parties` (FAQPage JSON-LD,
+  rewrites in `vercel.json`, in `sitemap.xml`, footer links on every page).
+  `robots.txt` allows everything public. The owner must verify the domain in Google
+  Search Console and submit the sitemap — it cannot be done from the repo. No
+  guarantee of ranking.
+- **Mobile**: the viewport meta must **not** contain `maximum-scale`/`user-scalable=no`.
+  Tap targets ≥44 px (`.btn`, menu, footer links, breadcrumbs), checkboxes 24 px,
+  body text not tiny. Verify at 320, 360, 390, 430 px that
+  `document.documentElement.scrollWidth` equals the viewport width (the header
+  brand needed special rules at ≤340 px). Appended CSS blocks at the end of
+  `style.css` are the place for fixes.
+- Desktop party cards are compact (a long card was rejected by the owner);
+  keep them short.
+
+## 8. Admin panel (`src/`)
+
+- `Admin.jsx` owns the shell; `adminTabs.js` is the single list of tabs (add a
+  tab there **and** the icon map and the lazy route). ~25 independent sections,
+  each fetching through named `src/firebase/*.js` functions — never raw
+  Firestore inline. Don't restructure `Admin.jsx`; restyle around it.
+- Auth: `sessionStorage.admin_authenticated` after mount (not routing-level).
+  Privileged writes go through `api/admin-settings.js` (`callAdminSettings`).
+- Styling: Tailwind layout + inline hex colours, lucide icons, RTL Hebrew.
+- **Telegram tab** (`TelegramSection.jsx`): bots, channels, messages. A channel
+  entry may carry `allowedAdvertiserIds`: absent = everyone; an array = only
+  those producers' parties (an empty array = nobody). The bot records every
+  non-private chat it hears from (including being added, via `my_chat_member`)
+  in `settings/telegramSeenChats` (max 60; groups the bot left are removed). The
+  tab polls it every 20 s, shows a pink badge with the number of groups not yet
+  in the list, and a **"הוספה לרשימה"** button; added groups start with an empty
+  `allowedAdvertiserIds` so nothing is posted until a producer is ticked, then
+  the owner saves. Only the main bot (`TELEGRAM_BOT_TOKEN`) is detected.
+- **Agents tab** (`AgentsSection.jsx`): roster cards ("כתוב ל<name>"), a message
+  box (`callAdminSettings('agent-chat-post')`) and the team chat grouped by task
+  thread. The owner commands agents in plain Hebrew; he does not want to be
+  handed steps when an agent can act.
+- Verify after admin changes: `npm run build` and click through every tab.
+
+## 9. Agents & the team chat (A2A)
+
+Roster in `shared/agentsRoster.js` (the owner chose the names). Categories:
+marketing, ops, health, systems.
+
+| id | name | role | schedule |
+|---|---|---|---|
+| publisher | עומר | campaign posts to the channel `@libralparty` | Sun/Tue/Thu |
+| recruiter | ליאור | group promo "want to publish your party?" | Mon/Thu |
+| tiktok | נועם | prepares the next TikTok post and sends it to the owner on Telegram | Sun/Thu 12:00 |
+| creator | שחר | Claude agent: monthly campaign-pool refresh (auto-merge) | 1st of month |
+| secretary | אדם | party reminders | Sun–Thu 12:00 |
+| cleaner | ניק | nightly cleanup, lifetime women, starter accounts | 03:00 |
+| doctor | דין | daily health check (`settings/healthCheck`) | daily 12:00 |
+| fixer | שון | Claude agent: reads the check + owner requests, fixes code, merges | daily |
+| support | רוי | support-chat FAQ answers | always |
+| matcher | דור | automatic gender balance | on registration |
+| notifier | איתי | push notifications | on events |
+
+- Each agent has A2A-style **skills** (Hebrew tags). `runTask` (`shared/a2a.js`)
+  picks the agent by best skill match (up to 2 delegation hops), returns lines
+  `from/to/taskId/state` (working/completed/input-required). Requests the server
+  cannot do become `kind:"request"` for שון. Chat is stored in `settings/agentChat`
+  (cap 150), per-agent config (days, paused) in `settings/agentConfig`.
+- Commands (`shared/agentCommands.js`): days ("רק בימי ראשון וחמישי"), pause
+  ("תעצור"), resume ("תמשיך"), run now (publisher/recruiter/tiktok/doctor/cleaner).
+  "Run now" goes through `NOW_JOBS` in `api/admin-settings.js`.
+- **Adding or changing an agent**: update the roster, `CONTROLLABLE`/`NOW_BY_AGENT`
+  if controllable, `NOW_JOBS` if it can run now, regenerate
+  `public/.well-known/agent-card.json` (`teamCard()`), update the count asserted in
+  `tests/api/agentChat.test.js` and `docs/agents-roster.md`, add tests.
+- Claude routines (שון daily fixer, שחר monthly refresh) run in Claude sessions and
+  merge their own PRs; the owner must delete the two old Instagram routines by hand.
+
+## 10. Telegram, campaigns, TikTok, health
+
+- Channel campaigns: pool in `shared/telegramCampaigns.js` (22 campaigns, version
+  stamp `YYYY-MM`; a new version restarts from the first). Generate with
+  `python3 scripts/campaigns/make_campaigns.py <fonts-dir>` (needs the merged Heebo
+  Hebrew+Latin font via fonttools — Hebrew-only Heebo lacks punctuation). Posts only
+  to `@libralparty`; captions use plain links with **no tracking parameters**;
+  Hebrew must be proofread (no spelling errors). `?job=campaign&force=1` posts now.
+- Group promo: `?job=promo-now`; message link is `/advertiser-register`.
+- **TikTok**: TikTok's posting API needs an approved developer app, so it is *not*
+  automatic. `scripts/tiktok/make_tiktok.py` makes 8 slides 1080×1920
+  (`public/assets/tiktok/tNN.jpg`), `shared/tiktokPack.js`, and
+  `docs/tiktok-pack.md`. Agent נועם (`sendTiktokPostIfDue`, `?job=tiktok&force=1`)
+  sends the next image + caption to the owner's chat
+  (`settings/private/supportChat/config`). Content must stay brand/community only:
+  no nudity, no sexual wording; link only in the profile bio; "18+" marked;
+  paid TikTok ads for swingers/BDSM are not allowed. If the owner gets a developer
+  app approved, the direct-post integration can replace the manual step.
+- Health check (`runHealthCheck`, `?job=health&noalert=1`) writes
+  `settings/healthCheck` {lastRunAt, ok, problems}; stale >30 h means the daily
+  cron did not run.
+- Telegram settings, bot tokens and channel list live in `settings/telegram`
+  (public-read doc — treat contents as sensitive).
+
+## 11. Firestore & rules
+
+- `settings/*` publicly readable; writes via Admin SDK / `api/admin-settings.js`.
+  `parties` updates are open to clients (`safePartyShape`). `users` delete is
+  `allow delete: if false` — user deletion goes through `api/admin-settings.js`.
+- Rule helpers: use `.data.get('field', default)` for optional fields (a thrown
+  error denies the whole request). Rules must be provable from the query's own
+  filters (an `!=` rule fails an unconstrained list query).
+- Don't gate shared endpoints (`api/telegram-relay.js`) entirely behind the admin
+  secret: anonymous public flows call `sendMessage`/`sendPhoto`; gate only
+  bot/webhook management.
+- Any change that removes or narrows a permission check is a "Security Weaken"
+  action: get the owner's explicit approval first; if git is still blocked, give
+  him the exact file content to apply on GitHub.
+
+## 12. Routing (`vercel.json`)
+
+Clean URLs are `rewrites` (`/about` → `/about.html`) plus `redirects` (old `.html`
+→ clean URL, 301). When adding/renaming a page add both, remove stale entries,
+and add it to `public/sitemap.xml` if it should be indexed (not private routes,
+which `robots.txt` disallows). Verify actual live behaviour rather than assuming
+from the file alone.
+
+## 13. Verification checklist (run before every push)
+
+```bash
+npx vitest run tests/api          # ~50 tests; 14 live-Firebase tests fail in the sandbox and on main — ignore those only
+npm run build                     # Vite/Nitro build of src/
+node --check public/assets/site-data.js
+git status --short                # only intended files; no scratch scripts
+```
+
+Browser checks use Playwright (Chromium at `/opt/pw-browsers/chromium`, launch with
+`executablePath`; never `playwright install`): serve `public/` with
+`python3 -m http.server 8940`, stub `site-data.js` with a route, and delete any
+script created inside the repo before committing (a scratch file was once
+committed by accident). Take screenshots at 390 and 1280 px for visual work.
+The bundle can't be served as-is in the sandbox because Firestore calls hang,
+so stub it.
+
+## 14. Known pitfalls (do not reintroduce)
+
+- Inserting code into the bundle's `var` chains (kills the site).
+- Forgetting to bump `style.css`/`app.js`/`site-data.js` versions (fix invisible in prod).
+- Registration without a transaction; comparing a party `date` to now.
+- A forced password change for women; showing the producer's name on favourites;
+  favourites/hearts for producers.
+- Time-based registration cutoffs (removed); blocking anything other than
+  `registrationMode === "closed"`.
+- Reintroducing `maximum-scale=1,user-scalable=no`.
+- Tracking parameters (`utm_*`) in campaign links.
+- Posting to Telegram channels other than `@libralparty` for campaigns; adding a
+  group to a channel list without a producer restriction.
+- Re-enabling the submit button right after a successful party
+  publish (duplicate parties).
+- Claiming something works on the live site without having verified it — say what
+  was and wasn't tested.
