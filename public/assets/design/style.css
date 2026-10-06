@@ -347,3 +347,8 @@ input[type="date"]::-webkit-date-and-time-value{text-align:right;min-height:1.2e
 .hero-v3{padding:22px 24px 6px!important}
 .hero-v3-wide{max-width:1240px!important;border-radius:22px;overflow:hidden;box-shadow:0 0 0 1px #ff5aa044,0 22px 70px #000a,0 0 70px #ff2d8a2e}
 }
+/* Banners between the parties: the same width, centred (the Instagram/Facebook ones were pushed to one side by an
+   inline margin, and the WhatsApp one was wider than both). */
+@media(min-width:801px){
+#event-grid>.insta-banner-wrap,#event-grid>.whatsapp-promo-wrap{width:100%!important;max-width:960px!important;justify-self:center!important;margin-inline:auto!important}
+}
