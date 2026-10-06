@@ -195,6 +195,14 @@ async function sendReminderToChat(botToken, chatId, party) {
     });
     return res.json().catch(() => ({ ok: false, description: `HTTP ${res.status}` }));
   };
+  if (party.imageURL && caption.length > 1000) {
+    // Telegram limits a photo caption to 1024 characters: send the image first,
+    // then the full text right under it, so the long party text keeps its picture.
+    const photoOnly = await post('sendPhoto', { chat_id: chatId, photo: party.imageURL });
+    const text = await post('sendMessage', { chat_id: chatId, text: caption });
+    if (text.ok) return text;
+    return photoOnly.ok ? photoOnly : text;
+  }
   if (party.imageURL) {
     const withPhoto = await post('sendPhoto', { chat_id: chatId, photo: party.imageURL, caption });
     if (withPhoto.ok) return withPhoto;
