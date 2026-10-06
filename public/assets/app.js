@@ -247,7 +247,7 @@ async function lpWireFavHearts(container) {
 
   const paint = (btn, on) => {
     btn.classList.toggle("saved", on);
-    btn.textContent = on ? "♥ במועדפים" : "♡ הוספה למועדפים";
+    btn.textContent = on ? "במועדפים" : "הוספה למועדפים";
     btn.setAttribute("aria-pressed", on);
   };
 
