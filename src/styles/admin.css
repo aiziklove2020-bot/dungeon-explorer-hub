@@ -678,9 +678,6 @@
   max-width: 100vw;
   overflow-x: hidden;
 }
-.lp-admin-theme * {
-  min-width: 0;
-}
 .lp-admin-theme img,
 .lp-admin-theme video,
 .lp-admin-theme canvas,
