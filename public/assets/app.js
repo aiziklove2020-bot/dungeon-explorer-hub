@@ -235,42 +235,50 @@ async function lpWireFavHearts(container) {
   if (buttons.length === 0) return;
   const identity = lpFavIdentity();
 
-  // Favorites are a subscriber-only feature — a forum login alone isn't
-  // enough (see toggleFavorite in site-bridge.ts). Hide the hearts entirely
-  // for anyone who isn't an active subscriber, rather than showing them a
-  // button that will just error out on click.
-  let isSubscriber = false;
-  if (identity && window.LPData?.loadMyForumPersonalArea) {
-    const area = await window.LPData.loadMyForumPersonalArea(identity).catch(() => null);
-    isSubscriber = !!area?.profile?.isPrivilegedSubscriber;
-  }
+  // The click handlers are attached right away. The slow part (checking the subscription and loading the
+  // current favourites) runs in the background, and a tap simply waits for it — before, the hearts were
+  // visible but did nothing until that finished, which looked like "I can't press the heart".
   let isProducer = false;
   try { isProducer = LP.current()?.role === "advertiser"; } catch {}
-  if (!isSubscriber || isProducer) {
-    buttons.forEach((btn) => { btn.style.display = "none"; });
-    return;
-  }
-
+  let isSubscriber = false;
   let myFavIds = [];
-  if (identity && window.LPData?.loadMyFavorites) {
-    myFavIds = await window.LPData.loadMyFavorites(identity).catch(() => []);
-  }
+  const subKey = identity ? "lp_fav_sub_" + identity : "";
+  try { if (subKey && sessionStorage.getItem(subKey) === "1") isSubscriber = true; } catch {}
+
   const paint = (btn, on) => {
     btn.classList.toggle("saved", on);
     btn.textContent = on ? "♥" : "♡";
     btn.setAttribute("aria-pressed", on);
   };
 
+  const ready = (async () => {
+    if (identity && window.LPData?.loadMyForumPersonalArea) {
+      const area = await window.LPData.loadMyForumPersonalArea(identity).catch(() => null);
+      isSubscriber = !!area?.profile?.isPrivilegedSubscriber;
+      try { if (subKey) sessionStorage.setItem(subKey, isSubscriber ? "1" : "0"); } catch {}
+    }
+    if (!isSubscriber || isProducer) {
+      // Favorites are a subscriber-only feature: hide the hearts for everyone else.
+      buttons.forEach((btn) => { btn.style.display = "none"; });
+      return;
+    }
+    if (identity && window.LPData?.loadMyFavorites) {
+      myFavIds = await window.LPData.loadMyFavorites(identity).catch(() => []);
+    }
+    buttons.forEach((btn) => paint(btn, myFavIds.includes(btn.dataset.favBtn)));
+  })();
+
+  if (isProducer) {
+    buttons.forEach((btn) => { btn.style.display = "none"; });
+    return;
+  }
+
   buttons.forEach((btn) => {
     const id = btn.dataset.favBtn;
-    paint(btn, myFavIds.includes(id));
     btn.addEventListener("click", async (ev) => {
       ev.preventDefault();
-      // addFavorite writes via setDoc on a deterministic doc id, and the
-      // favorites collection's rules disallow "update" on an existing doc —
-      // a fast double-tap before the first request finished used to fire a
-      // second toggle whose write Firestore would reject. Guard against
-      // that by ignoring clicks while one is already in flight.
+      // addFavorite writes via setDoc on a deterministic doc id, and the favorites collection's rules
+      // disallow "update" on an existing doc — ignore taps while a request is in flight.
       if (btn.dataset.favPending === "1") return;
       const current = lpFavIdentity();
       if (!current) {
@@ -278,16 +286,20 @@ async function lpWireFavHearts(container) {
         setTimeout(() => (location.href = "/login"), 900);
         return;
       }
-      const nowFav = btn.classList.contains("saved");
-      const next = !nowFav;
-      paint(btn, next); // optimistic
       btn.dataset.favPending = "1";
       try {
-        await window.LPData.toggleFavorite(current, id, next);
-        toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
-      } catch (err) {
-        paint(btn, nowFav); // revert
-        toast(err?.message || "שגיאה בשמירת מועדף", "error");
+        await ready;
+        if (!isSubscriber) return;
+        const nowFav = btn.classList.contains("saved");
+        const next = !nowFav;
+        paint(btn, next); // optimistic
+        try {
+          await window.LPData.toggleFavorite(current, id, next);
+          toast(next ? "נוסף למועדפים" : "הוסר מהמועדפים");
+        } catch (err) {
+          paint(btn, nowFav); // revert
+          toast(err?.message || "שגיאה בשמירת מועדף", "error");
+        }
       } finally {
         delete btn.dataset.favPending;
       }
