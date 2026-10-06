@@ -241,6 +241,80 @@ Globals from `app.js`: `toast(msg, kind)`, `window.LP.current()/setCurrent()`
   handed steps when an agent can act.
 - Verify after admin changes: `npm run build` and click through every tab.
 
+## 8b. The admin panel in full — every tab, every endpoint, every credential
+
+**Entering the panel**: `/admin` (not linked publicly, disallowed in `robots.txt`). The
+login form (`AdminAuthForm.jsx`) calls `api/admin-settings.js` action `admin-login`
+with a username + password. Admin accounts are documents in `users` with
+`isAdmin`; the built-in default admin has username **`admin`**. If an admin has no
+password yet, the first login asks for a new one (min. 8 characters, stored as a
+bcrypt hash; a legacy plain-text password is upgraded to bcrypt on its first
+successful login). Accounts are added, disabled, promoted, removed and reset in the
+**ניהול אדמינים** tab (`admin-set-password`, `admin-set-active`, `admin-make-admin`,
+`admin-remove-admin`). A disabled admin cannot log in; if no active admin exists the
+default admin is re-activated so the owner can never be locked out. The session is
+`sessionStorage.admin_authenticated`.
+
+**Tabs** (`adminTabs.js`, in this order):
+
+| id | label | what it manages |
+|---|---|---|
+| subscriptions | ניהול משתמשים ומנויים | everyone on the site (`users`): approvals/requests (incl. the plan), tier & expiry, renew, CRM notes, payments, women's lifetime membership |
+| matching | התאמות | balance matching per party (`BalanceTables`), manual match, swap partner, "entered" checkbox, **reveal/hide the woman's phone**, WhatsApp send |
+| parties | מסיבות | create/edit parties (`PartyEditor`: registration mode auto/open/closed, balance, images), registrations list + export, convert client to user, remove from party |
+| siteDesign | עיצוב האתר | logo, banners, popup (`SiteDesignSection`/`HeroSection`) |
+| forumUsers | מנויי האתר | login accounts (`forumUsers`): block, role, reset password |
+| about / contact | אודות / צור קשר | page copy, WhatsApp link, alert text |
+| links | קישורים וקבוצות | the social links used by the site icons (instagram, facebook, telegramChannel, telegramGroup, whatsapp) |
+| deleteRequests | בקשות מחיקה | account-deletion requests (`delete-account.html`) |
+| admins | ניהול אדמינים | admin accounts (above) |
+| advertisers | מפרסמים | approve/block producers, their parties |
+| rss | RSS Feeds | RSS feeds shown on the news page (`add/update/delete/restore-rss-feed`) |
+| telegram | טלגרם | bots, channels (+ allowed producers, new-group detection), message templates, send-now |
+| agents | צוות הסוכנים | the 11 agents, team chat, commands |
+| db (advanced) | DB | backup & restore |
+| dbLogger (advanced) | לוג קריאות DB | Firestore read-volume tracking |
+| gitHistory (advanced) | היסטוריית Git | recent publish commits (`api/git-history.js`) |
+
+**API files** (`api/`, one function each): `admin-settings.js` (settings writes, agent
+chat, admin/user mutations, RSS — Bearer `ADMIN_API_SECRET`), `advertiser-auth.js`
+(producer register/login/admin actions; bcrypt hashes never leave the server),
+`forum-auth.js` (email verification + password reset, `?action=`),
+`telegram-webhook.js` (webhook + every scheduled job), `telegram-relay.js`
+(Telegram Bot API proxy for the SPA; `sendMessage`/`sendPhoto` stay open to the
+public registration flow), `support-chat-send.js` (support bubble → Telegram),
+`send-push.js` (Web Push, needs the VAPID private key), `publish-content.js` /
+`publish-content-local.js` / `import-content-from-git.js` (explicit "publish to
+Git" and import — never automatic), `git-history.js`.
+
+**Credentials & secrets — where each one lives (values are NOT stored here)**.
+This skill is committed to Git and read by automatic routines, so real passwords,
+tokens and keys must **never** be written into it, into code, or into chat. What
+exists and where to rotate it:
+
+| Credential | Lives in | Notes |
+|---|---|---|
+| Admin panel passwords | bcrypt hash in `users/{adminId}.password` | set at first login or via ניהול אדמינים → `admin-set-password` (≥8 chars); there is no way to read one back |
+| `ADMIN_API_SECRET` / `VITE_ADMIN_API_SECRET` | Vercel env vars (the second is inlined at build time via `vite.config.js`) | must match; bearer for every privileged write; the SPA bundle contains it, so treat the admin panel URL as sensitive |
+| `TELEGRAM_PROMO_SECRET` | Vercel env var | the `key=` of every `?job=` URL (campaign, promo, health, tiktok…) — it was once pasted in chat, so rotate it if in doubt |
+| `CRON_SECRET` | Vercel env var | lets Vercel cron call the jobs |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` | Vercel env vars | main bot; other bots' tokens are stored in Firestore `settings/telegram.bots` (publicly readable doc — rotate those tokens with BotFather if exposed) |
+| `GOOGLE_APPLICATION_CREDENTIALS_JSON`, `GCLOUD_PROJECT` | Vercel env vars | Firebase Admin service account; project `tbdsm-5acca` |
+| Support-chat bot + owner chat id | Firestore `settings/private/supportChat/config` | used by health alerts and the TikTok agent to message the owner |
+| `VAPID_PRIVATE_KEY` | Vercel env var | Web Push (public half is in the code) |
+| `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_BRANCH`, `GITHUB_FILE_PATH` | Vercel env vars | publish/import content, git history |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | Vercel env vars | forum verification / reset emails |
+| `WHATSAPP_BOT_PUBLIC_URL`, `WHATSAPP_BOT_API_KEY`, `VITE_WHATSAPP_BOT_*` | Vercel env vars | WhatsApp bot |
+| `WINDSOR_API_KEY`, `WINDSOR_INSTAGRAM_ACCOUNT_ID` | Vercel env vars | Instagram stats |
+| `VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_UPLOAD_PRESET` | Vercel env vars | image uploads |
+| `DEPLOY_STATUS_SECRET`, `PUBLIC_SITE_URL`, `VITE_SITE_URL` | Vercel env vars | deploy status + site URL |
+| Member / producer / forum passwords | bcrypt hashes (`users`, `forumUsers`, `advertisers`) | users reset them in their area; admins reset in the matching tab |
+
+Non-secret facts about passwords: every woman's account is created with the
+starter password **`102040`** and is never forced to change it; the default admin
+username is `admin`. If the owner needs a secret's real value he reads it in the
+Vercel dashboard (Settings → Environment Variables) — Claude does not have it.
+
 ## 9. Agents & the team chat (A2A)
 
 Roster in `shared/agentsRoster.js` (the owner chose the names). Categories:
