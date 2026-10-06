@@ -15,6 +15,7 @@ export const CONTROLLABLE = {
   cleaner: { now: 'cleanup' },
   doctor: { now: 'health' },
   notifier: { now: 'push' },
+  fixer: { now: 'standup' },
 };
 
 // Agents that run by themselves and have nothing to start by hand.
@@ -31,6 +32,7 @@ const NOW_BY_AGENT = {
   tiktok: /(עכשיו|מיד|תכין|תשלח|תריץ|תעבוד)/,
   doctor: /(עכשיו|מיד|תבדוק|בדוק|תריץ|תעבוד)/,
   cleaner: /(עכשיו|מיד|^\s*(תנקה|נקה)\s*$)/,
+  fixer: /(סיכום|סטטוס|ישיבה|תעדכן|עדכון|דיווח|תפתח)/,
   notifier: /(עכשיו|מיד|תשלח|שלח|תפעיל|תריץ|תעבוד|התראה|התראות)/,
 };
 
@@ -67,7 +69,7 @@ export function applyAgentCommand(agentId, text, current = {}) {
     }
   }
   if (rules?.now && NOW_BY_AGENT[agentId]?.test(t)) {
-    const say = { campaign: 'מפרסם עכשיו קמפיין בערוץ, תראה את זה כאן בצ׳אט בעוד רגע.', push: 'שולח עכשיו התראה לנייד לכל מי שאישר התראות, אכתוב כאן כמה מכשירים קיבלו.', tiktok: 'מכין עכשיו פוסט לטיקטוק ושולח לך אותו בטלגרם.', promo: 'שולח עכשיו לקבוצה את ההודעה למפרסמים.', health: 'בודק את האתר עכשיו, אכתוב כאן מה מצאתי בעוד רגע.', cleanup: 'מנקה עכשיו, אכתוב כאן מה עשיתי.' };
+    const say = { campaign: 'מפרסם עכשיו קמפיין בערוץ, תראה את זה כאן בצ׳אט בעוד רגע.', standup: 'פותח עכשיו ישיבת צוות, כולם מדווחים כאן בצ׳אט בעוד רגע.', push: 'שולח עכשיו התראה לנייד לכל מי שאישר התראות, אכתוב כאן כמה מכשירים קיבלו.', tiktok: 'מכין עכשיו פוסט לטיקטוק ושולח לך אותו בטלגרם.', promo: 'שולח עכשיו לקבוצה את ההודעה למפרסמים.', health: 'בודק את האתר עכשיו, אכתוב כאן מה מצאתי בעוד רגע.', cleanup: 'מנקה עכשיו, אכתוב כאן מה עשיתי.' };
     return { config: current, handled: true, runNow: rules.now, reply: say[rules.now] };
   }
   const agent = agentById(agentId);

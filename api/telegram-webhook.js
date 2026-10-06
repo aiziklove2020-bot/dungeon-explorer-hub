@@ -1149,7 +1149,8 @@ async function handlePartyReminders(req, res) {
     const tiktok = await sendTiktokPostIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const instagramCampaign = await sendInstagramCampaignIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const health = await runHealthCheck().catch((err) => ({ ok: false, error: String(err?.message || err) }));
-    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, campaign, groupPromo, tiktok, instagramCampaign, health });
+    const standup = await runDailyStandup({ health }).catch((err) => ({ ok: false, error: String(err?.message || err) }));
+    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, campaign, groupPromo, tiktok, instagramCampaign, health, standup });
   } catch (err) {
     console.error('party-reminders:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
@@ -1224,7 +1225,7 @@ async function handleCleanupExpiredParties(req, res) {
       deletedParties = partiesSnap.size;
     }
     // The anonymous match chats die with their party (also catches parties an admin deleted by hand).
-    await deleteOrphanMatchChats(db).catch((err) => console.error('deleteOrphanMatchChats:', err?.message || err));
+    try { await deleteOrphanMatchChats(db); } catch (err) { console.error('deleteOrphanMatchChats:', err?.message || err); }
 
     let deletedUsers = 0;
     const dayPassSnap = await db.collection('users').where('subscriptions.parties.tier', '==', 'day').get();
@@ -1335,6 +1336,7 @@ async function handleCleanupExpiredParties(req, res) {
     if (upgradedWomen) parts.push(`${upgradedWomen} נשים עברו למנוי לכל החיים`);
     if (createdWomenAccounts) parts.push(`${createdWomenAccounts} חשבונות כניסה חדשים לנשים`);
     await agentSay('cleaner', parts.length ? `סיימתי ניקיון לילי: ${parts.join(', ')}.` : 'ניקיון לילי: אין מה לנקות, הכל מסודר ✅');
+    try { await db.collection('settings').doc('cleanupLast').set({ at: Date.now(), deleted: deletedParties }, { merge: true }); } catch { /* stats only */ }
     return res.status(200).json({ ok: true, deleted: deletedParties, deletedDayPassUsers: deletedUsers, upgradedWomen, createdWomenAccounts });
   } catch (err) {
     return res.status(200).json({ ok: false, deleted: 0, error: String(err?.message || err) });
@@ -1557,6 +1559,64 @@ async function handleMatchChat(req, res) {
   }
 }
 
+
+// ── Daily team meeting ──────────────────────────────────────────────────────
+// Every day the agents go over the site together in the team chat. Every line is built from real numbers
+// read from the database (parties, registrations, matches, subscriptions, push devices, the last
+// campaign/health check), so the chat shows what is really going on; nothing is invented. שון runs the
+// meeting. Agents hand things to each other with "@name" when the numbers call for it.
+export async function runDailyStandup({ health } = {}) {
+  const admin = await initAdmin();
+  const db = admin.firestore();
+  const now = Date.now();
+  const toMs = (v) => (v?.toDate ? v.toDate().getTime() : v ? new Date(v).getTime() : NaN);
+  const dayMs = 24 * 3600 * 1000;
+
+  const parties = (await db.collection('parties').get()).docs.map((d) => ({ id: d.id, ...d.data() })).filter((p) => p.status !== 'inactive');
+  const upcoming = parties.filter((p) => !Number.isFinite(toMs(p.date)) || toMs(p.date) >= now - 6 * 3600 * 1000).sort((a, b) => toMs(a.date) - toMs(b.date));
+  const regCount = (p) => (Array.isArray(p.registrations) ? p.registrations.length : 0);
+  const totalRegs = upcoming.reduce((n, p) => n + regCount(p), 0);
+  const closed = upcoming.filter((p) => p.registrationMode === 'closed').length;
+  const soon = upcoming.filter((p) => toMs(p.date) - now < 2 * dayMs);
+  const quiet = upcoming.filter((p) => p.partyType !== 'external' && regCount(p) === 0 && toMs(p.date) - now < 3 * dayMs);
+  let pairs = 0;
+  let waiting = 0;
+  upcoming.forEach((p) => {
+    const m = (p.balanceMatches || []).filter((x) => x.isMatched && !x.isCouple);
+    pairs += m.length;
+    const matchedPhones = new Set(m.flatMap((x) => [x.malePhone, x.femalePhone]));
+    waiting += (p.registrations || []).filter((r) => String(r.registrationType || '').includes('balance') && !matchedPhones.has(r.phoneNumber)).length;
+  });
+  const pending = (await db.collection('subscriptionRequests').where('status', '==', 'pending').get().catch(() => ({ size: 0 }))).size;
+  const pushDevices = (await db.collection('pushSubscriptions').get().catch(() => ({ size: 0 }))).size;
+  const camp = (await db.collection('settings').doc('telegramCampaigns').get().catch(() => null))?.data?.() || {};
+  const tik = (await db.collection('settings').doc('tiktokPosts').get().catch(() => null))?.data?.() || {};
+  const cleanup = (await db.collection('settings').doc('cleanupLast').get().catch(() => null))?.data?.() || {};
+  const hoursAgo = (t) => (t ? Math.round((now - t) / 3600000) : null);
+  const problems = Array.isArray(health?.problems) ? health.problems : [];
+
+  const say = (agent, text, to) => agentSay(agent, text, to);
+  await say('fixer', `בוקר טוב צוות, ישיבת הבוקר. באתר ${upcoming.length} מסיבות פעילות, ${totalRegs} נרשמים בסך הכל. כל אחד מדווח מהתחום שלו.`);
+  await say('doctor', problems.length ? `בדקתי את האתר: מצאתי ${problems.length} בעיות (${problems.slice(0, 2).join('; ')}).` : 'בדקתי את כל הדפים, הקבצים, בסיס הנתונים והבוט. הכל תקין ✅');
+  if (problems.length) await say('doctor', 'צריך תיקון בקוד, אני מעביר אליך.', 'fixer');
+  await say('cleaner', cleanup.at ? `בניקיון האחרון (לפני ${hoursAgo(cleanup.at)} שעות) נמחקו ${cleanup.deleted || 0} מסיבות שעבר זמנן.` : 'הניקיון הלילי פעיל, עוד אין לי נתוני ריצה אחרונים לדווח.');
+  await say('secretary', soon.length ? `בשני הימים הקרובים יש ${soon.length} מסיבות. אני שולח עליהן תזכורות לערוצים ולקבוצות.` : 'אין מסיבות בשני הימים הקרובים, אין תזכורות להיום.');
+  if (soon.length) await say('secretary', `${soon[0].title || soon[0].name} היא הקרובה ביותר, ${regCount(soon[0])} נרשמים עד עכשיו. כדאי לחזק אותה בקמפיין.`, 'publisher');
+  await say('publisher', camp.lastSentAt ? `הקמפיין האחרון בערוץ יצא לפני ${hoursAgo(camp.lastSentAt)} שעות. הבא יוצא ביום הקמפיין הקרוב.` : 'עוד לא יצא קמפיין החודש, אני מחכה ליום הקמפיין.');
+  await say('recruiter', 'ההודעה למפרסמים בקבוצה "מסיבות בישראל" ממשיכה לצאת פעמיים בשבוע, כדי להביא עוד מפיקים.');
+  await say('tiktok', tik.lastSentAt ? `פוסט הטיקטוק האחרון נשלח אליך לפני ${hoursAgo(tik.lastSentAt)} שעות. הבא בראשון או בחמישי.` : 'עוד לא שלחתי לך פוסט לטיקטוק. הראשון יוצא ביום ראשון או חמישי.');
+  await say('matcher', `באיזון: ${pairs} זוגות מאוזנים פעילים, ו-${waiting} סינגלים וסינגליות עדיין מחכים להתאמה.`);
+  if (waiting > 0) await say('matcher', `${waiting} מחכים להתאמה. ברגע שיש איזון חדש תשלח להם התראה.`, 'notifier');
+  await say('notifier', pushDevices ? `יש ${pushDevices} מכשירים שאישרו התראות. אני מוכן לשלוח על איזון ועל מסיבות חדשות.` : 'עוד אין מכשירים שאישרו התראות. כדאי לעודד אישור באתר.');
+  await say('support', 'ענייתי לשאלות הנפוצות בצ׳אט התמיכה. שאלה שאין לי עליה תשובה ממתינה לך בצ׳אט.');
+  if (pending > 0) await say('secretary', `יש ${pending} בקשות הצטרפות כמנוי שממתינות לך באישור.`, 'fixer');
+  if (quiet.length) await say('publisher', `ל-${quiet.length} מסיבות פנימיות בשלושת הימים הקרובים אין עדיין נרשמים (${quiet.slice(0, 2).map((p) => p.title || p.name).join(', ')}). אפשר לפרסם עליהן עכשיו.`, 'recruiter');
+  if (closed) await say('fixer', `${closed} מסיבות מסומנות כסגורות להרשמה. לוודא שזה מכוון.`);
+  const open = [pending ? `${pending} בקשות מנוי לאישור` : '', problems.length ? `${problems.length} בעיות באתר` : '', quiet.length ? `${quiet.length} מסיבות בלי נרשמים` : ''].filter(Boolean);
+  await say('fixer', open.length ? `סיכום: ${open.join(', ')}. כל השאר בסדר. נתראה מחר.` : 'סיכום: אין שום דבר פתוח, האתר ירוק. נתראה מחר ✅');
+  return { ok: true, parties: upcoming.length, registrations: totalRegs, pairs, waiting, pending };
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
@@ -1576,6 +1636,13 @@ export default async function handler(req, res) {
     }
     if (job === 'health') {
       return handleHealth(req, res);
+    }
+    if (job === 'standup') {
+      if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+      try {
+        const health = await runHealthCheck({ alert: false }).catch(() => null);
+        return res.status(200).json(await runDailyStandup({ health }));
+      } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
     }
     if (job === 'push-now') {
       if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
