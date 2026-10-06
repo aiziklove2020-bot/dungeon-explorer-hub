@@ -296,7 +296,7 @@ input[type="date"]::-webkit-date-and-time-value{text-align:right;min-height:1.2e
 /* Hero: the square image sat alone in a wide empty page. A blurred, dimmed copy of the same image now fills the
    full width behind it, so the hero reads as one wide banner. */
 .hero-v3{position:relative;overflow:hidden;padding:30px 0}
-.hero-v3::before{content:"";position:absolute;inset:-60px;background:url("hero-v3-800.webp?v=2") center/cover no-repeat;filter:blur(46px) brightness(.5) saturate(1.25);transform:scale(1.15);z-index:0}
+.hero-v3::before{content:"";position:absolute;inset:-60px;background:url("hero-v3-800.webp?v=3") center/cover no-repeat;filter:blur(46px) brightness(.5) saturate(1.25);transform:scale(1.15);z-index:0}
 .hero-v3::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,9,16,.15),rgba(16,9,16,.55) 85%,#100910);z-index:0;pointer-events:none}
 .hero-v3-frame{position:relative;z-index:1}
 /* WhatsApp banner: one centred block over the photo instead of an empty half with a stray label */
@@ -307,4 +307,12 @@ input[type="date"]::-webkit-date-and-time-value{text-align:right;min-height:1.2e
 .insta-banner-wrap{max-width:960px;margin-inline:auto}
 /* Cookie and notification notices: a compact card at the bottom corner, not a full-width bar */
 #lpCookieBanner,#lpPushBanner{inset-inline:auto!important;left:auto!important;right:24px!important;bottom:24px!important;width:min(520px,calc(100vw - 48px))!important;border-radius:16px!important;box-shadow:0 18px 50px #000a!important}
+}
+
+@media(min-width:801px){
+.hero-v3-frame{width:min(100%,820px)}
+/* events filter: one row, as before (the date field and its label are only stacked on phones) */
+.date-label{display:none}.filters-form{flex-wrap:nowrap}.filters-form input[type="date"]{flex:0 0 190px;width:190px}
+/* flyers carry small text: give them more room on desktop */
+.grid .card-art{height:360px}
 }
