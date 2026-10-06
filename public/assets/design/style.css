@@ -316,3 +316,18 @@ input[type="date"]::-webkit-date-and-time-value{text-align:right;min-height:1.2e
 /* flyers carry small text: give them more room on desktop */
 .grid .card-art{height:360px}
 }
+/* Desktop hero, second pass: the blurred photo behind the square image made muddy brown patches. Use clean brand
+   glows instead, and size the image by the screen height so the whole hero (with its icon row) fits on one screen. */
+@media(min-width:801px){
+.hero-v3{background:radial-gradient(ellipse at 16% 45%,rgba(255,67,139,.20),transparent 46%),radial-gradient(ellipse at 84% 45%,rgba(246,200,135,.11),transparent 46%),#100910;padding:22px 0 26px}
+.hero-v3::before{display:none}
+.hero-v3::after{display:none}
+.hero-v3-frame{width:min(100%,820px,calc(100vh - 150px));min-width:520px}
+}
+
+/* Desktop hero, third pass: the sides are filled with the club photo already used across the site (dimmed and tinted
+   pink), full width, with the square image framed in the middle. */
+@media(min-width:801px){
+.hero-v3{background:linear-gradient(90deg,rgba(16,9,16,.80),rgba(60,10,45,.38) 50%,rgba(16,9,16,.80)),linear-gradient(180deg,rgba(16,9,16,.35),rgba(16,9,16,.15) 60%,#100910),url("dancefloor.webp") center 35%/cover no-repeat}
+.hero-v3-frame{box-shadow:0 0 0 1px #ff5aa044,0 24px 80px #000c,0 0 90px #ff2d8a33}
+}
