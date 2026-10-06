@@ -352,3 +352,6 @@ input[type="date"]::-webkit-date-and-time-value{text-align:right;min-height:1.2e
 @media(min-width:801px){
 #event-grid>.insta-banner-wrap,#event-grid>.whatsapp-promo-wrap{width:100%!important;max-width:960px!important;justify-self:center!important;margin-inline:auto!important}
 }
+/* Desktop: pages that are mostly text or a single small card were stretched over the whole 1240px column
+   (lines more than 1000px long, a full-width button). They stay at a readable width, centred. */
+@media(min-width:801px){.wrap.narrow-page{max-width:900px}.narrow-page .btn.full{width:auto;min-width:260px;display:inline-flex;justify-content:center}}
