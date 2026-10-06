@@ -109,7 +109,7 @@
 <script type="module">
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202610040922");
+    await import("./assets/site-data.js?v=202610060625");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
@@ -282,11 +282,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         toast("האירוע פורסם באתר");
       }
       setTimeout(() => location = "/advertiser-dashboard", 900);
+      return; // keep the button disabled: no second submit while redirecting
     } catch (err) {
       msg.textContent = err.message || "שגיאה בשמירת האירוע";
-    } finally {
-      btn.disabled = false;
     }
+    btn.disabled = false;
   });
 });
 </script>
