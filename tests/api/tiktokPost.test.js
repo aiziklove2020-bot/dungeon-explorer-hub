@@ -17,3 +17,10 @@ describe('tiktok agent', () => {
     expect(applyAgentCommand('tiktok', 'תכין לי פוסט עכשיו', {}).runNow).toBe('tiktok');
   });
 });
+
+describe('notifier (איתי) manual push', () => {
+  it('runs a push now when asked to send notifications', () => {
+    expect(applyAgentCommand('notifier', 'תשלח התראות על מסיבות חדשות', {}).runNow).toBe('push');
+    expect(applyAgentCommand('notifier', 'שלח התראה עכשיו', {}).runNow).toBe('push');
+  });
+});

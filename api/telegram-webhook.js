@@ -1405,6 +1405,54 @@ async function handleNotifyNewParty(req, res) {
   }
 }
 
+
+/**
+ * Agent איתי, run by hand from the admin team chat ("איתי, תשלח התראות על מסיבות חדשות"):
+ * pushes a "new parties" notification to every device that approved notifications.
+ * Lists the parties added in the last 3 days (or, if none, the nearest upcoming ones).
+ */
+export async function sendPushUpdateNow() {
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  if (!privateKey) return { ok: false, error: 'Push not configured' };
+  const admin = await initAdmin();
+  const db = admin.firestore();
+  const toMs = (v) => (v?.toDate ? v.toDate().getTime() : v ? new Date(v).getTime() : NaN);
+  const now = Date.now();
+  const parties = (await db.collection('parties').get()).docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .filter((p) => p.status !== 'inactive' && (!Number.isFinite(toMs(p.date)) || toMs(p.date) >= now - 6 * 3600 * 1000))
+    .sort((a, b) => toMs(a.date) - toMs(b.date));
+  if (!parties.length) return { ok: true, sent: 0, total: 0, skipped: 'no active parties' };
+  const fresh = parties.filter((p) => now - toMs(p.createdAt) < 3 * 24 * 3600 * 1000);
+  const list = (fresh.length ? fresh : parties).slice(0, 3);
+  const names = list.map((p) => p.title || p.name).filter(Boolean);
+  const more = (fresh.length ? fresh : parties).length - list.length;
+  const body = names.join(' · ') + (more > 0 ? ` ועוד ${more}` : '');
+
+  const subs = (await db.collection('pushSubscriptions').get()).docs.map((d) => ({ id: d.id, ...d.data() }));
+  if (!subs.length) return { ok: true, sent: 0, total: 0 };
+  const webpush = (await import('web-push')).default;
+  webpush.setVapidDetails('mailto:admin@libralparty.co.il', VAPID_PUBLIC_KEY, privateKey);
+  const payload = JSON.stringify({ title: fresh.length ? '🎉 מסיבות חדשות באתר!' : '🎉 המסיבות הקרובות באתר', body, url: '/events' });
+  const items = await Promise.all(
+    subs.map((sub) =>
+      webpush
+        .sendNotification({ endpoint: sub.endpoint, keys: sub.keys }, payload)
+        .then(() => ({ id: sub.id, ok: true }))
+        .catch((err) => ({ id: sub.id, ok: false, statusCode: err.statusCode }))
+    )
+  );
+  const sent = items.filter((i) => i.ok).length;
+  const deadIds = items.filter((i) => !i.ok && (i.statusCode === 404 || i.statusCode === 410)).map((i) => i.id);
+  if (deadIds.length) {
+    const batch = db.batch();
+    deadIds.forEach((id) => batch.delete(db.collection('pushSubscriptions').doc(id)));
+    await batch.commit();
+  }
+  await agentSay('notifier', `שלחתי התראה לנייד ל-${sent} מכשירים מתוך ${subs.length}: ${body || 'עדכון מסיבות'} ✅`);
+  return { ok: true, sent, total: subs.length };
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
@@ -1424,6 +1472,10 @@ export default async function handler(req, res) {
     }
     if (job === 'health') {
       return handleHealth(req, res);
+    }
+    if (job === 'push-now') {
+      if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+      try { return res.status(200).json(await sendPushUpdateNow()); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
     }
     if (job === 'tiktok') {
       if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
