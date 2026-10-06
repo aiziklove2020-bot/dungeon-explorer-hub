@@ -284,3 +284,10 @@ label:has(>input[type=checkbox]){min-height:44px;align-items:center}
 input[type="date"]{-webkit-appearance:none;appearance:none;display:block;box-sizing:border-box;width:100%;max-width:100%;min-width:0;min-height:48px;text-align:right;line-height:1.2}
 input[type="date"]::-webkit-date-and-time-value{text-align:right;min-height:1.2em}
 .filters-form{display:flex;flex-wrap:wrap;gap:10px}.filters-form>*{min-width:0}.filters-form input[type="date"]{flex:1 1 100%}
+/* Anonymous match chat (personal area) */
+.match-chat{margin-top:16px}.match-chat-toggle{width:100%;min-height:48px;border-radius:14px;border:1px solid #ff5aa066;background:#2a1020;color:#fff;font:inherit;font-weight:800;cursor:pointer}.match-chat-body{margin-top:10px}
+.match-chat-msgs{height:260px;overflow-y:auto;border:1px solid #ffffff1f;border-radius:14px;background:#0e0710;padding:10px;display:flex;flex-direction:column;gap:6px}
+.match-chat-row{display:flex;justify-content:flex-end}.match-chat-row.mine{justify-content:flex-start}
+.match-chat-bubble{max-width:80%;padding:8px 12px;border-radius:14px;background:#2b2230;color:#fff;font-size:15px;line-height:1.35;word-break:break-word}
+.match-chat-row.mine .match-chat-bubble{background:linear-gradient(135deg,#ee2775,#ff5596)}
+.match-chat-form{display:flex;gap:8px;margin-top:8px}.match-chat-form input{flex:1;min-width:0}

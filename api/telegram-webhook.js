@@ -1223,6 +1223,8 @@ async function handleCleanupExpiredParties(req, res) {
       await batch.commit();
       deletedParties = partiesSnap.size;
     }
+    // The anonymous match chats die with their party (also catches parties an admin deleted by hand).
+    await deleteOrphanMatchChats(db).catch((err) => console.error('deleteOrphanMatchChats:', err?.message || err));
 
     let deletedUsers = 0;
     const dayPassSnap = await db.collection('users').where('subscriptions.parties.tier', '==', 'day').get();
@@ -1453,6 +1455,108 @@ export async function sendPushUpdateNow() {
   return { ok: true, sent, total: subs.length };
 }
 
+
+// ── Anonymous chat between the two sides of a balance match ────────────────
+// Lives in `matchChats/{partyId}_{malePhone}_{femalePhone}` with a `messages` subcollection. Clients never
+// touch it (no Firestore rule opens it): every read/write goes through ?job=match-chat, which first checks
+// that the caller's phone is one side of a matched, non-couple pair of that party. Nobody ever sees a name
+// or a phone number in the chat. The chat is deleted together with its party (deleteOrphanMatchChats).
+const MATCH_CHAT_MAX_TEXT = 500;
+const MATCH_CHAT_MAX_MESSAGES = 300;
+
+function normPhone(p) {
+  let d = String(p || '').replace(/\D/g, '');
+  if (d.startsWith('972')) d = '0' + d.slice(3);
+  return d;
+}
+
+async function deleteChatDoc(db, ref) {
+  const msgs = await ref.collection('messages').get();
+  for (let i = 0; i < msgs.docs.length; i += 400) {
+    const batch = db.batch();
+    msgs.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+  }
+  await ref.delete();
+}
+
+async function deleteOrphanMatchChats(db) {
+  const chats = await db.collection('matchChats').get();
+  let removed = 0;
+  for (const chat of chats.docs) {
+    const partyId = chat.data()?.partyId || chat.id.split('_')[0];
+    const party = partyId ? await db.collection('parties').doc(partyId).get() : null;
+    if (!party || !party.exists) {
+      await deleteChatDoc(db, chat.ref);
+      removed++;
+    }
+  }
+  return removed;
+}
+
+async function notifyMatchChatPartner(db, partnerPhone) {
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  if (!privateKey || !partnerPhone) return;
+  const subs = (await db.collection('pushSubscriptions').where('phone', '==', partnerPhone).get()).docs.map((d) => ({ id: d.id, ...d.data() }));
+  if (!subs.length) return;
+  const webpush = (await import('web-push')).default;
+  webpush.setVapidDetails('mailto:admin@libralparty.co.il', VAPID_PUBLIC_KEY, privateKey);
+  const payload = JSON.stringify({ title: '💬 הודעה חדשה מההתאמה שלך', body: 'היכנסו לאזור האישי כדי לענות', url: '/profile' });
+  await Promise.all(subs.map((sub) => webpush.sendNotification({ endpoint: sub.endpoint, keys: sub.keys }, payload).catch(() => {})));
+}
+
+// POST ?job=match-chat  body { action: 'list' | 'send', phone, partyId, text?, after? }
+async function handleMatchChat(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  try {
+    const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+    const me = normPhone(body.phone);
+    const partyId = typeof body.partyId === 'string' ? body.partyId : '';
+    if (!/^0\d{8,9}$/.test(me) || !partyId || partyId.includes('/')) return res.status(400).json({ ok: false, error: 'bad request' });
+
+    const admin = await initAdmin();
+    const db = admin.firestore();
+    const party = await db.collection('parties').doc(partyId).get();
+    if (!party.exists) return res.status(200).json({ ok: false, error: 'המסיבה כבר לא קיימת' });
+    const match = (party.data().balanceMatches || []).find(
+      (m) => m.isMatched && !m.isCouple && (normPhone(m.malePhone) === me || normPhone(m.femalePhone) === me)
+    );
+    if (!match) return res.status(200).json({ ok: false, error: 'אין לכם התאמה פעילה לצ׳אט' });
+    const role = normPhone(match.malePhone) === me ? 'male' : 'female';
+    const partner = role === 'male' ? normPhone(match.femalePhone) : normPhone(match.malePhone);
+    const chatRef = db.collection('matchChats').doc(`${partyId}_${normPhone(match.malePhone)}_${normPhone(match.femalePhone)}`);
+
+    if (body.action === 'send') {
+      const text = String(body.text || '').trim().slice(0, MATCH_CHAT_MAX_TEXT);
+      if (!text) return res.status(400).json({ ok: false, error: 'הודעה ריקה' });
+      const now = Date.now();
+      let notify = false;
+      await db.runTransaction(async (tx) => {
+        const snap = await tx.get(chatRef);
+        const chat = snap.exists ? snap.data() || {} : {};
+        if ((chat.count || 0) >= MATCH_CHAT_MAX_MESSAGES) throw new Error('הצ׳אט הגיע למגבלת ההודעות');
+        if (chat.lastAt && now - chat.lastAt < 700) throw new Error('לאט יותר, נסו שוב בעוד רגע');
+        const notifiedKey = role === 'male' ? 'notifiedFemaleAt' : 'notifiedMaleAt';
+        notify = !chat[notifiedKey] || now - chat[notifiedKey] > 3 * 60 * 1000;
+        tx.set(chatRef, {
+          partyId, malePhone: normPhone(match.malePhone), femalePhone: normPhone(match.femalePhone),
+          createdAt: chat.createdAt || now, lastAt: now, count: (chat.count || 0) + 1,
+          ...(notify ? { [notifiedKey]: now } : {})
+        }, { merge: true });
+        tx.set(chatRef.collection('messages').doc(), { from: role, text, at: now });
+      });
+      if (notify) notifyMatchChatPartner(db, partner).catch(() => {});
+    }
+
+    const after = Number(body.after) || 0;
+    const snap = await chatRef.collection('messages').where('at', '>', after).orderBy('at', 'asc').limit(200).get();
+    const messages = snap.docs.map((d) => ({ id: d.id, mine: d.data().from === role, text: d.data().text, at: d.data().at }));
+    return res.status(200).json({ ok: true, messages });
+  } catch (err) {
+    return res.status(200).json({ ok: false, error: String(err?.message || err) });
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
@@ -1546,6 +1650,10 @@ export default async function handler(req, res) {
   }
   if (req.method !== 'POST') {
     return res.status(405).end();
+  }
+  if (req.method === 'POST') {
+    const postJob = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
+    if (postJob === 'match-chat') return handleMatchChat(req, res);
   }
   if (!requireTelegramWebhookSecret(req, res)) return;
 

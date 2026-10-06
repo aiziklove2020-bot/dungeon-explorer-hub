@@ -616,3 +616,81 @@ window.lpWireQuickRegister = function (container, phone) {
     });
   });
 };
+
+// Anonymous chat with the balance match (personal area). The two sides never see a name or a phone number
+// here; the chat is removed together with the party. Server side: api/telegram-webhook.js ?job=match-chat.
+window.lpMountMatchChat = function (container, phone, partyId) {
+  if (!container || !phone || !partyId) return;
+  container.innerHTML = `<div class="match-chat">
+    <button type="button" class="match-chat-toggle">💬 צ'אט אנונימי עם ההתאמה שלך</button>
+    <div class="match-chat-body" hidden>
+      <p class="meta">השיחה אנונימית: אף אחד לא רואה שם או מספר טלפון. הצ'אט נמחק אחרי שהמסיבה מסתיימת.</p>
+      <div class="match-chat-msgs" role="log" aria-live="polite"></div>
+      <form class="match-chat-form" autocomplete="off">
+        <input type="text" maxlength="500" placeholder="כתבו הודעה..." aria-label="הודעה">
+        <button class="btn gold" type="submit">שלח</button>
+      </form>
+    </div>
+  </div>`;
+  const toggle = container.querySelector(".match-chat-toggle");
+  const body = container.querySelector(".match-chat-body");
+  const list = container.querySelector(".match-chat-msgs");
+  const form = container.querySelector(".match-chat-form");
+  const input = form.querySelector("input");
+  let last = 0;
+  let timer = null;
+  const seen = new Set();
+
+  const call = async (payload) => {
+    const res = await fetch("/api/telegram-webhook?job=match-chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, partyId, after: last, ...payload }),
+    });
+    const data = await res.json().catch(() => ({ ok: false, error: "שגיאת רשת" }));
+    if (!data.ok) throw new Error(data.error || "שגיאה");
+    return data.messages || [];
+  };
+  const render = (messages) => {
+    messages.forEach((m) => {
+      if (seen.has(m.id)) return;
+      seen.add(m.id);
+      last = Math.max(last, m.at);
+      const row = document.createElement("div");
+      row.className = "match-chat-row" + (m.mine ? " mine" : "");
+      const bubble = document.createElement("div");
+      bubble.className = "match-chat-bubble";
+      bubble.textContent = m.text;
+      row.appendChild(bubble);
+      list.appendChild(row);
+    });
+    if (messages.length) list.scrollTop = list.scrollHeight;
+  };
+  const poll = async () => {
+    if (document.hidden || body.hidden) return;
+    try { render(await call({ action: "list" })); } catch { /* quiet: next poll retries */ }
+  };
+  toggle.addEventListener("click", () => {
+    body.hidden = !body.hidden;
+    if (!body.hidden) {
+      poll();
+      timer = timer || setInterval(poll, 6000);
+      input.focus();
+    }
+  });
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    const btn = form.querySelector("button");
+    btn.disabled = true;
+    try {
+      render(await call({ action: "send", text }));
+      input.value = "";
+    } catch (err) {
+      if (window.toast) toast(err.message || "ההודעה לא נשלחה", "error");
+    } finally {
+      btn.disabled = false;
+    }
+  });
+};
