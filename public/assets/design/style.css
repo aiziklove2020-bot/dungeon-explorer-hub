@@ -291,3 +291,20 @@ input[type="date"]::-webkit-date-and-time-value{text-align:right;min-height:1.2e
 .match-chat-bubble{max-width:80%;padding:8px 12px;border-radius:14px;background:#2b2230;color:#fff;font-size:15px;line-height:1.35;word-break:break-word}
 .match-chat-row.mine .match-chat-bubble{background:linear-gradient(135deg,#ee2775,#ff5596)}
 .match-chat-form{display:flex;gap:8px;margin-top:8px}.match-chat-form input{flex:1;min-width:0}
+/* ===== Desktop polish (>= 801px) ===== */
+@media(min-width:801px){
+/* Hero: the square image sat alone in a wide empty page. A blurred, dimmed copy of the same image now fills the
+   full width behind it, so the hero reads as one wide banner. */
+.hero-v3{position:relative;overflow:hidden;padding:30px 0}
+.hero-v3::before{content:"";position:absolute;inset:-60px;background:url("hero-v3-800.webp?v=2") center/cover no-repeat;filter:blur(46px) brightness(.5) saturate(1.25);transform:scale(1.15);z-index:0}
+.hero-v3::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,9,16,.15),rgba(16,9,16,.55) 85%,#100910);z-index:0;pointer-events:none}
+.hero-v3-frame{position:relative;z-index:1}
+/* WhatsApp banner: one centred block over the photo instead of an empty half with a stray label */
+.whatsapp-promo-banner{grid-template-columns:1fr!important;min-height:230px;background:linear-gradient(90deg,rgba(14,7,12,.55),rgba(31,10,25,.84) 50%,rgba(14,7,12,.55)),url('dancefloor.webp') center 46%/cover no-repeat!important}
+.whatsapp-promo-copy{padding:34px 8%!important;text-align:center!important}
+.whatsapp-photo-caption{display:none!important}
+/* Instagram / Facebook banners: not taller than the content around them */
+.insta-banner-wrap{max-width:960px;margin-inline:auto}
+/* Cookie and notification notices: a compact card at the bottom corner, not a full-width bar */
+#lpCookieBanner,#lpPushBanner{inset-inline:auto!important;left:auto!important;right:24px!important;bottom:24px!important;width:min(520px,calc(100vw - 48px))!important;border-radius:16px!important;box-shadow:0 18px 50px #000a!important}
+}
