@@ -588,10 +588,10 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-// "הרשם אותי" buttons on the favourite cards of the personal area (data-quick-reg="<partyId>").
+// "רשום אותי למסיבה זו" buttons on the favourite cards of the personal area (data-quick-reg="<partyId>").
 window.lpQuickRegisterHtml = function (e) {
   const canRegister = (e.partyType !== "external" || e.allowBalanceRegistration) && !e.registrationClosed;
-  return canRegister ? `<button type="button" class="btn gold" data-quick-reg="${String(e.id).replace(/"/g, "")}">הרשם אותי</button>` : "";
+  return canRegister ? `<button type="button" class="btn gold" data-quick-reg="${String(e.id).replace(/"/g, "")}">רשום אותי למסיבה זו</button>` : "";
 };
 window.lpWireQuickRegister = function (container, phone) {
   container.querySelectorAll("[data-quick-reg]").forEach((btn) => {
