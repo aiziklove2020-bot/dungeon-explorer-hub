@@ -43,6 +43,16 @@ export const updateSocialLinks = async (links) => {
 // Re-export from dataAccess for caching
 export const getTelegramSettings = getTelegramSettingsFromDataAccess;
 
+/** Chats the bot has heard from (recorded by api/telegram-webhook.js); used to offer new groups in the channel list. */
+export const getTelegramSeenChats = async () => {
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'telegramSeenChats'));
+    return snap.exists() ? (snap.data()?.chats || []) : [];
+  } catch (error) {
+    return [];
+  }
+};
+
 export const updateTelegramSettings = async (settings) => {
   try {
     await callAdminSettings('set-settings', { docId: TELEGRAM_SETTINGS_DOC_ID, data: settings });

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import DOMPurify from 'dompurify';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { getTelegramSettings, updateTelegramSettings } from '../../firebase/settings';
+import { getTelegramSettings, updateTelegramSettings, getTelegramSeenChats } from '../../firebase/settings';
 import { getRegistrationSettings } from '../../firebase/settings';
 import { getBotInfo, MESSAGE_KEYS, REGISTRATION_TYPE_KEYS, BALANCE_PUBLISH_TYPE_KEYS, VARIABLES_REFERENCE, buildMessagePreview, sendTelegramNotification } from '../../firebase/telegram';
 import { getAllAdvertisers } from '../../firebase/advertisers';
@@ -131,6 +131,11 @@ const TelegramSection = ({ showSaved }) => {
   const [sendingMsg, setSendingMsg] = useState(false);
   const [sendMsgResult, setSendMsgResult] = useState(null);
   const [advertisers, setAdvertisers] = useState([]);
+  const [seenChats, setSeenChats] = useState([]);
+
+  useEffect(() => {
+    getTelegramSeenChats().then(setSeenChats).catch(() => {});
+  }, []);
 
   const load = async () => {
     setLoading(true);
@@ -299,6 +304,14 @@ const TelegramSection = ({ showSaved }) => {
       const next = current.includes(advertiserId) ? current.filter((a) => a !== advertiserId) : [...current, advertiserId];
       return { ...c, allowedAdvertiserIds: next };
     }));
+  };
+
+  // A group/channel the bot was added to that is not in the list yet. It is added
+  // restricted to nobody, so no party is posted there until a producer is ticked.
+  const addSeenChat = (chat) => {
+    setChannels((prev) => (prev.some((c) => String(c.chatId) === String(chat.id))
+      ? prev
+      : [...prev, { id: genId(), name: chat.title || String(chat.id), chatId: String(chat.id), broadcastEnabled: true, allowedAdvertiserIds: [] }]));
   };
 
   const removeChannel = (id) => {
@@ -547,6 +560,22 @@ const TelegramSection = ({ showSaved }) => {
               <Plus size={16} /> {t('admin.telegram.addChannel')}
             </button>
           </div>
+          {(() => {
+            const missing = seenChats.filter((c) => c.type !== 'private' && !channels.some((ch) => String(ch.chatId) === String(c.id)));
+            if (!missing.length) return null;
+            return (
+              <div className="p-3 rounded-xl bg-[#1c1b1f] border border-[rgba(255,255,255,0.08)] space-y-2">
+                <p className="text-sm font-bold">קבוצות וערוצים שהבוט נוסף אליהם ואינם ברשימה</p>
+                {missing.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span>{c.title || c.id} <span className="text-[#94A3B8] text-xs" dir="ltr">{c.id}</span></span>
+                    <button type="button" onClick={() => addSeenChat(c)} className="bg-[#ff438b] hover:bg-[#ff5596] text-white px-3 py-1 rounded-lg font-bold text-xs">הוספה לרשימה</button>
+                  </div>
+                ))}
+                <p className="text-[#94A3B8] text-xs">אחרי ההוספה מסמנים מתחת לקבוצה את המפיק שלה, ולוחצים שמירה. עד שמסמנים מפיק לא יפורסמו שם מסיבות.</p>
+              </div>
+            );
+          })()}
           <ul className="space-y-2">
             {channels.map((c) => (
               <li key={c.id} className="p-3 bg-[#20151e]/60 rounded-xl border border-[rgba(255,255,255,0.08)] space-y-2">
