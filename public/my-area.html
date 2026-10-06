@@ -61,14 +61,14 @@
   <div class="personal-layout">
     <div class="personal-main">
       <section id="my-parties">
-        <div class="section-head"><div><div class="eyebrow">מחכים לך ברחבה</div><h2>המסיבות שלי</h2></div><a class="text-link" href="/events">לגלות עוד מסיבות ←</a></div>
+        <div class="section-head"><div><div class="eyebrow">מחכים לך ברחבה</div><h2>המסיבות שלי</h2></div><a class="text-link" href="/events">לגלות עוד מסיבות</a></div>
         <div id="registrations"><p class="meta">טוען...</p></div>
       </section>
       <section id="my-balance" class="balance-panel">
         <div id="balanceMatch" style="padding:21px"><p class="meta">טוען...</p></div>
       </section>
       <section id="my-favorites">
-        <div class="section-head"><div><div class="eyebrow">שווה לשמור את התאריך</div><h2>המועדפים שלי</h2></div><a class="text-link" href="/events">לכל המסיבות ←</a></div>
+        <div class="section-head"><div><div class="eyebrow">שווה לשמור את התאריך</div><h2>המועדפים שלי</h2></div><a class="text-link" href="/events">לכל המסיבות</a></div>
         <div id="favorites" class="personal-favorites"></div>
       </section>
     </div>
@@ -76,7 +76,7 @@
       <section id="my-membership" class="member-card panel">
         <div class="eyebrow">הכרטיס שלך לקהילה</div>
         <div class="gold-title" id="membershipTitle">בודק...</div>
-        <a class="text-link" href="/membership" id="subCta" style="display:none;margin-top:10px">אין לכם מנוי עדיין — לחצו כאן ←</a>
+        <a class="text-link" href="/membership" id="subCta" style="display:none;margin-top:10px">אין לכם מנוי עדיין — לחצו כאן</a>
       </section>
       <section class="aside-help panel">
         <span class="eyebrow">כדאי לדעת</span>
@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const box = document.getElementById("favorites");
     document.getElementById("fav-count").textContent = String((currentFavoriteIds||[]).length);
     if (!currentFavoriteIds || currentFavoriteIds.length === 0) {
-      box.innerHTML = '<div class="fav-empty"><span>♡</span><h3>הלילה הבא שלך עוד מחכה לך</h3><p>לחיצה על הלב בעמוד מסיבה תשמור אותה כאן.</p><a class="btn gold" href="/events">למציאת מסיבה ←</a></div>';
+      box.innerHTML = '<div class="fav-empty"><span>♡</span><h3>הלילה הבא שלך עוד מחכה לך</h3><p>לחיצה על הלב בעמוד מסיבה תשמור אותה כאן.</p><a class="btn gold" href="/events">למציאת מסיבה</a></div>';
       return;
     }
     let events = [];
