@@ -854,6 +854,7 @@ async function sendCampaignPost({ force = false } = {}) {
   if (!data.ok) {
     // Give the slot back so the next run retries the same campaign.
     await ref.set(claimed.previous, { merge: true }).catch(() => {});
+    await agentSay('publisher', `לא הצלחתי לפרסם את הקמפיין בערוץ: ${data.description || `HTTP ${res.status}`}`);
     return { ok: false, id: campaign.id, description: data.description || `HTTP ${res.status}` };
   }
   await agentSay('publisher', `פרסמתי בערוץ את הקמפיין "${campaign.caption.split('\n')[0].replace(/^[^\p{L}\p{N}]+/u, '')}" ✅`);
@@ -1009,7 +1010,9 @@ export async function sendGroupPromoIfDue({ force = false } = {}) {
   const data = await res.json().catch(() => ({}));
   if (!data.ok) {
     await ref.set({ lastSentAt: previous }, { merge: true }).catch(() => {});
-    return { ok: false, description: data.description || `HTTP ${res.status}` };
+    const why = data.description || `HTTP ${res.status}`;
+    await agentSay('recruiter', `לא הצלחתי לשלוח לקבוצה "מסיבות בישראל": ${why}. ${/not enough rights|kicked|not a member|chat not found|forbidden/i.test(why) ? 'הבוט צריך להיות בקבוצה ולקבל הרשאה לפרסם הודעות.' : ''}`.trim());
+    return { ok: false, description: why };
   }
   await agentSay('recruiter', 'שלחתי לקבוצה "מסיבות בישראל" את ההודעה למפרסמים ✅');
   return { ok: true };
