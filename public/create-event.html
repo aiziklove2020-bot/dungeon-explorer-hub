@@ -109,7 +109,7 @@
 <script type="module">
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202610060625");
+    await import("./assets/site-data.js?v=202610060627");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
@@ -285,6 +285,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       return; // keep the button disabled: no second submit while redirecting
     } catch (err) {
       msg.textContent = err.message || "שגיאה בשמירת האירוע";
+      toast(msg.textContent, "error");
+      msg.scrollIntoView({ behavior: "smooth", block: "center" });
     }
     btn.disabled = false;
   });
