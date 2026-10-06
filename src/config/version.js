@@ -6,12 +6,14 @@ const forceReload = (currentVersion, buildId = null) => {
   const currentUser = localStorage.getItem('currentUser');
   const dbLoggerEnabled = localStorage.getItem('db_logger_enabled');
   const webhookLoggerEnabled = localStorage.getItem('webhook_logger_enabled');
+  const adminSession = localStorage.getItem('admin_session');
   localStorage.clear();
   sessionStorage.clear();
 
   if (currentUser) localStorage.setItem('currentUser', currentUser);
   if (dbLoggerEnabled) localStorage.setItem('db_logger_enabled', dbLoggerEnabled);
   if (webhookLoggerEnabled) localStorage.setItem('webhook_logger_enabled', webhookLoggerEnabled);
+  if (adminSession) localStorage.setItem('admin_session', adminSession);
   localStorage.setItem('language', 'he');
 
   localStorage.setItem('app_version', currentVersion);

@@ -19,6 +19,7 @@ import AdminAuthForm from '../components/admin/AdminAuthForm';
 import AdminHeader from '../components/admin/AdminHeader';
 import { adminTabs } from '../components/admin/adminTabs';
 import { adminAuthHeader } from '../utils/adminApi';
+import { restoreAdminSession, forgetAdminSession } from '../utils/adminSession';
 import AdminLoader from '../components/admin/AdminLoader';
 
 // Each tab's code is fetched only when it's opened — the panel used to download
@@ -58,7 +59,7 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem('admin_authenticated') === 'true') {
+    if (restoreAdminSession()) {
       setIsAuthenticated(true);
     }
   }, []);
@@ -97,6 +98,7 @@ const Admin = () => {
     sessionStorage.removeItem('adminAuthenticated');
     sessionStorage.removeItem('admin_id');
     sessionStorage.removeItem('admin_username');
+    forgetAdminSession();
   };
 
   const showSaved = () => {
