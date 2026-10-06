@@ -34999,10 +34999,11 @@ function hU(e) {
 }
 var gU = (...e) => hU("subscribeMessages")(...e), _U = (...e) => hU("ensureMainRoom")(...e), vU = (...e) => hU("joinRoom")(...e), yU = (...e) => hU("sendChatMessage")(...e);
 B(), W();
-var bU = "favorites", xU = (e, t) => `${e}_${t}`, SU = async (e, t) => {
+var bU = "favorites", xU = (e, t) => `${e}_${t}`, SU = async (e, t, producerId) => {
 	await $u(E(H, bU, xU(e, t)), {
 		userId: e,
 		partyId: t,
+		...(producerId ? { producerId } : {}),
 		createdAt: N.now()
 	});
 }, CU = async (e, t) => {
@@ -35485,7 +35486,8 @@ async function aW(e, t, n) {
 	if (n) {
 		let r = await tN(e).catch(() => null), i = r?.phone, a = i ? await Oj(i).catch(() => null) : null;
 		if (!a?.isPrivilegedSubscriber) throw Error("סימון מועדפים זמין רק למנויים שנתיים");
-		await SU(e, t);
+		let favParty = await SM(t).catch(() => null);
+		await SU(e, t, favParty?.createdBy || "");
 		// Favoriting one party from a producer implicitly "follows" them —
 		// every other currently-active party from that same producer is
 		// favorited too, silently. No advertiser identity is ever shown for
@@ -35493,7 +35495,7 @@ async function aW(e, t, n) {
 		let party = await SM(t).catch(() => null);
 		if (party?.createdBy) {
 			let activeParties = await oM().catch(() => []), existingFavoriteIds = new Set(await wU(e).catch(() => [])), siblingParties = activeParties.filter((p) => p.id !== t && p.createdBy === party.createdBy && !existingFavoriteIds.has(p.id));
-			await Promise.all(siblingParties.map((p) => SU(e, p.id).catch(() => {})));
+			await Promise.all(siblingParties.map((p) => SU(e, p.id, party.createdBy).catch(() => {})));
 		}
 	} else await CU(e, t);
 }
@@ -35517,8 +35519,25 @@ async function lpCheckPhoneHasForumAccount_(e) {
 // Favouriting a party posted by a producer also brings in that producer's other
 // upcoming parties, shown as plain parties (no producer name). A party is never
 // listed twice, and the extras disappear when the favourite is removed.
-function lpExpandProducerFavorites_(all, favIds) {
-	let picked = all.filter((e) => favIds.includes(e.id)), producers = new Set(picked.map((e) => e.producerId).filter(Boolean)), seen = new Set(picked.map((e) => e.id));
+// Producers a member follows are remembered on the favourite records themselves (producerId), so
+// they keep working after the favourited party was deleted when it expired.
+async function lpFollowedProducers_(userId) {
+	if (!userId) return [];
+	try {
+		return [...new Set((await k(D(T(H, bU), O("userId", "==", userId)))).docs.map((d) => d.data().producerId).filter(Boolean))];
+	} catch {
+		return [];
+	}
+}
+// Records written before producerId existed: while the favourited party is still live, learn its producer.
+async function lpBackfillFollowedProducers_(userId, all, favIds) {
+	try {
+		let followed = new Set(await lpFollowedProducers_(userId));
+		await Promise.all(all.filter((e) => favIds.includes(e.id) && e.producerId && !followed.has(e.producerId)).map((e) => SU(userId, e.id, e.producerId).catch(() => {})));
+	} catch {}
+}
+function lpExpandProducerFavorites_(all, favIds, followed = []) {
+	let picked = all.filter((e) => favIds.includes(e.id)), producers = new Set([...picked.map((e) => e.producerId).filter(Boolean), ...followed]), seen = new Set(picked.map((e) => e.id));
 	return [...picked, ...all.filter((e) => e.producerId && producers.has(e.producerId) && !seen.has(e.id)).map((e) => ({ ...e, viaProducer: !0 }))];
 }
 async function cW(e) {
@@ -35528,7 +35547,12 @@ async function cW(e) {
 		Oj(e).catch(() => null),
 		wU(e).catch(() => [])
 	]), a = [];
-	return i.length > 0 && (a = lpExpandProducerFavorites_(await PU().catch(() => []), i)), {
+	if (i.length > 0) {
+		let allEvents = await PU().catch(() => []), followed = await lpFollowedProducers_(e);
+		a = lpExpandProducerFavorites_(allEvents, i, followed);
+		lpBackfillFollowedProducers_(e, allEvents, i);
+	}
+	return {
 		registrations: t,
 		balanceMatch: n,
 		profile: r,
@@ -35574,10 +35598,11 @@ async function dW(e) {
 	// no login) or forum account id (the events.html/index.html hearts, gated
 	// to a real login) — merge both so a forum-account subscriber sees every
 	// party they've favorited, whichever page they used.
-	let r = await wU(e).catch(() => []), i = new Set(n.favorites.map((e) => e.id)), a = r.filter((e) => !i.has(e));
-	if (a.length > 0) {
-		let o = await PU().catch(() => []);
-		n.favorites = [...n.favorites, ...o.filter((e) => a.includes(e.id))];
+	let r = await wU(e).catch(() => []), i = new Set(n.favorites.map((e) => e.id));
+	if (r.length > 0) {
+		let o = await PU().catch(() => []), followed = await lpFollowedProducers_(e);
+		n.favorites = [...n.favorites, ...lpExpandProducerFavorites_(o, r, followed).filter((e) => !i.has(e.id))];
+		lpBackfillFollowedProducers_(e, o, r);
 	}
 	return {
 		phone: t,
