@@ -185,8 +185,19 @@ function buildReminderCaption(party) {
   return lines.join('\n').slice(0, CAPTION_LIMIT);
 }
 
+// Telegram fetches a photo by URL and rejects big files (> ~5 MB or > 10000 px on both sides
+// summed). Cloudinary can resize on the fly, so ask it for a 1280 px JPEG first.
+function telegramFriendlyImage(url) {
+  const u = String(url || '').trim();
+  if (/^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/(?!c_|w_|f_|q_)/.test(u)) {
+    return u.replace('/image/upload/', '/image/upload/c_limit,w_1280,q_auto,f_jpg/');
+  }
+  return u;
+}
+
 async function sendReminderToChat(botToken, chatId, party) {
-  const caption = buildReminderCaption(party);
+  // Stray spaces at line ends and long runs of blank lines only waste room in the caption.
+  const caption = buildReminderCaption(party).replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
   const post = async (method, body) => {
     const res = await fetch(`https://api.telegram.org/bot${botToken}/${method}`, {
       method: 'POST',
@@ -195,21 +206,19 @@ async function sendReminderToChat(botToken, chatId, party) {
     });
     return res.json().catch(() => ({ ok: false, description: `HTTP ${res.status}` }));
   };
-  if (party.imageURL && caption.length > 1000) {
-    // Telegram limits a photo caption to 1024 characters: send the image first,
-    // then the full text right under it, so the long party text keeps its picture.
-    const photoOnly = await post('sendPhoto', { chat_id: chatId, photo: party.imageURL });
-    const text = await post('sendMessage', { chat_id: chatId, text: caption });
-    if (text.ok) return text;
-    return photoOnly.ok ? photoOnly : text;
-  }
   if (party.imageURL) {
-    const withPhoto = await post('sendPhoto', { chat_id: chatId, photo: party.imageURL, caption });
-    if (withPhoto.ok) return withPhoto;
-    // The image can't be fetched or the caption is too long for a photo: send the text alone
-    // instead of silently posting nothing.
+    // One message: the image with the text as its caption. Try the resized image,
+    // then the original URL.
+    const candidates = [...new Set([telegramFriendlyImage(party.imageURL), String(party.imageURL).trim()])];
+    let lastError = '';
+    for (const photo of candidates) {
+      const withPhoto = await post('sendPhoto', { chat_id: chatId, photo, caption });
+      if (withPhoto.ok) return withPhoto;
+      lastError = withPhoto.description || lastError;
+    }
+    // Last resort so the party still goes out: the text alone.
     const asText = await post('sendMessage', { chat_id: chatId, text: caption });
-    return asText.ok ? asText : { ...asText, description: `${asText.description || ''} (תמונה: ${withPhoto.description || 'נכשלה'})` };
+    return asText.ok ? { ...asText, imageFailed: lastError } : { ...asText, description: `${asText.description || ''} (תמונה: ${lastError || 'נכשלה'})` };
   }
   return post('sendMessage', { chat_id: chatId, text: caption });
 }
@@ -732,7 +741,7 @@ async function sendAllPartyReminders(targetChatId) {
       for (const dest of destinations) {
         if (!partyAllowedFor(party, dest.allowedAdvertiserIds)) continue;
         const data = await sendReminderToChat(botToken, dest.chatId, party);
-        results.push({ party: party.title || party.name, chatId: dest.chatId, group: dest.name || '', ok: data.ok, description: data.description });
+        results.push({ party: party.title || party.name, chatId: dest.chatId, group: dest.name || '', ok: data.ok, description: data.description, imageFailed: data.imageFailed || undefined });
         // Each send targets a different chat, so Telegram's ~1/sec-per-chat
         // limit doesn't apply — only the ~30/sec global limit does, which
         // needs ~34ms between sends, not 400ms. The old 400ms delay was the

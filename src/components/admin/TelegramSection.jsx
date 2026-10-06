@@ -338,6 +338,7 @@ const TelegramSection = ({ showSaved }) => {
       const lines = [`נשלחו ${results.length - failed.length} מתוך ${results.length} הודעות ל"${c.name}"`];
       if (!results.length) lines.push('אין מסיבה שמורשית להתפרסם בקבוצה הזו (בדוק שסימנת מפרסם ושמרת).');
       failed.slice(0, 12).forEach((r) => lines.push(`• ${r.party || '?'}: ${r.description || 'שגיאה לא ידועה'}`));
+      results.filter((r) => r.ok && r.imageFailed).forEach((r) => lines.push(`• ${r.party || '?'}: נשלח בלי תמונה — ${r.imageFailed}`));
       alert(lines.join('\n'));
     } catch (err) {
       alert(`הפרסום נכשל: ${err.message}`);
