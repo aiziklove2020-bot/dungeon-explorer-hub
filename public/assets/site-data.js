@@ -35393,6 +35393,9 @@ async function JU(e) {
 	return typeof t == "string" ? t : t?.url || "";
 }
 async function YU(e, t) {
+	// Same producer, same title and (about) the same day = a double submit; refuse it.
+	let lpTitle_ = String(t.title || "").trim().toLowerCase(), lpWhen_ = new Date(t.date).getTime();
+	if ((await sM() || []).some((x) => x.createdBy === e && String(x.title || x.name || "").trim().toLowerCase() === lpTitle_ && Number.isFinite(lpWhen_) && Math.abs(NU(x) - lpWhen_) < 864e5)) throw Error("כבר פורסם אצלך אירוע באותו שם ובאותו תאריך");
 	return aM({
 		city: t.city || "",
 		whatsappNumber: t.whatsappNumber || "",
