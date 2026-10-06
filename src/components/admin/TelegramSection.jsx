@@ -5,6 +5,7 @@ import { getTelegramSettings, updateTelegramSettings, getTelegramSeenChats } fro
 import { getRegistrationSettings } from '../../firebase/settings';
 import { getBotInfo, MESSAGE_KEYS, REGISTRATION_TYPE_KEYS, BALANCE_PUBLISH_TYPE_KEYS, VARIABLES_REFERENCE, buildMessagePreview, sendTelegramNotification } from '../../firebase/telegram';
 import { getAllAdvertisers } from '../../firebase/advertisers';
+import { adminAuthHeader } from '../../utils/adminApi';
 import { Plus, Trash2, Edit2, ChevronDown, ChevronRight, Send, Eye, Mail } from 'lucide-react';
 
 const BUILT_IN_MESSAGE_KEYS = [MESSAGE_KEYS.REGISTRATION, MESSAGE_KEYS.BALANCE_PUBLISH, MESSAGE_KEYS.NEW_PARTY, MESSAGE_KEYS.NEW_EXTERNAL_PARTY];
@@ -321,6 +322,28 @@ const TelegramSection = ({ showSaved }) => {
       : [...prev, { id: genId(), name: chat.title || String(chat.id), chatId: String(chat.id), broadcastEnabled: true, allowedAdvertiserIds: [] }]));
   };
 
+  // Posts the active parties to this one group only (the other groups get nothing),
+  // and shows exactly what Telegram answered for each party.
+  const publishToChannel = async (c) => {
+    if (!confirm(`לפרסם עכשיו את המסיבות המורשות לקבוצה "${c.name}" בלבד?`)) return;
+    try {
+      const res = await fetch(`/api/telegram-webhook?job=manual-post&chatId=${encodeURIComponent(c.chatId)}`, { headers: { ...adminAuthHeader() } });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        alert(`הפרסום נכשל: ${data.error || res.statusText}`);
+        return;
+      }
+      const results = Array.isArray(data.results) ? data.results : [];
+      const failed = results.filter((r) => !r.ok);
+      const lines = [`נשלחו ${results.length - failed.length} מתוך ${results.length} הודעות ל"${c.name}"`];
+      if (!results.length) lines.push('אין מסיבה שמורשית להתפרסם בקבוצה הזו (בדוק שסימנת מפרסם ושמרת).');
+      failed.slice(0, 12).forEach((r) => lines.push(`• ${r.party || '?'}: ${r.description || 'שגיאה לא ידועה'}`));
+      alert(lines.join('\n'));
+    } catch (err) {
+      alert(`הפרסום נכשל: ${err.message}`);
+    }
+  };
+
   const removeChannel = (id) => {
     if (!confirm(t('admin.telegram.confirmDeleteChannel'))) return;
     setChannels((prev) => prev.filter((c) => c.id !== id));
@@ -621,6 +644,7 @@ const TelegramSection = ({ showSaved }) => {
                         לכלול בפרסום מסיבות אוטומטי
                       </span>
                     </label>
+                    <button type="button" onClick={() => publishToChannel(c)} className="text-xs px-2 py-1 rounded-lg bg-[#2a292e] text-white">פרסם כאן עכשיו</button>
                     <button type="button" onClick={() => setEditingChannel(c.id)} className="text-[#c0aebb] hover:text-white">
                       <Edit2 size={14} />
                     </button>
