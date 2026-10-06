@@ -86,7 +86,7 @@ async function getReminderDestinations(admin) {
       // (checkbox in the ערוצים panel) without deleting the destination —
       // some only want their own party posted there, not everyone else's.
       .filter((c) => c.broadcastEnabled !== false)
-      .map((c) => ({ chatId: sanitizeChatId(c.chatId), allowedAdvertiserIds: Array.isArray(c.allowedAdvertiserIds) ? c.allowedAdvertiserIds : null }))
+      .map((c) => ({ chatId: sanitizeChatId(c.chatId), name: c.name || '', allowedAdvertiserIds: Array.isArray(c.allowedAdvertiserIds) ? c.allowedAdvertiserIds : null }))
       .filter((d) => /^-\d+$/.test(d.chatId) || /^@[\w-]+$/.test(d.chatId));
     if (dests.length > 0) return dests;
   } catch (err) {
@@ -187,18 +187,23 @@ function buildReminderCaption(party) {
 
 async function sendReminderToChat(botToken, chatId, party) {
   const caption = buildReminderCaption(party);
-  const endpoint = party.imageURL
-    ? `https://api.telegram.org/bot${botToken}/sendPhoto`
-    : `https://api.telegram.org/bot${botToken}/sendMessage`;
-  const body = party.imageURL
-    ? { chat_id: chatId, photo: party.imageURL, caption }
-    : { chat_id: chatId, text: caption };
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  return res.json();
+  const post = async (method, body) => {
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/${method}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return res.json().catch(() => ({ ok: false, description: `HTTP ${res.status}` }));
+  };
+  if (party.imageURL) {
+    const withPhoto = await post('sendPhoto', { chat_id: chatId, photo: party.imageURL, caption });
+    if (withPhoto.ok) return withPhoto;
+    // The image can't be fetched or the caption is too long for a photo: send the text alone
+    // instead of silently posting nothing.
+    const asText = await post('sendMessage', { chat_id: chatId, text: caption });
+    return asText.ok ? asText : { ...asText, description: `${asText.description || ''} (תמונה: ${withPhoto.description || 'נכשלה'})` };
+  }
+  return post('sendMessage', { chat_id: chatId, text: caption });
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -719,7 +724,7 @@ async function sendAllPartyReminders(targetChatId) {
       for (const dest of destinations) {
         if (!partyAllowedFor(party, dest.allowedAdvertiserIds)) continue;
         const data = await sendReminderToChat(botToken, dest.chatId, party);
-        results.push({ party: party.title || party.name, chatId: dest.chatId, ok: data.ok, description: data.description });
+        results.push({ party: party.title || party.name, chatId: dest.chatId, group: dest.name || '', ok: data.ok, description: data.description });
         // Each send targets a different chat, so Telegram's ~1/sec-per-chat
         // limit doesn't apply — only the ~30/sec global limit does, which
         // needs ~34ms between sends, not 400ms. The old 400ms delay was the
