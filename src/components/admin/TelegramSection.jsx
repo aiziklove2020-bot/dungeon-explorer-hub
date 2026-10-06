@@ -633,28 +633,39 @@ const TelegramSection = ({ showSaved }) => {
                   </>
                 ) : (
                   <>
-                    <span className="font-medium">{c.name}</span>
-                    <span className="text-[#94A3B8] text-sm font-mono">{c.chatId}</span>
-                    <label className="flex items-center gap-1.5 mr-auto cursor-pointer text-xs">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold leading-snug break-words">{c.name}</div>
+                      <div className="text-[#94A3B8] text-xs font-mono mt-0.5" dir="ltr" style={{ textAlign: 'right' }}>{c.chatId}</div>
+                    </div>
+                  </>
+                )}
+                </div>
+
+                {editingChannel !== c.id && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label
+                      className={`flex items-center gap-2 cursor-pointer text-xs font-bold px-3 h-9 rounded-lg border ${c.broadcastEnabled === false ? 'border-[rgba(255,255,255,0.12)] text-[#94A3B8]' : 'border-green-700 bg-green-900/20 text-green-400'}`}
+                    >
                       <input
                         type="checkbox"
                         checked={c.broadcastEnabled !== false}
                         onChange={() => toggleChannelBroadcast(c.id)}
                       />
-                      <span className={c.broadcastEnabled === false ? 'text-[#94A3B8]' : 'text-green-400'}>
-                        לכלול בפרסום מסיבות אוטומטי
-                      </span>
+                      פרסום אוטומטי
                     </label>
-                    <button type="button" onClick={() => publishToChannel(c)} className="text-xs px-2 py-1 rounded-lg bg-[#2a292e] text-white">פרסם כאן עכשיו</button>
-                    <button type="button" onClick={() => setEditingChannel(c.id)} className="text-[#c0aebb] hover:text-white">
-                      <Edit2 size={14} />
+                    <button type="button" onClick={() => publishToChannel(c)} className="h-9 px-3 rounded-lg bg-[#ff438b] hover:bg-[#ff5596] text-white text-xs font-bold">
+                      פרסם כאן עכשיו
                     </button>
-                    <button type="button" onClick={() => removeChannel(c.id)} className="text-[#ffb4ab] hover:text-[#ffdada]">
-                      <Trash2 size={14} />
-                    </button>
-                  </>
+                    <div className="flex items-center gap-2 mr-auto">
+                      <button type="button" onClick={() => setEditingChannel(c.id)} aria-label="עריכה" className="h-9 w-9 grid place-items-center rounded-lg bg-[#2a292e] text-[#c0aebb] hover:text-white">
+                        <Edit2 size={15} />
+                      </button>
+                      <button type="button" onClick={() => removeChannel(c.id)} aria-label="מחיקה" className="h-9 w-9 grid place-items-center rounded-lg bg-[#2a292e] text-[#ffb4ab] hover:text-[#ffdada]">
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </div>
                 )}
-                </div>
 
                 {editingChannel !== c.id && c.broadcastEnabled !== false && (
                   <div className="pt-2 border-t border-[rgba(255,255,255,0.08)]">
