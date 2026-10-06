@@ -331,3 +331,14 @@ input[type="date"]::-webkit-date-and-time-value{text-align:right;min-height:1.2e
 .hero-v3{background:linear-gradient(90deg,rgba(16,9,16,.80),rgba(60,10,45,.38) 50%,rgba(16,9,16,.80)),linear-gradient(180deg,rgba(16,9,16,.35),rgba(16,9,16,.15) 60%,#100910),url("dancefloor.webp") center 35%/cover no-repeat}
 .hero-v3-frame{box-shadow:0 0 0 1px #ff5aa044,0 24px 80px #000c,0 0 90px #ff2d8a33}
 }
+/* Desktop hero: a dedicated wide image (phones keep the square one). */
+.hero-v3-wide{display:none}
+@media(min-width:801px){
+.hero-v3{background:#100910;padding:0;overflow:visible}
+.hero-v3::before,.hero-v3::after{display:none}
+.hero-v3-frame{display:none}
+.hero-v3-wide{display:block;position:relative;width:100%;max-width:2000px;margin:0 auto;line-height:0}
+.hero-v3-wide img{display:block;width:100%;height:auto}
+.hero-v3-wide .hs{position:absolute;display:block;border-radius:14px}
+.hero-v3-wide .hs:hover{background:#ffffff1a;outline:2px solid #ff79aa}
+}
