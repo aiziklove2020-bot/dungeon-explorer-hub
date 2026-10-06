@@ -511,14 +511,20 @@ async function handleFixChatIds(req, res) {
 // logged to Firestore (capped list) so a group's real id can be read back
 // after someone sends any message there — see recordSeenChat() + the POST
 // handler, and ?job=recent-chats below to read the capped list.
-async function recordSeenChat(admin, chat) {
-  if (!chat) return;
+async function recordSeenChat(admin, chat, botStatus) {
+  // Private chats are not destinations and used to push groups out of the capped list.
+  if (!chat || chat.type === 'private') return;
   try {
     const ref = admin.firestore().collection('settings').doc('telegramSeenChats');
     const snap = await ref.get();
     const list = snap.exists ? (snap.data()?.chats || []) : [];
     const withoutDup = list.filter((c) => c.id !== chat.id);
-    const next = [{ id: chat.id, title: chat.title || chat.username || chat.first_name || '', type: chat.type, seenAt: new Date().toISOString() }, ...withoutDup].slice(0, 30);
+    // The bot was removed from the group: drop it from the list.
+    if (botStatus === 'left' || botStatus === 'kicked') {
+      await ref.set({ chats: withoutDup });
+      return;
+    }
+    const next = [{ id: chat.id, title: chat.title || chat.username || chat.first_name || '', type: chat.type, seenAt: new Date().toISOString() }, ...withoutDup].filter((c) => c.type !== 'private').slice(0, 60);
     await ref.set({ chats: next });
   } catch (err) {
     console.error('recordSeenChat:', err);
@@ -1489,7 +1495,7 @@ export default async function handler(req, res) {
     // Best-effort: remember every chat the bot hears from, so a group's
     // real chat_id can be looked up later (?job=recent-chats) instead of
     // guessed from a partial/mistyped value.
-    if (anyChat) await recordSeenChat(admin, anyChat);
+    if (anyChat) await recordSeenChat(admin, anyChat, body?.my_chat_member?.new_chat_member?.status);
 
     if (!msg?.text) {
       return res.status(200).json({ ok: true });
