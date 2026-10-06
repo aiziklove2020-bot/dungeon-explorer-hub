@@ -121,7 +121,14 @@ const Admin = () => {
         alert(`הפרסום נכשל: ${data.error || res.statusText}`);
         return;
       }
-      alert(`הפרסום הושלם.\nמסיבות שפורסמו: ${data.partiesSent}`);
+      const results = Array.isArray(data.results) ? data.results : [];
+      const failed = results.filter((r) => !r.ok);
+      const lines = [`הפרסום הושלם. מסיבות פעילות: ${data.partiesSent}`, `הודעות שנשלחו: ${results.length - failed.length} מתוך ${results.length}`];
+      if (failed.length) {
+        lines.push('', 'לא נשלחו:');
+        failed.slice(0, 12).forEach((r) => lines.push(`• ${r.party || '?'} ← ${r.group || r.chatId}: ${r.description || 'שגיאה לא ידועה'}`));
+      }
+      alert(lines.join('\n'));
       showSaved();
     } catch (err) {
       alert(`הפרסום נכשל: ${err.message}`);
