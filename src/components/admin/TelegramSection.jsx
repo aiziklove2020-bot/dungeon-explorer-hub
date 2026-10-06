@@ -133,9 +133,16 @@ const TelegramSection = ({ showSaved }) => {
   const [advertisers, setAdvertisers] = useState([]);
   const [seenChats, setSeenChats] = useState([]);
 
+  const refreshSeenChats = () => getTelegramSeenChats().then(setSeenChats).catch(() => {});
+
+  // Keeps checking, so a group the bot was just added to shows up without a reload.
   useEffect(() => {
-    getTelegramSeenChats().then(setSeenChats).catch(() => {});
+    refreshSeenChats();
+    const timer = setInterval(refreshSeenChats, 20000);
+    return () => clearInterval(timer);
   }, []);
+
+  const missingChats = seenChats.filter((c) => c.type !== 'private' && !channels.some((ch) => String(ch.chatId) === String(c.id)));
 
   const load = async () => {
     setLoading(true);
@@ -436,6 +443,9 @@ const TelegramSection = ({ showSaved }) => {
           >
             {panel === 'bots' && t('admin.telegram.bots')}
             {panel === 'channels' && t('admin.telegram.channels')}
+            {panel === 'channels' && missingChats.length > 0 && (
+              <span className="ms-1 px-1.5 rounded-full bg-[#ff438b] text-white text-[10px] font-bold">{missingChats.length}</span>
+            )}
             {panel === 'messages' && t('admin.telegram.messages')}
             {panel === 'sendMessage' && (
               <>
@@ -561,11 +571,11 @@ const TelegramSection = ({ showSaved }) => {
             </button>
           </div>
           {(() => {
-            const missing = seenChats.filter((c) => c.type !== 'private' && !channels.some((ch) => String(ch.chatId) === String(c.id)));
+            const missing = missingChats;
             if (!missing.length) return null;
             return (
               <div className="p-3 rounded-xl bg-[#1c1b1f] border border-[rgba(255,255,255,0.08)] space-y-2">
-                <p className="text-sm font-bold">קבוצות וערוצים שהבוט נוסף אליהם ואינם ברשימה</p>
+                <div className="flex items-center justify-between gap-2"><p className="text-sm font-bold">קבוצות וערוצים שהבוט נוסף אליהם ואינם ברשימה</p><button type="button" onClick={refreshSeenChats} className="text-xs underline">בדוק עכשיו</button></div>
                 {missing.map((c) => (
                   <div key={c.id} className="flex items-center justify-between gap-2 text-sm">
                     <span>{c.title || c.id} <span className="text-[#94A3B8] text-xs" dir="ltr">{c.id}</span></span>
