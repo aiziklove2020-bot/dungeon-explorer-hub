@@ -7,6 +7,7 @@ export function israelDate(now = new Date()) {
 }
 
 export function isSilentDay(now = new Date()) {
+  if (process.env.SILENT_DAYS_OFF === '1') return false; // tests only
   return SILENT_DAYS.includes(israelDate(now));
 }
 

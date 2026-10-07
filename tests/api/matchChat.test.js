@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+process.env.SILENT_DAYS_OFF = '1'; // the mourning-day guard is tested in silentDay.test.js
 
 // A tiny in-memory Firestore: parties/{id}, matchChats/{id} and matchChats/{id}/messages.
 const store = { parties: {}, matchChats: {}, messages: {} };
