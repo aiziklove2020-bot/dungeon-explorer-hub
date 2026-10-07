@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+process.env.SILENT_DAYS_OFF = '1'; // the mourning-day guard is tested in silentDay.test.js
 
 const lines = [];
 const docs = {

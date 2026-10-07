@@ -40,6 +40,7 @@
  * `Authorization: Bearer ADMIN_API_SECRET` (see lib/apiAuth.js), same as
  * every other admin-only endpoint.
  */
+import { isSilentDay, NON_PUBLISHING_JOBS } from '../shared/silentDay.js';
 import { requireTelegramWebhookSecret, requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 import { TELEGRAM_CAMPAIGNS, TELEGRAM_CAMPAIGNS_VERSION } from '../shared/telegramCampaigns.js';
@@ -1623,6 +1624,10 @@ export async function runDailyStandup({ health } = {}) {
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
+    // National mourning day: no automatic or manual publishing of any kind.
+    if (isSilentDay() && !NON_PUBLISHING_JOBS.has(job)) {
+      return res.status(200).json({ ok: true, skipped: 'silent-day' });
+    }
     if (job === 'promo-check') {
       // Diagnostic only — never sends a message. Reports whether the secret
       // is configured and whether the provided key matches, without leaking
