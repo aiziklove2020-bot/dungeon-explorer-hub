@@ -40,7 +40,7 @@
  * `Authorization: Bearer ADMIN_API_SECRET` (see lib/apiAuth.js), same as
  * every other admin-only endpoint.
  */
-import { isSilentDay, NON_PUBLISHING_JOBS } from '../shared/silentDay.js';
+import { isSilentDay, israelDate, NON_PUBLISHING_JOBS } from '../shared/silentDay.js';
 import { requireTelegramWebhookSecret, requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 import { TELEGRAM_CAMPAIGNS, TELEGRAM_CAMPAIGNS_VERSION } from '../shared/telegramCampaigns.js';
@@ -1621,12 +1621,47 @@ export async function runDailyStandup({ health } = {}) {
   return { ok: true, parties: upcoming.length, registrations: totalRegs, pairs, waiting, pending };
 }
 
+// 7 October memorial: one picture, no caption, no link, sent once to every
+// group and channel. It is the only thing published on the silent day.
+async function sendMemorialOnce() {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) throw new Error('Server not configured (missing TELEGRAM_BOT_TOKEN)');
+  const admin = await initAdmin();
+  const db = admin.firestore();
+  const ref = db.collection('settings').doc('memorialSent');
+  const day = israelDate();
+  const claimed = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (snap.exists && snap.data()?.day === day) return false;
+    tx.set(ref, { day, at: Date.now() });
+    return true;
+  });
+  if (!claimed) return { ok: true, skipped: 'memorial already sent today' };
+  const destinations = await getReminderDestinations(admin);
+  const results = [];
+  for (const dest of destinations) {
+    const r = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: dest.chatId, photo: 'https://www.libralparty.net/assets/memorial-710.jpg' })
+    });
+    const data = await r.json().catch(() => ({}));
+    results.push({ chatId: dest.chatId, name: dest.name || '', ok: Boolean(data.ok), description: data.description });
+    await sleep(80);
+  }
+  if (!results.some((x) => x.ok)) await ref.set({ day: '' }).catch(() => {});
+  await agentSay('publisher', `פרסמתי את תמונת הזיכרון ב-${results.filter((x) => x.ok).length} מתוך ${results.length} קבוצות וערוצים.`).catch(() => {});
+  return { ok: results.some((x) => x.ok), results };
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
     // National mourning day: no automatic or manual publishing of any kind.
     if (isSilentDay() && !NON_PUBLISHING_JOBS.has(job)) {
-      return res.status(200).json({ ok: true, skipped: 'silent-day' });
+      if (job && job !== 'memorial') return res.status(200).json({ ok: true, skipped: 'silent-day' });
+      if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(200).json({ ok: true, skipped: 'silent-day' });
+      try { return res.status(200).json({ ok: true, skipped: 'silent-day', memorial: await sendMemorialOnce() }); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
     }
     if (job === 'promo-check') {
       // Diagnostic only — never sends a message. Reports whether the secret
