@@ -1,5 +1,6 @@
 import webpush from 'web-push';
 import { requireAdminApiSecret } from '../lib/apiAuth.js';
+import { isSilentDay } from '../shared/silentDay.js';
 
 /**
  * Sends Web Push notifications to a set of subscriptions. POST JSON:
@@ -28,6 +29,7 @@ export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
+  if (isSilentDay()) return res.status(200).json({ ok: true, skipped: 'silent-day', sent: 0 });
   if (!requireAdminApiSecret(req, res)) return;
 
   const privateKey = process.env.VAPID_PRIVATE_KEY;
