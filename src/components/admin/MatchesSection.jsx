@@ -541,20 +541,33 @@ const MatchesSection = ({ showSaved }) => {
   // Names-only balance list (no phone numbers) as plain WhatsApp text.
   // Copies it to the clipboard and opens WhatsApp's own "choose a chat"
   // screen (wa.me/?text=) — the admin picks any contact or group there.
-  const buildBalanceNamesText = (partyId, partyName) => {
+  // Two sections: every balanced pair/couple, then every woman who registered
+  // with the discount (matched or not), so the list covers both groups.
+  const buildBalanceNamesText = (partyId, partyName, registrations = []) => {
     const matched = (partyBalances[partyId] || []).filter((m) => m.isMatched === true);
-    if (matched.length === 0) {
+    const discountWomen = registrations.filter(
+      (r) => r.registrationType === 'single-female-discount' || r.registrationType === 'female_discount'
+    );
+    if (matched.length === 0 && discountWomen.length === 0) {
       alert(t('admin.balanceTables.noMatchedCouplesToExport'));
       return null;
     }
-    const lines = matched.map(
-      (m, i) => `${i + 1}. ${m.maleName || '-'} + ${m.femaleName || '-'}${m.isCouple ? ' (זוג)' : ''}`
-    );
-    return `איזון — ${partyName || 'מסיבה'}\n\n${lines.join('\n')}`;
+    const sections = [`איזון — ${partyName || 'מסיבה'}`];
+    if (matched.length > 0) {
+      const lines = matched.map(
+        (m, i) => `${i + 1}. ${m.maleName || '-'} + ${m.femaleName || '-'}${m.isCouple ? ' (זוג)' : ''}`
+      );
+      sections.push(`זוגות ואיזונים:\n${lines.join('\n')}`);
+    }
+    if (discountWomen.length > 0) {
+      const lines = discountWomen.map((r, i) => `${i + 1}. ${r.fullName || r.userName || '-'}`);
+      sections.push(`בחורות בהנחה:\n${lines.join('\n')}`);
+    }
+    return sections.join('\n\n');
   };
 
-  const shareBalanceNamesWhatsApp = async (partyId, partyName) => {
-    const text = buildBalanceNamesText(partyId, partyName);
+  const shareBalanceNamesWhatsApp = async (partyId, partyName, registrations) => {
+    const text = buildBalanceNamesText(partyId, partyName, registrations);
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
@@ -750,10 +763,10 @@ const MatchesSection = ({ showSaved }) => {
                         <Download size={16} /> הורד XLSX
                       </button>
                     )}
-                    {partyBalance.length > 0 && (
+                    {(partyBalance.length > 0 || (party.registrations || []).length > 0) && (
                       <button
                         type="button"
-                        onClick={() => shareBalanceNamesWhatsApp(party.id, party.name || party.title)}
+                        onClick={() => shareBalanceNamesWhatsApp(party.id, party.name || party.title, party.registrations || [])}
                         className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-2 text-sm whitespace-nowrap"
                       >
                         <MessageCircle size={16} /> שלח שמות בוואטסאפ
