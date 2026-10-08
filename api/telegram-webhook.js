@@ -886,6 +886,10 @@ const TIKTOK_DAYS = [0, 4]; // Sunday, Thursday (Israel time)
 const TIKTOK_MIN_GAP_MS = 20 * 60 * 60 * 1000;
 
 export async function sendTiktokPostIfDue({ force = false } = {}) {
+  // The owner's Telegram chat is the support group, and TikTok posts must not
+  // appear there in any form. Nothing is sent until a separate destination is chosen.
+  return { ok: true, skipped: 'tiktok posts are not sent to the support group' };
+  // eslint-disable-next-line no-unreachable
   if (!TIKTOK_PACK.length) return { ok: false, skipped: 'no tiktok pack' };
   const admin = await initAdmin();
   const db = admin.firestore();
