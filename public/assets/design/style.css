@@ -361,3 +361,6 @@ input[type="date"]::-webkit-date-and-time-value{text-align:right;min-height:1.2e
 .card .heart.event-save-button:hover{background:#ff5aa01f!important}
 .card .heart.event-save-button.saved{background:#ff5aa01f!important;border-color:#ff5aa099!important;color:#ffb6d0!important}
 .card-bottom:has(.event-save-button){flex-wrap:wrap}
+.match-chat-new{display:inline-block;margin-inline-start:8px;padding:2px 10px;border-radius:999px;background:#ff2e7e;color:#fff;font-size:12px;font-weight:800}
+.match-chat-push{margin-top:8px;padding:10px 12px;border:1px solid #ff5aa055;border-radius:12px;background:#ff5aa014;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.match-chat-push[hidden],.match-chat-new[hidden]{display:none}
