@@ -622,7 +622,8 @@ window.lpWireQuickRegister = function (container, phone) {
 window.lpMountMatchChat = function (container, phone, partyId) {
   if (!container || !phone || !partyId) return;
   container.innerHTML = `<div class="match-chat">
-    <button type="button" class="match-chat-toggle">💬 צ'אט אנונימי עם ההתאמה שלך</button>
+    <button type="button" class="match-chat-toggle">💬 צ'אט אנונימי עם ההתאמה שלך <span class="match-chat-new" hidden>● הודעה חדשה</span></button>
+    <div class="match-chat-push meta" hidden></div>
     <div class="match-chat-body" hidden>
       <p class="meta">השיחה אנונימית: אף אחד לא רואה שם או מספר טלפון. הצ'אט נמחק אחרי שהמסיבה מסתיימת.</p>
       <div class="match-chat-msgs" role="log" aria-live="polite"></div>
@@ -637,9 +638,38 @@ window.lpMountMatchChat = function (container, phone, partyId) {
   const list = container.querySelector(".match-chat-msgs");
   const form = container.querySelector(".match-chat-form");
   const input = form.querySelector("input");
+  const badge = container.querySelector(".match-chat-new");
+  const pushBox = container.querySelector(".match-chat-push");
   let last = 0;
   let timer = null;
   const seen = new Set();
+
+  // Without a notification on the phone the other side never learns a message arrived, so the chat
+  // itself asks for it and ties this device to the phone number (the site-wide banner may have
+  // saved the device under an anonymous id, which the server cannot look up by phone).
+  const setupPush = async () => {
+    const supported = ("serviceWorker" in navigator) && ("PushManager" in window) && typeof Notification !== "undefined";
+    if (lpIsIosNotInstalled()) {
+      pushBox.hidden = false;
+      pushBox.textContent = "כדי לקבל התראה על הודעות באייפון: בכפתור השיתוף בחרו \"הוסף למסך הבית\", פתחו את האתר משם ואשרו התראות.";
+      return;
+    }
+    if (!supported) return;
+    if (Notification.permission === "granted") { lpEnablePushNotifications(phone).catch(() => {}); return; }
+    pushBox.hidden = false;
+    if (Notification.permission === "denied") {
+      pushBox.textContent = "ההתראות חסומות בדפדפן, ולכן לא תדעו על הודעות חדשות כשאתם לא באתר. אפשר לאשר אותן בהגדרות האתר.";
+      return;
+    }
+    pushBox.innerHTML = '<span>כדי לדעת על הודעה חדשה גם כשאתם לא באתר, אשרו התראות. </span><button type="button" class="btn gold match-chat-push-btn">הפעלת התראות</button>';
+    pushBox.querySelector("button").addEventListener("click", async (ev) => {
+      ev.target.disabled = true;
+      const result = await lpEnablePushNotifications(phone);
+      if (result === "ok") { pushBox.hidden = true; if (window.toast) toast("התראות הופעלו. תקבלו הודעה כשההתאמה שלכם תכתוב"); }
+      else { ev.target.disabled = false; if (window.toast) toast(result === "denied" ? "ההתראות נחסמו בדפדפן" : "לא הצלחנו להפעיל התראות", "error"); }
+    });
+  };
+  setupPush();
 
   const call = async (payload) => {
     const res = await fetch("/api/telegram-webhook?job=match-chat", {
@@ -667,17 +697,28 @@ window.lpMountMatchChat = function (container, phone, partyId) {
     if (messages.length) list.scrollTop = list.scrollHeight;
   };
   const poll = async () => {
-    if (document.hidden || body.hidden) return;
-    try { render(await call({ action: "list" })); } catch { /* quiet: next poll retries */ }
+    if (document.hidden) return;
+    try {
+      const messages = await call({ action: "list" });
+      if (body.hidden) {
+        // closed chat: only flag partner messages that arrived since it was last open
+        if (messages.some((m) => !m.mine && !seen.has(m.id))) badge.hidden = false;
+      } else {
+        render(messages);
+      }
+    } catch { /* quiet: next poll retries */ }
   };
   toggle.addEventListener("click", () => {
     body.hidden = !body.hidden;
+    badge.hidden = true;
     if (!body.hidden) {
       poll();
-      timer = timer || setInterval(poll, 6000);
       input.focus();
     }
   });
+  poll();
+  let tick = 0;
+  timer = setInterval(() => { tick++; if (!body.hidden || tick % 3 === 0) poll(); }, 6000); // open: every 6s, closed: every 18s
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const text = input.value.trim();
