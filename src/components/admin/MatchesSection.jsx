@@ -541,37 +541,32 @@ const MatchesSection = ({ showSaved }) => {
   // Names-only balance list (no phone numbers) as plain WhatsApp text.
   // Copies it to the clipboard and opens WhatsApp's own "choose a chat"
   // screen (wa.me/?text=) — the admin picks any contact or group there.
-  // The full list for a party, names only: balanced pairs and couples, the women
-  // registered with the discount, and everyone else who registered, so nobody
-  // is missing from what gets sent.
+  // The list the owner sends in WhatsApp, names only, three parts: couples who
+  // registered as couples, single women (not yet balanced), and the pairs he balanced.
+  // Single men are not part of it.
   const buildBalanceNamesText = (partyId, partyName, registrations = []) => {
     const digits = (v) => String(v || '').replace(/\D/g, '').replace(/^972/, '0');
     const nameOf = (r) => r.fullName || r.userName || '-';
-    const matched = (partyBalances[partyId] || []).filter((m) => m.isMatched === true);
-    if (matched.length === 0 && registrations.length === 0) {
+    const pairs = (partyBalances[partyId] || []).filter((m) => m.isMatched === true && !m.isCouple);
+    const pairedPhones = new Set(pairs.flatMap((m) => [digits(m.malePhone), digits(m.femalePhone)]).filter(Boolean));
+    const couples = registrations.filter((r) => r.registrationType === 'couple');
+    const singleWomen = registrations.filter((r) => r.registrationType !== 'couple'
+      && genderFromRegistration(r) === 'female' && !pairedPhones.has(digits(r.phoneNumber)));
+    if (pairs.length === 0 && couples.length === 0 && singleWomen.length === 0) {
       alert(t('admin.balanceTables.noMatchedCouplesToExport'));
       return null;
     }
-    const matchedPhones = new Set(matched.flatMap((m) => [digits(m.malePhone), digits(m.femalePhone)]).filter(Boolean));
-    const isDiscount = (r) => r.registrationType === 'single-female-discount' || r.registrationType === 'female_discount';
-    const discountWomen = registrations.filter(isDiscount);
-    const others = registrations.filter((r) => !isDiscount(r) && !matchedPhones.has(digits(r.phoneNumber)));
     const numbered = (rows) => rows.map((x, i) => `${i + 1}. ${x}`).join('\n');
-
-    const sections = [`${partyName || 'מסיבה'} — רשימת נרשמים (${registrations.length})`];
-    if (matched.length > 0) {
-      sections.push(`זוגות ואיזונים:\n${numbered(matched.map((m) => `${m.maleName || '-'} + ${m.femaleName || '-'}${m.isCouple ? ' (זוג)' : ''}`))}`);
+    const sections = [`${partyName || 'מסיבה'} — רשימה`];
+    if (couples.length > 0) {
+      sections.push(`זוגות:\n${numbered(couples.map((r) => `${nameOf(r)}${r.partnerName ? ` + ${r.partnerName}` : ''}`))}`);
     }
-    if (discountWomen.length > 0) {
-      sections.push(`בחורות בהנחה:\n${numbered(discountWomen.map(nameOf))}`);
+    if (singleWomen.length > 0) {
+      const discount = (r) => (r.registrationType === 'single-female-discount' || r.registrationType === 'female_discount' ? ' (בהנחה)' : '');
+      sections.push(`סינגליות:\n${numbered(singleWomen.map((r) => `${nameOf(r)}${discount(r)}`))}`);
     }
-    const tag = { male: 'גבר', female: 'אישה', couple: 'זוג' };
-    if (others.length > 0) {
-      sections.push(`נרשמים נוספים:\n${numbered(others.map((r) => {
-        const kind = tag[genderFromRegistration(r)] || '';
-        const partner = r.registrationType === 'couple' && r.partnerName ? ` + ${r.partnerName}` : '';
-        return `${nameOf(r)}${partner}${kind ? ` (${kind})` : ''}`;
-      }))}`);
+    if (pairs.length > 0) {
+      sections.push(`איזונים:\n${numbered(pairs.map((m) => `${m.maleName || '-'} + ${m.femaleName || '-'}`))}`);
     }
     return sections.join('\n\n');
   };
