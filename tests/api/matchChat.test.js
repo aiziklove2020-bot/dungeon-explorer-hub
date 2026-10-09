@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 process.env.SILENT_DAYS_OFF = '1'; // the mourning-day guard is tested in silentDay.test.js
 
 // A tiny in-memory Firestore: parties/{id}, matchChats/{id} and matchChats/{id}/messages.
-const store = { parties: {}, matchChats: {}, messages: {} };
+const store = { parties: {}, matchChats: {}, messages: {}, subs: [] };
+const pushed = [];
 let autoId = 0;
 const snapOf = (data) => ({ exists: data !== undefined, data: () => data });
 const chatRef = (id) => ({
@@ -25,7 +26,7 @@ const chatRef = (id) => ({
 const db = {
   collection: (name) => ({
     doc: (id) => (name === 'matchChats' ? chatRef(id) : { get: async () => snapOf(store.parties[id]) }),
-    where: () => ({ get: async () => ({ docs: [] }) }),
+    where: (f, _o, v) => ({ get: async () => ({ docs: (store.subs || []).filter((x) => x[f] === v).map((x) => ({ id: x.id, data: () => x })) }) }),
     get: async () => ({ docs: Object.keys(store.matchChats).map((id) => ({ id, data: () => store.matchChats[id], ref: chatRef(id) })) }),
   }),
   batch: () => { const ops = []; return { delete: (r) => ops.push(r), commit: async () => ops.forEach((r) => r.__del?.()) }; },
@@ -38,6 +39,8 @@ const db = {
   }),
 };
 vi.mock('firebase-admin', () => ({ default: { firestore: Object.assign(() => db, { Timestamp: { now: () => 'NOW' } }), apps: [1] } }));
+vi.mock('web-push', () => ({ default: { setVapidDetails() {}, sendNotification: async (sub, payload) => { pushed.push({ endpoint: sub.endpoint, payload: JSON.parse(payload) }); } } }));
+process.env.VAPID_PRIVATE_KEY = 'test-key';
 process.env.TELEGRAM_BOT_TOKEN = 'T';
 process.env.TELEGRAM_WEBHOOK_SECRET = 'S';
 
@@ -80,5 +83,26 @@ describe('anonymous match chat', () => {
     await call({ action: 'send', phone: '0501111111', partyId: 'P1', text: 'א' });
     const fast = await call({ action: 'send', phone: '0501111111', partyId: 'P1', text: 'ב' });
     expect(fast.ok).toBe(false);
+  });
+
+  it('pushes a notification to the partner device only, and not again within 3 minutes', async () => {
+    store.subs = [
+      { id: 'a', phone: '0501111111', endpoint: 'https://push/sender', keys: {} },
+      { id: 'b', phone: '0522222222', endpoint: 'https://push/partner', keys: {} },
+    ];
+    pushed.length = 0;
+    await call({ action: 'send', phone: '0501111111', partyId: 'P1', text: 'שלום' });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(pushed.map((x) => x.endpoint)).toEqual(['https://push/partner']);
+    expect(pushed[0].payload.title).toContain('הודעה חדשה');
+    expect(pushed[0].payload.body).not.toContain('שלום'); // anonymous: no message text in the notification
+    vi.setSystemTime(new Date('2026-10-06T10:01:00Z'));
+    await call({ action: 'send', phone: '0501111111', partyId: 'P1', text: 'עוד אחת' });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(pushed).toHaveLength(1);
+    vi.setSystemTime(new Date('2026-10-06T10:05:00Z'));
+    await call({ action: 'send', phone: '0501111111', partyId: 'P1', text: 'ועוד' });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(pushed).toHaveLength(2);
   });
 });
