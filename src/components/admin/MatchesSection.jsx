@@ -541,27 +541,37 @@ const MatchesSection = ({ showSaved }) => {
   // Names-only balance list (no phone numbers) as plain WhatsApp text.
   // Copies it to the clipboard and opens WhatsApp's own "choose a chat"
   // screen (wa.me/?text=) — the admin picks any contact or group there.
-  // Two sections: every balanced pair/couple, then every woman who registered
-  // with the discount (matched or not), so the list covers both groups.
+  // The full list for a party, names only: balanced pairs and couples, the women
+  // registered with the discount, and everyone else who registered, so nobody
+  // is missing from what gets sent.
   const buildBalanceNamesText = (partyId, partyName, registrations = []) => {
+    const digits = (v) => String(v || '').replace(/\D/g, '').replace(/^972/, '0');
+    const nameOf = (r) => r.fullName || r.userName || '-';
     const matched = (partyBalances[partyId] || []).filter((m) => m.isMatched === true);
-    const discountWomen = registrations.filter(
-      (r) => r.registrationType === 'single-female-discount' || r.registrationType === 'female_discount'
-    );
-    if (matched.length === 0 && discountWomen.length === 0) {
+    if (matched.length === 0 && registrations.length === 0) {
       alert(t('admin.balanceTables.noMatchedCouplesToExport'));
       return null;
     }
-    const sections = [`איזון — ${partyName || 'מסיבה'}`];
+    const matchedPhones = new Set(matched.flatMap((m) => [digits(m.malePhone), digits(m.femalePhone)]).filter(Boolean));
+    const isDiscount = (r) => r.registrationType === 'single-female-discount' || r.registrationType === 'female_discount';
+    const discountWomen = registrations.filter(isDiscount);
+    const others = registrations.filter((r) => !isDiscount(r) && !matchedPhones.has(digits(r.phoneNumber)));
+    const numbered = (rows) => rows.map((x, i) => `${i + 1}. ${x}`).join('\n');
+
+    const sections = [`${partyName || 'מסיבה'} — רשימת נרשמים (${registrations.length})`];
     if (matched.length > 0) {
-      const lines = matched.map(
-        (m, i) => `${i + 1}. ${m.maleName || '-'} + ${m.femaleName || '-'}${m.isCouple ? ' (זוג)' : ''}`
-      );
-      sections.push(`זוגות ואיזונים:\n${lines.join('\n')}`);
+      sections.push(`זוגות ואיזונים:\n${numbered(matched.map((m) => `${m.maleName || '-'} + ${m.femaleName || '-'}${m.isCouple ? ' (זוג)' : ''}`))}`);
     }
     if (discountWomen.length > 0) {
-      const lines = discountWomen.map((r, i) => `${i + 1}. ${r.fullName || r.userName || '-'}`);
-      sections.push(`בחורות בהנחה:\n${lines.join('\n')}`);
+      sections.push(`בחורות בהנחה:\n${numbered(discountWomen.map(nameOf))}`);
+    }
+    const tag = { male: 'גבר', female: 'אישה', couple: 'זוג' };
+    if (others.length > 0) {
+      sections.push(`נרשמים נוספים:\n${numbered(others.map((r) => {
+        const kind = tag[genderFromRegistration(r)] || '';
+        const partner = r.registrationType === 'couple' && r.partnerName ? ` + ${r.partnerName}` : '';
+        return `${nameOf(r)}${partner}${kind ? ` (${kind})` : ''}`;
+      }))}`);
     }
     return sections.join('\n\n');
   };
