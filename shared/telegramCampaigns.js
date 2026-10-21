@@ -64,51 +64,46 @@ export const TELEGRAM_CAMPAIGNS = [
   {
     "id": "c13",
     "image": "https://www.libralparty.net/assets/campaigns/c13.jpg",
-    "caption": "🌗 שני עולמות, מנוי אחד!\nהמנוי המשולב נותן גישה לשני סוגי המסיבות, מסיבות BDSM ומסיבות סווינגרס, והוא הכי משתלם.\n\n👇 לפרטים ולהצטרפות:\nhttps://www.libralparty.net/membership"
+    "caption": "🩶 קהילה מכבדת, חיבורים מעניינים.\nמרחב של חופש ושל כבוד הדדי, להכיר, לרקוד ולצאת מהרגיל.\n\n👇 קצת עלינו:\nhttps://www.libralparty.net/about"
   },
   {
     "id": "c14",
     "image": "https://www.libralparty.net/assets/campaigns/c14.jpg",
-    "caption": "🩶 קהילה מכבדת, חיבורים מעניינים.\nמרחב של חופש ושל כבוד הדדי, להכיר, לרקוד ולצאת מהרגיל.\n\n👇 קצת עלינו:\nhttps://www.libralparty.net/about"
+    "caption": "🔥 מנוי מסיבות סווינגרס!\nגישה למסיבות הסווינגרס של הקהילה, עם איזון, התראות ואזור אישי.\n\n👇 לפרטים ולהצטרפות:\nhttps://www.libralparty.net/membership"
   },
   {
     "id": "c15",
     "image": "https://www.libralparty.net/assets/campaigns/c15.jpg",
-    "caption": "🔥 מנוי מסיבות סווינגרס!\nגישה למסיבות הסווינגרס של הקהילה, עם איזון, התראות ואזור אישי.\n\n👇 לפרטים ולהצטרפות:\nhttps://www.libralparty.net/membership"
+    "caption": "📅 כל המסיבות בלוח אחד!\nמפנים מקום ביומן ובוחרים את הלילה הבא.\n\n👇 ללוח האירועים:\nhttps://www.libralparty.net/calendar"
   },
   {
     "id": "c16",
     "image": "https://www.libralparty.net/assets/campaigns/c16.jpg",
-    "caption": "📅 כל המסיבות בלוח אחד!\nמפנים מקום ביומן ובוחרים את הלילה הבא.\n\n👇 ללוח האירועים:\nhttps://www.libralparty.net/calendar"
+    "caption": "📣 מפיקים, מעוניינים לפרסם את המסיבה שלכם?\nנרשמים כמפרסמים, מעלים את המסיבה, והיא מופיעה באתר ובערוצים שלנו.\n\n👇 להרשמה כמפרסם:\nhttps://www.libralparty.net/advertiser-register"
   },
   {
     "id": "c17",
     "image": "https://www.libralparty.net/assets/campaigns/c17.jpg",
-    "caption": "📣 מפיקים, מעוניינים לפרסם את המסיבה שלכם?\nנרשמים כמפרסמים, מעלים את המסיבה, והיא מופיעה באתר ובערוצים שלנו.\n\n👇 להרשמה כמפרסם:\nhttps://www.libralparty.net/advertiser-register"
+    "caption": "🖤 מנוי BDSM!\nגישה למסיבות BDSM בקהילה, באווירה מכבדת, עם איזון, התראות ואזור אישי.\n\n👇 לפרטים ולהצטרפות:\nhttps://www.libralparty.net/membership"
   },
   {
     "id": "c18",
     "image": "https://www.libralparty.net/assets/campaigns/c18.jpg",
-    "caption": "🖤 מנוי BDSM!\nגישה למסיבות BDSM בקהילה, באווירה מכבדת, עם איזון, התראות ואזור אישי.\n\n👇 לפרטים ולהצטרפות:\nhttps://www.libralparty.net/membership"
+    "caption": "🎁 לנשים, מנוי למסיבות חינם לכל החיים!\nנרשמות פעם אחת ונהנות מהכל.\n\n👇 להרשמה:\nhttps://www.libralparty.net/register"
   },
   {
     "id": "c19",
     "image": "https://www.libralparty.net/assets/campaigns/c19.jpg",
-    "caption": "🎁 לנשים, מנוי למסיבות חינם לכל החיים!\nנרשמות פעם אחת ונהנות מהכל.\n\n👇 להרשמה:\nhttps://www.libralparty.net/register"
+    "caption": "🌙 הלילה הבא מתחיל כאן!\nמסיבות, איזונים וקהילה, הכל באתר LIBRAL PARTY.\n\n👇 כניסה לאתר:\nhttps://www.libralparty.net/"
   },
   {
     "id": "c20",
     "image": "https://www.libralparty.net/assets/campaigns/c20.jpg",
-    "caption": "🌙 הלילה הבא מתחיל כאן!\nמסיבות, איזונים וקהילה, הכל באתר LIBRAL PARTY.\n\n👇 כניסה לאתר:\nhttps://www.libralparty.net/"
+    "caption": "🙋 לא בטוחים איזה מנוי מתאים לכם?\nמשאירים שם וטלפון בדף המנויים, ואנחנו חוזרים אליכם ומסבירים הכל.\n\n👇 משאירים פרטים:\nhttps://www.libralparty.net/membership"
   },
   {
     "id": "c21",
     "image": "https://www.libralparty.net/assets/campaigns/c21.jpg",
-    "caption": "🙋 לא בטוחים איזה מנוי מתאים לכם?\nמשאירים שם וטלפון בדף המנויים, ואנחנו חוזרים אליכם ומסבירים הכל.\n\n👇 משאירים פרטים:\nhttps://www.libralparty.net/membership"
-  },
-  {
-    "id": "c22",
-    "image": "https://www.libralparty.net/assets/campaigns/c22.jpg",
     "caption": "🌟 חבל להישאר בחוץ!\nמצטרפים לקהילה של מסיבות, איזונים וחיבורים מעניינים.\n\n👇 בוחרים מנוי:\nhttps://www.libralparty.net/membership"
   }
 ];
