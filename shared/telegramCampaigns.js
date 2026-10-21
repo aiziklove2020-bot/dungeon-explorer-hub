@@ -29,96 +29,101 @@ export const TELEGRAM_CAMPAIGNS = [
   {
     "id": "c06",
     "image": "https://www.libralparty.net/assets/campaigns/c06.jpg",
-    "caption": "📲 חדש באתר: התראות ישירות לנייד!\nמאשרים התראות פעם אחת, ומקבלים עדכון ברגע שנמצא לכם איזון ובכל פעם שעולה מסיבה חדשה.\n\n👇 נכנסים לאתר ומאשרים התראות:\nhttps://www.libralparty.net/"
+    "caption": "✈️ הערוץ שלנו בטלגרם!\nמסיבות חדשות ועדכונים מהקהילה. מכירים מישהו שיאהב? שולחים לו את הקישור.\n\n👇 מצטרפים לערוץ:\nhttps://t.me/libralparty"
   },
   {
     "id": "c07",
     "image": "https://www.libralparty.net/assets/campaigns/c07.jpg",
-    "caption": "⚡ חדש באתר: הרשמה מהירה!\nמנויים שמחוברים לא צריכים להקליד שוב שם וטלפון — בוחרים מסיבה, ונרשמים.\n\n👇 לוחצים ונרשמים:\nhttps://www.libralparty.net/events"
+    "caption": "📲 חדש באתר: התראות ישירות לנייד!\nמאשרים התראות פעם אחת, ומקבלים עדכון ברגע שנמצא לכם איזון ובכל פעם שעולה מסיבה חדשה.\n\n👇 נכנסים לאתר ומאשרים התראות:\nhttps://www.libralparty.net/"
   },
   {
     "id": "c08",
     "image": "https://www.libralparty.net/assets/campaigns/c08.jpg",
-    "caption": "👤 חדש באתר: אזור אישי מלא!\nאפשר לערוך שם, להחליף סיסמה ותמונה, לראות את ההרשמות שלכם ולדעת מתי יש לכם איזון.\n\n👇 נכנסים לאזור האישי:\nhttps://www.libralparty.net/my-area"
+    "caption": "⚡ חדש באתר: הרשמה מהירה!\nמנויים שמחוברים לא צריכים להקליד שוב שם וטלפון — בוחרים מסיבה, ונרשמים.\n\n👇 לוחצים ונרשמים:\nhttps://www.libralparty.net/events"
   },
   {
     "id": "c09",
     "image": "https://www.libralparty.net/assets/campaigns/c09.jpg",
-    "caption": "💗 חדש באתר: מועדפים!\nלוחצים על הלב ליד מסיבה, והיא נשמרת באזור האישי. מסיבות נוספות של אותו מפיק מופיעות שם גם הן.\n\n👇 בוחרים מסיבות:\nhttps://www.libralparty.net/events"
+    "caption": "👤 חדש באתר: אזור אישי מלא!\nאפשר לערוך שם, להחליף סיסמה ותמונה, לראות את ההרשמות שלכם ולדעת מתי יש לכם איזון.\n\n👇 נכנסים לאזור האישי:\nhttps://www.libralparty.net/my-area"
   },
   {
     "id": "c10",
     "image": "https://www.libralparty.net/assets/campaigns/c10.jpg",
-    "caption": "✨ האתר התחדש!\nעיצוב חדש, טעינה מהירה בהרבה ותצוגה נוחה גם במחשב.\n\n👇 בואו להתרשם:\nhttps://www.libralparty.net/"
+    "caption": "💗 חדש באתר: מועדפים!\nלוחצים על הלב ליד מסיבה, והיא נשמרת באזור האישי. מסיבות נוספות של אותו מפיק מופיעות שם גם הן.\n\n👇 בוחרים מסיבות:\nhttps://www.libralparty.net/events"
   },
   {
     "id": "c11",
     "image": "https://www.libralparty.net/assets/campaigns/c11.jpg",
-    "caption": "💎 רוצים מנוי? זה המקום שלכם!\n✅ איזון מגדרי למסיבות\n✅ התראות ישירות לנייד על איזון ועל מסיבות חדשות\n✅ מועדפים ואזור אישי מלא\n✅ הרשמה מהירה בלחיצה\n\nכל המנויים והמחירים באתר 👇\nhttps://www.libralparty.net/membership"
+    "caption": "✨ האתר התחדש!\nעיצוב חדש, טעינה מהירה בהרבה ותצוגה נוחה גם במחשב.\n\n👇 בואו להתרשם:\nhttps://www.libralparty.net/"
   },
   {
     "id": "c12",
     "image": "https://www.libralparty.net/assets/campaigns/c12.jpg",
-    "caption": "⏰ סוף השבוע מתקרב, וחבל לפספס איזון!\nאפשר להירשם לאיזון מגדרי דרך האתר בכל שעה.\n\n👇 כל המסיבות באתר:\nhttps://www.libralparty.net/events"
+    "caption": "💎 רוצים מנוי? זה המקום שלכם!\n✅ איזון מגדרי למסיבות\n✅ התראות ישירות לנייד על איזון ועל מסיבות חדשות\n✅ מועדפים ואזור אישי מלא\n✅ הרשמה מהירה בלחיצה\n\nכל המנויים והמחירים באתר 👇\nhttps://www.libralparty.net/membership"
   },
   {
     "id": "c13",
     "image": "https://www.libralparty.net/assets/campaigns/c13.jpg",
-    "caption": "🔥 מסיבות חדשות עלו עכשיו לאתר!\nכל התאריכים, המקומות וההרשמה, הכל במקום אחד.\n\n👇 מה מתאים לכם הלילה?\nhttps://www.libralparty.net/events"
+    "caption": "⏰ סוף השבוע מתקרב, וחבל לפספס איזון!\nאפשר להירשם לאיזון מגדרי דרך האתר בכל שעה.\n\n👇 כל המסיבות באתר:\nhttps://www.libralparty.net/events"
   },
   {
     "id": "c14",
     "image": "https://www.libralparty.net/assets/campaigns/c14.jpg",
-    "caption": "🤝 סינגלים, המנוי הוא הדרך שלכם לאיזון!\nמקבלים התאמה למסיבה, ורואים באזור האישי עם מי אתם מאוזנים.\n\n👇 בוחרים מנוי ומצטרפים:\nhttps://www.libralparty.net/membership"
+    "caption": "🔥 מסיבות חדשות עלו עכשיו לאתר!\nכל התאריכים, המקומות וההרשמה, הכל במקום אחד.\n\n👇 מה מתאים לכם הלילה?\nhttps://www.libralparty.net/events"
   },
   {
     "id": "c15",
     "image": "https://www.libralparty.net/assets/campaigns/c15.jpg",
-    "caption": "💑 זוגות, ההרשמה למסיבה לוקחת דקה!\nבוחרים מסיבה, ממלאים פרטים ומגיעים ליהנות.\n\n👇 מסיבות פתוחות להרשמה:\nhttps://www.libralparty.net/events"
+    "caption": "🤝 סינגלים, המנוי הוא הדרך שלכם לאיזון!\nמקבלים התאמה למסיבה, ורואים באזור האישי עם מי אתם מאוזנים.\n\n👇 בוחרים מנוי ומצטרפים:\nhttps://www.libralparty.net/membership"
   },
   {
     "id": "c16",
     "image": "https://www.libralparty.net/assets/campaigns/c16.jpg",
-    "caption": "✨ פחות שגרה, יותר לילה!\nהמסיבה הבאה שלכם כבר מחכה באתר.\n\n👇 לוחצים ונרשמים:\nhttps://www.libralparty.net/events"
+    "caption": "💑 זוגות, ההרשמה למסיבה לוקחת דקה!\nבוחרים מסיבה, ממלאים פרטים ומגיעים ליהנות.\n\n👇 מסיבות פתוחות להרשמה:\nhttps://www.libralparty.net/events"
   },
   {
     "id": "c17",
     "image": "https://www.libralparty.net/assets/campaigns/c17.jpg",
-    "caption": "🩶 קהילה מכבדת, חיבורים מעניינים.\nמרחב של חופש ושל כבוד הדדי, להכיר, לרקוד ולצאת מהרגיל.\n\n👇 קצת עלינו:\nhttps://www.libralparty.net/about"
+    "caption": "✨ פחות שגרה, יותר לילה!\nהמסיבה הבאה שלכם כבר מחכה באתר.\n\n👇 לוחצים ונרשמים:\nhttps://www.libralparty.net/events"
   },
   {
     "id": "c18",
     "image": "https://www.libralparty.net/assets/campaigns/c18.jpg",
-    "caption": "🔥 מנוי מסיבות סווינגרס!\nגישה למסיבות הסווינגרס של הקהילה, עם איזון, התראות ואזור אישי.\n\n👇 לפרטים ולהצטרפות:\nhttps://www.libralparty.net/membership"
+    "caption": "🩶 קהילה מכבדת, חיבורים מעניינים.\nמרחב של חופש ושל כבוד הדדי, להכיר, לרקוד ולצאת מהרגיל.\n\n👇 קצת עלינו:\nhttps://www.libralparty.net/about"
   },
   {
     "id": "c19",
     "image": "https://www.libralparty.net/assets/campaigns/c19.jpg",
-    "caption": "📅 כל המסיבות בלוח אחד!\nמפנים מקום ביומן ובוחרים את הלילה הבא.\n\n👇 ללוח האירועים:\nhttps://www.libralparty.net/calendar"
+    "caption": "🔥 מנוי מסיבות סווינגרס!\nגישה למסיבות הסווינגרס של הקהילה, עם איזון, התראות ואזור אישי.\n\n👇 לפרטים ולהצטרפות:\nhttps://www.libralparty.net/membership"
   },
   {
     "id": "c20",
     "image": "https://www.libralparty.net/assets/campaigns/c20.jpg",
-    "caption": "📣 מפיקים, מעוניינים לפרסם את המסיבה שלכם?\nנרשמים כמפרסמים, מעלים את המסיבה, והיא מופיעה באתר ובערוצים שלנו.\n\n👇 להרשמה כמפרסם:\nhttps://www.libralparty.net/advertiser-register"
+    "caption": "📅 כל המסיבות בלוח אחד!\nמפנים מקום ביומן ובוחרים את הלילה הבא.\n\n👇 ללוח האירועים:\nhttps://www.libralparty.net/calendar"
   },
   {
     "id": "c21",
     "image": "https://www.libralparty.net/assets/campaigns/c21.jpg",
-    "caption": "🖤 מנוי BDSM!\nגישה למסיבות BDSM בקהילה, באווירה מכבדת, עם איזון, התראות ואזור אישי.\n\n👇 לפרטים ולהצטרפות:\nhttps://www.libralparty.net/membership"
+    "caption": "📣 מפיקים, מעוניינים לפרסם את המסיבה שלכם?\nנרשמים כמפרסמים, מעלים את המסיבה, והיא מופיעה באתר ובערוצים שלנו.\n\n👇 להרשמה כמפרסם:\nhttps://www.libralparty.net/advertiser-register"
   },
   {
     "id": "c22",
     "image": "https://www.libralparty.net/assets/campaigns/c22.jpg",
-    "caption": "🌙 הלילה הבא מתחיל כאן!\nמסיבות, איזונים וקהילה, הכל באתר LIBRAL PARTY.\n\n👇 כניסה לאתר:\nhttps://www.libralparty.net/"
+    "caption": "🖤 מנוי BDSM!\nגישה למסיבות BDSM בקהילה, באווירה מכבדת, עם איזון, התראות ואזור אישי.\n\n👇 לפרטים ולהצטרפות:\nhttps://www.libralparty.net/membership"
   },
   {
     "id": "c23",
     "image": "https://www.libralparty.net/assets/campaigns/c23.jpg",
-    "caption": "🙋 לא בטוחים איזה מנוי מתאים לכם?\nמשאירים שם וטלפון בדף המנויים, ואנחנו חוזרים אליכם ומסבירים הכל.\n\n👇 משאירים פרטים:\nhttps://www.libralparty.net/membership"
+    "caption": "🌙 הלילה הבא מתחיל כאן!\nמסיבות, איזונים וקהילה, הכל באתר LIBRAL PARTY.\n\n👇 כניסה לאתר:\nhttps://www.libralparty.net/"
   },
   {
     "id": "c24",
     "image": "https://www.libralparty.net/assets/campaigns/c24.jpg",
+    "caption": "🙋 לא בטוחים איזה מנוי מתאים לכם?\nמשאירים שם וטלפון בדף המנויים, ואנחנו חוזרים אליכם ומסבירים הכל.\n\n👇 משאירים פרטים:\nhttps://www.libralparty.net/membership"
+  },
+  {
+    "id": "c25",
+    "image": "https://www.libralparty.net/assets/campaigns/c25.jpg",
     "caption": "🌟 חבל להישאר בחוץ!\nמצטרפים לקהילה של מסיבות, איזונים וחיבורים מעניינים.\n\n👇 בוחרים מנוי:\nhttps://www.libralparty.net/membership"
   }
 ];
