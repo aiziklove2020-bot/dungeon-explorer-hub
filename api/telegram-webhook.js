@@ -40,6 +40,7 @@
  * `Authorization: Bearer ADMIN_API_SECRET` (see lib/apiAuth.js), same as
  * every other admin-only endpoint.
  */
+import { ANNOUNCEMENTS } from '../shared/announcements.js';
 import { isSilentDay, israelDate, NON_PUBLISHING_JOBS } from '../shared/silentDay.js';
 import { requireTelegramWebhookSecret, requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
@@ -1152,13 +1153,14 @@ async function handlePartyReminders(req, res) {
       : await sendAllPartyReminders();
     if (secretaryPaused) await agentSay('secretary', 'אני בהפסקה לפי הבקשה שלך, לא שלחתי תזכורות היום.');
     else await agentSay('secretary', partiesSent ? `שלחתי תזכורות על ${partiesSent} מסיבות לערוצים ולקבוצות ✅` : 'אין מסיבות פעילות היום, לא נשלחו תזכורות.');
+    const announcements = await sendAnnouncementsOnce().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const campaign = await sendCampaignPost().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const groupPromo = await sendGroupPromoIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const tiktok = await sendTiktokPostIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const instagramCampaign = await sendInstagramCampaignIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const health = await runHealthCheck().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const standup = await runDailyStandup({ health }).catch((err) => ({ ok: false, error: String(err?.message || err) }));
-    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, campaign, groupPromo, tiktok, instagramCampaign, health, standup });
+    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, announcements, campaign, groupPromo, tiktok, instagramCampaign, health, standup });
   } catch (err) {
     console.error('party-reminders:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
@@ -1658,6 +1660,42 @@ async function sendMemorialOnce() {
   return { ok: results.some((x) => x.ok), results };
 }
 
+// Sends every announcement in shared/announcements.js that has not gone out yet, once, to all groups and channels.
+export async function sendAnnouncementsOnce() {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) throw new Error('Server not configured (missing TELEGRAM_BOT_TOKEN)');
+  const admin = await initAdmin();
+  const db = admin.firestore();
+  const ref = db.collection('settings').doc('announcementsSent');
+  const out = [];
+  for (const a of ANNOUNCEMENTS) {
+    const claimed = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      const done = snap.exists ? snap.data() || {} : {};
+      if (done[a.id]) return false;
+      tx.set(ref, { [a.id]: Date.now() }, { merge: true });
+      return true;
+    });
+    if (!claimed) { out.push({ id: a.id, skipped: 'already sent' }); continue; }
+    const destinations = await getReminderDestinations(admin);
+    const results = [];
+    for (const dest of destinations) {
+      const r = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: dest.chatId, photo: a.image, caption: a.caption })
+      });
+      const data = await r.json().catch(() => ({}));
+      results.push({ chatId: dest.chatId, name: dest.name || '', ok: Boolean(data.ok), description: data.description });
+      await sleep(80);
+    }
+    if (!results.some((x) => x.ok)) await ref.set({ [a.id]: 0 }, { merge: true }).catch(() => {});
+    await agentSay('publisher', `פרסמתי את ההודעה המיוחדת ב-${results.filter((x) => x.ok).length} מתוך ${results.length} קבוצות וערוצים.`).catch(() => {});
+    out.push({ id: a.id, results });
+  }
+  return out;
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
@@ -1676,6 +1714,10 @@ export default async function handler(req, res) {
         keyReceived: Boolean(req.query?.key || new URL(req.url, 'http://x').searchParams.get('key')),
         authorized: isPromoAuthorized(req)
       });
+    }
+    if (job === 'announce') {
+      if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+      try { return res.status(200).json({ ok: true, announcements: await sendAnnouncementsOnce() }); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
     }
     if (job === 'promo-now') {
       if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
