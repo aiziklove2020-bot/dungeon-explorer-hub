@@ -1152,7 +1152,13 @@ async function handlePartyReminders(req, res) {
       ? { partiesSent: 0, results: [], instagramResults: [], whatsappResult: null }
       : await sendAllPartyReminders();
     if (secretaryPaused) await agentSay('secretary', 'אני בהפסקה לפי הבקשה שלך, לא שלחתי תזכורות היום.');
-    else await agentSay('secretary', partiesSent ? `שלחתי תזכורות על ${partiesSent} מסיבות לערוצים ולקבוצות ✅` : 'אין מסיבות פעילות היום, לא נשלחו תזכורות.');
+    else {
+      await agentSay('secretary', partiesSent ? `שלחתי תזכורות על ${partiesSent} מסיבות לערוצים ולקבוצות ✅` : 'אין מסיבות פעילות היום, לא נשלחו תזכורות.');
+      const failed = describeFailedChats(results);
+      if (failed) await agentSay('secretary', `לא הצלחתי לשלוח ל: ${failed}. צריך לתת לבוט הרשאות שם.`);
+      const noPhoto = [...new Set((results || []).filter((r) => r.ok && r.imageFailed).map((r) => r.group || String(r.chatId)))];
+      if (noPhoto.length) await agentSay('secretary', `ל-${noPhoto.join(', ')} התזכורת יצאה בלי תמונה (כנראה אין לבוט הרשאה לשלוח תמונות שם).`);
+    }
     const announcements = await sendAnnouncementsOnce().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const campaign = await sendCampaignPost().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const groupPromo = await sendGroupPromoIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
@@ -1656,7 +1662,8 @@ async function sendMemorialOnce() {
     await sleep(80);
   }
   if (!results.some((x) => x.ok)) await ref.set({ day: '' }).catch(() => {});
-  await agentSay('publisher', `פרסמתי את תמונת הזיכרון ב-${results.filter((x) => x.ok).length} מתוך ${results.length} קבוצות וערוצים.`).catch(() => {});
+  const failedMem = describeFailedChats(results);
+  await agentSay('publisher', `פרסמתי את תמונת הזיכרון ב-${results.filter((x) => x.ok).length} מתוך ${results.length} קבוצות וערוצים.${failedMem ? ` לא נשלח ל: ${failedMem}.` : ''}`).catch(() => {});
   return { ok: results.some((x) => x.ok), results };
 }
 
@@ -1690,10 +1697,27 @@ export async function sendAnnouncementsOnce() {
       await sleep(80);
     }
     if (!results.some((x) => x.ok)) await ref.set({ [a.id]: 0 }, { merge: true }).catch(() => {});
-    await agentSay('publisher', `פרסמתי את ההודעה המיוחדת ב-${results.filter((x) => x.ok).length} מתוך ${results.length} קבוצות וערוצים.`).catch(() => {});
+    const failedAnn = describeFailedChats(results);
+    await agentSay('publisher', `פרסמתי את ההודעה המיוחדת ב-${results.filter((x) => x.ok).length} מתוך ${results.length} קבוצות וערוצים.${failedAnn ? ` לא נשלח ל: ${failedAnn}.` : ''}`).catch(() => {});
     out.push({ id: a.id, results });
   }
   return out;
+}
+
+// "MOJO (no rights to send photos), ..." — which groups a broadcast did not reach and why, so the owner
+// can fix the bot's rights there. Telegram's English reasons are translated for the common cases.
+export function describeFailedChats(results) {
+  const reason = (d = '') => (/not enough rights to send photos/i.test(d) ? 'אין לבוט הרשאה לשלוח תמונות'
+    : /not enough rights/i.test(d) ? 'אין לבוט הרשאה לשלוח הודעות'
+    : /chat not found|kicked|not a member/i.test(d) ? 'הבוט לא נמצא בקבוצה'
+    : d ? d.slice(0, 60) : 'סיבה לא ידועה');
+  const seen = new Map();
+  for (const r of results || []) {
+    if (r.ok) continue;
+    const key = r.group || r.name || String(r.chatId);
+    if (!seen.has(key)) seen.set(key, reason(r.description));
+  }
+  return [...seen].map(([name, why]) => `${name} (${why})`).join(', ');
 }
 
 export default async function handler(req, res) {
