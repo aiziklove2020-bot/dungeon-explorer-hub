@@ -50,3 +50,13 @@ describe('owner commands to agents', () => {
     expect(applyAgentCommand('publisher', 'תכתוב יותר על איזון', {}).handled).toBe(false);
   });
 });
+
+describe('notifier: internal parties', () => {
+  it('"שלח התראה על המסיבות הפנימיות" runs the internal-only push', () => {
+    const r = applyAgentCommand('notifier', 'תשלח התראה על המסיבות הפנימיות', {});
+    expect(r.runNow).toBe('push-internal');
+  });
+  it('a plain "שלח התראה" still runs the regular push', () => {
+    expect(applyAgentCommand('notifier', 'שלח התראה', {}).runNow).toBe('push');
+  });
+});
