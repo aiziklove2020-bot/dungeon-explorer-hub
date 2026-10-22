@@ -70,6 +70,10 @@ export function applyAgentCommand(agentId, text, current = {}) {
   }
   if (rules?.now && NOW_BY_AGENT[agentId]?.test(t)) {
     const say = { campaign: 'מפרסם עכשיו קמפיין בערוץ, תראה את זה כאן בצ׳אט בעוד רגע.', standup: 'פותח עכשיו ישיבת צוות, כולם מדווחים כאן בצ׳אט בעוד רגע.', push: 'שולח עכשיו התראה לנייד לכל מי שאישר התראות, אכתוב כאן כמה מכשירים קיבלו.', tiktok: 'מכין עכשיו פוסט לטיקטוק ושולח לך אותו בטלגרם.', promo: 'שולח עכשיו לקבוצה את ההודעה למפרסמים.', health: 'בודק את האתר עכשיו, אכתוב כאן מה מצאתי בעוד רגע.', cleanup: 'מנקה עכשיו, אכתוב כאן מה עשיתי.' };
+    // "שלח התראה על המסיבות הפנימיות" → only internal (on-site) parties, not the newest party of any kind.
+    if (agentId === 'notifier' && /פנימי/.test(t)) {
+      return { config: current, handled: true, runNow: 'push-internal', reply: 'שולח עכשיו התראה לנייד על המסיבות הפנימיות הקרובות, אכתוב כאן כמה מכשירים קיבלו.' };
+    }
     return { config: current, handled: true, runNow: rules.now, reply: say[rules.now] };
   }
   const agent = agentById(agentId);

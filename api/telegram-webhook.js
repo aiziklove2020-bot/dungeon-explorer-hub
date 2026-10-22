@@ -1431,7 +1431,7 @@ async function handleNotifyNewParty(req, res) {
  * pushes a "new parties" notification to every device that approved notifications.
  * Lists the parties added in the last 3 days (or, if none, the nearest upcoming ones).
  */
-export async function sendPushUpdateNow() {
+export async function sendPushUpdateNow({ scope = '' } = {}) {
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   if (!privateKey) return { ok: false, error: 'Push not configured' };
   const admin = await initAdmin();
@@ -1442,18 +1442,23 @@ export async function sendPushUpdateNow() {
     .map((d) => ({ id: d.id, ...d.data() }))
     .filter((p) => p.status !== 'inactive' && (!Number.isFinite(toMs(p.date)) || toMs(p.date) >= now - 6 * 3600 * 1000))
     .sort((a, b) => toMs(a.date) - toMs(b.date));
-  if (!parties.length) return { ok: true, sent: 0, total: 0, skipped: 'no active parties' };
-  const fresh = parties.filter((p) => now - toMs(p.createdAt) < 3 * 24 * 3600 * 1000);
-  const list = (fresh.length ? fresh : parties).slice(0, 3);
+  const internalOnly = scope === 'internal';
+  const pool = internalOnly ? parties.filter((p) => p.partyType !== 'external') : parties;
+  if (!pool.length) return { ok: true, sent: 0, total: 0, skipped: internalOnly ? 'no internal parties' : 'no active parties' };
+  // Internal: simply the nearest upcoming internal parties. Otherwise prefer ones added in the last 3 days.
+  const fresh = internalOnly ? [] : pool.filter((p) => now - toMs(p.createdAt) < 3 * 24 * 3600 * 1000);
+  const chosen = fresh.length ? fresh : pool;
+  const list = chosen.slice(0, 3);
   const names = list.map((p) => p.title || p.name).filter(Boolean);
-  const more = (fresh.length ? fresh : parties).length - list.length;
+  const more = chosen.length - list.length;
   const body = names.join(' · ') + (more > 0 ? ` ועוד ${more}` : '');
 
   const subs = (await db.collection('pushSubscriptions').get()).docs.map((d) => ({ id: d.id, ...d.data() }));
   if (!subs.length) return { ok: true, sent: 0, total: 0 };
   const webpush = (await import('web-push')).default;
   webpush.setVapidDetails('mailto:admin@libralparty.co.il', VAPID_PUBLIC_KEY, privateKey);
-  const payload = JSON.stringify({ title: fresh.length ? '🎉 מסיבות חדשות באתר!' : '🎉 המסיבות הקרובות באתר', body, url: '/events' });
+  const title = internalOnly ? '🎉 המסיבות הפנימיות הקרובות' : fresh.length ? '🎉 מסיבות חדשות באתר!' : '🎉 המסיבות הקרובות באתר';
+  const payload = JSON.stringify({ title, body, url: '/events' });
   const items = await Promise.all(
     subs.map((sub) =>
       webpush
@@ -1759,7 +1764,8 @@ export default async function handler(req, res) {
     }
     if (job === 'push-now') {
       if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-      try { return res.status(200).json(await sendPushUpdateNow()); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
+      const scope = req.query?.scope || new URL(req.url, 'http://x').searchParams.get('scope') || '';
+      try { return res.status(200).json(await sendPushUpdateNow({ scope })); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
     }
     if (job === 'tiktok') {
       if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
