@@ -30,11 +30,17 @@ document.getElementById("advLogin").addEventListener("submit", async e => {
   }
   btn.disabled = true;
   try {
-    const res = await fetch("/api/advertiser-auth?action=login", {
+    const send = () => fetch("/api/advertiser-auth?action=login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "login", phoneNumber, password })
     });
+    let res;
+    try { res = await send(); } catch (netErr) {
+      // "Load failed" / "Failed to fetch": the request got no answer at all. Try once more before giving up.
+      await new Promise((r) => setTimeout(r, 1200));
+      try { res = await send(); } catch { throw new Error("אין חיבור לשרת כרגע. בדקו את החיבור לאינטרנט ונסו שוב בעוד דקה."); }
+    }
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data?.authenticated || !data?.advertiser) {
       throw new Error(data?.error || "פרטי התחברות שגויים");
@@ -52,6 +58,7 @@ document.getElementById("advLogin").addEventListener("submit", async e => {
     setTimeout(() => location = "/advertiser-dashboard", 700);
   } catch (err) {
     msg.textContent = err.message || "פרטי התחברות שגויים";
+    msg.style.color = "#ffb4ab";
   } finally {
     btn.disabled = false;
   }
