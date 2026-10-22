@@ -30,18 +30,23 @@ document.getElementById("advLogin").addEventListener("submit", async e => {
   }
   btn.disabled = true;
   try {
-    const send = () => fetch("/api/advertiser-auth?action=login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "login", phoneNumber, password })
-    });
+    // A server that hangs would leave the button looking dead: give up after 15 seconds and say so.
+    const send = () => {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 15000);
+      return fetch("/api/advertiser-auth?action=login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "login", phoneNumber, password }),
+        signal: ctrl.signal
+      }).finally(() => clearTimeout(timer));
+    };
     let res;
     try { res = await send(); } catch (netErr) {
-      // "Load failed" / "Failed to fetch": the request got no answer at all. Try once more before giving up.
-      await new Promise((r) => setTimeout(r, 1200));
-      try { res = await send(); } catch { throw new Error("אין חיבור לשרת כרגע. בדקו את החיבור לאינטרנט ונסו שוב בעוד דקה."); }
+      throw new Error("שרת האתר לא מגיב כרגע, ולכן אי אפשר להתחבר. זו לא טעות בפרטים שלכם. נסו שוב בעוד כמה דקות.");
     }
     const data = await res.json().catch(() => ({}));
+    if (res.status >= 500 && !data?.error) throw new Error("שרת האתר לא מגיב כרגע, ולכן אי אפשר להתחבר. זו לא טעות בפרטים שלכם. נסו שוב בעוד כמה דקות.");
     if (!res.ok || !data?.authenticated || !data?.advertiser) {
       throw new Error(data?.error || "פרטי התחברות שגויים");
     }
