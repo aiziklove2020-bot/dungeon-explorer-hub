@@ -46,6 +46,16 @@ const lastPayment = (u) => {
   return [...payments].sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
 };
 
+// A Firestore Timestamp (or ISO string) -> "12.10.2026, 18:30 (לפני 3 ימים)". Empty when the request has no date.
+const formatRequestDate = (value) => {
+  const ms = value?.seconds ? value.seconds * 1000 : value?.toMillis ? value.toMillis() : value ? new Date(value).getTime() : NaN;
+  if (!Number.isFinite(ms)) return '';
+  const d = new Date(ms);
+  const days = Math.floor((Date.now() - ms) / 86400000);
+  const ago = days <= 0 ? 'היום' : days === 1 ? 'אתמול' : `לפני ${days} ימים`;
+  return `${d.toLocaleDateString('he-IL')}, ${d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })} (${ago})`;
+};
+
 const SubscriptionsSection = ({ showSaved }) => {
   const { t } = useLanguage();
   const { data: users, loading, error: loadError, reload } = useAdminSection(getAllUsers);
@@ -668,6 +678,7 @@ const SubscriptionsSection = ({ showSaved }) => {
                 <div>
                   <p className="font-bold text-white">{req.fullName}</p>
                   <PhoneLink phone={req.phoneNumber}>{req.phoneNumber}</PhoneLink>
+                  {formatRequestDate(req.createdAt) && <p className="text-[#94A3B8] text-xs mt-1">🕒 הבקשה נשלחה: {formatRequestDate(req.createdAt)}</p>}
                   {req.plan && <p className="text-[#D4AF37] text-xs mt-1">מסלול: {({bdsm:'מנוי BDSM',swingers:'מנוי מסיבות סווינגרס',combined:'מנוי משולב'})[req.plan] || req.plan}</p>}
                   {req.note && <p className="text-[#94A3B8] text-xs mt-1">{req.note}</p>}
                 </div>
