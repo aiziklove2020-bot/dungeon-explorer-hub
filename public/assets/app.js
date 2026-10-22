@@ -570,12 +570,19 @@ function lpWirePushGate() {
     const btn = ev.currentTarget;
     btn.disabled = true;
     btn.textContent = "רגע...";
-    const result = await lpEnablePushNotifications(lpPushIdentity());
+    // Some browsers (Edge, Chrome with "quieter messaging") show no popup: the request waits silently
+    // behind a bell icon in the address bar. Never wait forever; after 8 seconds explain and let them in.
+    const pending = lpEnablePushNotifications(lpPushIdentity());
+    const result = await Promise.race([pending, new Promise((r) => setTimeout(() => r("timeout"), 8000))]);
+    // If they approve through the bell afterwards, close the page by itself.
+    if (result === "timeout") pending.then((r) => { if (r === "ok" && el.isConnected) { toast("התראות הופעלו ✅"); finish(); } });
     if (result === "ok") { toast("התראות הופעלו ✅"); finish(); return; }
     btn.hidden = true;
     note.hidden = false;
     go.hidden = false;
-    note.textContent = result === "ios-not-installed"
+    note.textContent = result === "timeout"
+      ? "הדפדפן מחכה לאישור שלכם: לחצו על סמל הפעמון או המנעול ליד שורת הכתובת ובחרו \"אפשר\". אפשר גם להיכנס עכשיו ולאשר אחר כך."
+      : result === "ios-not-installed"
       ? "באייפון מאשרים התראות רק מהאתר שבמסך הבית: לוחצים על כפתור השיתוף, בוחרים \"הוסף למסך הבית\", פותחים את האתר משם ומאשרים."
       : result === "denied"
         ? "ההתראות חסומות בדפדפן. כדי לקבל עדכונים, מאשרים אותן בהגדרות האתר בדפדפן (סמל המנעול ליד הכתובת)."
