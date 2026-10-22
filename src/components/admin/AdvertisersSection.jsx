@@ -41,19 +41,25 @@ const AdvertisersSection = ({ showSaved }) => {
     }
   };
 
-  const handleResetPassword = async (id, businessName) => {
-    const suggested = Math.random().toString(36).slice(-8);
-    const newPassword = prompt(
-      `סיסמה חדשה למפרסם "${businessName || 'ללא שם עסק'}" (אפשר לשנות, מינימום 4 תווים):`,
-      suggested
-    );
-    if (!newPassword) return;
+  // A page dialog instead of window.prompt/alert: those are silently blocked in many mobile browsers,
+  // which made the reset button look like it did nothing.
+  const [resetFor, setResetFor] = useState(null);
+
+  const handleResetPassword = (id, businessName) => {
+    setResetFor({ id, name: businessName || 'ללא שם עסק', value: Math.random().toString(36).slice(-8), busy: false, error: '', done: false });
+  };
+
+  const submitReset = async () => {
+    if (!resetFor || resetFor.busy) return;
+    const value = resetFor.value.trim();
+    if (value.length < 4) { setResetFor({ ...resetFor, error: 'הסיסמה חייבת להכיל לפחות 4 תווים' }); return; }
+    setResetFor({ ...resetFor, busy: true, error: '' });
     try {
-      await resetAdvertiserPassword(id, newPassword);
-      alert(`הסיסמה עודכנה. הסיסמה החדשה: ${newPassword}`);
+      await resetAdvertiserPassword(resetFor.id, value);
+      setResetFor((cur) => ({ ...cur, busy: false, done: true, value }));
       showSaved();
     } catch (error) {
-      alert(error.message || 'שגיאה באיפוס סיסמה');
+      setResetFor((cur) => ({ ...cur, busy: false, error: error.message || 'שגיאה באיפוס סיסמה' }));
     }
   };
 
@@ -198,6 +204,39 @@ const AdvertisersSection = ({ showSaved }) => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {resetFor && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4" onClick={() => !resetFor.busy && setResetFor(null)}>
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#20151e] p-5 space-y-4" dir="rtl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold">איפוס סיסמה: {resetFor.name}</h3>
+            {resetFor.done ? (
+              <>
+                <p className="text-sm text-[#94A3B8]">הסיסמה עודכנה. שלחו אותה למפרסם:</p>
+                <p className="select-all rounded-xl bg-[#2a1a24] p-3 text-center text-xl font-bold tracking-wide" dir="ltr">{resetFor.value}</p>
+                <button type="button" className="w-full rounded-xl bg-green-600 px-4 py-2 font-bold" onClick={() => setResetFor(null)}>סגירה</button>
+              </>
+            ) : (
+              <>
+                <label className="block text-sm text-[#94A3B8]">סיסמה חדשה (אפשר לשנות, לפחות 4 תווים)</label>
+                <input
+                  className="w-full rounded-xl border border-white/10 bg-[#2a1a24] p-3 text-center text-lg font-bold"
+                  dir="ltr"
+                  value={resetFor.value}
+                  onChange={(e) => setResetFor({ ...resetFor, value: e.target.value, error: '' })}
+                  onKeyDown={(e) => { if (e.key === 'Enter') submitReset(); }}
+                  autoFocus
+                />
+                {resetFor.error && <p className="text-sm text-[#ffb4ab]">{resetFor.error}</p>}
+                <div className="flex gap-2">
+                  <button type="button" disabled={resetFor.busy} className="flex-1 rounded-xl bg-blue-600 px-4 py-2 font-bold disabled:opacity-50" onClick={submitReset}>
+                    {resetFor.busy ? 'מעדכן...' : 'עדכון סיסמה'}
+                  </button>
+                  <button type="button" disabled={resetFor.busy} className="rounded-xl bg-white/10 px-4 py-2 font-bold" onClick={() => setResetFor(null)}>ביטול</button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
