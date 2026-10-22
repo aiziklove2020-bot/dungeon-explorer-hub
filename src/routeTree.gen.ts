@@ -9,49 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TicketsRouteImport } from './routes/tickets'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TicketsRouteImport } from './routes/tickets'
 import { Route as AdvertiserIndexRouteImport } from './routes/advertiser/index'
-import { Route as ForumVerifyEmailRouteImport } from './routes/forum/verify-email'
-import { Route as ForumResetPasswordRouteImport } from './routes/forum/reset-password'
-import { Route as BlogPostIdRouteImport } from './routes/blog/$postId'
 import { Route as AdvertiserRegisterRouteImport } from './routes/advertiser/register'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as BlogPostIdRouteImport } from './routes/blog/$postId'
+import { Route as ForumResetPasswordRouteImport } from './routes/forum/reset-password'
+import { Route as ForumVerifyEmailRouteImport } from './routes/forum/verify-email'
 
-const TicketsRoute = TicketsRouteImport.update({
-  id: '/tickets',
-  path: '/tickets',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -59,14 +34,34 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BlogIndexRoute = BlogIndexRouteImport.update({
-  id: '/blog/',
-  path: '/blog/',
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TicketsRoute = TicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdvertiserIndexRoute = AdvertiserIndexRouteImport.update({
@@ -74,14 +69,14 @@ const AdvertiserIndexRoute = AdvertiserIndexRouteImport.update({
   path: '/advertiser/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForumVerifyEmailRoute = ForumVerifyEmailRouteImport.update({
-  id: '/forum/verify-email',
-  path: '/forum/verify-email',
+const AdvertiserRegisterRoute = AdvertiserRegisterRouteImport.update({
+  id: '/advertiser/register',
+  path: '/advertiser/register',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForumResetPasswordRoute = ForumResetPasswordRouteImport.update({
-  id: '/forum/reset-password',
-  path: '/forum/reset-password',
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogPostIdRoute = BlogPostIdRouteImport.update({
@@ -89,9 +84,14 @@ const BlogPostIdRoute = BlogPostIdRouteImport.update({
   path: '/blog/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdvertiserRegisterRoute = AdvertiserRegisterRouteImport.update({
-  id: '/advertiser/register',
-  path: '/advertiser/register',
+const ForumResetPasswordRoute = ForumResetPasswordRouteImport.update({
+  id: '/forum/reset-password',
+  path: '/forum/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForumVerifyEmailRoute = ForumVerifyEmailRouteImport.update({
+  id: '/forum/verify-email',
+  path: '/forum/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -214,46 +214,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tickets': {
-      id: '/tickets'
-      path: '/tickets'
-      fullPath: '/tickets'
-      preLoaderRoute: typeof TicketsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -263,18 +228,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog/': {
-      id: '/blog/'
-      path: '/blog'
-      fullPath: '/blog/'
-      preLoaderRoute: typeof BlogIndexRouteImport
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tickets': {
+      id: '/tickets'
+      path: '/tickets'
+      fullPath: '/tickets'
+      preLoaderRoute: typeof TicketsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/advertiser/': {
@@ -284,18 +277,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdvertiserIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forum/verify-email': {
-      id: '/forum/verify-email'
-      path: '/forum/verify-email'
-      fullPath: '/forum/verify-email'
-      preLoaderRoute: typeof ForumVerifyEmailRouteImport
+    '/advertiser/register': {
+      id: '/advertiser/register'
+      path: '/advertiser/register'
+      fullPath: '/advertiser/register'
+      preLoaderRoute: typeof AdvertiserRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forum/reset-password': {
-      id: '/forum/reset-password'
-      path: '/forum/reset-password'
-      fullPath: '/forum/reset-password'
-      preLoaderRoute: typeof ForumResetPasswordRouteImport
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/$postId': {
@@ -305,11 +298,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/advertiser/register': {
-      id: '/advertiser/register'
-      path: '/advertiser/register'
-      fullPath: '/advertiser/register'
-      preLoaderRoute: typeof AdvertiserRegisterRouteImport
+    '/forum/reset-password': {
+      id: '/forum/reset-password'
+      path: '/forum/reset-password'
+      fullPath: '/forum/reset-password'
+      preLoaderRoute: typeof ForumResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forum/verify-email': {
+      id: '/forum/verify-email'
+      path: '/forum/verify-email'
+      fullPath: '/forum/verify-email'
+      preLoaderRoute: typeof ForumVerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
