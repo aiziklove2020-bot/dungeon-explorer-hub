@@ -696,29 +696,38 @@ window.lpMountMatchChat = function (container, phone, partyId) {
     });
     if (messages.length) list.scrollTop = list.scrollHeight;
   };
+  // Every poll is a call to a serverless function, so keep them rare: 10s while the chat is open,
+  // otherwise 90s that stretches to 5 minutes while nothing new arrives, and none while the tab is hidden.
+  let delay = 90000;
+  const schedule = () => {
+    clearTimeout(timer);
+    timer = setTimeout(poll, body.hidden ? delay : 10000);
+  };
   const poll = async () => {
-    if (document.hidden) return;
+    if (document.hidden) { schedule(); return; }
     try {
       const messages = await call({ action: "list" });
       if (body.hidden) {
         // closed chat: only flag partner messages that arrived since it was last open
-        if (messages.some((m) => !m.mine && !seen.has(m.id))) badge.hidden = false;
+        if (messages.some((m) => !m.mine && !seen.has(m.id))) { badge.hidden = false; delay = 90000; }
+        else delay = Math.min(delay * 1.5, 300000);
       } else {
         render(messages);
       }
     } catch { /* quiet: next poll retries */ }
+    schedule();
   };
   toggle.addEventListener("click", () => {
     body.hidden = !body.hidden;
     badge.hidden = true;
+    delay = 90000;
     if (!body.hidden) {
       poll();
       input.focus();
-    }
+    } else schedule();
   });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
   poll();
-  let tick = 0;
-  timer = setInterval(() => { tick++; if (!body.hidden || tick % 3 === 0) poll(); }, 6000); // open: every 6s, closed: every 18s
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const text = input.value.trim();
