@@ -527,6 +527,64 @@ function lpWireCookieBanner() {
 }
 document.addEventListener("DOMContentLoaded", lpWireCookieBanner);
 
+// Entry page: every visitor confirms phone notifications (new parties, balance matches) before using
+// the site. The button asks the browser for permission; where the browser cannot grant it (iPhone outside
+// "Add to Home Screen", a browser without push, or a visitor who blocked it before) we explain how, and
+// the visitor still enters after pressing it. Search-engine crawlers are never shown the gate.
+function lpPushGateDone() {
+  try { return localStorage.getItem("lp_push_gate_done") === "1"; } catch { return false; }
+}
+function lpWirePushGate() {
+  if (/bot|crawl|spider|slurp|lighthouse|headless/i.test(navigator.userAgent || "")) return;
+  if (lpPushGateDone()) return;
+  if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+    try { localStorage.setItem("lp_push_gate_done", "1"); } catch {}
+    return;
+  }
+  const el = document.createElement("div");
+  el.id = "lpPushGate";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.setAttribute("aria-labelledby", "lpPushGateTitle");
+  el.innerHTML = `
+    <div class="lp-gate-card">
+      <img src="/assets/design/couples-logo-128.png" width="84" height="84" alt="">
+      <h1 id="lpPushGateTitle">רגע לפני שנכנסים</h1>
+      <p>האתר שולח התראות לנייד על <b>מסיבות חדשות</b> ועל <b>איזון שנמצא לכם</b>. כדי להיכנס, מאשרים התראות.</p>
+      <button type="button" class="btn gold full" id="lpPushGateBtn">אישור התראות וכניסה לאתר</button>
+      <p class="lp-gate-note" id="lpPushGateNote" hidden></p>
+      <button type="button" class="btn full" id="lpPushGateGo" hidden>כניסה לאתר</button>
+    </div>`;
+  el.style.cssText = "position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at 50% 0,#4a1230,#100910 70%);overflow:auto";
+  document.body.appendChild(el);
+  document.documentElement.style.overflow = "hidden";
+  const finish = () => {
+    try { localStorage.setItem("lp_push_gate_done", "1"); } catch {}
+    document.documentElement.style.overflow = "";
+    el.remove();
+  };
+  const note = el.querySelector("#lpPushGateNote");
+  const go = el.querySelector("#lpPushGateGo");
+  go.addEventListener("click", finish);
+  el.querySelector("#lpPushGateBtn").addEventListener("click", async (ev) => {
+    const btn = ev.currentTarget;
+    btn.disabled = true;
+    btn.textContent = "רגע...";
+    const result = await lpEnablePushNotifications(lpPushIdentity());
+    if (result === "ok") { toast("התראות הופעלו ✅"); finish(); return; }
+    btn.hidden = true;
+    note.hidden = false;
+    go.hidden = false;
+    note.textContent = result === "ios-not-installed"
+      ? "באייפון מאשרים התראות רק מהאתר שבמסך הבית: לוחצים על כפתור השיתוף, בוחרים \"הוסף למסך הבית\", פותחים את האתר משם ומאשרים."
+      : result === "denied"
+        ? "ההתראות חסומות בדפדפן. כדי לקבל עדכונים, מאשרים אותן בהגדרות האתר בדפדפן (סמל המנעול ליד הכתובת)."
+        : "הדפדפן הזה לא תומך בהתראות. מומלץ להיכנס מ-Chrome או מהאפליקציה שלנו.";
+  });
+}
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", lpWirePushGate);
+else lpWirePushGate();
+
 // Site-wide "enable notifications" banner — every previous entry point to
 // lpEnablePushNotifications lived deep inside /my-area or /profile, which a
 // first-time or anonymous visitor has no reason to ever open. This surfaces
@@ -538,6 +596,7 @@ document.addEventListener("DOMContentLoaded", lpWireCookieBanner);
 // below is what stops it from ever showing again — no separate "dismissed"
 // flag needed, and none is set here.
 function lpWirePushBanner() {
+  if (document.getElementById("lpPushGate")) return; // the entry page already asks
   // One banner at a time: the cookie notice comes first, this one follows once it is answered.
   if (!lpCookieDecided()) { document.addEventListener("lp-cookie-decided", lpWirePushBanner, { once: true }); return; }
   if (lpIsIosNotInstalled()) return; // can't work here at all; nothing to offer
