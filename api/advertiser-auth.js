@@ -165,20 +165,29 @@ export default async function handler(req, res) {
       if (!phone) {
         return res.status(200).json({ authenticated: false, error: 'פרטי התחברות שגויים' });
       }
-      const snap = await advertisersRef.where('phoneNumber', '==', phone).limit(1).get();
-      if (snap.empty) {
+      // Older accounts may hold the phone with dashes or +972, and the same phone may have been registered
+      // twice (a password reset only reaches one of the two). So look the phone up tolerantly and accept
+      // the password of any account that has it.
+      let docs = (await advertisersRef.where('phoneNumber', '==', phone).get()).docs;
+      if (!docs.length) {
+        docs = (await advertisersRef.get()).docs.filter((d) => cleanPhone(d.data().phoneNumber) === phone);
+      }
+      if (!docs.length) {
         return res.status(200).json({ authenticated: false, error: 'פרטי התחברות שגויים' });
       }
-      const advertiser = { id: snap.docs[0].id, ...snap.docs[0].data() };
+      let advertiser = null;
+      for (const d of docs) {
+        const candidate = { id: d.id, ...d.data() };
+        if (await bcrypt.compare(password, candidate.password || '')) { advertiser = candidate; break; }
+      }
+      if (!advertiser) {
+        return res.status(200).json({ authenticated: false, error: 'פרטי התחברות שגויים' });
+      }
       if (advertiser.status === 'pending') {
         return res.status(200).json({ authenticated: false, error: 'הבקשה שלך עדיין ממתינה לאישור מנהל' });
       }
       if (advertiser.status === 'rejected') {
         return res.status(200).json({ authenticated: false, error: 'הבקשה שלך נדחתה' });
-      }
-      const ok = await bcrypt.compare(password, advertiser.password || '');
-      if (!ok) {
-        return res.status(200).json({ authenticated: false, error: 'פרטי התחברות שגויים' });
       }
       return res.status(200).json({ authenticated: true, advertiser: stripPassword(advertiser) });
     }
