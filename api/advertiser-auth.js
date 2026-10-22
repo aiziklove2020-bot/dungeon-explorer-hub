@@ -30,7 +30,7 @@
  * Env: GOOGLE_APPLICATION_CREDENTIALS_JSON, ADMIN_API_SECRET
  */
 import bcrypt from 'bcryptjs';
-import { getFirebaseAdmin, parseBody, getRequestIp, isRateLimited, PUBLIC_SITE_URL } from '../lib/forumAuthApi.js';
+import { getFirebaseAdmin, parseBody, getRequestIp, isRateLimited, sha256Hex, PUBLIC_SITE_URL } from '../lib/forumAuthApi.js';
 import { requireAdminApiSecret } from '../lib/apiAuth.js';
 
 function setCors(res) {
@@ -50,6 +50,20 @@ const cleanPhone = (value) => {
   if (digits.startsWith('972') && digits.length === 12) return '0' + digits.slice(3);
   return digits;
 };
+
+// The cost factor of a bcrypt hash ("$2b$10$..."), or null when the stored value is not a bcrypt hash.
+// A broken or absurdly expensive hash must never be fed to bcrypt.compare: it either throws or runs
+// for minutes, and the login request then dies without an answer ("Load failed" in the browser).
+const bcryptCost = (hash) => {
+  const m = /^\$2[aby]\$(\d{2})\$[./A-Za-z0-9]{53}$/.exec(String(hash || ''));
+  return m ? Number(m[1]) : null;
+};
+const passwordMatches = async (password, hash) => {
+  const cost = bcryptCost(hash);
+  if (cost === null || cost > 14) return false;
+  try { return await bcrypt.compare(password, hash); } catch { return false; }
+};
+const throttleDocId = (scope, key) => `${scope}_${sha256Hex(key).slice(0, 32)}`;
 
 const stripPassword = (doc) => {
   if (!doc) return doc;
@@ -178,7 +192,7 @@ export default async function handler(req, res) {
       let advertiser = null;
       for (const d of docs) {
         const candidate = { id: d.id, ...d.data() };
-        if (await bcrypt.compare(password, candidate.password || '')) { advertiser = candidate; break; }
+        if (await passwordMatches(password, candidate.password)) { advertiser = candidate; break; }
       }
       if (!advertiser) {
         return res.status(200).json({ authenticated: false, error: 'פרטי התחברות שגויים' });
@@ -189,7 +203,9 @@ export default async function handler(req, res) {
       if (advertiser.status === 'rejected') {
         return res.status(200).json({ authenticated: false, error: 'הבקשה שלך נדחתה' });
       }
-      return res.status(200).json({ authenticated: true, advertiser: stripPassword(advertiser) });
+      // Only what the login page needs: a large account document must not bloat (or break) the response.
+      const { id, businessName, contactName, phoneNumber, status, role } = advertiser;
+      return res.status(200).json({ authenticated: true, advertiser: { id, businessName, contactName, phoneNumber, status, role } });
     }
 
     // Everything below is admin-only.
@@ -219,8 +235,49 @@ export default async function handler(req, res) {
       if (!newPassword || String(newPassword).length < 4) {
         return res.status(400).json({ error: 'הסיסמה חייבת להכיל לפחות 4 תווים' });
       }
+      const ref = advertisersRef.doc(advertiserId);
+      const snap = await ref.get();
+      if (!snap.exists) return res.status(404).json({ error: 'המפרסם לא נמצא' });
       const hashed = await bcrypt.hash(String(newPassword), SALT_ROUNDS);
-      await advertisersRef.doc(advertiserId).update({ password: hashed });
+      const phone = cleanPhone(snap.data().phoneNumber);
+      // Also store the phone in the clean 05XXXXXXXX form the login looks up, and lift any login block.
+      await ref.update({ password: hashed, ...(phone ? { phoneNumber: phone } : {}) });
+      if (phone) await db.collection('forumAuthThrottle').doc(throttleDocId('advertiser-login-phone', phone)).delete().catch(() => {});
+      return res.status(200).json({ ok: true, phoneNumber: phone || null, status: snap.data().status || null });
+    }
+
+    // Admin "check account": why a given advertiser cannot log in. Never returns the hash itself.
+    if (action === 'check') {
+      const { advertiserId } = body;
+      if (!advertiserId) return res.status(400).json({ error: 'Missing advertiserId' });
+      const snap = await advertisersRef.doc(advertiserId).get();
+      if (!snap.exists) return res.status(404).json({ error: 'המפרסם לא נמצא' });
+      const d = snap.data();
+      const phone = cleanPhone(d.phoneNumber);
+      const all = (await advertisersRef.get()).docs.filter((x) => x.id !== advertiserId && cleanPhone(x.data().phoneNumber) === phone);
+      const throttle = phone ? await db.collection('forumAuthThrottle').doc(throttleDocId('advertiser-login-phone', phone)).get() : null;
+      const since = Date.now() - RATE_WINDOW_MS;
+      const recent = throttle?.exists ? (throttle.data().attempts || []).filter((t) => typeof t === 'number' && t >= since).length : 0;
+      return res.status(200).json({
+        ok: true,
+        status: d.status || null,
+        phoneStored: d.phoneNumber || null,
+        phoneClean: phone || null,
+        phoneValid: /^0\d{9}$/.test(phone),
+        hashValid: bcryptCost(d.password) !== null && bcryptCost(d.password) <= 14,
+        duplicates: all.map((x) => ({ id: x.id, businessName: x.data().businessName || '', status: x.data().status || null })),
+        loginBlocked: recent >= RATE_PER_PHONE,
+        recentAttempts: recent,
+        sizeKb: Math.round(Buffer.byteLength(JSON.stringify(stripPassword(d))) / 1024)
+      });
+    }
+
+    if (action === 'unblock') {
+      const { advertiserId } = body;
+      const snap = advertiserId ? await advertisersRef.doc(advertiserId).get() : null;
+      if (!snap?.exists) return res.status(404).json({ error: 'המפרסם לא נמצא' });
+      const phone = cleanPhone(snap.data().phoneNumber);
+      if (phone) await db.collection('forumAuthThrottle').doc(throttleDocId('advertiser-login-phone', phone)).delete();
       return res.status(200).json({ ok: true });
     }
 

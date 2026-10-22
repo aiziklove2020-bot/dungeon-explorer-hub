@@ -53,3 +53,11 @@ export const resetAdvertiserPassword = async (advertiserId, newPlainPassword) =>
 export const deleteAdvertiser = async (advertiserId) => {
   await callAdvertiserAuth('delete', { advertiserId }, { admin: true });
 };
+
+/** Admin-side: why can't this advertiser log in? (status, phone format, password hash, duplicates, login block) */
+export const checkAdvertiser = async (advertiserId) => callAdvertiserAuth('check', { advertiserId }, { admin: true });
+
+/** Admin-side: lift the temporary login block after too many attempts. */
+export const unblockAdvertiser = async (advertiserId) => {
+  await callAdvertiserAuth('unblock', { advertiserId }, { admin: true });
+};

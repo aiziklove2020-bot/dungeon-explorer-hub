@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { RotateCcw, Check, X, RotateCw, Trash2, KeyRound, Search } from 'lucide-react';
+import { RotateCcw, Check, X, RotateCw, Trash2, KeyRound, Search, Stethoscope } from 'lucide-react';
 import AdminLoader from './AdminLoader';
 import PhoneLink from '../PhoneLink';
 import useAdminSection from '../../hooks/useAdminSection';
-import { getAllAdvertisers, setAdvertiserStatus, deleteAdvertiser, resetAdvertiserPassword } from '../../firebase/advertisers';
+import { getAllAdvertisers, setAdvertiserStatus, deleteAdvertiser, resetAdvertiserPassword, checkAdvertiser, unblockAdvertiser } from '../../firebase/advertisers';
 
 const STATUS_LABEL = {
   pending: 'ממתין לאישור',
@@ -60,6 +60,27 @@ const AdvertisersSection = ({ showSaved }) => {
       showSaved();
     } catch (error) {
       setResetFor((cur) => ({ ...cur, busy: false, error: error.message || 'שגיאה באיפוס סיסמה' }));
+    }
+  };
+
+  // "Why can't they log in?" — one click shows the account state in plain Hebrew.
+  const [checkFor, setCheckFor] = useState(null);
+  const runCheck = async (id, businessName) => {
+    setCheckFor({ id, name: businessName || 'ללא שם עסק', busy: true, result: null, error: '' });
+    try {
+      const result = await checkAdvertiser(id);
+      setCheckFor((cur) => ({ ...cur, busy: false, result }));
+    } catch (error) {
+      setCheckFor((cur) => ({ ...cur, busy: false, error: error.message || 'הבדיקה נכשלה' }));
+    }
+  };
+  const runUnblock = async () => {
+    try {
+      await unblockAdvertiser(checkFor.id);
+      await runCheck(checkFor.id, checkFor.name);
+      showSaved();
+    } catch (error) {
+      setCheckFor((cur) => ({ ...cur, error: error.message || 'שחרור החסימה נכשל' }));
     }
   };
 
@@ -189,6 +210,12 @@ const AdvertisersSection = ({ showSaved }) => {
                     </button>
                   )}
                   <button
+                    onClick={() => runCheck(adv.id, adv.businessName)}
+                    className="bg-[#2a292e] hover:bg-[#353439] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+                  >
+                    <Stethoscope size={14} /> למה לא מצליח להיכנס?
+                  </button>
+                  <button
                     onClick={() => handleResetPassword(adv.id, adv.businessName)}
                     className="bg-[#2a292e] hover:bg-[#353439] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
                   >
@@ -204,6 +231,30 @@ const AdvertisersSection = ({ showSaved }) => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {checkFor && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4" onClick={() => setCheckFor(null)}>
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#20151e] p-5 space-y-3" dir="rtl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold">בדיקת חשבון: {checkFor.name}</h3>
+            {checkFor.busy && <p className="text-sm text-[#94A3B8]">בודק...</p>}
+            {checkFor.error && <p className="text-sm text-[#ffb4ab]">{checkFor.error}</p>}
+            {checkFor.result && (() => {
+              const r = checkFor.result;
+              const row = (ok, text) => <p className="text-sm">{ok ? '✅' : '❌'} {text}</p>;
+              return (
+                <div className="space-y-2">
+                  {row(r.status === 'approved', r.status === 'approved' ? 'החשבון מאושר' : r.status === 'pending' ? 'החשבון ממתין לאישור: לחצו "אשר"' : r.status === 'rejected' ? 'החשבון נדחה: לחצו "אשר"' : 'לחשבון אין סטטוס: לחצו "אשר"')}
+                  {row(r.phoneValid, r.phoneValid ? `טלפון תקין: ${r.phoneClean}` : `הטלפון השמור לא תקין: ${r.phoneStored || 'ריק'}`)}
+                  {row(r.hashValid, r.hashValid ? 'יש סיסמה תקינה' : 'הסיסמה השמורה פגומה: לחצו "אפס סיסמה"')}
+                  {row(!r.loginBlocked, r.loginBlocked ? `ההתחברות חסומה זמנית (${r.recentAttempts} ניסיונות ב-15 דקות)` : 'ההתחברות לא חסומה')}
+                  {row(!r.duplicates.length, r.duplicates.length ? `יש עוד ${r.duplicates.length} חשבונות על אותו טלפון: ${r.duplicates.map((d) => d.businessName || d.id).join(', ')}` : 'אין חשבון כפול')}
+                  {r.loginBlocked && <button type="button" className="w-full rounded-xl bg-blue-600 px-4 py-2 font-bold" onClick={runUnblock}>שחרור החסימה</button>}
+                </div>
+              );
+            })()}
+            <button type="button" className="w-full rounded-xl bg-white/10 px-4 py-2 font-bold" onClick={() => setCheckFor(null)}>סגירה</button>
+          </div>
         </div>
       )}
       {resetFor && (
