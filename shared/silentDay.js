@@ -17,3 +17,9 @@ export const NON_PUBLISHING_JOBS = new Set([
   'recent-chats', 'bot-info', 'webhook-info', 'chat-status', 'set-webhook', 'manual-post-check',
   'fix-channels', 'fix-chatids', 'migrate-support-chat-secret', 'fix-party-whatsapp'
 ]);
+
+// The site is closed for good (owner's decision, 24.10.2026): nothing is published anymore.
+export const SITE_CLOSED = true;
+export function isSiteClosed() {
+  return SITE_CLOSED && process.env.SILENT_DAYS_OFF !== '1'; // tests of the publishing code switch it off
+}

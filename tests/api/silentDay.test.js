@@ -16,3 +16,16 @@ describe('silent day', () => {
     expect(israelDate(new Date('2026-10-07T03:00:00Z'))).toBe('2026-10-07');
   });
 });
+
+describe('site closed for good', () => {
+  it('blocks every publishing job and lets the read-only ones through', async () => {
+    const prev = process.env.SILENT_DAYS_OFF;
+    delete process.env.SILENT_DAYS_OFF;
+    const { isSiteClosed } = await import('../../shared/silentDay.js');
+    expect(isSiteClosed()).toBe(true);
+    for (const j of ['promo', 'campaign', 'tiktok', 'push-now', 'notify-new-party', 'announce', 'memorial']) {
+      expect(NON_PUBLISHING_JOBS.has(j)).toBe(false);
+    }
+    process.env.SILENT_DAYS_OFF = prev;
+  });
+});
