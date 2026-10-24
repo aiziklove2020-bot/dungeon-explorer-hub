@@ -1,6 +1,8 @@
 {
   "functions": {
-    "api/telegram-webhook.js": { "maxDuration": 60 }
+    "api/telegram-webhook.js": {
+      "maxDuration": 60
+    }
   },
   "crons": [
     {
@@ -147,6 +149,11 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/((?!admin|api|assets|content|_|\\.well-known|closed\\.html|favicon|icon-|apple-touch-icon|manifest\\.webmanifest|sw\\.js|version\\.json).*)",
+      "destination": "/closed.html",
+      "permanent": false
+    },
     {
       "source": "/about.html",
       "destination": "/about",
