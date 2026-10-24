@@ -41,7 +41,7 @@
  * every other admin-only endpoint.
  */
 import { ANNOUNCEMENTS } from '../shared/announcements.js';
-import { isSilentDay, israelDate, NON_PUBLISHING_JOBS } from '../shared/silentDay.js';
+import { isSilentDay, israelDate, NON_PUBLISHING_JOBS, isSiteClosed } from '../shared/silentDay.js';
 import { requireTelegramWebhookSecret, requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 import { TELEGRAM_CAMPAIGNS, TELEGRAM_CAMPAIGNS_VERSION } from '../shared/telegramCampaigns.js';
@@ -1730,6 +1730,10 @@ export function describeFailedChats(results) {
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
+    // The site is closed for good: no reminders, campaigns, announcements, pushes or posts of any kind.
+    if (isSiteClosed() && !NON_PUBLISHING_JOBS.has(job)) {
+      return res.status(200).json({ ok: true, skipped: 'site-closed' });
+    }
     // National mourning day: no automatic or manual publishing of any kind.
     if (isSilentDay() && !NON_PUBLISHING_JOBS.has(job)) {
       if (job && job !== 'memorial') return res.status(200).json({ ok: true, skipped: 'silent-day' });
