@@ -17,15 +17,13 @@ describe('silent day', () => {
   });
 });
 
-describe('site closed for good', () => {
-  it('blocks every publishing job and lets the read-only ones through', async () => {
+describe('agents back on, publisher paused', () => {
+  it('the global kill switch is off and only the channel publisher stays silent', async () => {
     const prev = process.env.SILENT_DAYS_OFF;
     delete process.env.SILENT_DAYS_OFF;
-    const { isSiteClosed } = await import('../../shared/silentDay.js');
-    expect(isSiteClosed()).toBe(true);
-    for (const j of ['promo', 'campaign', 'tiktok', 'push-now', 'notify-new-party', 'announce', 'memorial']) {
-      expect(NON_PUBLISHING_JOBS.has(j)).toBe(false);
-    }
+    const { isSiteClosed, PUBLISHER_PAUSED } = await import('../../shared/silentDay.js');
+    expect(isSiteClosed()).toBe(false);
+    expect(PUBLISHER_PAUSED).toBe(true);
     process.env.SILENT_DAYS_OFF = prev;
   });
 });

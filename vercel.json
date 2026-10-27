@@ -4,6 +4,16 @@
       "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/telegram-webhook",
+      "schedule": "0 9 * * 0,1,2,3,4"
+    },
+    {
+      "path": "/api/telegram-webhook?job=cleanup-parties",
+      "schedule": "0 3 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
