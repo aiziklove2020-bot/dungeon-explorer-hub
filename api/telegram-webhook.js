@@ -41,7 +41,7 @@
  * every other admin-only endpoint.
  */
 import { ANNOUNCEMENTS } from '../shared/announcements.js';
-import { isSilentDay, israelDate, NON_PUBLISHING_JOBS, isSiteClosed } from '../shared/silentDay.js';
+import { isSilentDay, israelDate, NON_PUBLISHING_JOBS, isSiteClosed, PUBLISHER_PAUSED } from '../shared/silentDay.js';
 import { requireTelegramWebhookSecret, requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 import { TELEGRAM_CAMPAIGNS, TELEGRAM_CAMPAIGNS_VERSION } from '../shared/telegramCampaigns.js';
@@ -824,6 +824,8 @@ function israelWeekday(date = new Date()) {
 }
 
 async function sendCampaignPost({ force = false } = {}) {
+  // The owner asked that the publisher publishes nothing for now, not even a forced manual run.
+  if (PUBLISHER_PAUSED && process.env.SILENT_DAYS_OFF !== '1') return { ok: true, skipped: 'publisher paused by the owner' };
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) throw new Error('Server not configured (missing TELEGRAM_BOT_TOKEN)');
   if (!TELEGRAM_CAMPAIGNS.length) return { ok: false, skipped: 'no campaigns' };
@@ -1676,6 +1678,7 @@ async function sendMemorialOnce() {
 
 // Sends every announcement in shared/announcements.js that has not gone out yet, once, to all groups and channels.
 export async function sendAnnouncementsOnce() {
+  if (PUBLISHER_PAUSED && process.env.SILENT_DAYS_OFF !== '1') return [{ skipped: 'publisher paused by the owner' }];
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) throw new Error('Server not configured (missing TELEGRAM_BOT_TOKEN)');
   const admin = await initAdmin();
