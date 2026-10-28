@@ -12,6 +12,7 @@ const db = {
     ? { doc: (id) => ({ get: async () => ({ exists: !!throttle[id], data: () => throttle[id] }), delete: async () => { delete throttle[id]; } }) }
     : { ...col, doc: (id) => ({ get: async () => { const a = accounts.find((x) => x.id === id); return { exists: !!a, data: () => a }; }, update: async (u) => { Object.assign(accounts.find((x) => x.id === id), u); } }) },
 };
+process.env.ADVERTISER_LOGIN_OPEN = '1';
 process.env.ADMIN_API_SECRET = 'admin-secret-for-tests-0123456789';
 vi.mock('../../lib/forumAuthApi.js', async (orig) => ({
   ...(await orig()),
@@ -30,6 +31,16 @@ const login = async (phoneNumber, password) => {
   await handler({ method: 'POST', query: { action: 'login' }, headers: {}, body: { action: 'login', phoneNumber, password } }, res);
   return res.body;
 };
+
+describe('advertiser login closed', () => {
+  it('refuses every login while the owner keeps it closed', async () => {
+    delete process.env.ADVERTISER_LOGIN_OPEN;
+    try {
+      accounts = [{ id: 'a1', phoneNumber: '0501234567', status: 'approved', password: await bcrypt.hash('9600', 4) }];
+      expect(await login('0501234567', '9600')).toMatchObject({ authenticated: false, closed: true, error: 'כניסת המפרסמים סגורה כרגע' });
+    } finally { process.env.ADVERTISER_LOGIN_OPEN = '1'; }
+  });
+});
 
 describe('advertiser login', () => {
   let hashOld; let hashNew;
