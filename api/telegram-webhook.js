@@ -950,6 +950,8 @@ function instagramCaption(caption) {
 }
 
 export async function sendInstagramCampaignIfDue({ force = false } = {}) {
+  // עומר's weekly Instagram post is part of the publisher pause: nothing is published, even when forced.
+  if (PUBLISHER_PAUSED && process.env.SILENT_DAYS_OFF !== '1') return { ok: true, skipped: 'publisher paused by the owner' };
   const pool = TELEGRAM_CAMPAIGNS.filter((c) => INSTAGRAM_CAMPAIGN_IDS.includes(c.id));
   if (!pool.length) return { ok: false, skipped: 'no instagram campaigns' };
   if (!force && israelWeekday() !== INSTAGRAM_CAMPAIGN_DAY) return { ok: true, skipped: 'not instagram day' };
@@ -1042,8 +1044,10 @@ async function healthFetch(path) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 12000);
   try {
-    const res = await fetch(`${HEALTH_SITE}${path}`, { signal: ctrl.signal, headers: { 'user-agent': 'libral-health-check' } });
-    return { status: res.status, text: path.startsWith('/assets/') ? '' : await res.text() };
+    // Assets only need to exist: HEAD skips downloading them (site-data.js alone is large).
+    const asset = path.startsWith('/assets/');
+    const res = await fetch(`${HEALTH_SITE}${path}`, { method: asset ? 'HEAD' : 'GET', signal: ctrl.signal, headers: { 'user-agent': 'libral-health-check' } });
+    return { status: res.status, text: asset ? '' : await res.text() };
   } finally {
     clearTimeout(timer);
   }

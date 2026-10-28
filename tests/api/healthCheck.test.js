@@ -15,10 +15,12 @@ process.env.TELEGRAM_BOT_TOKEN = 'T';
 let pageStatus = {};
 let botOk = true;
 const sentToAdmin = [];
+const assetMethods = [];
 globalThis.fetch = vi.fn(async (url, init) => {
   const u = String(url);
   if (u.startsWith('https://www.libralparty.net')) {
     const path = u.replace('https://www.libralparty.net', '');
+    if (path.startsWith('/assets/')) assetMethods.push(init?.method);
     return { status: pageStatus[path] ?? 200, text: async () => '<html></html>' };
   }
   if (u.includes('/getMe')) return { json: async () => ({ ok: botOk }) };
@@ -59,5 +61,14 @@ describe('daily health check', () => {
     expect(r.problems.join(' ')).toContain('בוט הטלגרם');
     expect(r.problems.join(' ')).toContain('קמפיין');
     expect(sentToAdmin).toHaveLength(0);
+  });
+});
+
+describe('health check stays light', () => {
+  it('only asks whether the assets exist, without downloading them', async () => {
+    assetMethods.length = 0;
+    await runHealthCheck({ alert: false });
+    expect(assetMethods.length).toBeGreaterThan(0);
+    expect(assetMethods.every((m) => m === 'HEAD')).toBe(true);
   });
 });
