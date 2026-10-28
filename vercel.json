@@ -150,6 +150,11 @@
   ],
   "redirects": [
     {
+      "source": "/closed.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
       "source": "/about.html",
       "destination": "/about",
       "permanent": true
