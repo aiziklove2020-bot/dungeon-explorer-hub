@@ -10,7 +10,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=202609073000">
 <link rel="stylesheet" href="assets/design/style.css?v=202610281548">
-</head><body><header><div class="wrap nav"><a class="brand brand-couples" href="/" aria-label="מסיבות ליברליות בישראל — דף הבית"><img src="assets/design/couples-logo-128.png" width="64" height="64" alt=""><span class="brand-words"><span class="brand-title">מסיבות ליברליות <span class="brand-country">בישראל</span></span><span class="brand-caption">פורטל מסיבות לזוגות סינגלים וסינגליות</span></span></a><nav aria-label="תפריט ראשי"><a href="/">דף הבית</a><a href="/about">אודות</a><a href="/events">מסיבות</a><a href="/contact">יצירת קשר</a></nav><div class="account"><a class="btn gold join" href="/events">למסיבות</a><button class="mobile-menu" aria-label="פתיחת תפריט"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div></header><main class="wrap page"><div class="eyebrow">נפגשים בלילה</div><h1>המסיבות שלנו</h1><p>כל האירועים הקרובים, במקום אחד.</p>
+</head><body><header><div class="wrap nav"><a class="brand brand-couples" href="/" aria-label="מסיבות ליברליות בישראל — דף הבית"><img src="assets/design/couples-logo-128.png" width="64" height="64" alt=""><span class="brand-words"><span class="brand-title">מסיבות ליברליות <span class="brand-country">בישראל</span></span><span class="brand-caption">המועדון של אבי סווינגרס</span></span></a><nav aria-label="תפריט ראשי"><a href="/">דף הבית</a><a href="/about">אודות</a><a href="/events">מסיבות</a><a href="/contact">יצירת קשר</a></nav><div class="account"><a class="btn gold join" href="/events">למסיבות</a><button class="mobile-menu" aria-label="פתיחת תפריט"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></div></header><main class="wrap page"><div class="eyebrow">נפגשים בלילה</div><h1>המסיבות שלנו</h1><p>כל האירועים הקרובים, במקום אחד.</p>
 <div class="filters" aria-label="סינון מסיבות" id="typePills">
   <button class="chip active" type="button" data-type="">כל המסיבות</button>
   <button class="chip" type="button" data-type="חילופי זוגות">חילופי זוגות</button>
@@ -20,26 +20,24 @@
 </div>
 <div class="filters filters-form" style="margin-top:8px">
   <input type="search" id="search" placeholder="חיפוש לפי שם אירוע..." style="flex:1;min-width:160px">
-  <select id="city" style="flex:1;min-width:140px"><option value="">כל האזורים</option><option>אום אל-פחם</option><option>אופקים</option><option>אור יהודה</option><option>אור עקיבא</option><option>אילת</option><option>אלעד</option><option>אריאל</option><option>אשדוד</option><option>אשקלון</option><option>באקה אל-גרבייה</option><option>באר יעקב</option><option>באר שבע</option><option>בית שאן</option><option>בית שמש</option><option>ביתר עילית</option><option>בני ברק</option><option>בת ים</option><option>גבעת שמואל</option><option>גבעתיים</option><option>דימונה</option><option>הוד השרון</option><option>הרצליה</option><option>חדרה</option><option>חולון</option><option>חיפה</option><option>טבריה</option><option>טייבה</option><option>טירה</option><option>טירת כרמל</option><option>טמרה</option><option>יבנה</option><option>יהוד-מונוסון</option><option>ירושלים</option><option>כפר יונה</option><option>כפר סבא</option><option>כפר קאסם</option><option>כרמיאל</option><option>לוד</option><option>מגדל העמק</option><option>מודיעין-מכבים-רעות</option><option>מודיעין עילית</option><option>מעלה אדומים</option><option>מעלות-תרשיחא</option><option>נהריה</option><option>נוף הגליל</option><option>נס ציונה</option><option>נצרת</option><option>נשר</option><option>נתיבות</option><option>נתניה</option><option>סח'נין</option><option>עכו</option><option>עפולה</option><option>ערד</option><option>עראבה</option><option>פתח תקווה</option><option>צפת</option><option>קלנסווה</option><option>קריית אונו</option><option>קריית אתא</option><option>קריית ביאליק</option><option>קריית גת</option><option>קריית ים</option><option>קריית מוצקין</option><option>קריית מלאכי</option><option>קריית שמונה</option><option>ראש העין</option><option>ראשון לציון</option><option>רהט</option><option>רחובות</option><option>רמלה</option><option>רמת גן</option><option>רמת השרון</option><option>רעננה</option><option>שדרות</option><option>שפרעם</option><option>תל אביב-יפו</option></select>
   <label class="date-label" for="date">תאריך</label>
   <input type="date" id="date">
   <button type="button" id="reset" class="chip">איפוס</button>
 </div>
 <p class="meta">נמצאו <span id="eventCount">0</span> מסיבות</p>
 <div class="grid" id="event-grid"><p class="meta">טוען אירועים...</p></div>
-</main><footer><div class="wrap footer-row"><a class="brand brand-couples" href="/" aria-label="מסיבות ליברליות בישראל — דף הבית"><img src="assets/design/couples-logo-128.png" width="64" height="64" alt=""><span class="brand-words"><span class="brand-title">מסיבות ליברליות <span class="brand-country">בישראל</span></span><span class="brand-caption">פורטל מסיבות לזוגות סינגלים וסינגליות</span></span></a><div class="footer-links"><a href="/about">אודות</a><a href="/contact">צור קשר</a><a href="/privacy">פרטיות</a><a href="/terms">תנאי שימוש</a><a href="/swingers-parties">מסיבות חילופי זוגות</a><a href="/bdsm-parties">מסיבות בדסמ</a></div><span>מרחב של חופש. מקום לכבוד הדדי. 18+</span></div></footer><div id="toast" role="status"></div><div class="mobile-bottom" role="navigation" aria-label="ניווט תחתון"><a href="/"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg><span>דף הבית</span></a><a href="/about"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg><span>אודות</span></a><a href="/events"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>מסיבות</span></a><a href="/contact"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>יצירת קשר</span></a></div><script src="assets/app.js?v=202610281548"></script>
+</main><footer><div class="wrap footer-row"><a class="brand brand-couples" href="/" aria-label="מסיבות ליברליות בישראל — דף הבית"><img src="assets/design/couples-logo-128.png" width="64" height="64" alt=""><span class="brand-words"><span class="brand-title">מסיבות ליברליות <span class="brand-country">בישראל</span></span><span class="brand-caption">המועדון של אבי סווינגרס</span></span></a><div class="footer-links"><a href="/about">אודות</a><a href="/contact">צור קשר</a><a href="/privacy">פרטיות</a><a href="/terms">תנאי שימוש</a><a href="/swingers-parties">מסיבות חילופי זוגות</a><a href="/bdsm-parties">מסיבות בדסמ</a></div><span>מרחב של חופש. מקום לכבוד הדדי. 18+</span></div></footer><div id="toast" role="status"></div><div class="mobile-bottom" role="navigation" aria-label="ניווט תחתון"><a href="/"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg><span>דף הבית</span></a><a href="/about"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg><span>אודות</span></a><a href="/events"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>מסיבות</span></a><a href="/contact"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>יצירת קשר</span></a></div><script src="assets/app.js?v=202610281625"></script>
 <script src="assets/design/event-images.js?v=202610012132"></script>
 <script type="module">
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202610281608");
+    await import("./assets/site-data.js?v=202610281625");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
   }
   const box = document.getElementById("event-grid");
   const search = document.getElementById("search");
-  const city = document.getElementById("city");
   const date = document.getElementById("date");
   const reset = document.getElementById("reset");
   const countEl = document.getElementById("eventCount");
@@ -58,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="card-body">
         ${e.category ? `<span class="tag">${escapeHtml(e.category)}</span>` : ""}
         <h3><a href="/event?id=${encodeURIComponent(e.id)}">${escapeHtml(e.title)}</a></h3>
-        <div class="meta">${escapeHtml(e.city||"")}${e.city && (e.day||e.date) ? " · " : ""}${escapeHtml(e.day||"")}${e.day && e.date ? ", " : ""}${escapeHtml(e.date||"")}</div>
+        <div class="meta">${escapeHtml(e.day||"")}${e.day && e.date ? ", " : ""}${escapeHtml(e.date||"")}</div>
         <div class="card-bottom"><a class="btn gold event-register-card" href="${escapeHtml(lpRegisterLink(e).href)}" target="_blank" rel="noopener noreferrer">${lpRegisterLink(e).label}</a></div>
       </div>
     </article>`;
@@ -69,7 +67,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const data = allEvents.filter(e =>
       (!q || e.title.toLowerCase().includes(q)) &&
       (!activeType || e.category === activeType) &&
-      (!city.value || e.city === city.value) &&
       (!date.value || e.dateISO === date.value)
     );
     countEl.textContent = data.length;
@@ -90,9 +87,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     render();
   }));
 
-  [search, city, date].forEach(x => x.addEventListener("input", render));
+  [search, date].forEach(x => x.addEventListener("input", render));
   reset.addEventListener("click", () => {
-    search.value = ""; city.value = ""; date.value = ""; activeType = "";
+    search.value = ""; date.value = ""; activeType = "";
     pills.forEach(x => x.classList.remove("active"));
     pills[0].classList.add("active");
     render();

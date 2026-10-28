@@ -71,23 +71,6 @@ function detectCategory(title: string, desc: string): string {
   return "";
 }
 
-// Real parties have no admin-managed "city" field yet either — derive one
-// from the title the organizer already wrote, based on which venue/brand
-// name maps to which real city.
-const CITY_KEYWORDS: { city: string; words: string[] }[] = [
-  { city: "פתח תקווה", words: ["אבי"] },
-  { city: "תל אביב", words: ["דאנג'ון", "דאנגאון", "דאנג'ן", "סווינגרס", "סדום"] },
-  { city: "נתניה", words: ["no limit", "נו לימיט"] },
-];
-
-function detectCity(title: string): string {
-  const text = title.toLowerCase();
-  for (const { city, words } of CITY_KEYWORDS) {
-    if (words.some((w) => text.includes(w.toLowerCase()))) return city;
-  }
-  return "";
-}
-
 function toEventShape(p: any) {
   const title = p.title || "";
   const desc = p.description || "";
@@ -104,16 +87,10 @@ function toEventShape(p: any) {
     time: p.time || "",
     dj: p.dj || "",
     category: p.category || detectCategory(title, desc),
-    city: p.city || detectCity(title),
     badge: p.badge || "",
-    // Real parties have no city field yet — badge falls back to a
-    // generic label instead of showing something misleading.
-    type: p.partyType === "external" ? "אירוע חיצוני" : "מסיבה",
     img: p.imageURL || "",
     desc,
-    registrationLink: p.registrationLink || "",
     whatsappNumber: p.whatsappNumber || "",
-    partyType: p.partyType || "internal",
   };
 }
 

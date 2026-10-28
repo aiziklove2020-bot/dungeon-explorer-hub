@@ -44,11 +44,8 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
       time: party.time || '',
       dj: party.dj || '',
       imageURL: party.imageURL || '',
-      registrationLink: party.registrationLink || '',
       whatsappNumber: party.whatsappNumber || '',
-      partyType: party.partyType || 'internal',
       category: party.category || '',
-      city: party.city || '',
       badge: party.badge || ''
     };
   });
@@ -64,10 +61,6 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
 
   const handleSave = async () => {
 
-    if (formData.partyType === 'external' && !formData.registrationLink?.trim()) {
-      alert(t('admin.externalPartyUrlRequired'));
-      return;
-    }
 
     // Block phone numbers inside the description so contact goes through the
     // dedicated WhatsApp field (which the site uses to build the wa.me link). Normalize away
@@ -115,7 +108,10 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
     const dataToSave = {
       ...formData,
       imageURL: finalImageUrl,
-      date: localMidnight
+      date: localMidnight,
+      // Every party is a party of the club: no external parties or ticket links any more.
+      partyType: 'internal',
+      registrationLink: ''
     };
     
     try {
@@ -193,22 +189,6 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           />
         </div>
         <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.partyType')} *</label>
-          <select
-            value={formData.partyType}
-            onChange={e => setFormData(prev => ({...prev, partyType: e.target.value}))}
-            className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
-            required
-          >
-            <option value="internal">{t('admin.internal')}</option>
-            <option value="exchange">{t('admin.exchange')}</option>
-            <option value="external">{t('admin.external')}</option>
-          </select>
-          <p className="text-[#94A3B8] text-xs mt-1">
-            {t('admin.partyTypeDescription')}
-          </p>
-        </div>
-        <div className="space-y-1 text-right">
           <label className="text-xs uppercase font-bold text-[#94A3B8]">קטגוריה (לסינון באתר)</label>
           <select
             value={formData.category}
@@ -224,93 +204,6 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           <p className="text-[#94A3B8] text-xs mt-1">
             קובע איך המסיבה תסונן בדף "מסיבות". אם לא נבחר — המערכת תנסה לזהות לפי הכותרת/תיאור.
           </p>
-        </div>
-        <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-[#94A3B8]">אזור/עיר (לסינון באתר)</label>
-          <select
-            value={formData.city}
-            onChange={e => setFormData(prev => ({...prev, city: e.target.value}))}
-            className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
-          >
-            <option value="">— זיהוי אוטומטי מהכותרת —</option>
-            <option value="אום אל-פחם">אום אל-פחם</option>
-            <option value="אופקים">אופקים</option>
-            <option value="אור יהודה">אור יהודה</option>
-            <option value="אור עקיבא">אור עקיבא</option>
-            <option value="אילת">אילת</option>
-            <option value="אלעד">אלעד</option>
-            <option value="אריאל">אריאל</option>
-            <option value="אשדוד">אשדוד</option>
-            <option value="אשקלון">אשקלון</option>
-            <option value="באקה אל-גרבייה">באקה אל-גרבייה</option>
-            <option value="באר יעקב">באר יעקב</option>
-            <option value="באר שבע">באר שבע</option>
-            <option value="בית שאן">בית שאן</option>
-            <option value="בית שמש">בית שמש</option>
-            <option value="ביתר עילית">ביתר עילית</option>
-            <option value="בני ברק">בני ברק</option>
-            <option value="בת ים">בת ים</option>
-            <option value="גבעת שמואל">גבעת שמואל</option>
-            <option value="גבעתיים">גבעתיים</option>
-            <option value="דימונה">דימונה</option>
-            <option value="הוד השרון">הוד השרון</option>
-            <option value="הרצליה">הרצליה</option>
-            <option value="חדרה">חדרה</option>
-            <option value="חולון">חולון</option>
-            <option value="חיפה">חיפה</option>
-            <option value="טבריה">טבריה</option>
-            <option value="טייבה">טייבה</option>
-            <option value="טירה">טירה</option>
-            <option value="טירת כרמל">טירת כרמל</option>
-            <option value="טמרה">טמרה</option>
-            <option value="יבנה">יבנה</option>
-            <option value="יהוד-מונוסון">יהוד-מונוסון</option>
-            <option value="ירושלים">ירושלים</option>
-            <option value="כפר יונה">כפר יונה</option>
-            <option value="כפר סבא">כפר סבא</option>
-            <option value="כפר קאסם">כפר קאסם</option>
-            <option value="כרמיאל">כרמיאל</option>
-            <option value="לוד">לוד</option>
-            <option value="מגדל העמק">מגדל העמק</option>
-            <option value="מודיעין-מכבים-רעות">מודיעין-מכבים-רעות</option>
-            <option value="מודיעין עילית">מודיעין עילית</option>
-            <option value="מעלה אדומים">מעלה אדומים</option>
-            <option value="מעלות-תרשיחא">מעלות-תרשיחא</option>
-            <option value="נהריה">נהריה</option>
-            <option value="נוף הגליל">נוף הגליל</option>
-            <option value="נס ציונה">נס ציונה</option>
-            <option value="נצרת">נצרת</option>
-            <option value="נשר">נשר</option>
-            <option value="נתיבות">נתיבות</option>
-            <option value="נתניה">נתניה</option>
-            <option value="סח'נין">סח'נין</option>
-            <option value="עכו">עכו</option>
-            <option value="עפולה">עפולה</option>
-            <option value="ערד">ערד</option>
-            <option value="עראבה">עראבה</option>
-            <option value="פתח תקווה">פתח תקווה</option>
-            <option value="צפת">צפת</option>
-            <option value="קלנסווה">קלנסווה</option>
-            <option value="קריית אונו">קריית אונו</option>
-            <option value="קריית אתא">קריית אתא</option>
-            <option value="קריית ביאליק">קריית ביאליק</option>
-            <option value="קריית גת">קריית גת</option>
-            <option value="קריית ים">קריית ים</option>
-            <option value="קריית מוצקין">קריית מוצקין</option>
-            <option value="קריית מלאכי">קריית מלאכי</option>
-            <option value="קריית שמונה">קריית שמונה</option>
-            <option value="ראש העין">ראש העין</option>
-            <option value="ראשון לציון">ראשון לציון</option>
-            <option value="רהט">רהט</option>
-            <option value="רחובות">רחובות</option>
-            <option value="רמלה">רמלה</option>
-            <option value="רמת גן">רמת גן</option>
-            <option value="רמת השרון">רמת השרון</option>
-            <option value="רעננה">רעננה</option>
-            <option value="שדרות">שדרות</option>
-            <option value="שפרעם">שפרעם</option>
-            <option value="תל אביב-יפו">תל אביב-יפו</option>
-          </select>
         </div>
         <div className="space-y-1 text-right">
           <label className="text-xs uppercase font-bold text-[#94A3B8]">תגית קידום (בכרטיס באתר)</label>
@@ -347,22 +240,6 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           onChange={(value) => setFormData(prev => ({...prev, imageURL: value}))}
         />
       </div>
-      {formData.partyType === 'external' && (
-        <div className="space-y-1 text-right">
-          <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.partyPageUrl')} *</label>
-          <input
-            type="text"
-            value={formData.registrationLink}
-            onChange={e => setFormData(prev => ({...prev, registrationLink: e.target.value}))}
-            className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
-            placeholder="https://..."
-            required={formData.partyType === 'external'}
-          />
-          <p className="text-[#94A3B8] text-xs mt-1">
-            {t('admin.externalPartyUrlRequired')}
-          </p>
-        </div>
-      )}
       <div className="space-y-1 text-right">
         <label className="text-xs uppercase font-bold text-[#94A3B8]">מספר וואטסאפ להרשמה</label>
         <input

@@ -1109,7 +1109,7 @@ export async function sendPushUpdateNow({ scope = '' } = {}) {
     .filter((p) => p.status !== 'inactive' && (!Number.isFinite(toMs(p.date)) || toMs(p.date) >= now - 6 * 3600 * 1000))
     .sort((a, b) => toMs(a.date) - toMs(b.date));
   const internalOnly = scope === 'internal';
-  const pool = internalOnly ? parties.filter((p) => p.partyType !== 'external') : parties;
+  const pool = parties; // every party on the site is a party of the club
   if (!pool.length) return { ok: true, sent: 0, total: 0, skipped: internalOnly ? 'no internal parties' : 'no active parties' };
   // Internal: simply the nearest upcoming internal parties. Otherwise prefer ones added in the last 3 days.
   const fresh = internalOnly ? [] : pool.filter((p) => now - toMs(p.createdAt) < 3 * 24 * 3600 * 1000);
