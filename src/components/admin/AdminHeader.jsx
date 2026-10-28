@@ -1,5 +1,6 @@
 import { X, RotateCcw, CheckCircle2, Eye, Download, Loader2, Megaphone, Instagram } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import SiteClosureButton from './SiteClosureButton';
 
 /**
  * Admin panel top bar: title, logout, action buttons (import, reset, view site),
@@ -71,6 +72,7 @@ const AdminHeader = ({
               >
                 <Eye size={16} style={{ color: '#3ecf6d' }} /> {t('admin.editSite')}
               </button>
+              <SiteClosureButton />
             </div>
           </div>
 

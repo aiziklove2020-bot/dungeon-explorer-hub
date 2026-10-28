@@ -64,3 +64,19 @@ export const updatePopup = async (popup) => {
   await callAdminSettings('set-settings', { docId: SITE_CONFIG_DOC_ID, data: { popup } });
   invalidateCache();
 };
+
+// Site closure switch, read by public/assets/memorial-block.js on every public page.
+// Always read live (no cache): the admin must see the real state before flipping it.
+export const getSiteClosure = async () => {
+  const snap = await getDoc(ref());
+  const data = snap.exists() ? snap.data() || {} : {};
+  return { closed: data.siteClosed === true, text: typeof data.siteClosedText === 'string' ? data.siteClosedText : '' };
+};
+
+export const setSiteClosure = async (closed, text = '') => {
+  await callAdminSettings('set-settings', {
+    docId: SITE_CONFIG_DOC_ID,
+    data: { siteClosed: !!closed, siteClosedText: String(text || '').slice(0, 500) },
+  });
+  invalidateCache();
+};
