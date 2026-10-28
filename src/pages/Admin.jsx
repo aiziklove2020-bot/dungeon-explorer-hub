@@ -23,18 +23,31 @@ import AdminLoader from '../components/admin/AdminLoader';
 
 // Each tab's code is fetched only when it's opened — the panel used to download
 // all sixteen sections up front just to show the first one.
-const PartiesSection = lazy(() => import('../components/admin/PartiesSection'));
-const RssSection = lazy(() => import('../components/admin/RssSection'));
-const AboutSection = lazy(() => import('../components/admin/AboutSection'));
-const ContactSection = lazy(() => import('../components/admin/ContactSection'));
-const LinksSection = lazy(() => import('../components/admin/LinksSection'));
-const AdminsSection = lazy(() => import('../components/admin/AdminsSection'));
-const TelegramSection = lazy(() => import('../components/admin/TelegramSection'));
-const AgentsSection = lazy(() => import('../components/admin/AgentsSection'));
-const DBLoggerSection = lazy(() => import('../components/admin/DBLoggerSection'));
-const DBSection = lazy(() => import('../components/admin/DBSection'));
-const GitHistorySection = lazy(() => import('../components/admin/GitHistorySection'));
-const PartyBannersSection = lazy(() => import('../components/admin/PartyBannersSection'));
+// After a new version of the site goes up, the files of the old one are gone, so a
+// panel left open from before fails to open a tab ("not found"). Reload once to get
+// the new version; the login is remembered (utils/adminSession.js), so it stays signed in.
+const lazyTab = (load) => lazy(() => load().catch((err) => {
+  try {
+    const last = Number(sessionStorage.getItem('admin_tab_reload_at')) || 0;
+    if (Date.now() - last > 30_000) {
+      sessionStorage.setItem('admin_tab_reload_at', String(Date.now()));
+      window.location.reload();
+      return new Promise(() => {});
+    }
+  } catch { /* private mode: fall through to the error */ }
+  throw err;
+}));
+const PartiesSection = lazyTab(() => import('../components/admin/PartiesSection'));
+const RssSection = lazyTab(() => import('../components/admin/RssSection'));
+const SiteTextSection = lazyTab(() => import('../components/admin/SiteTextSection'));
+const LinksSection = lazyTab(() => import('../components/admin/LinksSection'));
+const AdminsSection = lazyTab(() => import('../components/admin/AdminsSection'));
+const TelegramSection = lazyTab(() => import('../components/admin/TelegramSection'));
+const AgentsSection = lazyTab(() => import('../components/admin/AgentsSection'));
+const DBLoggerSection = lazyTab(() => import('../components/admin/DBLoggerSection'));
+const DBSection = lazyTab(() => import('../components/admin/DBSection'));
+const GitHistorySection = lazyTab(() => import('../components/admin/GitHistorySection'));
+const PartyBannersSection = lazyTab(() => import('../components/admin/PartyBannersSection'));
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -307,8 +320,8 @@ const Admin = () => {
           <Suspense fallback={<AdminLoader />}>
           {activeSection === 'siteDesign' && <PartyBannersSection showSaved={showSaved} />}
           {activeSection === 'parties'   && <PartiesSection showSaved={showSaved} refreshKey={partiesRefreshKey} />}
-          {activeSection === 'about'     && <AboutSection showSaved={showSaved} />}
-          {activeSection === 'contact'   && <ContactSection showSaved={showSaved} />}
+          {activeSection === 'about'     && <SiteTextSection field="aboutText" showSaved={showSaved} />}
+          {activeSection === 'contact'   && <SiteTextSection field="contactText" showSaved={showSaved} />}
           {activeSection === 'links'     && <LinksSection showSaved={showSaved} />}
           {activeSection === 'db'        && <DBSection />}
           {activeSection === 'dbLogger'  && <DBLoggerSection />}

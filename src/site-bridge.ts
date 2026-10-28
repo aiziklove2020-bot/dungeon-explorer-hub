@@ -7,6 +7,7 @@
 // parties are shown here and registration is by WhatsApp.
 import { collection, doc, getDoc, query, where, getDocs, getDocsFromServer } from "firebase/firestore";
 import { normalizePartyBanners } from "../shared/partyBanners.js";
+import { siteTexts } from "../shared/siteTexts.js";
 import { db } from "./firebase/config";
 import { getSocialLinks, getRssFeeds, getContent } from "./firebase/settings";
 import {
@@ -156,6 +157,15 @@ async function loadPartyBanners() {
   return normalizePartyBanners(stored).filter((b: any) => b.enabled);
 }
 
+/** The About / Contact page text, edited in the admin panel (defaults when empty). */
+async function loadSiteTexts() {
+  try {
+    return siteTexts((await getDoc(doc(db, "settings", "siteConfig"))).data() || {});
+  } catch {
+    return siteTexts({});
+  }
+}
+
 /** Real about-page content, managed from the admin panel's "אודות" section. */
 async function loadAbout() {
   const content = await getContent().catch(() => ({}));
@@ -211,6 +221,7 @@ async function loadNewsFeed() {
 (window as any).LPData = {
   loadEvents,
   loadPartyBanners,
+  loadSiteTexts,
   loadSocialLinks,
   loadNewsFeed,
   loadAbout,
