@@ -7,16 +7,14 @@ function escapeHtml(str){
 }
 window.escapeHtml = escapeHtml;
 
-// Registration is by WhatsApp only (there are no site accounts). A party's own
-// WhatsApp number wins; otherwise the site's number. External parties with a
-// ticket link keep their link.
+// Registration is by WhatsApp only, with Avi. A party's own WhatsApp number
+// wins; otherwise the site's number.
 const LP_WHATSAPP_NUMBER = "0559364370";
 function lpWhatsappHref(number, text) {
   const digits = String(number || LP_WHATSAPP_NUMBER).replace(/\D/g, "").replace(/^0/, "972");
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 }
 function lpRegisterLink(e) {
-  if (e.partyType === "external" && e.registrationLink) return { href: e.registrationLink, label: "לרכישת כרטיסים" };
   return { href: lpWhatsappHref(e.whatsappNumber, `היי, אני רוצה להירשם למסיבה: ${e.title || ""}`), label: "הרשמה בוואטסאפ" };
 }
 window.lpWhatsappHref = lpWhatsappHref;

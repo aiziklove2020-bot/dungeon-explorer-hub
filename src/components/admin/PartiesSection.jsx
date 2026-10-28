@@ -207,9 +207,6 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
       time: '',
       dj: '',
       imageURL: '',
-      maleLimit: 100,
-      femaleLimit: 100,
-      registrationLink: '',
       partyType: 'internal'
     };
     setEditingParty(newParty);
@@ -420,15 +417,6 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                     <div className="flex flex-col gap-3 mb-3">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-lg md:text-xl font-bold">{selectedParty.name || selectedParty.title}</h3>
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${
-                          selectedParty.partyType === 'exchange' ? 'bg-purple-600'
-                            : selectedParty.partyType === 'external' ? 'bg-blue-600'
-                            : 'bg-[#ff438b]'
-                        }`}>
-                          {selectedParty.partyType === 'exchange' ? t('admin.exchangeParty')
-                            : selectedParty.partyType === 'external' ? t('admin.externalParty')
-                            : t('admin.internalParty')}
-                        </span>
                         {isPartyExpiredByDate(selectedParty.date, retentionHours) && (
                           <span className="px-2 py-1 rounded text-xs font-bold bg-[#2a292e] text-[#e4e1e7]">
                             פג תוקף
@@ -483,14 +471,6 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                           <GuardianAddForm onAdd={(name, role) => handleAddGuardian(selectedParty, name, role)} />
                         </div>
                     </div>
-                    {selectedParty.registrationLink && (selectedParty.partyType || 'internal') === 'external' && (
-                      <p className="mb-3">
-                        <strong>{t('admin.externalRegistrationLink')}:</strong>{' '}
-                        <a href={selectedParty.registrationLink} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
-                          {selectedParty.registrationLink}
-                        </a>
-                      </p>
-                    )}
                     {selectedParty.whatsappNumber && (
                       <p className="mb-3">
                         <strong>{t('admin.whatsappNumber') || 'מספר וואטסאפ'}:</strong>{' '}
