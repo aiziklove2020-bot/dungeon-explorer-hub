@@ -2,16 +2,12 @@ import { useState, useEffect } from 'react';
 import { RotateCcw, Plus, Trash2, Clock, AlertTriangle, X } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminLoader from './AdminLoader';
-import { getAllParties, createParty, updateParty, deleteParty, adminRemoveUserFromParty, swapCoupleRegistrationPartner, recomputeAllPartiesExpiration } from '../../firebase/parties';
-import { createUserFromRegistration, getAllUsers } from '../../firebase/users';
+import { getAllParties, createParty, updateParty, deleteParty, recomputeAllPartiesExpiration } from '../../firebase/parties';
 import { getPartySettings, updatePartySettings } from '../../firebase/partySettings';
 import { DEFAULT_PARTY_RETENTION_HOURS, isPartyExpiredByDate } from '../../../shared/partyExpiry.js';
 import { todayLocalStr } from '../../utils/dateFormat';
 import PartyEditor from './PartyEditor';
-import RegistrationItem from './RegistrationItem';
-import CoupleRegistrationItem from './CoupleRegistrationItem';
 import PartyImage from '../PartyImage';
-import { normalizeCoupleRegistrations } from '../../utils/coupleRegistrations';
 
 /**
  * Retention-hours preset options shown in the admin select. Picked to cover the
@@ -27,19 +23,12 @@ const RETENTION_OPTIONS = [
   { value: 168, labelKey: 'admin.partyRetention.option168' },
 ];
 
-// An external (ticket-link) party only has on-site registrations when it
-// opted into gender-balance registration through the site.
-const takesOnSiteRegistrations = (party) =>
-  ['internal', 'exchange'].includes(party.partyType || 'internal') ||
-  (party.partyType === 'external' && party.allowBalanceRegistration === true);
-
 const PartiesSection = ({ showSaved, refreshKey }) => {
   const { t } = useLanguage();
   const [activeParties, setActiveParties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingParty, setEditingParty] = useState(null);
   const [isAddingEvent, setIsAddingEvent] = useState(false);
-  const [allUsersMap, setAllUsersMap] = useState(new Map()); // Map of phoneNumber -> user
   const [retentionHours, setRetentionHours] = useState(DEFAULT_PARTY_RETENTION_HOURS);
   const [savingRetention, setSavingRetention] = useState(false);
   // After a successful retention change we recompute every party's
@@ -69,16 +58,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
       };
       parties.sort((a, b) => toMs(a.date) - toMs(b.date));
       setActiveParties(parties);
-      
-      // Load all users once to avoid multiple calls in RegistrationItem
-      const allUsers = await getAllUsers();
-      const usersMap = new Map();
-      allUsers.forEach(user => {
-        if (user.phoneNumber) {
-          usersMap.set(user.phoneNumber, user);
-        }
-      });
-      setAllUsersMap(usersMap);
+
     } catch (error) {
     } finally {
       setLoading(false);
@@ -142,98 +122,6 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
     });
   };
 
-  const getGenderCount = (party, gender) => {
-    const regs = normalizeCoupleRegistrations(party.registrations);
-    if (gender === 'male') {
-      return regs.filter(reg => reg.gender === 'male').length || 0;
-    }
-    if (gender === 'female') {
-      return regs.filter(reg => reg.gender === 'female').length || 0;
-    }
-    return regs.length;
-  };
-
-  const getRegistrationDisplayItems = (registrations) => {
-    const regs = normalizeCoupleRegistrations(registrations);
-    const couplesByCoupleId = {};
-    regs.forEach(reg => {
-      if (reg.coupleId) {
-        if (!couplesByCoupleId[reg.coupleId]) couplesByCoupleId[reg.coupleId] = [];
-        couplesByCoupleId[reg.coupleId].push(reg);
-      }
-    });
-    const processedCoupleIds = new Set();
-    const items = [];
-    regs.forEach(reg => {
-      if (reg.coupleId && couplesByCoupleId[reg.coupleId]) {
-        if (processedCoupleIds.has(reg.coupleId)) return;
-        processedCoupleIds.add(reg.coupleId);
-        const group = couplesByCoupleId[reg.coupleId];
-        const maleReg = group.find(r => r.gender === 'male');
-        const femaleReg = group.find(r => r.gender === 'female');
-        if (maleReg && femaleReg) {
-          items.push({ type: 'couple', maleReg, femaleReg });
-        } else {
-          group.forEach(r => items.push({ type: 'single', registration: r }));
-        }
-      } else if (!reg.coupleId) {
-        items.push({ type: 'single', registration: reg });
-      }
-    });
-    return items;
-  };
-
-  const exportRegistrationsByType = (party) => {
-    const typeLabels = {
-      'single-female-balance': t('admin.singleFemaleBalance'),
-      'single-male-balance': t('admin.singleMaleBalance'),
-      'single-female-discount': t('admin.singleFemaleDiscount'),
-      'couple': t('admin.couple'),
-      'other': t('admin.unassigned')
-    };
-
-    const grouped = {};
-    (party.registrations || []).forEach(reg => {
-      const type = reg.registrationType || 'other';
-      if (!grouped[type]) grouped[type] = [];
-      grouped[type].push(reg);
-    });
-
-    let csvContent = '\ufeff';
-    csvContent += `${t('party.defaultName')}: ${party.name}\n`;
-    csvContent += `${t('admin.date')}: ${formatDate(party.date)}\n\n`;
-
-    Object.keys(typeLabels).forEach(type => {
-      const registrations = grouped[type] || [];
-      if (registrations.length === 0) return;
-
-      csvContent += `${typeLabels[type]} (${registrations.length})\n`;
-      csvContent += `${t('admin.csvHeaders')}\n`;
-
-      registrations.forEach(reg => {
-        const name = (reg.fullName || reg.userName || '').replace(/"/g, '""');
-        const phone = (reg.phoneNumber || '').replace(/"/g, '""');
-        const telegram = (reg.telegramUsername || '').replace(/"/g, '""');
-        const regType = (reg.registrationType || type).replace(/"/g, '""');
-        const gender = (reg.gender || '').replace(/"/g, '""');
-        const regDate = reg.registeredAt 
-          ? new Date(reg.registeredAt.seconds * 1000).toLocaleString('he-IL')
-          : '';
-        
-        csvContent += `"${name}","${phone}","${telegram}","${regType}","${gender}","${regDate}"\n`;
-      });
-      csvContent += '\n';
-    });
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${party.name.replace(/[^a-z0-9]/gi, '_')}_registrations_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   // Handle edit party
   const handleEditParty = (party) => {
     setEditingParty(party);
@@ -279,91 +167,6 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
       showSaved();
     } catch (error) {
       alert(`${t('admin.errorSavingParty')}: ${error.message}`);
-    }
-  };
-
-  // Convert client to user. `day` only approves gender balance for this
-  // specific party; `year` grants a real full-site subscription — the
-  // confirm() spells out exactly what's about to happen and until when,
-  // so a misclick doesn't silently hand out a free year of access.
-  const handleConvertClientToUser = async (registration, tier = 'year') => {
-    const name = registration.fullName || registration.userName || registration.phoneNumber || t('admin.user');
-    // Women get free full access automatically (see getSubscription's
-    // gender bypass) — the tier/expiry stored here doesn't actually gate
-    // anything for them, so the confirmation should say so, not quote a
-    // paid-subscription expiry date that's misleading for this case.
-    const message = registration.gender === 'female'
-      ? `ליצור למשתמשת ${name} חשבון באתר? היא תקבל גישה מלאה וחינמית אוטומטית (איזון מגדרי).`
-      : tier === 'year'
-        ? (() => {
-            const expiry = new Date();
-            expiry.setFullYear(expiry.getFullYear() + 1);
-            const expiryStr = expiry.toLocaleDateString('he-IL');
-            return `לתת ל${name} מנוי מלא לכל האתר עד ${expiryStr} (שנה מהיום)?\n\nלאישור חד פעמי למסיבה הזו בלבד, השתמש בכפתור הנפרד.`;
-          })()
-        : `לאשר איזון מגדרי ל${name} — למסיבה הזו בלבד? זה לא הופך אותו למנוי קבוע.`;
-    if (!window.confirm(message)) return;
-
-    try {
-      await createUserFromRegistration(registration, 'registered', tier);
-      loadActiveParties();
-      showSaved();
-    } catch (error) {
-      alert(`${t('admin.errorConvertingClientToUser')}: ${error.message}`);
-    }
-  };
-
-  // Handle remove user from party
-  const handleRemoveFromParty = async (partyId, registration) => {
-    const userName = registration.fullName || registration.userName || registration.phoneNumber || t('admin.user');
-    if (!window.confirm(`${t('confirmRemoveUser')} ${userName}?`)) {
-      return;
-    }
-    
-    try {
-      const identifier = registration.userId || registration.phoneNumber;
-      if (!identifier) {
-        alert(t('admin.balanceTables.cannotDeleteNoIdentifier'));
-        return;
-      }
-      
-      await adminRemoveUserFromParty(partyId, identifier);
-      
-      // Clear cache for this party
-      const { clearCache } = await import('../../utils/cache');
-      clearCache(`balanceMatches_${partyId}`);
-      clearCache('activeParties');
-      
-      loadActiveParties();
-      showSaved();
-      alert(t('userRemovedFromParty'));
-    } catch (error) {
-      alert(`${t('failedToRemoveUser')}: ${error.message}`);
-    }
-  };
-
-  const handleSwapCoupleRegistrationPartner = async (partyId, coupleId, sideGender, newPartner) => {
-    try {
-      await swapCoupleRegistrationPartner(partyId, coupleId, sideGender, newPartner);
-      loadActiveParties();
-      showSaved();
-    } catch (error) {
-      alert(`שגיאה בהחלפת בן/בת הזוג: ${error.message}`);
-    }
-  };
-
-  // Quick-control toggles (lock solo-men sales / auto-approve verified
-  // couples) — optimistic local update + real Firestore write, no full
-  // party-editor round trip.
-  const handleToggleQuickControl = async (partyId, field, nextValue) => {
-    setActiveParties(prev => prev.map(p => (p.id === partyId ? { ...p, [field]: nextValue } : p)));
-    try {
-      await updateParty(partyId, { [field]: nextValue });
-      showSaved();
-    } catch (error) {
-      // Roll back on failure so the toggle doesn't lie about saved state.
-      setActiveParties(prev => prev.map(p => (p.id === partyId ? { ...p, [field]: !nextValue } : p)));
-      alert(`שגיאה בשמירת ההגדרה: ${error.message}`);
     }
   };
 
@@ -435,30 +238,11 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
         <div className="space-y-6">
           {!loading && activeParties.length > 0 && (() => {
             const notExpired = activeParties.filter(p => !isPartyExpiredByDate(p.date, retentionHours));
-            const totalRegs = activeParties.reduce((sum, p) => sum + (p.registrations?.length || 0), 0);
-            const totalCapacity = activeParties.reduce((sum, p) => sum + (Number(p.maleLimit) || 0) + (Number(p.femaleLimit) || 0), 0);
-            const avgOccupancy = totalCapacity > 0 ? Math.round((totalRegs / totalCapacity) * 100) : 0;
-            const soldOut = activeParties.filter(p => {
-              const cap = (Number(p.maleLimit) || 0) + (Number(p.femaleLimit) || 0);
-              return cap > 0 && (p.registrations?.length || 0) >= cap;
-            }).length;
             return (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                   <p className="text-[#94A3B8] text-xs font-bold">מסיבות פעילות</p>
                   <p className="text-2xl font-bold mt-1">{notExpired.length}</p>
-                </div>
-                <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
-                  <p className="text-[#94A3B8] text-xs font-bold">סה״כ נרשמים</p>
-                  <p className="text-2xl font-bold mt-1">{totalRegs}</p>
-                </div>
-                <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
-                  <p className="text-[#94A3B8] text-xs font-bold">תפוסה ממוצעת</p>
-                  <p className="text-2xl font-bold mt-1" style={{ color: '#10B981' }}>{avgOccupancy}%</p>
-                </div>
-                <div className="bg-[#20151e] border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
-                  <p className="text-[#94A3B8] text-xs font-bold">מכסה מלאה</p>
-                  <p className="text-2xl font-bold mt-1" style={{ color: soldOut > 0 ? '#ffb4ab' : undefined }}>{soldOut}</p>
                 </div>
               </div>
             );
@@ -531,19 +315,12 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
             </div>
           </div>
           {!loading && activeParties.length > 0 && (() => {
-            const statusOf = (p) => {
-              const maleFull = Number(p.maleLimit) > 0 && getGenderCount(p, 'male') >= Number(p.maleLimit);
-              const femaleFull = Number(p.femaleLimit) > 0 && getGenderCount(p, 'female') >= Number(p.femaleLimit);
-              if (isPartyExpiredByDate(p.date, retentionHours)) return 'expired';
-              if (maleFull || femaleFull) return 'locked';
-              return 'active';
-            };
-            const counts = { all: activeParties.length, active: 0, locked: 0, expired: 0 };
+            const statusOf = (p) => (isPartyExpiredByDate(p.date, retentionHours) ? 'expired' : 'active');
+            const counts = { all: activeParties.length, active: 0, expired: 0 };
             activeParties.forEach(p => { counts[statusOf(p)] += 1; });
             const TABS = [
               { id: 'all', label: 'הכל' },
               { id: 'active', label: 'פעילים' },
-              { id: 'locked', label: 'נעול לאיזון' },
               { id: 'expired', label: 'פג תוקף' },
             ];
             return (
@@ -577,13 +354,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
           })()}
           {(() => {
             const q = searchQuery.trim().toLowerCase();
-            const statusOf = (p) => {
-              const maleFull = Number(p.maleLimit) > 0 && getGenderCount(p, 'male') >= Number(p.maleLimit);
-              const femaleFull = Number(p.femaleLimit) > 0 && getGenderCount(p, 'female') >= Number(p.femaleLimit);
-              if (isPartyExpiredByDate(p.date, retentionHours)) return 'expired';
-              if (maleFull || femaleFull) return 'locked';
-              return 'active';
-            };
+            const statusOf = (p) => (isPartyExpiredByDate(p.date, retentionHours) ? 'expired' : 'active');
             const filteredParties = activeParties.filter(p => {
               const matchesTab = statusTab === 'all' || statusOf(p) === statusTab;
               const matchesQuery = !q || [p.name, p.title, p.dj, p.description].some(v => (v || '').toLowerCase().includes(q));
@@ -606,13 +377,6 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                 <div className="space-y-2">
                   {filteredParties.map(party => {
                     const status = statusOf(party);
-                    const maleCount = getGenderCount(party, 'male');
-                    const femaleCount = getGenderCount(party, 'female');
-                    const maleLimit = Number(party.maleLimit) || 0;
-                    const femaleLimit = Number(party.femaleLimit) || 0;
-                    const totalLimit = maleLimit + femaleLimit || 1;
-                    const malePct = Math.min(100, Math.round((maleCount / totalLimit) * 100));
-                    const femalePct = Math.min(100 - malePct, Math.round((femaleCount / totalLimit) * 100));
                     const selected = selectedParty?.id === party.id;
                     return (
                       <button
@@ -636,9 +400,6 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-bold text-sm truncate">{party.name || party.title}</h4>
-                            {status === 'locked' && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#ff438b]/20 text-[#ff9fc3]">נעול לאיזון</span>
-                            )}
                             {status === 'expired' && (
                               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#2a292e] text-[#94A3B8]">פג תוקף</span>
                             )}
@@ -646,14 +407,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                           <p className="text-xs text-[#94A3B8] truncate mt-0.5">
                             {formatDate(party.date)}{party.dj ? ` · DJ ${party.dj}` : ''}
                           </p>
-                          {!party.whatsappNumber && takesOnSiteRegistrations(party) && (
-                            <div className="w-full h-1.5 rounded-full bg-[#2a292e] overflow-hidden flex mt-2">
-                              <div className="h-full" style={{ width: `${malePct}%`, background: '#ff438b' }} />
-                              <div className="h-full" style={{ width: `${femalePct}%`, background: '#ff9fc3' }} />
-                            </div>
-                          )}
                         </div>
-                        <span className="text-xs text-[#94A3B8] shrink-0">{party.registrations?.length || 0}/{totalLimit}</span>
                       </button>
                     );
                   })}
@@ -675,11 +429,6 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                             : selectedParty.partyType === 'external' ? t('admin.externalParty')
                             : t('admin.internalParty')}
                         </span>
-                        {selectedParty.createdByType === 'advertiser' && (
-                          <span className="px-2 py-1 rounded text-xs font-bold bg-indigo-600">
-                            פורסם ע"י מפרסם
-                          </span>
-                        )}
                         {isPartyExpiredByDate(selectedParty.date, retentionHours) && (
                           <span className="px-2 py-1 rounded text-xs font-bold bg-[#2a292e] text-[#e4e1e7]">
                             פג תוקף
@@ -723,52 +472,8 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                       {selectedParty.dj && <p><strong>DJ:</strong> {selectedParty.dj}</p>}
                     </div>
                     {selectedParty.description && <p className="mb-3"><strong>{t('description') || 'תיאור'}:</strong> {selectedParty.description}</p>}
-                    {!selectedParty.whatsappNumber && takesOnSiteRegistrations(selectedParty) && (() => {
-                      const maleCount = getGenderCount(selectedParty, 'male');
-                      const femaleCount = getGenderCount(selectedParty, 'female');
-                      const maleLimit = Number(selectedParty.maleLimit) || 0;
-                      const femaleLimit = Number(selectedParty.femaleLimit) || 0;
-                      const totalLimit = maleLimit + femaleLimit || 1;
-                      const malePct = Math.min(100, Math.round((maleCount / totalLimit) * 100));
-                      const femalePct = Math.min(100 - malePct, Math.round((femaleCount / totalLimit) * 100));
-                      const maleFull = maleLimit > 0 && maleCount >= maleLimit;
-                      const femaleFull = femaleLimit > 0 && femaleCount >= femaleLimit;
-                      return (
-                        <div className="mb-3">
-                          <div className="w-full h-2.5 rounded-full bg-[#2a292e] overflow-hidden flex">
-                            <div className="h-full" style={{ width: `${malePct}%`, background: '#ff438b' }} title={`גברים: ${maleCount}/${maleLimit}`} />
-                            <div className="h-full" style={{ width: `${femalePct}%`, background: '#ff9fc3' }} title={`נשים: ${femaleCount}/${femaleLimit}`} />
-                          </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 mt-2 text-sm md:text-base">
-                            <p><strong>{t('maleRegistered') || 'גברים רשומים'}:</strong> <span style={maleFull ? { color: '#ffb4ab' } : undefined}>{maleCount}/{maleLimit}{maleFull ? ' (מלא)' : ''}</span></p>
-                            <p><strong>{t('femaleRegistered') || 'נשים רשומות'}:</strong> <span style={femaleFull ? { color: '#ffb4ab' } : undefined}>{femaleCount}/{femaleLimit}{femaleFull ? ' (מלא)' : ''}</span></p>
-                            <p><strong>{t('totalRegistered') || 'סה"כ רשומים'}:</strong> {selectedParty.registrations?.length || 0}</p>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                    {!selectedParty.whatsappNumber && takesOnSiteRegistrations(selectedParty) && (
-                      <div className="mb-3 rounded-xl bg-[#20151e] p-3 flex flex-col gap-3">
-                        <span className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider">שליטה מהירה</span>
-                        <label className="flex items-center justify-between gap-2 cursor-pointer">
-                          <span className="text-sm">נעילת מכירה לגברים סולו</span>
-                          <input
-                            type="checkbox"
-                            checked={!!selectedParty.soloMenSalesLocked}
-                            onChange={(e) => handleToggleQuickControl(selectedParty.id, 'soloMenSalesLocked', e.target.checked)}
-                            className="w-5 h-5 accent-[#ff438b] cursor-pointer"
-                          />
-                        </label>
-                        <label className="flex items-center justify-between gap-2 cursor-pointer">
-                          <span className="text-sm">אישור אוטומטי לזוגות מאומתים</span>
-                          <input
-                            type="checkbox"
-                            checked={!!selectedParty.autoApproveVerifiedCouples}
-                            onChange={(e) => handleToggleQuickControl(selectedParty.id, 'autoApproveVerifiedCouples', e.target.checked)}
-                            className="w-5 h-5 accent-[#10B981] cursor-pointer"
-                          />
-                        </label>
-                        <div className="pt-2 border-t border-[rgba(255,255,255,0.08)]">
+                    <div className="mb-3 rounded-xl bg-[#20151e] p-3 flex flex-col gap-3">
+                        <div>
                           <span className="text-xs font-bold text-[#94A3B8]">נאמני מרחב משובצים ({(selectedParty.guardians || []).length})</span>
                           <div className="flex flex-wrap gap-2 mt-2">
                             {(selectedParty.guardians || []).map((g, i) => (
@@ -782,8 +487,7 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                           </div>
                           <GuardianAddForm onAdd={(name, role) => handleAddGuardian(selectedParty, name, role)} />
                         </div>
-                      </div>
-                    )}
+                    </div>
                     {selectedParty.registrationLink && (selectedParty.partyType || 'internal') === 'external' && (
                       <p className="mb-3">
                         <strong>{t('admin.externalRegistrationLink')}:</strong>{' '}
@@ -797,44 +501,6 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                         <strong>{t('admin.whatsappNumber') || 'מספר וואטסאפ'}:</strong>{' '}
                         <span dir="ltr">{selectedParty.whatsappNumber}</span>
                       </p>
-                    )}
-                    {!selectedParty.whatsappNumber && selectedParty.registrations && selectedParty.registrations.length > 0 && takesOnSiteRegistrations(selectedParty) && (
-                      <div className="mt-4 space-y-4">
-                        <button
-                          onClick={() => exportRegistrationsByType(selectedParty)}
-                          className="bg-blue-600 hover:bg-blue-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm mr-2"
-                        >
-                          📊 {t('admin.exportRegistrations')}
-                        </button>
-                        <div className="mt-4 border-t border-[rgba(255,255,255,0.08)] pt-4">
-                          <h4 className="text-lg font-bold mb-3">{t('admin.registrationsList')}</h4>
-                          <div className="space-y-2 max-h-96 overflow-y-auto">
-                            {getRegistrationDisplayItems(selectedParty.registrations).map((item, idx) =>
-                              item.type === 'couple' ? (
-                                <CoupleRegistrationItem
-                                  key={`couple-${item.maleReg?.coupleId || idx}`}
-                                  maleReg={item.maleReg}
-                                  femaleReg={item.femaleReg}
-                                  partyId={selectedParty.id}
-                                  onConvertToUser={handleConvertClientToUser}
-                                  onRemoveFromParty={handleRemoveFromParty}
-                                  onSwapPartner={handleSwapCoupleRegistrationPartner}
-                                  allUsersMap={allUsersMap}
-                                />
-                              ) : (
-                                <RegistrationItem
-                                  key={`single-${item.registration?.phoneNumber || idx}`}
-                                  registration={item.registration}
-                                  partyId={selectedParty.id}
-                                  onConvertToUser={handleConvertClientToUser}
-                                  onRemoveFromParty={handleRemoveFromParty}
-                                  userFromMap={item.registration?.phoneNumber ? allUsersMap.get(item.registration.phoneNumber) : null}
-                                />
-                              )
-                            )}
-                          </div>
-                        </div>
-                      </div>
                     )}
                   </div>
                 )}

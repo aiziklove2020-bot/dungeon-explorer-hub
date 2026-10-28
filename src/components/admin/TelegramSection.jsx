@@ -4,7 +4,6 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import { getTelegramSettings, updateTelegramSettings, getTelegramSeenChats } from '../../firebase/settings';
 import { getRegistrationSettings } from '../../firebase/settings';
 import { getBotInfo, MESSAGE_KEYS, REGISTRATION_TYPE_KEYS, BALANCE_PUBLISH_TYPE_KEYS, VARIABLES_REFERENCE, buildMessagePreview, sendTelegramNotification } from '../../firebase/telegram';
-import { getAllAdvertisers } from '../../firebase/advertisers';
 import { adminAuthHeader } from '../../utils/adminApi';
 import { Plus, Trash2, Edit2, ChevronDown, ChevronRight, Send, Eye, Mail } from 'lucide-react';
 
@@ -77,10 +76,9 @@ const COUPLE_TEMPLATE_PLACEHOLDER = `שם הגבר: {{registration.fullName}}
 
 const genId = () => Math.random().toString(36).slice(2, 12);
 
-// Synthetic id representing the site admin's own directly-added parties
-// (which have no real advertiser doc / createdBy). Not a real advertiser —
-// added to the picker so an admin can explicitly opt their own content
-// into a restricted channel, matching the same allowlist mechanism.
+// Synthetic id representing the site's own parties in a channel's allowlist
+// (the server's broadcast honours allowedAdvertiserIds): a restricted channel
+// gets the site's parties only when this id is ticked.
 const ADMIN_PSEUDO_ADVERTISER_ID = '__admin__';
 
 // Telegram preview: render only the small subset of HTML tags that Telegram's
@@ -131,7 +129,6 @@ const TelegramSection = ({ showSaved }) => {
   const [sendMsgChannelIds, setSendMsgChannelIds] = useState([]);
   const [sendingMsg, setSendingMsg] = useState(false);
   const [sendMsgResult, setSendMsgResult] = useState(null);
-  const [advertisers, setAdvertisers] = useState([]);
   const [seenChats, setSeenChats] = useState([]);
 
   const refreshSeenChats = () => getTelegramSeenChats().then(setSeenChats).catch(() => {});
@@ -148,7 +145,6 @@ const TelegramSection = ({ showSaved }) => {
   const load = async () => {
     setLoading(true);
     try {
-      getAllAdvertisers().then((all) => setAdvertisers(all.filter((a) => a.status === 'approved'))).catch(() => setAdvertisers([]));
       const [tg, reg] = await Promise.all([getTelegramSettings(), getRegistrationSettings()]);
       if (tg.legacy) {
         setLegacy(tg.legacy);
@@ -290,13 +286,9 @@ const TelegramSection = ({ showSaved }) => {
     setChannels((prev) => prev.map((c) => (c.id === id ? { ...c, broadcastEnabled: c.broadcastEnabled === false } : c)));
   };
 
-  // Restricts WHICH advertisers' parties may be posted into this channel —
-  // separate from the on/off switch above. Empty/absent allowedAdvertiserIds
-  // means "everyone" (current default); once restricted, ONLY parties
-  // created by one of the checked advertisers go there — a party with no
-  // advertiser attached (e.g. added directly by the site admin) is
-  // deliberately excluded rather than given a free pass, so a mistake can
-  // never leak it into a competitor's group.
+  // Restricts this channel — separate from the on/off switch above.
+  // Empty/absent allowedAdvertiserIds means "everything" (default); once
+  // restricted, the site's parties go there only when ticked.
   const toggleChannelRestricted = (id) => {
     setChannels((prev) => prev.map((c) => {
       if (c.id !== id) return c;
@@ -315,7 +307,7 @@ const TelegramSection = ({ showSaved }) => {
   };
 
   // A group/channel the bot was added to that is not in the list yet. It is added
-  // restricted to nobody, so no party is posted there until a producer is ticked.
+  // restricted, so no party is posted there until the site's parties are ticked.
   const addSeenChat = (chat) => {
     setChannels((prev) => (prev.some((c) => String(c.chatId) === String(chat.id))
       ? prev
@@ -676,7 +668,7 @@ const TelegramSection = ({ showSaved }) => {
                         onChange={() => toggleChannelRestricted(c.id)}
                       />
                       <span className="text-[#c0aebb]">
-                        רק מפרסמים נבחרים מותרים לפרסם כאן
+                        הגבלת פרסום בקבוצה הזו
                       </span>
                     </label>
                     {Array.isArray(c.allowedAdvertiserIds) && (
@@ -687,21 +679,8 @@ const TelegramSection = ({ showSaved }) => {
                             checked={c.allowedAdvertiserIds.includes(ADMIN_PSEUDO_ADVERTISER_ID)}
                             onChange={() => toggleChannelAdvertiser(c.id, ADMIN_PSEUDO_ADVERTISER_ID)}
                           />
-                          <span className="text-amber-400">אני (המנהל הראשי)</span>
+                          <span className="text-amber-400">לפרסם כאן את המסיבות של האתר</span>
                         </label>
-                        {advertisers.length === 0 && (
-                          <span className="text-[#64748B] text-xs">אין מפרסמים מאושרים</span>
-                        )}
-                        {advertisers.map((a) => (
-                          <label key={a.id} className="flex items-center gap-1 cursor-pointer text-xs bg-[#2a1a24]/80 border border-[rgba(255,255,255,0.08)] rounded-lg px-2 py-1">
-                            <input
-                              type="checkbox"
-                              checked={c.allowedAdvertiserIds.includes(a.id)}
-                              onChange={() => toggleChannelAdvertiser(c.id, a.id)}
-                            />
-                            {a.businessName || a.contactName || a.phoneNumber}
-                          </label>
-                        ))}
                       </div>
                     )}
                   </div>

@@ -4,10 +4,9 @@ process.env.SILENT_DAYS_OFF = '1'; // the mourning-day guard is tested in silent
 const lines = [];
 const docs = {
   parties: [
-    { id: 'a', data: () => ({ title: 'מסיבה קרובה', partyType: 'internal', date: new Date(Date.now() + 20 * 3600 * 1000).toISOString(), registrations: [{ registrationType: 'single-female-balance', phoneNumber: '1' }], balanceMatches: [] }) },
-    { id: 'b', data: () => ({ title: 'ריקה', partyType: 'internal', date: new Date(Date.now() + 40 * 3600 * 1000).toISOString(), registrations: [] }) },
+    { id: 'a', data: () => ({ title: 'מסיבה קרובה', partyType: 'internal', date: new Date(Date.now() + 20 * 3600 * 1000).toISOString() }) },
+    { id: 'b', data: () => ({ title: 'ריקה', partyType: 'internal', date: new Date(Date.now() + 40 * 3600 * 1000).toISOString() }) },
   ],
-  subscriptionRequests: [{ id: 'r', data: () => ({ status: 'pending' }) }],
   pushSubscriptions: [{ id: 'p', data: () => ({}) }],
 };
 const db = {
@@ -28,12 +27,13 @@ const { runDailyStandup } = await import('../../api/telegram-webhook.js');
 describe('daily team meeting', () => {
   it('has the agents report real numbers and hand work to each other', async () => {
     const out = await runDailyStandup({ health: { ok: true, problems: [] } });
-    expect(out).toMatchObject({ ok: true, parties: 2, registrations: 1, pending: 1 });
+    expect(out).toMatchObject({ ok: true, parties: 2 });
     const texts = lines.map((l) => l.text).join('\n');
     expect(texts).toContain('2 מסיבות פעילות');
-    expect(texts).toContain('בקשות הצטרפות כמנוי');
-    expect(lines.some((l) => l.agent === 'matcher' && l.to === 'notifier')).toBe(true);
+    expect(texts).not.toMatch(/מנוי|נרשמים|איזון/);
+    expect(lines.some((l) => l.agent === 'secretary' && l.to === 'publisher')).toBe(true);
+    expect(lines.some((l) => ['matcher', 'recruiter'].includes(l.agent))).toBe(false);
     expect(lines.at(-1).agent).toBe('fixer');
-    expect(new Set(lines.map((l) => l.agent)).size).toBeGreaterThanOrEqual(8);
+    expect(new Set(lines.map((l) => l.agent)).size).toBeGreaterThanOrEqual(7);
   });
 });

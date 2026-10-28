@@ -44,13 +44,9 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
       time: party.time || '',
       dj: party.dj || '',
       imageURL: party.imageURL || '',
-      maleLimit: party.maleLimit || 100,
-      femaleLimit: party.femaleLimit || 100,
       registrationLink: party.registrationLink || '',
       whatsappNumber: party.whatsappNumber || '',
       partyType: party.partyType || 'internal',
-      allowBalanceRegistration: party.allowBalanceRegistration === true,
-      registrationMode: ['open', 'closed'].includes(party.registrationMode) ? party.registrationMode : 'auto',
       category: party.category || '',
       city: party.city || '',
       badge: party.badge || '',
@@ -75,8 +71,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
     }
 
     // Block phone numbers inside the description so contact goes through the
-    // dedicated WhatsApp field (which the site uses to build the wa.me link and
-    // to keep the party out of the on-site registration list). Normalize away
+    // dedicated WhatsApp field (which the site uses to build the wa.me link). Normalize away
     // spaces/dashes/parens/dots so "055-936 4370" is caught the same as a plain
     // number; the pattern targets Israeli mobile/landline (0…) and +972 forms.
     const normalizedDesc = String(formData.description || '').replace(/[\s\-().]/g, '');
@@ -121,8 +116,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
     const dataToSave = {
       ...formData,
       imageURL: finalImageUrl,
-      date: localMidnight,
-      allowBalanceRegistration: formData.partyType === 'external' && formData.allowBalanceRegistration === true
+      date: localMidnight
     };
     
     try {
@@ -199,30 +193,6 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
             className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
           />
         </div>
-        {!formData.whatsappNumber?.trim() && (
-          <>
-            <div className="space-y-1 text-right">
-              <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.maleLimit')}</label>
-              <input
-                type="number"
-                value={formData.maleLimit}
-                onChange={e => setFormData(prev => ({...prev, maleLimit: parseInt(e.target.value) || 0}))}
-                className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
-                min="0"
-              />
-            </div>
-            <div className="space-y-1 text-right">
-              <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.femaleLimit')}</label>
-              <input
-                type="number"
-                value={formData.femaleLimit}
-                onChange={e => setFormData(prev => ({...prev, femaleLimit: parseInt(e.target.value) || 0}))}
-                className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
-                min="0"
-              />
-            </div>
-          </>
-        )}
         <div className="space-y-1 text-right">
           <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.partyType')} *</label>
           <select
@@ -392,20 +362,6 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           onChange={(value) => setFormData(prev => ({...prev, imageURL: value}))}
         />
       </div>
-      <div>
-        <label className="block text-sm font-bold text-[#c0aebb] mb-1">מצב ההרשמה</label>
-        <select
-          value={formData.registrationMode || 'auto'}
-          onChange={e => setFormData(prev => ({ ...prev, registrationMode: e.target.value }))}
-          className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
-        >
-          <option value="auto">פתוחה (עד שתסגור ידנית)</option>
-          <option value="open">פתוחה (סימון מפורש)</option>
-          <option value="closed">סגורה (ידנית)</option>
-        </select>
-        <p className="text-[#94A3B8] text-xs mt-1">אפשר לפתוח או לסגור את ההרשמה למסיבה הזו בכל רגע. שמירה מעדכנת את האתר מיד.</p>
-      </div>
-
       {formData.partyType === 'external' && (
         <div className="space-y-1 text-right">
           <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.partyPageUrl')} *</label>
@@ -420,22 +376,10 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           <p className="text-[#94A3B8] text-xs mt-1">
             {t('admin.externalPartyUrlRequired')}
           </p>
-          <label className="flex items-start gap-2 mt-3 cursor-pointer text-white text-sm">
-            <input
-              type="checkbox"
-              checked={!!formData.allowBalanceRegistration}
-              onChange={e => setFormData(prev => ({...prev, allowBalanceRegistration: e.target.checked}))}
-              className="mt-1 accent-[#ff438b]"
-            />
-            <span>לאפשר גם הרשמה דרך האתר (כל סוגי ההרשמה)</span>
-          </label>
-          <p className="text-[#94A3B8] text-xs">
-            כל סוגי ההרשמה (זוגות, סינגלים וסינגליות לאיזון מגדרי ועוד) יהיו זמינים גם דרך האתר, והכרטיסים ימשיכו להימכר בלינק החיצוני. זוגות שנרשמו וזוגות שיאוזנו יופיעו אצל המפיק באזור המפרסם עם שם, כינוי טלגרם ומספר טלפון.
-          </p>
         </div>
       )}
       <div className="space-y-1 text-right">
-        <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.whatsappNumber') || 'מספר וואטסאפ ליצירת קשר'}</label>
+        <label className="text-xs uppercase font-bold text-[#94A3B8]">מספר וואטסאפ להרשמה</label>
         <input
           type="tel"
           value={formData.whatsappNumber}
@@ -445,7 +389,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           dir="ltr"
         />
         <p className="text-[#94A3B8] text-xs mt-1">
-          {t('admin.whatsappNumberHint') || 'הזינו רק מספר טלפון - הקישור לוואטסאפ ייווצר אוטומטית'}
+          ההרשמה למסיבה בוואטסאפ בלבד. אם משאירים ריק, הכפתור באתר שולח הודעה למספר של האתר (055-9364370).
         </p>
       </div>
       <div className="flex flex-col sm:flex-row gap-2">

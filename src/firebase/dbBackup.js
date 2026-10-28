@@ -29,7 +29,6 @@ const BATCH_SIZE = 500;
 const TOP_LEVEL_COLLECTIONS = [
   'users',
   'parties',
-  'registrations',
   'storeProducts',
   'storeOrders',
   'rssFeeds',

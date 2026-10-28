@@ -13,8 +13,6 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LanguageProvider } from "../i18n/LanguageContext";
-import { SiteAuthProvider } from "../context/AuthContext";
-import { ForumAuthProvider } from "../context/ForumAuthContext";
 import SupportChat from "../SupportChat";
 
 function NotFoundComponent() {
@@ -150,13 +148,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <SiteAuthProvider>
-          <ForumAuthProvider>
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-            {!isAdmin && <SupportChat />}
-          </ForumAuthProvider>
-        </SiteAuthProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+        {!isAdmin && <SupportChat />}
       </LanguageProvider>
     </QueryClientProvider>
   );

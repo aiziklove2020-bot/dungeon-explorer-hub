@@ -55,8 +55,7 @@ function serializePartiesArray(active) {
     dj: p.dj || '',
     title: p.title || '',
     registrationLink: p.registrationLink || '',
-    status: p.status || 'active',
-    registrations: p.registrations || []
+    status: p.status || 'active'
   }));
 }
 
@@ -147,8 +146,8 @@ export async function importParties(jsonData) {
   }
 }
 
-/** Download everything (content, parties, settings, registrations) as a single JSON file. */
-export async function exportAllData(registrationsCache) {
+/** Download everything (content, parties, settings) as a single JSON file. */
+export async function exportAllData() {
   const [active, socialLinks, whatsappGroups, telegramSettings, aboutStory, contentData, registrationSettings] = await Promise.all([
     getActiveParties(),
     getSocialLinks(),
@@ -185,10 +184,6 @@ export async function exportAllData(registrationsCache) {
     parties: {
       active: serializePartiesArray(activeArray)
     },
-    registrations: (registrationsCache || []).map((r) => ({
-      ...r,
-      submittedAt: r.submittedAt instanceof Date ? r.submittedAt.toISOString() : r.submittedAt
-    })),
     exportDate: new Date().toISOString()
   };
 

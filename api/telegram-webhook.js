@@ -227,15 +227,6 @@ async function sendReminderToChat(botToken, chatId, party) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const PROMO_MESSAGE = [
-  '📣 מעוניינים לפרסם את המסיבה שלכם?',
-  '',
-  'בואו באהבה 🩶 כל פרסום מסיבות בקבוצה נעשה רק דרך לינק אחד — אתר הקהילה. ככה כולם רואים את כל המסיבות במקום אחד, מסודר וברור.',
-  '',
-  'להרשמה כמפרסם ופרסום המסיבה שלכם:',
-  'https://www.libralparty.net/advertiser-register'
-].join('\n');
-
 function isPromoAuthorized(req) {
   const secret = process.env.TELEGRAM_PROMO_SECRET;
   if (!secret) return false; // must be explicitly configured — no lenient default for a public-facing job
@@ -458,47 +449,6 @@ async function handleMigrateSupportChatSecret(req, res) {
   }
 }
 
-async function handleListDeleteRequests(req, res) {
-  if (!requireAdminApiSecret(req, res)) return;
-  try {
-    const admin = await initAdmin();
-    const snap = await admin.firestore().collection('deleteRequests').orderBy('createdAt', 'desc').limit(200).get();
-    const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    return res.status(200).json({ ok: true, rows });
-  } catch (err) {
-    console.error('list-delete-requests:', err);
-    return res.status(500).json({ error: err.message || 'Internal error' });
-  }
-}
-
-const DELETE_REQUEST_STATUSES = new Set(['pending', 'done', 'dismissed']);
-
-// GET ?job=process-delete-request&requestId=<x>&status=<pending|done|dismissed>
-// Marks the request's status — this endpoint does NOT itself delete any
-// user data (that stays a deliberate manual step for the admin, given how
-// much a phone number can touch: users, registrations, forum posts, chat
-// messages), it just tracks that the request was seen and handled.
-async function handleProcessDeleteRequest(req, res) {
-  if (!requireAdminApiSecret(req, res)) return;
-  const url = new URL(req.url, 'http://x');
-  const requestId = req.query?.requestId || url.searchParams.get('requestId');
-  const status = req.query?.status || url.searchParams.get('status');
-  if (!requestId || !DELETE_REQUEST_STATUSES.has(status)) {
-    return res.status(400).json({ error: 'Missing requestId or invalid status' });
-  }
-  try {
-    const admin = await initAdmin();
-    await admin.firestore().collection('deleteRequests').doc(requestId).update({
-      status,
-      processedAt: new Date().toISOString(),
-    });
-    return res.status(200).json({ ok: true });
-  } catch (err) {
-    console.error('process-delete-request:', err);
-    return res.status(500).json({ error: err.message || 'Internal error' });
-  }
-}
-
 // GET ?job=fix-chatids — one-off correction for channels whose chatId was
 // entered without the "-100" supergroup prefix (e.g. "-3989635097" instead
 // of "-1003989635097"), discovered via ?job=recent-chats. sanitizeChatId()
@@ -601,38 +551,6 @@ async function handleTestGroup(req, res) {
     return res.status(500).json({ error: err.message || 'Internal error' });
   }
 }
-
-async function handleGroupPromo(req, res) {
-  if (!isPromoAuthorized(req)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  if (!botToken) {
-    return res.status(503).json({ error: 'Server not configured (missing TELEGRAM_BOT_TOKEN)' });
-  }
-  try {
-    const res2 = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: REMINDER_GROUP_CHAT_ID, text: PROMO_MESSAGE })
-    });
-    const data = await res2.json();
-    return res.status(200).json({ ok: data.ok, description: data.description });
-  } catch (err) {
-    console.error('group-promo:', err);
-    return res.status(500).json({ error: err.message || 'Internal error' });
-  }
-}
-
-// Core sending logic, shared by the scheduled cron path and the admin
-// "פרסם מסיבות לטלגרם" manual-trigger button — only the auth check differs
-// between the two callers.
-// A stuck/retried invocation re-running the full send loop is exactly what
-// caused the duplicate-spam incident this fixes — guard against it with a
-// short Firestore lock. Any invocation that starts while another is still
-// "active" (per its own last-heartbeat, not just a fixed TTL) is rejected
-// outright rather than silently resending everything.
-const BROADCAST_LOCK_STALE_MS = 90_000;
 
 async function acquireBroadcastLock(admin) {
   const ref = admin.firestore().collection('settings').doc('telegramBroadcastLock');
@@ -986,49 +904,6 @@ export async function sendInstagramCampaignIfDue({ force = false } = {}) {
   }
 }
 
-// ── Weekly "want to advertise your party?" message to the group ────────────
-// Used to depend on an external pinger (cron-job.org) hitting ?job=promo; now
-// the daily reminders cron also posts it on Mondays and Thursdays (Israel
-// time), with the same short lock as the campaigns so a retry never doubles it.
-const PROMO_DAYS = [1, 4];
-const PROMO_MIN_GAP_MS = 20 * 60 * 60 * 1000;
-
-export async function sendGroupPromoIfDue({ force = false } = {}) {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  if (!botToken) return { ok: false, error: 'missing TELEGRAM_BOT_TOKEN' };
-  const admin = await initAdmin();
-  const db = admin.firestore();
-  const agentCfg = (await getAgentConfig(db)).recruiter || {};
-  if (!force && agentCfg.paused) return { ok: true, skipped: 'paused by the owner' };
-  const promoDays = Array.isArray(agentCfg.days) && agentCfg.days.length ? agentCfg.days : PROMO_DAYS;
-  if (!force && !promoDays.includes(israelWeekday())) return { ok: true, skipped: 'not a promo day' };
-  const ref = db.collection('settings').doc('telegramGroupPromo');
-  const now = Date.now();
-  const previous = await db.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    const last = snap.exists ? snap.data()?.lastSentAt : null;
-    if (!force && last && now - last < PROMO_MIN_GAP_MS) return undefined;
-    tx.set(ref, { lastSentAt: now }, { merge: true });
-    return last ?? null;
-  });
-  if (previous === undefined) return { ok: true, skipped: 'already sent recently' };
-  const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: REMINDER_GROUP_CHAT_ID, text: PROMO_MESSAGE })
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!data.ok) {
-    await ref.set({ lastSentAt: previous }, { merge: true }).catch(() => {});
-    const why = data.description || `HTTP ${res.status}`;
-    await agentSay('recruiter', `לא הצלחתי לשלוח לקבוצה "מסיבות בישראל": ${why}. ${/not enough rights|kicked|not a member|chat not found|forbidden/i.test(why) ? 'הבוט צריך להיות בקבוצה ולקבל הרשאה לפרסם הודעות.' : ''}`.trim());
-    return { ok: false, description: why };
-  }
-  await agentSay('recruiter', 'שלחתי לקבוצה "מסיבות בישראל" את ההודעה למפרסמים ✅');
-  return { ok: true };
-}
-
-
 // ── Daily health check ─────────────────────────────────────────────────────
 // Runs with the daily reminders cron: opens the key pages and assets of the
 // live site, checks Firestore and the Telegram bot, and that the campaign
@@ -1167,12 +1042,11 @@ async function handlePartyReminders(req, res) {
     }
     const announcements = await sendAnnouncementsOnce().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const campaign = await sendCampaignPost().catch((err) => ({ ok: false, error: String(err?.message || err) }));
-    const groupPromo = await sendGroupPromoIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const tiktok = await sendTiktokPostIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const instagramCampaign = await sendInstagramCampaignIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const health = await runHealthCheck().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const standup = await runDailyStandup({ health }).catch((err) => ({ ok: false, error: String(err?.message || err) }));
-    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, announcements, campaign, groupPromo, tiktok, instagramCampaign, health, standup });
+    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, announcements, campaign, tiktok, instagramCampaign, health, standup });
   } catch (err) {
     console.error('party-reminders:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
@@ -1216,27 +1090,13 @@ async function handleManualPost(req, res) {
  * from the public site's loadEvents(), so real traffic drives near-real-time
  * cleanup) and by this file's existing cron as a backstop. Safe to call
  * anytime — it only deletes docs already past their own stored expiration.
- *
- * Also deletes `users` docs that only ever existed as a one-time "day pass"
- * — i.e. an admin explicitly approved them for a single party via the
- * balance table's "one-time approval" button (createUserFromRegistration
- * with tier: 'day' — see src/firebase/users.js), never a real annual
- * subscriber. Scoped tightly to avoid touching anyone real:
- *   - subscriptions.parties.tier === 'day' (never set for a 'year' member)
- *   - their one-day pass has already lapsed (expiry in the past)
- *   - no forumUsers doc links to them (linkedUserId) — a linked doc means
- *     this is someone's actual community account's site-user record, so it
- *     stays regardless of subscription tier.
  */
-const WOMEN_STARTER_PASSWORD = '102040';
-
 async function handleCleanupExpiredParties(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const admin = await initAdmin();
     const db = admin.firestore();
     const now = admin.firestore.Timestamp.now();
-    const nowIso = new Date().toISOString();
 
     const partiesSnap = await db.collection('parties').where('expiration', '<=', now).get();
     let deletedParties = 0;
@@ -1246,120 +1106,9 @@ async function handleCleanupExpiredParties(req, res) {
       await batch.commit();
       deletedParties = partiesSnap.size;
     }
-    // The anonymous match chats die with their party (also catches parties an admin deleted by hand).
-    try { await deleteOrphanMatchChats(db); } catch (err) { console.error('deleteOrphanMatchChats:', err?.message || err); }
-
-    let deletedUsers = 0;
-    const dayPassSnap = await db.collection('users').where('subscriptions.parties.tier', '==', 'day').get();
-    const lapsed = dayPassSnap.docs.filter((d) => {
-      const expiry = d.data()?.subscriptions?.parties?.expiry;
-      return typeof expiry === 'string' && expiry <= nowIso;
-    });
-    if (lapsed.length > 0) {
-      // Firestore's `in` operator caps at 30 values per query — chunk so a
-      // large batch of lapsed day-passes still gets every id checked for a
-      // forum-account link, instead of silently skipping the check (and
-      // deleting) past the first 30.
-      const lapsedIds = lapsed.map((d) => d.id);
-      const linkedIds = new Set();
-      for (let i = 0; i < lapsedIds.length; i += 30) {
-        const chunk = lapsedIds.slice(i, i + 30);
-        const linkedSnap = await db.collection('forumUsers').where('linkedUserId', 'in', chunk).get();
-        linkedSnap.docs.forEach((d) => linkedIds.add(d.data()?.linkedUserId));
-      }
-      const toDelete = lapsed.filter((d) => !linkedIds.has(d.id));
-      if (toDelete.length > 0) {
-        const userBatch = db.batch();
-        toDelete.forEach((d) => userBatch.delete(d.ref));
-        await userBatch.commit();
-        deletedUsers = toDelete.length;
-      }
-    }
-
-    // Every woman gets the lifetime ("gold") parties subscription. The public
-    // registration form can't grant gold itself (firestore.rules rejects any
-    // client write setting a gold tier), so a newly registered woman starts on
-    // the yearly tier, which already gives full access, and is moved to gold
-    // here. Idempotent: only touches women not already on gold, and leaves
-    // an exchange-parties subscription and an admin/blocked level alone.
-    let upgradedWomen = 0;
-    const womenSnap = await db.collection('users').where('gender', '==', 'female').get();
-    const needGold = womenSnap.docs.filter((d) => d.data()?.subscriptions?.parties?.tier !== 'gold');
-    for (let i = 0; i < needGold.length; i += 400) {
-      const batch = db.batch();
-      needGold.slice(i, i + 400).forEach((d) => {
-        const data = d.data() || {};
-        const subs = data.subscriptions && typeof data.subscriptions === 'object' && !Array.isArray(data.subscriptions)
-          ? data.subscriptions : {};
-        const startDate = typeof subs.parties?.startDate === 'string' ? subs.parties.startDate : nowIso;
-        const update = {
-          subscriptions: {
-            parties: { tier: 'gold', expiry: null, startDate, lastRenewedAt: nowIso, lastRenewalTier: 'gold' },
-            exchangeParties: subs.exchangeParties || null,
-          },
-          registrationExpiry: null,
-          registrationStartDate: startDate,
-        };
-        if (data.level !== 'admin' && data.level !== 'blocked' && !data.isAdmin) update.level = 'gold';
-        batch.update(d.ref, update);
-      });
-      await batch.commit();
-    }
-    upgradedWomen = needGold.length;
-
-    // Every woman can sign in to the personal area: women without a community
-    // (forumUsers) account get one with the shared starter password the owner
-    // chose. Idempotent — a woman who already has an
-    // account (found by phone) is left untouched, so a password she set herself
-    // is never overwritten. Blocked women are skipped.
-    const forumSnap = await db.collection('forumUsers').get();
-    const takenPhones = new Set(forumSnap.docs.map((d) => String(d.data()?.phone || '').replace(/\D/g, '')));
-    const takenNicks = new Set(forumSnap.docs.map((d) => String(d.data()?.nicknameLower || '')));
-    const needAccount = womenSnap.docs.filter((d) => {
-      const data = d.data() || {};
-      const phone = String(data.phoneNumber || '').replace(/\D/g, '');
-      return /^05\d{8}$/.test(phone) && data.level !== 'blocked' && !takenPhones.has(phone);
-    });
-    let createdWomenAccounts = 0;
-    if (needAccount.length > 0) {
-      const bcrypt = (await import('bcryptjs')).default;
-      const starterHash = await bcrypt.hash(WOMEN_STARTER_PASSWORD, 10);
-      for (let i = 0; i < needAccount.length; i += 400) {
-        const batch = db.batch();
-        needAccount.slice(i, i + 400).forEach((d) => {
-          const phone = String(d.data().phoneNumber).replace(/\D/g, '');
-          if (takenPhones.has(phone)) return;
-          const nickname = `lp${phone}`;
-          if (takenNicks.has(nickname)) return;
-          takenPhones.add(phone);
-          takenNicks.add(nickname);
-          batch.set(db.collection('forumUsers').doc(), {
-            nickname,
-            nicknameLower: nickname,
-            displayName: String(d.data().name || '').trim(),
-            password: starterHash,
-            phone,
-            gender: 'female',
-            role: 'user',
-            isBlocked: false,
-            isApproved: true,
-            linkedUserId: d.id,
-            createdAt: admin.firestore.Timestamp.now(),
-          });
-          createdWomenAccounts += 1;
-        });
-        await batch.commit();
-      }
-    }
-
-    const parts = [];
-    if (deletedParties) parts.push(`${deletedParties} מסיבות שעבר זמנן`);
-    if (deletedUsers) parts.push(`${deletedUsers} מנויי יום שפג תוקפם`);
-    if (upgradedWomen) parts.push(`${upgradedWomen} נשים עברו למנוי לכל החיים`);
-    if (createdWomenAccounts) parts.push(`${createdWomenAccounts} חשבונות כניסה חדשים לנשים`);
-    await agentSay('cleaner', parts.length ? `סיימתי ניקיון לילי: ${parts.join(', ')}.` : 'ניקיון לילי: אין מה לנקות, הכל מסודר ✅');
+    await agentSay('cleaner', deletedParties ? `סיימתי ניקיון לילי: נמחקו ${deletedParties} מסיבות שעבר זמנן.` : 'ניקיון לילי: אין מה לנקות, הכל מסודר ✅');
     try { await db.collection('settings').doc('cleanupLast').set({ at: Date.now(), deleted: deletedParties }, { merge: true }); } catch { /* stats only */ }
-    return res.status(200).json({ ok: true, deleted: deletedParties, deletedDayPassUsers: deletedUsers, upgradedWomen, createdWomenAccounts });
+    return res.status(200).json({ ok: true, deleted: deletedParties });
   } catch (err) {
     return res.status(200).json({ ok: false, deleted: 0, error: String(err?.message || err) });
   }
@@ -1487,113 +1236,11 @@ export async function sendPushUpdateNow({ scope = '' } = {}) {
 }
 
 
-// ── Anonymous chat between the two sides of a balance match ────────────────
-// Lives in `matchChats/{partyId}_{malePhone}_{femalePhone}` with a `messages` subcollection. Clients never
-// touch it (no Firestore rule opens it): every read/write goes through ?job=match-chat, which first checks
-// that the caller's phone is one side of a matched, non-couple pair of that party. Nobody ever sees a name
-// or a phone number in the chat. The chat is deleted together with its party (deleteOrphanMatchChats).
-const MATCH_CHAT_MAX_TEXT = 500;
-const MATCH_CHAT_MAX_MESSAGES = 300;
-
-function normPhone(p) {
-  let d = String(p || '').replace(/\D/g, '');
-  if (d.startsWith('972')) d = '0' + d.slice(3);
-  return d;
-}
-
-async function deleteChatDoc(db, ref) {
-  const msgs = await ref.collection('messages').get();
-  for (let i = 0; i < msgs.docs.length; i += 400) {
-    const batch = db.batch();
-    msgs.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
-    await batch.commit();
-  }
-  await ref.delete();
-}
-
-async function deleteOrphanMatchChats(db) {
-  const chats = await db.collection('matchChats').get();
-  let removed = 0;
-  for (const chat of chats.docs) {
-    const partyId = chat.data()?.partyId || chat.id.split('_')[0];
-    const party = partyId ? await db.collection('parties').doc(partyId).get() : null;
-    if (!party || !party.exists) {
-      await deleteChatDoc(db, chat.ref);
-      removed++;
-    }
-  }
-  return removed;
-}
-
-async function notifyMatchChatPartner(db, partnerPhone) {
-  const privateKey = process.env.VAPID_PRIVATE_KEY;
-  if (!privateKey || !partnerPhone) return;
-  const subs = (await db.collection('pushSubscriptions').where('phone', '==', partnerPhone).get()).docs.map((d) => ({ id: d.id, ...d.data() }));
-  if (!subs.length) return;
-  const webpush = (await import('web-push')).default;
-  webpush.setVapidDetails('mailto:admin@libralparty.co.il', VAPID_PUBLIC_KEY, privateKey);
-  const payload = JSON.stringify({ title: '💬 הודעה חדשה מההתאמה שלך', body: 'היכנסו לאזור האישי כדי לענות', url: '/profile' });
-  await Promise.all(subs.map((sub) => webpush.sendNotification({ endpoint: sub.endpoint, keys: sub.keys }, payload).catch(() => {})));
-}
-
-// POST ?job=match-chat  body { action: 'list' | 'send', phone, partyId, text?, after? }
-async function handleMatchChat(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-    const me = normPhone(body.phone);
-    const partyId = typeof body.partyId === 'string' ? body.partyId : '';
-    if (!/^0\d{8,9}$/.test(me) || !partyId || partyId.includes('/')) return res.status(400).json({ ok: false, error: 'bad request' });
-
-    const admin = await initAdmin();
-    const db = admin.firestore();
-    const party = await db.collection('parties').doc(partyId).get();
-    if (!party.exists) return res.status(200).json({ ok: false, error: 'המסיבה כבר לא קיימת' });
-    const match = (party.data().balanceMatches || []).find(
-      (m) => m.isMatched && !m.isCouple && (normPhone(m.malePhone) === me || normPhone(m.femalePhone) === me)
-    );
-    if (!match) return res.status(200).json({ ok: false, error: 'אין לכם התאמה פעילה לצ׳אט' });
-    const role = normPhone(match.malePhone) === me ? 'male' : 'female';
-    const partner = role === 'male' ? normPhone(match.femalePhone) : normPhone(match.malePhone);
-    const chatRef = db.collection('matchChats').doc(`${partyId}_${normPhone(match.malePhone)}_${normPhone(match.femalePhone)}`);
-
-    if (body.action === 'send') {
-      const text = String(body.text || '').trim().slice(0, MATCH_CHAT_MAX_TEXT);
-      if (!text) return res.status(400).json({ ok: false, error: 'הודעה ריקה' });
-      const now = Date.now();
-      let notify = false;
-      await db.runTransaction(async (tx) => {
-        const snap = await tx.get(chatRef);
-        const chat = snap.exists ? snap.data() || {} : {};
-        if ((chat.count || 0) >= MATCH_CHAT_MAX_MESSAGES) throw new Error('הצ׳אט הגיע למגבלת ההודעות');
-        if (chat.lastAt && now - chat.lastAt < 700) throw new Error('לאט יותר, נסו שוב בעוד רגע');
-        const notifiedKey = role === 'male' ? 'notifiedFemaleAt' : 'notifiedMaleAt';
-        notify = !chat[notifiedKey] || now - chat[notifiedKey] > 3 * 60 * 1000;
-        tx.set(chatRef, {
-          partyId, malePhone: normPhone(match.malePhone), femalePhone: normPhone(match.femalePhone),
-          createdAt: chat.createdAt || now, lastAt: now, count: (chat.count || 0) + 1,
-          ...(notify ? { [notifiedKey]: now } : {})
-        }, { merge: true });
-        tx.set(chatRef.collection('messages').doc(), { from: role, text, at: now });
-      });
-      if (notify) notifyMatchChatPartner(db, partner).catch(() => {});
-    }
-
-    const after = Number(body.after) || 0;
-    const snap = await chatRef.collection('messages').where('at', '>', after).orderBy('at', 'asc').limit(200).get();
-    const messages = snap.docs.map((d) => ({ id: d.id, mine: d.data().from === role, text: d.data().text, at: d.data().at }));
-    return res.status(200).json({ ok: true, messages });
-  } catch (err) {
-    return res.status(200).json({ ok: false, error: String(err?.message || err) });
-  }
-}
-
-
 // ── Daily team meeting ──────────────────────────────────────────────────────
 // Every day the agents go over the site together in the team chat. Every line is built from real numbers
-// read from the database (parties, registrations, matches, subscriptions, push devices, the last
-// campaign/health check), so the chat shows what is really going on; nothing is invented. שון runs the
-// meeting. Agents hand things to each other with "@name" when the numbers call for it.
+// read from the database (parties, push devices, the last campaign/health check), so the chat shows what
+// is really going on; nothing is invented. שון runs the meeting. Agents hand things to each other with
+// "@name" when the numbers call for it. There are no site accounts: registration is by WhatsApp.
 export async function runDailyStandup({ health } = {}) {
   const admin = await initAdmin();
   const db = admin.firestore();
@@ -1603,20 +1250,7 @@ export async function runDailyStandup({ health } = {}) {
 
   const parties = (await db.collection('parties').get()).docs.map((d) => ({ id: d.id, ...d.data() })).filter((p) => p.status !== 'inactive');
   const upcoming = parties.filter((p) => !Number.isFinite(toMs(p.date)) || toMs(p.date) >= now - 6 * 3600 * 1000).sort((a, b) => toMs(a.date) - toMs(b.date));
-  const regCount = (p) => (Array.isArray(p.registrations) ? p.registrations.length : 0);
-  const totalRegs = upcoming.reduce((n, p) => n + regCount(p), 0);
-  const closed = upcoming.filter((p) => p.registrationMode === 'closed').length;
   const soon = upcoming.filter((p) => toMs(p.date) - now < 2 * dayMs);
-  const quiet = upcoming.filter((p) => p.partyType !== 'external' && regCount(p) === 0 && toMs(p.date) - now < 3 * dayMs);
-  let pairs = 0;
-  let waiting = 0;
-  upcoming.forEach((p) => {
-    const m = (p.balanceMatches || []).filter((x) => x.isMatched && !x.isCouple);
-    pairs += m.length;
-    const matchedPhones = new Set(m.flatMap((x) => [x.malePhone, x.femalePhone]));
-    waiting += (p.registrations || []).filter((r) => String(r.registrationType || '').includes('balance') && !matchedPhones.has(r.phoneNumber)).length;
-  });
-  const pending = (await db.collection('subscriptionRequests').where('status', '==', 'pending').get().catch(() => ({ size: 0 }))).size;
   const pushDevices = (await db.collection('pushSubscriptions').get().catch(() => ({ size: 0 }))).size;
   const camp = (await db.collection('settings').doc('telegramCampaigns').get().catch(() => null))?.data?.() || {};
   const tik = (await db.collection('settings').doc('tiktokPosts').get().catch(() => null))?.data?.() || {};
@@ -1625,25 +1259,19 @@ export async function runDailyStandup({ health } = {}) {
   const problems = Array.isArray(health?.problems) ? health.problems : [];
 
   const say = (agent, text, to) => agentSay(agent, text, to);
-  await say('fixer', `בוקר טוב צוות, ישיבת הבוקר. באתר ${upcoming.length} מסיבות פעילות, ${totalRegs} נרשמים בסך הכל. כל אחד מדווח מהתחום שלו.`);
+  await say('fixer', `בוקר טוב צוות, ישיבת הבוקר. באתר ${upcoming.length} מסיבות פעילות. כל אחד מדווח מהתחום שלו.`);
   await say('doctor', problems.length ? `בדקתי את האתר: מצאתי ${problems.length} בעיות (${problems.slice(0, 2).join('; ')}).` : 'בדקתי את כל הדפים, הקבצים, בסיס הנתונים והבוט. הכל תקין ✅');
   if (problems.length) await say('doctor', 'צריך תיקון בקוד, אני מעביר אליך.', 'fixer');
   await say('cleaner', cleanup.at ? `בניקיון האחרון (לפני ${hoursAgo(cleanup.at)} שעות) נמחקו ${cleanup.deleted || 0} מסיבות שעבר זמנן.` : 'הניקיון הלילי פעיל, עוד אין לי נתוני ריצה אחרונים לדווח.');
   await say('secretary', soon.length ? `בשני הימים הקרובים יש ${soon.length} מסיבות. אני שולח עליהן תזכורות לערוצים ולקבוצות.` : 'אין מסיבות בשני הימים הקרובים, אין תזכורות להיום.');
-  if (soon.length) await say('secretary', `${soon[0].title || soon[0].name} היא הקרובה ביותר, ${regCount(soon[0])} נרשמים עד עכשיו. כדאי לחזק אותה בקמפיין.`, 'publisher');
+  if (soon.length) await say('secretary', `${soon[0].title || soon[0].name} היא הקרובה ביותר. כדאי לחזק אותה בקמפיין.`, 'publisher');
   await say('publisher', camp.lastSentAt ? `הקמפיין האחרון בערוץ יצא לפני ${hoursAgo(camp.lastSentAt)} שעות. הבא יוצא ביום הקמפיין הקרוב.` : 'עוד לא יצא קמפיין החודש, אני מחכה ליום הקמפיין.');
-  await say('recruiter', 'ההודעה למפרסמים בקבוצה "מסיבות בישראל" ממשיכה לצאת פעמיים בשבוע, כדי להביא עוד מפיקים.');
   await say('tiktok', tik.lastSentAt ? `פוסט הטיקטוק האחרון נשלח אליך לפני ${hoursAgo(tik.lastSentAt)} שעות. הבא בראשון או בחמישי.` : 'עוד לא שלחתי לך פוסט לטיקטוק. הראשון יוצא ביום ראשון או חמישי.');
-  await say('matcher', `באיזון: ${pairs} זוגות מאוזנים פעילים, ו-${waiting} סינגלים וסינגליות עדיין מחכים להתאמה.`);
-  if (waiting > 0) await say('matcher', `${waiting} מחכים להתאמה. ברגע שיש איזון חדש תשלח להם התראה.`, 'notifier');
-  await say('notifier', pushDevices ? `יש ${pushDevices} מכשירים שאישרו התראות. אני מוכן לשלוח על איזון ועל מסיבות חדשות.` : 'עוד אין מכשירים שאישרו התראות. כדאי לעודד אישור באתר.');
+  await say('notifier', pushDevices ? `יש ${pushDevices} מכשירים שאישרו התראות. אני מוכן לשלוח על מסיבות חדשות.` : 'עוד אין מכשירים שאישרו התראות. כדאי לעודד אישור באתר.');
   await say('support', 'ענייתי לשאלות הנפוצות בצ׳אט התמיכה. שאלה שאין לי עליה תשובה ממתינה לך בצ׳אט.');
-  if (pending > 0) await say('secretary', `יש ${pending} בקשות הצטרפות כמנוי שממתינות לך באישור.`, 'fixer');
-  if (quiet.length) await say('publisher', `ל-${quiet.length} מסיבות פנימיות בשלושת הימים הקרובים אין עדיין נרשמים (${quiet.slice(0, 2).map((p) => p.title || p.name).join(', ')}). אפשר לפרסם עליהן עכשיו.`, 'recruiter');
-  if (closed) await say('fixer', `${closed} מסיבות מסומנות כסגורות להרשמה. לוודא שזה מכוון.`);
-  const open = [pending ? `${pending} בקשות מנוי לאישור` : '', problems.length ? `${problems.length} בעיות באתר` : '', quiet.length ? `${quiet.length} מסיבות בלי נרשמים` : ''].filter(Boolean);
+  const open = [problems.length ? `${problems.length} בעיות באתר` : ''].filter(Boolean);
   await say('fixer', open.length ? `סיכום: ${open.join(', ')}. כל השאר בסדר. נתראה מחר.` : 'סיכום: אין שום דבר פתוח, האתר ירוק. נתראה מחר ✅');
-  return { ok: true, parties: upcoming.length, registrations: totalRegs, pairs, waiting, pending };
+  return { ok: true, parties: upcoming.length };
 }
 
 // 7 October memorial: one picture, no caption, no link, sent once to every
@@ -1761,10 +1389,6 @@ export default async function handler(req, res) {
       if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
       try { return res.status(200).json({ ok: true, announcements: await sendAnnouncementsOnce() }); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
     }
-    if (job === 'promo-now') {
-      if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-      try { return res.status(200).json(await sendGroupPromoIfDue({ force: true })); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
-    }
     if (job === 'health') {
       return handleHealth(req, res);
     }
@@ -1794,9 +1418,6 @@ export default async function handler(req, res) {
       const force = (req.query?.force || new URL(req.url, 'http://x').searchParams.get('force')) === '1';
       try { return res.status(200).json(await sendInstagramCampaignIfDue({ force })); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
     }
-    if (job === 'promo') {
-      return handleGroupPromo(req, res);
-    }
     if (job === 'test-group') {
       return handleTestGroup(req, res);
     }
@@ -1815,17 +1436,11 @@ export default async function handler(req, res) {
     if (job === 'migrate-support-chat-secret') {
       return handleMigrateSupportChatSecret(req, res);
     }
-    if (job === 'list-delete-requests') {
-      return handleListDeleteRequests(req, res);
-    }
     if (job === 'cleanup-parties') {
       return handleCleanupExpiredParties(req, res);
     }
     if (job === 'notify-new-party') {
       return handleNotifyNewParty(req, res);
-    }
-    if (job === 'process-delete-request') {
-      return handleProcessDeleteRequest(req, res);
     }
     if (job === 'fix-party-whatsapp') {
       return handleFixPartyWhatsapp(req, res);
@@ -1852,7 +1467,6 @@ export default async function handler(req, res) {
   }
   if (req.method === 'POST') {
     const postJob = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
-    if (postJob === 'match-chat') return handleMatchChat(req, res);
   }
   if (!requireTelegramWebhookSecret(req, res)) return;
 

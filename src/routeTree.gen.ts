@@ -10,48 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TicketsRouteImport } from './routes/tickets'
-import { Route as AdvertiserIndexRouteImport } from './routes/advertiser/index'
-import { Route as AdvertiserRegisterRouteImport } from './routes/advertiser/register'
-import { Route as BlogIndexRouteImport } from './routes/blog/index'
-import { Route as BlogPostIdRouteImport } from './routes/blog/$postId'
-import { Route as ForumResetPasswordRouteImport } from './routes/forum/reset-password'
-import { Route as ForumVerifyEmailRouteImport } from './routes/forum/verify-email'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -64,152 +34,39 @@ const TicketsRoute = TicketsRouteImport.update({
   path: '/tickets',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdvertiserIndexRoute = AdvertiserIndexRouteImport.update({
-  id: '/advertiser/',
-  path: '/advertiser/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdvertiserRegisterRoute = AdvertiserRegisterRouteImport.update({
-  id: '/advertiser/register',
-  path: '/advertiser/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogIndexRoute = BlogIndexRouteImport.update({
-  id: '/blog/',
-  path: '/blog/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogPostIdRoute = BlogPostIdRouteImport.update({
-  id: '/blog/$postId',
-  path: '/blog/$postId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForumResetPasswordRoute = ForumResetPasswordRouteImport.update({
-  id: '/forum/reset-password',
-  path: '/forum/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForumVerifyEmailRoute = ForumVerifyEmailRouteImport.update({
-  id: '/forum/verify-email',
-  path: '/forum/verify-email',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/contact': typeof ContactRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
-  '/advertiser/register': typeof AdvertiserRegisterRoute
-  '/blog/$postId': typeof BlogPostIdRoute
-  '/forum/reset-password': typeof ForumResetPasswordRoute
-  '/forum/verify-email': typeof ForumVerifyEmailRoute
-  '/advertiser/': typeof AdvertiserIndexRoute
-  '/blog/': typeof BlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/contact': typeof ContactRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
-  '/advertiser/register': typeof AdvertiserRegisterRoute
-  '/blog/$postId': typeof BlogPostIdRoute
-  '/forum/reset-password': typeof ForumResetPasswordRoute
-  '/forum/verify-email': typeof ForumVerifyEmailRoute
-  '/advertiser': typeof AdvertiserIndexRoute
-  '/blog': typeof BlogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
-  '/contact': typeof ContactRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tickets': typeof TicketsRoute
-  '/advertiser/register': typeof AdvertiserRegisterRoute
-  '/blog/$postId': typeof BlogPostIdRoute
-  '/forum/reset-password': typeof ForumResetPasswordRoute
-  '/forum/verify-email': typeof ForumVerifyEmailRoute
-  '/advertiser/': typeof AdvertiserIndexRoute
-  '/blog/': typeof BlogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/about'
-    | '/admin'
-    | '/contact'
-    | '/login'
-    | '/register'
-    | '/sitemap.xml'
-    | '/tickets'
-    | '/advertiser/register'
-    | '/blog/$postId'
-    | '/forum/reset-password'
-    | '/forum/verify-email'
-    | '/advertiser/'
-    | '/blog/'
+  fullPaths: '/' | '/admin' | '/sitemap.xml' | '/tickets'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/about'
-    | '/admin'
-    | '/contact'
-    | '/login'
-    | '/register'
-    | '/sitemap.xml'
-    | '/tickets'
-    | '/advertiser/register'
-    | '/blog/$postId'
-    | '/forum/reset-password'
-    | '/forum/verify-email'
-    | '/advertiser'
-    | '/blog'
-  id:
-    | '__root__'
-    | '/'
-    | '/about'
-    | '/admin'
-    | '/contact'
-    | '/login'
-    | '/register'
-    | '/sitemap.xml'
-    | '/tickets'
-    | '/advertiser/register'
-    | '/blog/$postId'
-    | '/forum/reset-password'
-    | '/forum/verify-email'
-    | '/advertiser/'
-    | '/blog/'
+  to: '/' | '/admin' | '/sitemap.xml' | '/tickets'
+  id: '__root__' | '/' | '/admin' | '/sitemap.xml' | '/tickets'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
-  ContactRoute: typeof ContactRoute
-  LoginRoute: typeof LoginRoute
-  RegisterRoute: typeof RegisterRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TicketsRoute: typeof TicketsRoute
-  AdvertiserRegisterRoute: typeof AdvertiserRegisterRoute
-  BlogPostIdRoute: typeof BlogPostIdRoute
-  ForumResetPasswordRoute: typeof ForumResetPasswordRoute
-  ForumVerifyEmailRoute: typeof ForumVerifyEmailRoute
-  AdvertiserIndexRoute: typeof AdvertiserIndexRoute
-  BlogIndexRoute: typeof BlogIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -221,39 +78,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin': {
       id: '/admin'
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -270,66 +99,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TicketsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/advertiser/': {
-      id: '/advertiser/'
-      path: '/advertiser'
-      fullPath: '/advertiser/'
-      preLoaderRoute: typeof AdvertiserIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/advertiser/register': {
-      id: '/advertiser/register'
-      path: '/advertiser/register'
-      fullPath: '/advertiser/register'
-      preLoaderRoute: typeof AdvertiserRegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog/': {
-      id: '/blog/'
-      path: '/blog'
-      fullPath: '/blog/'
-      preLoaderRoute: typeof BlogIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog/$postId': {
-      id: '/blog/$postId'
-      path: '/blog/$postId'
-      fullPath: '/blog/$postId'
-      preLoaderRoute: typeof BlogPostIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forum/reset-password': {
-      id: '/forum/reset-password'
-      path: '/forum/reset-password'
-      fullPath: '/forum/reset-password'
-      preLoaderRoute: typeof ForumResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forum/verify-email': {
-      id: '/forum/verify-email'
-      path: '/forum/verify-email'
-      fullPath: '/forum/verify-email'
-      preLoaderRoute: typeof ForumVerifyEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
-  ContactRoute: ContactRoute,
-  LoginRoute: LoginRoute,
-  RegisterRoute: RegisterRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TicketsRoute: TicketsRoute,
-  AdvertiserRegisterRoute: AdvertiserRegisterRoute,
-  BlogPostIdRoute: BlogPostIdRoute,
-  ForumResetPasswordRoute: ForumResetPasswordRoute,
-  ForumVerifyEmailRoute: ForumVerifyEmailRoute,
-  AdvertiserIndexRoute: AdvertiserIndexRoute,
-  BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

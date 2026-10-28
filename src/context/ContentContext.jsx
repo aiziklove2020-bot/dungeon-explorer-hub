@@ -8,7 +8,6 @@ import {
   clearAllContentCache,
 } from '../services/contentService';
 import { defaultContent } from './content/defaults';
-import { buildMatchingTable, exportMatchesToCsv } from './content/matching';
 import {
   exportContent as exportContentHelper,
   parseContentImport,
@@ -18,7 +17,6 @@ import {
   importAllData as importAllDataHelper,
 } from './content/importExport';
 import { useContentLoader } from './content/useContentLoader';
-import { useRegistrationsCache } from './content/useRegistrationsCache';
 import { useContentAutosave } from './content/useContentAutosave';
 import { createContentMutators } from './content/contentMutators';
 
@@ -29,7 +27,6 @@ const ContentContext = createContext();
  * lives in ./content/ slices:
  *
  *   - useContentLoader       → content state + mode-flag watcher + reload
- *   - useRegistrationsCache  → registrations list + CRUD
  *   - useContentAutosave     → debounced Firestore batch write in edit mode
  *   - createContentMutators  → hero/about/contact/events/... updaters
  *
@@ -38,13 +35,6 @@ const ContentContext = createContext();
  */
 export const ContentProvider = ({ children }) => {
   const { content, setContent, isInitialized, contentLoadError, reloadContent } = useContentLoader();
-  const {
-    registrationsCache,
-    getRegistrations,
-    refreshRegistrations,
-    saveRegistration,
-    clearRegistrations,
-  } = useRegistrationsCache();
 
   useContentAutosave(content, isInitialized);
 
@@ -64,11 +54,6 @@ export const ContentProvider = ({ children }) => {
       isInitialized,
       contentLoadError,
       ...mutators,
-      getMatchingTable: () => buildMatchingTable(registrationsCache),
-      getRegistrations,
-      saveRegistration,
-      clearRegistrations,
-      exportMatches: () => exportMatchesToCsv(registrationsCache),
       resetToDefaults: () => setContent(defaultContent),
       exportContent: () => exportContentHelper(content),
       importContent: (jsonData) => {
@@ -79,10 +64,8 @@ export const ContentProvider = ({ children }) => {
       },
       exportParties: exportPartiesHelper,
       importParties: importPartiesHelper,
-      exportAllData: () => exportAllDataHelper(registrationsCache),
+      exportAllData: exportAllDataHelper,
       importAllData: importAllDataHelper,
-      registrationsCount: registrationsCache.length,
-      refreshRegistrations,
       reloadContent: () => reloadContent(true),
       publishContent: publishContentToGit,
       importContentFromGit: importContentFromGitService,
@@ -95,12 +78,7 @@ export const ContentProvider = ({ children }) => {
       content,
       isInitialized,
       contentLoadError,
-      registrationsCache,
       mutators,
-      getRegistrations,
-      saveRegistration,
-      clearRegistrations,
-      refreshRegistrations,
       reloadContent,
       setContent,
     ]
