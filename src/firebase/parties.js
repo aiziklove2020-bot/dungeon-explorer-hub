@@ -275,9 +275,6 @@ export const updateParty = async (partyId, partyData) => {
       updateData.partyType = partyData.partyType;
     }
 
-    if (partyData.publishToInstagram !== undefined) {
-      updateData.publishToInstagram = partyData.publishToInstagram === true;
-    }
     if (partyData.badge !== undefined) updateData.badge = partyData.badge || '';
 
     // Assigned safety team, set from the admin's party panel (PartiesSection).

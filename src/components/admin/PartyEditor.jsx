@@ -49,8 +49,7 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
       partyType: party.partyType || 'internal',
       category: party.category || '',
       city: party.city || '',
-      badge: party.badge || '',
-      publishToInstagram: party.publishToInstagram === true
+      badge: party.badge || ''
     };
   });
 
@@ -329,20 +328,6 @@ const PartyEditor = ({ party, onSave, onCancel }) => {
           </p>
         </div>
       </div>
-      <label className="flex items-center gap-2 text-sm bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={formData.publishToInstagram}
-          onChange={e => setFormData(prev => ({ ...prev, publishToInstagram: e.target.checked }))}
-          className="w-4 h-4 accent-pink-600"
-        />
-        <span>
-          כלול באינסטגרם (talking_b_d_s_m)
-          <span className="block text-[#94A3B8] text-xs mt-0.5">
-            רק מסיבות מסומנות כאן ייכללו בכפתור "פרסם מסיבות לאינסטגרם" — כדי לא להציף/לחשוף לחסימה חשבונות שלא רלוונטיים.
-          </span>
-        </span>
-      </label>
       <div className="space-y-1 text-right">
         <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('admin.description')}</label>
         <textarea

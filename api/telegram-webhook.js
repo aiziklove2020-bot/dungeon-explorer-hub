@@ -15,10 +15,7 @@
  * 12-serverless-function limit — same reasoning as git-history.js absorbing
  * the old record-deploy-status route.
  *
- * Same run also re-posts every active party marked "כלול באינסטגרם" to
- * Instagram (see publishActiveInstagramParties, reusing publish-content.js's
- * publishPartyToInstagram — server-side via Windsor.ai, no admin browser
- * needed), and pokes the whatsapp-bot's /broadcast-parties (see
+ * Same run also pokes the whatsapp-bot's /broadcast-parties (see
  * publishActiveWhatsApp) once it's hosted somewhere public — set
  * WHATSAPP_BOT_PUBLIC_URL + WHATSAPP_BOT_API_KEY to enable; until then this
  * silently no-ops and WhatsApp stays the admin's manual button.
@@ -599,30 +596,6 @@ async function publishActiveWhatsApp() {
   }
 }
 
-// Instagram side of the same scheduled run: posts every active party
-// explicitly marked "כלול באינסטגרם" (publishToInstagram) — same account
-// scoping the admin's manual "פרסם לאינסטגרם" button already applies (see
-// pages/Admin.jsx). No dedup/skip-if-already-posted by design, matching the
-// existing manual behavior and the Telegram reminder cadence the admin
-// chose this to mirror — re-running a few times a week just refreshes the
-// story and re-shares the feed post.
-async function publishActiveInstagramParties(admin, activeParties) {
-  const results = [];
-  const eligible = activeParties.filter((p) => p.publishToInstagram === true && (p.imageURL || p.img));
-  if (eligible.length === 0) return results;
-
-  const { publishPartyToInstagram } = await import('./publish-content.js');
-  for (const party of eligible) {
-    try {
-      const { postId, storyId } = await publishPartyToInstagram(party);
-      results.push({ party: party.title || party.name, ok: true, postId, storyId });
-    } catch (e) {
-      results.push({ party: party.title || party.name, ok: false, error: e.message });
-    }
-  }
-  return results;
-}
-
 async function sendAllPartyReminders(targetChatId) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
@@ -678,14 +651,9 @@ async function sendAllPartyReminders(targetChatId) {
       }
     }
 
-    // Automatic Instagram posting disabled — it re-posted every active party
-    // on every scheduled run (no dedup), which got the account close to
-    // being blocked by Instagram. Manual posting from the admin panel (a
-    // separate code path, api/publish-content.js) is unaffected.
-    const instagramResults = [];
     const whatsappResult = targetChatId ? null : await publishActiveWhatsApp();
 
-    return { partiesSent: activeParties.length, destinationCount: destinations.length, results, instagramResults, whatsappResult };
+    return { partiesSent: activeParties.length, destinationCount: destinations.length, results, whatsappResult };
   } finally {
     await releaseBroadcastLock(lockRef);
   }
@@ -848,62 +816,6 @@ export async function sendTiktokPostIfDue({ force = false } = {}) {
   return { ok: true, id: post.id };
 }
 
-// ── Weekly Instagram campaign ──────────────────────────────────────────────
-// Once a week (Sunday, Israel time) one site campaign image goes to
-// Instagram as a single feed post — no stories, no party flyers. Only the
-// tame, site-feature campaigns below are allowed (no BDSM / swingers /
-// "singles" wording), and captions drop links (not clickable on Instagram).
-// A 6-day lock in Firestore guarantees at most one post per week even if the
-// cron retries. The old automatic party-to-Instagram posting stays disabled.
-const INSTAGRAM_CAMPAIGN_IDS = ['c01', 'c02', 'c03', 'c04', 'c05', 'c07', 'c09', 'c11', 'c14', 'c16', 'c17', 'c20', 'c21', 'c22'];
-const INSTAGRAM_CAMPAIGN_DAY = 0; // Sunday
-const INSTAGRAM_MIN_GAP_MS = 6 * 24 * 60 * 60 * 1000;
-
-function instagramCaption(caption) {
-  const lines = String(caption || '')
-    .split('\n')
-    .filter((l) => !/https?:\/\//.test(l) && !/👇/.test(l));
-  while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
-  return `${lines.join('\n')}\n\n🔗 libralparty.net — הקישור בביו\n18+`;
-}
-
-export async function sendInstagramCampaignIfDue({ force = false } = {}) {
-  // עומר's weekly Instagram post is part of the publisher pause: nothing is published, even when forced.
-  if (PUBLISHER_PAUSED && process.env.SILENT_DAYS_OFF !== '1') return { ok: true, skipped: 'publisher paused by the owner' };
-  const pool = TELEGRAM_CAMPAIGNS.filter((c) => INSTAGRAM_CAMPAIGN_IDS.includes(c.id));
-  if (!pool.length) return { ok: false, skipped: 'no instagram campaigns' };
-  if (!force && israelWeekday() !== INSTAGRAM_CAMPAIGN_DAY) return { ok: true, skipped: 'not instagram day' };
-  const admin = await initAdmin();
-  const db = admin.firestore();
-  const ref = db.collection('settings').doc('instagramCampaigns');
-  const now = Date.now();
-  const claimed = await db.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    const data = snap.exists ? snap.data() || {} : {};
-    if (data.paused === true && !force) return { paused: true };
-    if (!force && data.lastSentAt && now - data.lastSentAt < INSTAGRAM_MIN_GAP_MS) return null;
-    const index = Number.isInteger(data.nextIndex) ? data.nextIndex % pool.length : 0;
-    tx.set(ref, { nextIndex: (index + 1) % pool.length, lastSentAt: now, lastId: pool[index].id }, { merge: true });
-    return { index, previous: { nextIndex: data.nextIndex ?? 0, lastSentAt: data.lastSentAt ?? null, lastId: data.lastId ?? null } };
-  });
-  if (!claimed) return { ok: true, skipped: 'already posted this week' };
-  if (claimed.paused) return { ok: true, skipped: 'paused (settings/instagramCampaigns.paused)' };
-
-  const campaign = pool[claimed.index];
-  try {
-    const { publishPartyToInstagram } = await import('./publish-content.js');
-    const { postId } = await publishPartyToInstagram(
-      { imageURL: campaign.image, description: instagramCaption(campaign.caption) },
-      { includeStory: false, rawCaption: true }
-    );
-    await agentSay('publisher', `פרסמתי באינסטגרם את הקמפיין השבועי "${campaign.caption.split('\n')[0].replace(/^[^\p{L}\p{N}]+/u, '')}" ✅`).catch(() => {});
-    return { ok: true, id: campaign.id, postId };
-  } catch (err) {
-    await ref.set(claimed.previous, { merge: true }).catch(() => {});
-    return { ok: false, id: campaign.id, error: String(err?.message || err) };
-  }
-}
-
 // ── Daily health check ─────────────────────────────────────────────────────
 // Runs with the daily reminders cron: opens the key pages and assets of the
 // live site, checks Firestore and the Telegram bot, and that the campaign
@@ -1029,8 +941,8 @@ async function handlePartyReminders(req, res) {
   try {
     let secretaryPaused = false;
     try { secretaryPaused = Boolean((await getAgentConfig((await initAdmin()).firestore())).secretary?.paused); } catch { /* keep sending */ }
-    const { partiesSent, results, instagramResults, whatsappResult } = secretaryPaused
-      ? { partiesSent: 0, results: [], instagramResults: [], whatsappResult: null }
+    const { partiesSent, results, whatsappResult } = secretaryPaused
+      ? { partiesSent: 0, results: [], whatsappResult: null }
       : await sendAllPartyReminders();
     if (secretaryPaused) await agentSay('secretary', 'אני בהפסקה לפי הבקשה שלך, לא שלחתי תזכורות היום.');
     else {
@@ -1043,10 +955,9 @@ async function handlePartyReminders(req, res) {
     const announcements = await sendAnnouncementsOnce().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const campaign = await sendCampaignPost().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const tiktok = await sendTiktokPostIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
-    const instagramCampaign = await sendInstagramCampaignIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const health = await runHealthCheck().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const standup = await runDailyStandup({ health }).catch((err) => ({ ok: false, error: String(err?.message || err) }));
-    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult, announcements, campaign, tiktok, instagramCampaign, health, standup });
+    return res.status(200).json({ ok: true, partiesSent, results, whatsappResult, announcements, campaign, tiktok, health, standup });
   } catch (err) {
     console.error('party-reminders:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
@@ -1073,8 +984,8 @@ async function handleManualPost(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
   const targetChatId = req.query?.chatId || new URL(req.url, 'http://x').searchParams.get('chatId') || undefined;
   try {
-    const { partiesSent, results, instagramResults, whatsappResult } = await sendAllPartyReminders(targetChatId);
-    return res.status(200).json({ ok: true, partiesSent, results, instagramResults, whatsappResult });
+    const { partiesSent, results, whatsappResult } = await sendAllPartyReminders(targetChatId);
+    return res.status(200).json({ ok: true, partiesSent, results, whatsappResult });
   } catch (err) {
     console.error('manual-post:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
@@ -1411,12 +1322,6 @@ export default async function handler(req, res) {
     }
     if (job === 'campaign') {
       return handleCampaign(req, res);
-    }
-    // GET ?job=instagram-campaign&key=<TELEGRAM_PROMO_SECRET>[&force=1] — manual run/test.
-    if (job === 'instagram-campaign') {
-      if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-      const force = (req.query?.force || new URL(req.url, 'http://x').searchParams.get('force')) === '1';
-      try { return res.status(200).json(await sendInstagramCampaignIfDue({ force })); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
     }
     if (job === 'test-group') {
       return handleTestGroup(req, res);

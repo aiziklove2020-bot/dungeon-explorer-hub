@@ -434,11 +434,6 @@ const PartiesSection = ({ showSaved, refreshKey }) => {
                             פג תוקף
                           </span>
                         )}
-                        {selectedParty.publishToInstagram === true && (
-                          <span className="px-2 py-1 rounded text-xs font-bold bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-600 text-white">
-                            כלול באינסטגרם
-                          </span>
-                        )}
                       </div>
                       {selectedParty.imageURL && (
                         <PartyImage

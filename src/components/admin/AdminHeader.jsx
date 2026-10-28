@@ -1,4 +1,4 @@
-import { X, RotateCcw, CheckCircle2, Eye, Download, Loader2, Megaphone, Instagram } from 'lucide-react';
+import { X, RotateCcw, CheckCircle2, Eye, Download, Loader2, Megaphone } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import SiteClosureButton from './SiteClosureButton';
 
@@ -13,8 +13,6 @@ const AdminHeader = ({
   onLogout,
   postingParties,
   onPostParties,
-  postingPartiesInstagram,
-  onPostPartiesInstagram,
   onImport,
   onReset,
   onViewSite,
@@ -88,16 +86,6 @@ const AdminHeader = ({
               >
                 {postingParties ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Megaphone size={16} style={{ color: '#ad43ff' }} />}
                 {postingParties ? 'מפרסם...' : 'טלגרם'}
-              </button>
-              <button
-                onClick={onPostPartiesInstagram}
-                disabled={postingPartiesInstagram}
-                title="מפרסם רק את המסיבות המסומנות &quot;כלול באינסטגרם&quot; (פוסט + סטורי לכל אחת), דרך Windsor.ai"
-                className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
-                style={{ background: '#1c1120', border: '1px solid #f4bfd733', borderRadius: 15, padding: '10px 16px' }}
-              >
-                {postingPartiesInstagram ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Instagram size={16} style={{ color: '#f6c887' }} />}
-                {postingPartiesInstagram ? 'מפרסם...' : 'אינסטגרם'}
               </button>
             </div>
           </div>

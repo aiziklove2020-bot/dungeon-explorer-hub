@@ -92,14 +92,3 @@ describe('owner switches for the publisher', () => {
     expect(sent).toHaveLength(1);
   });
 });
-
-describe('publisher pause covers Instagram', () => {
-  it('the weekly Instagram campaign is not posted while עומר is paused, even when forced', async () => {
-    const { sendInstagramCampaignIfDue } = await import('../../api/telegram-webhook.js');
-    const prev = process.env.SILENT_DAYS_OFF;
-    delete process.env.SILENT_DAYS_OFF;
-    try {
-      expect(await sendInstagramCampaignIfDue({ force: true })).toEqual({ ok: true, skipped: 'publisher paused by the owner' });
-    } finally { process.env.SILENT_DAYS_OFF = prev; }
-  });
-});

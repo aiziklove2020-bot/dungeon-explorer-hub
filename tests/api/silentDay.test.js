@@ -10,7 +10,7 @@ describe('silent day', () => {
     expect(isSilentDay(new Date('2026-10-08T09:00:00Z'))).toBe(false);
   });
   it('publishing jobs are not in the non-publishing list', () => {
-    for (const j of ['promo', 'promo-now', 'campaign', 'tiktok', 'push-now', 'manual-post', 'notify-new-party', 'instagram-campaign', 'test-group']) {
+    for (const j of ['promo', 'promo-now', 'campaign', 'tiktok', 'push-now', 'manual-post', 'notify-new-party', 'test-group']) {
       expect(NON_PUBLISHING_JOBS.has(j)).toBe(false);
     }
     expect(israelDate(new Date('2026-10-07T03:00:00Z'))).toBe('2026-10-07');

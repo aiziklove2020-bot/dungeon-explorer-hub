@@ -9,15 +9,6 @@
  *       sends `import.meta.env.VITE_ADMIN_API_SECRET` (must equal `ADMIN_API_SECRET`).
  *
  * Env: ADMIN_API_SECRET, GOOGLE_APPLICATION_CREDENTIALS_JSON, GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO, GITHUB_BRANCH (optional, default PublishMode), GITHUB_FILE_PATH (optional, default content/content.json)
- *
- * POST { job: "instagram-publish", partyId, includeStory? }: Admin panel's
- * "פרסם לאינסטגרם" button — posts one party's image + description straight to
- * Instagram (feed post + story) via the Windsor.ai connectors REST API, using
- * the Instagram account already connected there. Merged in here (rather than
- * its own file) to stay under the Vercel Hobby plan's 12-serverless-function
- * limit — same reasoning as git-history.js absorbing record-deploy-status and
- * telegram-webhook.js absorbing its manual-post/promo jobs.
- * Env: WINDSOR_API_KEY, WINDSOR_INSTAGRAM_ACCOUNT_ID (+ same GOOGLE_APPLICATION_CREDENTIALS_JSON as above).
  */
 import { requireAdminApiSecret } from '../lib/apiAuth.js';
 import {
@@ -27,156 +18,11 @@ import {
   normalizeRetentionHours,
 } from '../shared/partyExpiry.js';
 
-const WINDSOR_ACTIONS_URL = 'https://connectors.windsor.ai/instagram/actions';
-
-function buildInstagramCaption(party) {
-  const lines = [];
-  if (party.description) lines.push(party.description);
-  lines.push('');
-  lines.push('https://www.libralparty.net/');
-  return lines.join('\n');
-}
-
-// Instagram enforces fixed aspect-ratio limits Meta zooms/crops (stories: exactly
-// 9:16) or rejects outright (feed posts: must be between 4:5 and 1.91:1 — a
-// too-tall/too-narrow party flyer 400s with "aspect ratio is not supported").
-// Party images are hosted on Cloudinary, so instead of hitting either problem
-// we ask Cloudinary to pad the image onto a canvas of the right shape (b_auto
-// picks a fill color from the image itself) — the full original image stays
-// visible, just letterboxed. (b_blurred requires a paid Cloudinary add-on and
-// 400s on this account, so b_auto — solid-color padding, no add-on needed —
-// is used instead.) Falls back to the original URL untouched for any
-// non-Cloudinary image.
-function toCloudinaryPaddedUrl(imageUrl, width, height) {
-  if (typeof imageUrl !== 'string') return imageUrl;
-  const marker = '/image/upload/';
-  const idx = imageUrl.indexOf(marker);
-  if (!imageUrl.includes('res.cloudinary.com') || idx === -1) return imageUrl;
-  const insertAt = idx + marker.length;
-  return `${imageUrl.slice(0, insertAt)}w_${width},h_${height},c_pad,b_auto/${imageUrl.slice(insertAt)}`;
-}
-
-// 9:16, matches the story frame exactly.
-const toStoryImageUrl = (imageUrl) => toCloudinaryPaddedUrl(imageUrl, 1080, 1920);
-// 4:5 (Instagram's own recommended portrait ratio for feed posts) — safely
-// inside the 4:5–1.91:1 range Instagram requires, whichever way the source
-// image leans.
-const toFeedImageUrl = (imageUrl) => toCloudinaryPaddedUrl(imageUrl, 1080, 1350);
-
-// Posts one party's image straight to Instagram (feed post + optional story)
-// via Windsor.ai. Shared by the admin's manual "פרסם לאינסטגרם" button
-// (handleInstagramPublish below, over HTTP) and the scheduled cron in
-// telegram-webhook.js (called in-process — same env vars, no HTTP hop).
-// Throws on failure; the caller decides how to report/aggregate that.
-export async function publishPartyToInstagram(party, { includeStory = true, rawCaption = false } = {}) {
-  const WINDSOR_API_KEY = process.env.WINDSOR_API_KEY;
-  const IG_ACCOUNT_ID = process.env.WINDSOR_INSTAGRAM_ACCOUNT_ID;
-  if (!WINDSOR_API_KEY || !IG_ACCOUNT_ID) {
-    throw new Error('WINDSOR_API_KEY / WINDSOR_INSTAGRAM_ACCOUNT_ID are not set');
-  }
-  const imageUrl = party.imageURL || party.img;
-  if (!imageUrl) {
-    throw new Error('Party has no imageURL to publish');
-  }
-
-  const caption = rawCaption ? String(party.description || '') : buildInstagramCaption(party);
-  const postResult = await runWindsorAction({
-    apiKey: WINDSOR_API_KEY,
-    account: IG_ACCOUNT_ID,
-    action: 'create_image_post',
-    params: { image_url: toFeedImageUrl(imageUrl), caption },
-  });
-
-  let storyResult = null;
-  if (includeStory) {
-    storyResult = await runWindsorAction({
-      apiKey: WINDSOR_API_KEY,
-      account: IG_ACCOUNT_ID,
-      action: 'create_story',
-      params: { image_url: toStoryImageUrl(imageUrl) },
-    });
-  }
-
-  return { postId: postResult?.result || postResult, storyId: storyResult?.result || storyResult };
-}
-
-async function runWindsorAction({ apiKey, account, action, params }) {
-  const res = await fetch(`${WINDSOR_ACTIONS_URL}?api_key=${encodeURIComponent(apiKey)}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ account, action, params }),
-  });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok || json.error) {
-    throw new Error(json.error || json.message || `Windsor.ai action "${action}" failed (HTTP ${res.status})`);
-  }
-  return json;
-}
-
-async function handleInstagramPublish(req, res) {
-  let body;
-  try {
-    body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
-  } catch {
-    return res.status(400).json({ error: 'Invalid JSON' });
-  }
-  const { partyId, includeStory = true } = body;
-  if (!partyId || typeof partyId !== 'string') {
-    return res.status(400).json({ error: 'Missing partyId' });
-  }
-
-  let admin;
-  try {
-    admin = (await import('firebase-admin')).default;
-    if (!admin.firestore) {
-      const [{ getApps }, { getFirestore }] = await Promise.all([
-        import('firebase-admin/app'),
-        import('firebase-admin/firestore'),
-      ]);
-      Object.defineProperty(admin, 'apps', { get: () => getApps(), configurable: true });
-      admin.firestore = () => getFirestore();
-    }
-    if (!admin.apps?.length) {
-      const cred = admin.cert(JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON));
-      admin.initializeApp({
-        credential: cred,
-        projectId: process.env.GCLOUD_PROJECT || 'tbdsm-5acca',
-      });
-    }
-  } catch (e) {
-    console.error('Firebase init:', e.message);
-    return res.status(503).json({
-      error: 'Firebase configuration error',
-      message: e.message,
-      hint: 'Set GOOGLE_APPLICATION_CREDENTIALS_JSON in Vercel (Firebase service account JSON).',
-    });
-  }
-  const db = admin.firestore();
-
-  try {
-    const partyDoc = await db.collection('parties').doc(partyId).get();
-    if (!partyDoc.exists) {
-      return res.status(404).json({ error: 'Party not found' });
-    }
-    const { postId, storyId } = await publishPartyToInstagram(partyDoc.data(), { includeStory });
-    return res.status(200).json({ ok: true, postId, storyId });
-  } catch (e) {
-    console.error('instagram-publish error:', e.message);
-    const status = /WINDSOR_API_KEY|not set/.test(e.message) ? 503 : /no imageURL/.test(e.message) ? 400 : 502;
-    return res.status(status).json({ error: 'Instagram publish failed', message: e.message });
-  }
-}
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   if (!requireAdminApiSecret(req, res)) return;
-
-  const bodyForDispatch = typeof req.body === 'string' ? (() => { try { return JSON.parse(req.body || '{}'); } catch { return {}; } })() : (req.body || {});
-  if (bodyForDispatch.job === 'instagram-publish') {
-    return handleInstagramPublish(req, res);
-  }
 
   const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
   const GITHUB_OWNER = process.env.GITHUB_OWNER;
@@ -303,7 +149,6 @@ export default async function handler(req, res) {
       description: party.description || '',
       registrationLink: party.registrationLink || '',
       partyType: party.partyType || 'internal',
-      publishToInstagram: party.publishToInstagram === true,
       expiration: resolveExpirationIso(party)
     }));
 
@@ -317,7 +162,6 @@ export default async function handler(req, res) {
       description: party.description || '',
       registrationLink: party.registrationLink || '',
       partyType: 'external',
-      publishToInstagram: party.publishToInstagram === true,
       expiration: resolveExpirationIso(party)
     }));
 
