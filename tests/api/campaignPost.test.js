@@ -92,3 +92,13 @@ describe('owner switches for the publisher', () => {
     expect(sent).toHaveLength(1);
   });
 });
+
+describe('campaign content', () => {
+  it('campaigns are only about the club and the suite: no balancing, memberships or site sign-up', async () => {
+    const { TELEGRAM_CAMPAIGNS } = await import('../../shared/telegramCampaigns.js');
+    expect(TELEGRAM_CAMPAIGNS.length).toBeGreaterThan(0);
+    for (const c of TELEGRAM_CAMPAIGNS) {
+      expect(c.caption, c.id).not.toMatch(/איזון|איזונ|מאוזנ|מנוי|האזור האישי|מועדפים|מפרסמ|\/register|\/membership|\/my-area/);
+    }
+  });
+});
