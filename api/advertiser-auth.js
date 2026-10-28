@@ -63,6 +63,11 @@ const passwordMatches = async (password, hash) => {
   if (cost === null || cost > 14) return false;
   try { return await bcrypt.compare(password, hash); } catch { return false; }
 };
+// The owner closed the advertiser login for now: every login answers with this message.
+// Set it back to false to open it again (the tests open it with ADVERTISER_LOGIN_OPEN=1).
+const ADVERTISER_LOGIN_CLOSED = true;
+export const ADVERTISER_LOGIN_CLOSED_MESSAGE = 'כניסת המפרסמים סגורה כרגע';
+const advertiserLoginClosed = () => ADVERTISER_LOGIN_CLOSED && process.env.ADVERTISER_LOGIN_OPEN !== '1';
 const throttleDocId = (scope, key) => `${scope}_${sha256Hex(key).slice(0, 32)}`;
 
 const stripPassword = (doc) => {
@@ -166,6 +171,7 @@ export default async function handler(req, res) {
     }
 
     if (action === 'login') {
+      if (advertiserLoginClosed()) return res.status(200).json({ authenticated: false, closed: true, error: ADVERTISER_LOGIN_CLOSED_MESSAGE });
       const phone = cleanPhone(body.phoneNumber);
       const password = String(body.password || '');
       const ip = getRequestIp(req);
