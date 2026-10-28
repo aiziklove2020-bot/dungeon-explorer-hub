@@ -1,7 +1,7 @@
 <!doctype html><html lang="he" dir="rtl"><head><script src="/assets/memorial-block.js?v=202610281242"></script>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#100910"><title>צור קשר | LIBRAL PARTY - מסיבות ליברליות בישראל</title>
-<meta name="description" content="יצירת קשר עם צוות LIBRAL PARTY — שאלות על הרשמה, מסיבות חילופי זוגות ואיזון מגדרי.">
+<meta name="description" content="יצירת קשר עם צוות LIBRAL PARTY — שאלות על הרשמה ועל מסיבות חילופי זוגות.">
 <meta property="og:title" content="צור קשר | LIBRAL PARTY">
 <meta property="og:description" content="יצירת קשר עם צוות הקהילה הליברלית והקהילת חילופי הזוגות המובילה בישראל.">
 <meta property="og:type" content="website">
@@ -19,24 +19,19 @@
 <script type="module">
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202610281548");
+    await import("./assets/site-data.js?v=202610281554");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
   }
+  // Fixed text: the old admin-managed contact text was about balancing and memberships,
+  // which the site no longer has. Registration and questions go to Avi on WhatsApp.
   const box = document.getElementById("contactBox");
-  try {
-    const c = await window.LPData.loadContact();
-    box.innerHTML = `
-      ${c.alertText ? `<p class="meta" style="color:var(--gold)">${escapeHtml(c.alertText)}</p>` : ""}
-      <h2>דברו איתנו</h2>
-      <p>${escapeHtml(c.description)}</p>
-      ${c.whatsappLink ? `<a href="${escapeHtml(c.whatsappLink)}" target="_blank" rel="noopener noreferrer" class="btn gold full" style="background:#25D366;border-color:#25D366;margin-top:12px">שליחת הודעה בוואטסאפ</a>` : ""}
-      ${c.importantNote ? `<p class="meta" style="margin-top:12px">${escapeHtml(c.importantNote)}</p>` : ""}
-    `;
-  } catch (err) {
-    box.innerHTML = '<p class="meta">לא הצלחנו לטעון את פרטי יצירת הקשר כרגע.</p>';
-  }
+  box.innerHTML = `
+    <h2>דברו איתנו</h2>
+    <p>הרשמה למסיבות, שאלות או כל דבר אחר: שולחים הודעה בוואטסאפ לאבי, והוא חוזר אליכם. אפשר גם לכתוב לנו בצ'אט באתר.</p>
+    <a href="${escapeHtml(lpWhatsappHref("", "היי אבי, יש לי שאלה"))}" target="_blank" rel="noopener noreferrer" class="btn gold full" style="background:#25D366;border-color:#25D366;margin-top:12px">שליחת הודעה בוואטסאפ</a>
+  `;
 });
 </script>
 </body></html>

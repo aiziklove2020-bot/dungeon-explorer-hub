@@ -1214,7 +1214,7 @@ export async function sendPushUpdateNow({ scope = '' } = {}) {
   webpush.setVapidDetails('mailto:admin@libralparty.co.il', VAPID_PUBLIC_KEY, privateKey);
   // The owner's wording for the manual "send a notification" request.
   const title = internalOnly ? '🎉 חברים, המסיבות עלו!' : fresh.length ? '🎉 מסיבות חדשות באתר!' : '🎉 המסיבות הקרובות באתר';
-  const text = internalOnly ? 'זה הזמן להירשם, אל תפספסו איזון' : body;
+  const text = internalOnly ? 'זה הזמן להירשם בוואטסאפ, אל תפספסו' : body;
   const payload = JSON.stringify({ title, body: text, url: '/events' });
   const items = await Promise.all(
     subs.map((sub) =>

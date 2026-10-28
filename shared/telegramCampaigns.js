@@ -42,11 +42,6 @@ export const TELEGRAM_CAMPAIGNS = [
     "caption": "✨ האתר התחדש!\nעיצוב חדש, טעינה מהירה בהרבה ותצוגה נוחה גם במחשב.\n\n👇 בואו להתרשם:\nhttps://www.libralparty.net/"
   },
   {
-    "id": "c13",
-    "image": "https://www.libralparty.net/assets/campaigns/c13.jpg",
-    "caption": "⏰ סוף השבוע מתקרב, וחבל לפספס איזון!\nנרשמים בוואטסאפ, בכל שעה.\n\n👇 כל המסיבות באתר:\nhttps://www.libralparty.net/events"
-  },
-  {
     "id": "c14",
     "image": "https://www.libralparty.net/assets/campaigns/c14.jpg",
     "caption": "🔥 מסיבות חדשות עלו עכשיו לאתר!\nכל התאריכים, המקומות וההרשמה, הכל במקום אחד.\n\n👇 מה מתאים לכם הלילה?\nhttps://www.libralparty.net/events"
@@ -70,10 +65,5 @@ export const TELEGRAM_CAMPAIGNS = [
     "id": "c20",
     "image": "https://www.libralparty.net/assets/campaigns/c20.jpg",
     "caption": "📅 כל המסיבות בלוח אחד!\nמפנים מקום ביומן ובוחרים את הלילה הבא.\n\n👇 ללוח האירועים:\nhttps://www.libralparty.net/calendar"
-  },
-  {
-    "id": "c23",
-    "image": "https://www.libralparty.net/assets/campaigns/c23.jpg",
-    "caption": "🌙 הלילה הבא מתחיל כאן!\nמסיבות, איזונים וקהילה, הכל באתר LIBRAL PARTY.\n\n👇 כניסה לאתר:\nhttps://www.libralparty.net/"
   }
 ];
