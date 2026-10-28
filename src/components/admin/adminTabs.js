@@ -7,7 +7,7 @@ export const adminTabs = [
   // The site has no member accounts: parties come first, then the agents team.
   { id: 'parties',  label: 'מסיבות' },
   { id: 'agents',   label: 'צוות הסוכנים' },
-  { id: 'siteDesign', label: 'עיצוב האתר (לוגו/באנרים/פופאפ)' },
+  { id: 'siteDesign', label: 'באנרים באתר' },
   { id: 'about',    label: 'אודות' },
   { id: 'contact',  label: 'צור קשר' },
   { id: 'links',    label: 'קישורים וקבוצות' },

@@ -5,7 +5,8 @@
 //
 // Exposes window.LPData — real data only. The site has no member accounts:
 // parties are shown here and registration is by WhatsApp.
-import { collection, query, where, getDocs, getDocsFromServer } from "firebase/firestore";
+import { collection, doc, getDoc, query, where, getDocs, getDocsFromServer } from "firebase/firestore";
+import { normalizePartyBanners } from "../shared/partyBanners.js";
 import { db } from "./firebase/config";
 import { getSocialLinks, getRssFeeds, getContent } from "./firebase/settings";
 import {
@@ -167,6 +168,17 @@ async function loadEvents() {
   return sorted.map(toEventShape);
 }
 
+/** The banners shown between the parties (admin panel "באנרים באתר"), enabled ones only. */
+async function loadPartyBanners() {
+  let stored: any;
+  try {
+    stored = (await getDoc(doc(db, "settings", "siteConfig"))).data()?.partyBanners;
+  } catch {
+    stored = undefined;
+  }
+  return normalizePartyBanners(stored).filter((b: any) => b.enabled);
+}
+
 /** Real about-page content, managed from the admin panel's "אודות" section. */
 async function loadAbout() {
   const content = await getContent().catch(() => ({}));
@@ -221,6 +233,7 @@ async function loadNewsFeed() {
 
 (window as any).LPData = {
   loadEvents,
+  loadPartyBanners,
   loadSocialLinks,
   loadNewsFeed,
   loadAbout,
