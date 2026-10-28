@@ -15,7 +15,7 @@
 <script type="module">
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    await import("./assets/site-data.js?v=202610281548");
+    await import("./assets/site-data.js?v=202610281554");
   } catch (err) {
     console.error("site-data.js failed to load:", err);
     return;
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ${e.category ? `<div class="eyebrow">${escapeHtml(e.category)}</div>` : ""}
         <p>${escapeHtml(e.desc || "")}</p>
         <h3>לפני שמגיעים</h3>
-        <p>האירוע מיועד לבני 18 ומעלה. ההרשמה בוואטסאפ, כפופה למכסות ולאישור הצוות. פרטי הגעה מלאים יימסרו לרשומים.</p>
+        <p>האירוע מיועד לבני 18 ומעלה. ההרשמה בוואטסאפ, מול אבי. פרטי הגעה מלאים יימסרו לרשומים.</p>
       </div>
       <aside class="panel" style="align-self:start;margin-top:20px">
         <h3>כל מה שצריך לדעת</h3>
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ${e.city ? `<div class="row"><span>מיקום</span><span>${escapeHtml(e.city)}</span></div>` : ""}
         ${e.dj ? `<div class="row"><span>DJ</span><span>${escapeHtml(e.dj)}</span></div>` : ""}
         <a class="btn gold full" href="${escapeHtml(reg.href)}" target="_blank" rel="noopener noreferrer">${reg.label}</a>
-        <p class="meta">ההרשמה בוואטסאפ בלבד. אין תשלום אונליין.</p>
+        <p class="meta">ההרשמה בוואטסאפ בלבד, מול אבי. אין תשלום אונליין.</p>
       </aside>
     </div>
   `;
