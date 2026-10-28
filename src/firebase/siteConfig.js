@@ -2,6 +2,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from './config';
 import { callAdminSettings } from '../utils/adminApi';
 import { normalizePartyBanners } from '../../shared/partyBanners.js';
+import { siteTexts, SITE_TEXT_MAX } from '../../shared/siteTexts.js';
 
 const SITE_CONFIG_DOC_ID = 'siteConfig';
 
@@ -32,4 +33,15 @@ export const savePartyBanners = async (banners) => {
   const clean = normalizePartyBanners(banners);
   await callAdminSettings('set-settings', { docId: SITE_CONFIG_DOC_ID, data: { partyBanners: clean } });
   return clean;
+};
+
+// The About / Contact page text (shared/siteTexts.js).
+export const getSiteTexts = async () => {
+  const snap = await getDoc(ref());
+  return siteTexts(snap.exists() ? snap.data() : {});
+};
+
+export const saveSiteText = async (field, text) => {
+  if (!['aboutText', 'contactText'].includes(field)) throw new Error('Unknown text');
+  await callAdminSettings('set-settings', { docId: SITE_CONFIG_DOC_ID, data: { [field]: String(text || '').trim().slice(0, SITE_TEXT_MAX) } });
 };
