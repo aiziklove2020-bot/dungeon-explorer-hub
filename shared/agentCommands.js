@@ -75,8 +75,11 @@ export function applyAgentCommand(agentId, text, current = {}) {
     return { config: current, handled: true, runNow: rules.now, reply: say[rules.now] };
   }
   const agent = agentById(agentId);
+  if (agentId === 'creator') {
+    return { config: current, handled: false, reply: 'קיבלתי ✅ אכין קמפיינים חדשים לפי ההוראה שלך. אני בודק בקשות כל בוקר ב-09:43, והקמפיינים החדשים ייכנסו לסבב בערוץ עד אז.' };
+  }
   if (CLAUDE_AGENTS.has(agentId)) {
-    return { config: current, handled: false, reply: 'אני סוכן Claude ורץ בזמנים קבועים' + (agentId === 'fixer' ? ' (כל יום ב-13:37)' : ' (פעם בחודש)') + '. רשמתי את הבקשה, ואטפל בה בריצה הבאה. אם אתה רוצה שזה יקרה עכשיו, כתוב את זה למנהל הצוות בשיחה עם Claude.' };
+    return { config: current, handled: false, reply: 'אני סוכן Claude ורץ בזמנים קבועים (כל יום ב-13:37). רשמתי את הבקשה, ואטפל בה בריצה הבאה. אם אתה רוצה שזה יקרה עכשיו, כתוב את זה למנהל הצוות בשיחה עם Claude.' };
   }
   if (AUTOMATIC.has(agentId)) {
     return { config: current, handled: false, reply: 'אני עובד אוטומטית ולא צריך להפעיל אותי ידנית. אם צריך לשנות איך אני עובד, רשמתי את הבקשה למנהל הצוות.' };
