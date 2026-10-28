@@ -34,7 +34,7 @@ const AgentsSection = lazy(() => import('../components/admin/AgentsSection'));
 const DBLoggerSection = lazy(() => import('../components/admin/DBLoggerSection'));
 const DBSection = lazy(() => import('../components/admin/DBSection'));
 const GitHistorySection = lazy(() => import('../components/admin/GitHistorySection'));
-const SiteDesignSection = lazy(() => import('../components/admin/SiteDesignSection'));
+const PartyBannersSection = lazy(() => import('../components/admin/PartyBannersSection'));
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -305,7 +305,7 @@ const Admin = () => {
 
         <div className="space-y-6">
           <Suspense fallback={<AdminLoader />}>
-          {activeSection === 'siteDesign' && <SiteDesignSection showSaved={showSaved} />}
+          {activeSection === 'siteDesign' && <PartyBannersSection showSaved={showSaved} />}
           {activeSection === 'parties'   && <PartiesSection showSaved={showSaved} refreshKey={partiesRefreshKey} />}
           {activeSection === 'about'     && <AboutSection showSaved={showSaved} />}
           {activeSection === 'contact'   && <ContactSection showSaved={showSaved} />}
