@@ -73,6 +73,7 @@ import { requireAdminApiSecret } from '../lib/apiAuth.js';
 import { getFirebaseAdmin } from '../lib/forumAuthApi.js';
 import { agentById } from '../shared/agentsRoster.js';
 import { runTask } from '../shared/a2a.js';
+import { purgeMembers } from '../lib/purgeMembers.js';
 
 // ── Subscription logic, ported from src/firebase/subscriptions.js ──────────
 // Pure computation only (no Firestore calls) — kept in lockstep with that
@@ -290,7 +291,7 @@ export default async function handler(req, res) {
       const text = typeof body.text === 'string' ? body.text.trim().slice(0, 500) : '';
       const agent = typeof to === 'string' ? agentById(to) : null;
       if (!agent || !text) return res.status(400).json({ error: 'Unknown agent or empty message' });
-      const NOW_JOBS = { announce: 'job=announce', memorial: 'job=memorial', campaign: 'job=campaign&force=1', promo: 'job=promo-now', tiktok: 'job=tiktok&force=1', push: 'job=push-now&scope=internal', 'push-internal': 'job=push-now&scope=internal', standup: 'job=standup', health: 'job=health&noalert=1', cleanup: 'job=cleanup-parties' };
+      const NOW_JOBS = { announce: 'job=announce', memorial: 'job=memorial', campaign: 'job=campaign&force=1', tiktok: 'job=tiktok&force=1', push: 'job=push-now&scope=internal', 'push-internal': 'job=push-now&scope=internal', standup: 'job=standup', health: 'job=health&noalert=1', cleanup: 'job=cleanup-parties' };
       const cfgRef = db.collection('settings').doc('agentConfig');
       const chatRef = db.collection('settings').doc('agentChat');
       const result = await db.runTransaction(async (tx) => {
@@ -478,6 +479,14 @@ export default async function handler(req, res) {
       const hashed = await bcrypt.hash(newPassword, 10);
       await usersRef.doc(adminId).update({ password: hashed });
       return res.status(200).json({ ok: true });
+    }
+
+    // POST { action: 'purge-members', confirm: 'מחק' }: permanently deletes every
+    // member / site-account record (see lib/purgeMembers.js). Admins and parties stay.
+    if (action === 'purge-members') {
+      if (body.confirm !== 'מחק') return res.status(400).json({ error: 'Missing confirmation' });
+      const deleted = await purgeMembers(db, FieldValue);
+      return res.status(200).json({ ok: true, deleted });
     }
 
     if (action === 'admin-list') {

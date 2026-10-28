@@ -13,7 +13,7 @@ export function isSilentDay(now = new Date()) {
 
 // Jobs on api/telegram-webhook.js that read or administer only, never publish.
 export const NON_PUBLISHING_JOBS = new Set([
-  'promo-check', 'health', 'standup', 'cleanup-parties', 'list-delete-requests', 'process-delete-request',
+  'promo-check', 'health', 'standup', 'cleanup-parties',
   'recent-chats', 'bot-info', 'webhook-info', 'chat-status', 'set-webhook', 'manual-post-check',
   'fix-channels', 'fix-chatids', 'migrate-support-chat-secret', 'fix-party-whatsapp'
 ]);

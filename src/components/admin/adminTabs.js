@@ -4,23 +4,13 @@
  * Imported by Admin.jsx to drive both the tab buttons and section rendering.
  */
 export const adminTabs = [
-  // Order follows how the admin actually works day to day: the very first
-  // thing on login is who's waiting for approval and everyone on the site
-  // (subscriptions), then balancing, then the parties being balanced.
-  // Single unified place for everyone on the site — merged with the old
-  // "ניהול משתמשים" tab, which was just a different filter over the exact
-  // same `users` collection and confused the admin (two tabs, one dataset).
-  { id: 'subscriptions', label: 'ניהול משתמשים ומנויים' },
-  { id: 'matching', label: 'התאמות' },
+  // The site has no member accounts: parties come first.
   { id: 'parties',  label: 'מסיבות' },
   { id: 'siteDesign', label: 'עיצוב האתר (לוגו/באנרים/פופאפ)' },
-  { id: 'forumUsers', label: 'מנויי האתר' },
   { id: 'about',    label: 'אודות' },
   { id: 'contact',  label: 'צור קשר' },
   { id: 'links',    label: 'קישורים וקבוצות' },
-  { id: 'deleteRequests', label: 'בקשות מחיקה' },
   { id: 'admins',   label: 'ניהול אדמינים' },
-  { id: 'advertisers', label: 'מפרסמים' },
   { id: 'rss',      label: 'RSS Feeds' },
   { id: 'telegram', label: 'טלגרם' },
   { id: 'agents',   label: 'צוות הסוכנים' },

@@ -45,18 +45,6 @@
       "destination": "/about.html"
     },
     {
-      "source": "/advertiser-dashboard",
-      "destination": "/advertiser-dashboard.html"
-    },
-    {
-      "source": "/advertiser-login",
-      "destination": "/advertiser-login.html"
-    },
-    {
-      "source": "/advertiser-register",
-      "destination": "/advertiser-register.html"
-    },
-    {
       "source": "/calendar",
       "destination": "/calendar.html"
     },
@@ -69,20 +57,8 @@
       "destination": "/contact.html"
     },
     {
-      "source": "/create-event",
-      "destination": "/create-event.html"
-    },
-    {
-      "source": "/delete-account",
-      "destination": "/delete-account.html"
-    },
-    {
       "source": "/event",
       "destination": "/event.html"
-    },
-    {
-      "source": "/favorites",
-      "destination": "/favorites.html"
     },
     {
       "source": "/events",
@@ -109,44 +85,12 @@
       "destination": "/liberal-suite.html"
     },
     {
-      "source": "/login",
-      "destination": "/login.html"
-    },
-    {
-      "source": "/membership",
-      "destination": "/membership.html"
-    },
-    {
-      "source": "/my-match",
-      "destination": "/my-match.html"
-    },
-    {
-      "source": "/my-area",
-      "destination": "/my-area.html"
-    },
-    {
       "source": "/news",
       "destination": "/news.html"
     },
     {
       "source": "/privacy",
       "destination": "/privacy.html"
-    },
-    {
-      "source": "/producer-info",
-      "destination": "/producer-info.html"
-    },
-    {
-      "source": "/profile",
-      "destination": "/profile.html"
-    },
-    {
-      "source": "/register",
-      "destination": "/register.html"
-    },
-    {
-      "source": "/register-event",
-      "destination": "/register-event.html"
     },
     {
       "source": "/terms",
@@ -165,21 +109,6 @@
       "permanent": true
     },
     {
-      "source": "/advertiser-dashboard.html",
-      "destination": "/advertiser-dashboard",
-      "permanent": true
-    },
-    {
-      "source": "/advertiser-login.html",
-      "destination": "/advertiser-login",
-      "permanent": true
-    },
-    {
-      "source": "/advertiser-register.html",
-      "destination": "/advertiser-register",
-      "permanent": true
-    },
-    {
       "source": "/calendar.html",
       "destination": "/calendar",
       "permanent": true
@@ -195,23 +124,8 @@
       "permanent": true
     },
     {
-      "source": "/create-event.html",
-      "destination": "/create-event",
-      "permanent": true
-    },
-    {
-      "source": "/delete-account.html",
-      "destination": "/delete-account",
-      "permanent": true
-    },
-    {
       "source": "/event.html",
       "destination": "/event",
-      "permanent": true
-    },
-    {
-      "source": "/favorites.html",
-      "destination": "/favorites",
       "permanent": true
     },
     {
@@ -235,16 +149,6 @@
       "permanent": true
     },
     {
-      "source": "/login.html",
-      "destination": "/login",
-      "permanent": true
-    },
-    {
-      "source": "/membership.html",
-      "destination": "/membership",
-      "permanent": true
-    },
-    {
       "source": "/news.html",
       "destination": "/news",
       "permanent": true
@@ -255,29 +159,149 @@
       "permanent": true
     },
     {
-      "source": "/producer-info.html",
-      "destination": "/producer-info",
-      "permanent": true
-    },
-    {
-      "source": "/profile.html",
-      "destination": "/profile",
-      "permanent": true
-    },
-    {
-      "source": "/register.html",
-      "destination": "/register",
-      "permanent": true
-    },
-    {
-      "source": "/register-event.html",
-      "destination": "/register-event",
-      "permanent": true
-    },
-    {
       "source": "/terms.html",
       "destination": "/terms",
       "permanent": true
+    },
+    {
+      "source": "/register",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/register.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/login",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/login.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/my-area",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/my-area.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/profile",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/profile.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/favorites",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/favorites.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/my-match",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/my-match.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/membership",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/membership.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/advertiser-login",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/advertiser-login.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/advertiser-register",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/advertiser-register.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/advertiser-dashboard",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/advertiser-dashboard.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/create-event",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/create-event.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/register-event",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/register-event.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/delete-account",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/delete-account.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/producer-info",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/producer-info.html",
+      "destination": "/",
+      "permanent": false
     }
   ]
 }

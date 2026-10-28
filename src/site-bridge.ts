@@ -3,17 +3,11 @@
 // (see vite.bridge.config.ts / `npm run build:bridge`) and loaded by the
 // static pages as <script type="module" src="assets/site-data.js">.
 //
-// Exposes window.LPData — real data only. window.LP (assets/app.js) still
-// owns local UI state (current logged-in user session, favorites list) until
-// auth is migrated too.
-import { getActiveParties, registerToPartyNew, createParty, getAllParties, getPartyById, updateParty, deleteParty, getMyBalanceMatch, setBalanceMatchPhoneShared, getMyRegistrations } from "./firebase/parties";
-import { getMyPersonalAreaProfile, updateMyProfilePhoto } from "./firebase/users";
-import { collection, query, where, getDocsFromServer } from "firebase/firestore";
+// Exposes window.LPData — real data only. The site has no member accounts:
+// parties are shown here and registration is by WhatsApp.
+import { collection, query, where, getDocs, getDocsFromServer } from "firebase/firestore";
 import { db } from "./firebase/config";
-import { sendRegistrationTelegram, sendManualPartyAnnouncement, sendSubscriptionRequestTelegram } from "./firebase/telegram";
-import { createSubscriptionRequest } from "./firebase/subscriptionRequests";
 import { getSocialLinks, getRssFeeds, getContent } from "./firebase/settings";
-import { registerForumUser, loginForumUser, getForumUserByPhone, updateForumUser, getForumUserById, getMyLinkedPhoneNumber, changeMyPassword } from "./firebase/forumUsers";
 import {
   getSessionId,
   sendSupportMessage,
@@ -22,20 +16,29 @@ import {
   subscribeToSupportMessages,
   fetchSupportMessages,
 } from "./firebase/supportChat";
-import { uploadPartyImage } from "./firebase/storage";
-import { registerAdvertiser, authenticateAdvertiser } from "./firebase/advertisers";
-import { addFavorite, removeFavorite, getFavoritePartyIds } from "./firebase/favorites";
 import { savePushSubscription } from "./firebase/pushSubscriptions";
+
+// A bare "YYYY-MM-DD" is a local calendar date: parse it as local midnight
+// (new Date("2026-10-30") would be UTC and can land on the previous day).
+function lpToLocalDate(d: any): Date {
+  if (d instanceof Date) return d;
+  if (d?.toDate) return d.toDate();
+  if (typeof d === "string") {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d);
+    if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+  }
+  return new Date(d);
+}
 
 /** "יום שישי" from any Firestore/JS date shape; "" when unparseable. */
 function hebrewDayFromDate(d: any): string {
-  const dt = d instanceof Date ? d : d?.toDate ? d.toDate() : new Date(d);
+  const dt = lpToLocalDate(d);
   if (!dt || Number.isNaN(dt.getTime())) return "";
   return dt.toLocaleDateString("he-IL", { weekday: "long" });
 }
 
 function formatDateLabel(d: any): string {
-  const dt = d instanceof Date ? d : d?.toDate ? d.toDate() : new Date(d);
+  const dt = lpToLocalDate(d);
   if (!dt || Number.isNaN(dt.getTime())) return "";
   return `${String(dt.getDate()).padStart(2, "0")}.${String(dt.getMonth() + 1).padStart(2, "0")}.${dt.getFullYear()}`;
 }
@@ -43,7 +46,7 @@ function formatDateLabel(d: any): string {
 // Machine-sortable/filterable form (YYYY-MM-DD) alongside the display label —
 // the events page date filter compares against this, not the DD.MM.YYYY text.
 function formatDateISO(d: any): string {
-  const dt = d instanceof Date ? d : d?.toDate ? d.toDate() : new Date(d);
+  const dt = lpToLocalDate(d);
   if (!dt || Number.isNaN(dt.getTime())) return "";
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 }
@@ -101,6 +104,7 @@ function toEventShape(p: any) {
     dj: p.dj || "",
     category: p.category || detectCategory(title, desc),
     city: p.city || detectCity(title),
+    badge: p.badge || "",
     // Real parties have no city field yet — badge falls back to a
     // generic label instead of showing something misleading.
     type: p.partyType === "external" ? "אירוע חיצוני" : "מסיבה",
@@ -131,16 +135,15 @@ function partyDateMs(p: any): number {
  */
 async function loadEvents() {
   let parties: any[] | null = null;
+  const activeParties = query(collection(db, "parties"), where("status", "==", "active"));
+  const toParty = (d: any) => {
+    const data: any = d.data();
+    return { id: d.id, ...data, date: data.date?.toDate?.() || new Date(data.date) };
+  };
   try {
-    const snap = await getDocsFromServer(
-      query(collection(db, "parties"), where("status", "==", "active"))
-    );
-    parties = snap.docs.map((d) => {
-      const data: any = d.data();
-      return { id: d.id, ...data, date: data.date?.toDate?.() || new Date(data.date) };
-    });
+    parties = (await getDocsFromServer(activeParties)).docs.map(toParty);
   } catch {
-    parties = await getActiveParties().catch(() => []);
+    parties = await getDocs(activeParties).then((snap) => snap.docs.map(toParty)).catch(() => []);
   }
   // status stays "active" in Firestore after a party's date has passed —
   // nothing flips it automatically — so expired parties kept showing on the
@@ -205,462 +208,8 @@ async function loadSocialLinks() {
   return out;
 }
 
-function sanitizeNickname(name: string): string {
-  return String(name || "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\p{L}\p{N}_-]/gu, "");
-}
-
-/** Real registration: creates a forum user (the site's actual account system). Phone is the login identifier. */
-async function register(name: string, phone: string, password: string, gender?: string) {
-  const nickname = sanitizeNickname(name);
-  if (nickname.length < 2) throw new Error("השם קצר מדי — נא להזין לפחות 2 תווים (אותיות/ספרות)");
-  const user = await registerForumUser(nickname, password, phone);
-  if (gender) await updateForumUser(user.id, { gender }).catch(() => {});
-  return { id: user.id, name: user.nickname, phone: (user as any).phone || phone, gender: gender || null, role: "user", isApproved: (user as any).isApproved !== false };
-}
-
-/** Real login: looks up the account by phone, then verifies via the real password check. */
-async function login(phone: string, password: string) {
-  const found = await getForumUserByPhone(phone).catch(() => null);
-  if (!found) throw new Error("לא נמצא חשבון עם מספר הטלפון הזה");
-  const user = await loginForumUser(found.nickname, password);
-  return { id: user.id, name: user.nickname, phone: (user as any).phone || phone, gender: (found as any).gender || null, role: "user" };
-}
-
-/**
- * Re-checks a stored session against the account's current state — login()
- * only gates the moment of signing in, so a session already sitting in
- * localStorage (profile.html trusts LP.current() as-is, no re-fetch) would
- * otherwise stay "logged in" forever even after an admin revokes approval
- * or blocks the account later. Call this once when a protected page loads.
- */
-async function checkMyAccountStatus(userId: string) {
-  const user = await getForumUserById(userId).catch(() => null) as any;
-  if (!user) return { valid: false, reason: "החשבון לא נמצא" };
-  if (user.isBlocked) return { valid: false, reason: "החשבון שלך נחסם" };
-  if (user.isApproved === false) return { valid: false, reason: "החשבון שלך ממתין לאישור מנהל" };
-  return { valid: true, reason: "" };
-}
-
-/**
- * Membership status shown on the personal area (profile.html).
- * Women get unconditional gold status (free, no expiry) per site policy.
- * Men's status is whatever an admin set on their forum account (subscriptionExpiry) —
- * there's no self-serve payment flow yet, so unset means "not subscribed".
- */
-/** Real profile update — writes phone/bio straight to the forum account doc. */
-async function updateMyProfile(userId: string, data: { phone?: string; bio?: string }) {
-  await updateForumUser(userId, { phone: data.phone || "", bio: data.bio || "" });
-}
-
-async function getMembershipStatus(userId: string, gender: string | null) {
-  if (gender === "female") {
-    return { active: true, tier: "gold", label: "מנוי זהב — חינם לנשים", expiry: null as string | null };
-  }
-  const user = await getForumUserById(userId).catch(() => null) as any;
-  const expiry = user?.subscriptionExpiry || null;
-  const active = expiry ? new Date(expiry).getTime() > Date.now() : false;
-  return {
-    active,
-    tier: active ? "standard" : null,
-    label: active ? "מנוי פעיל" : "אין מנוי פעיל",
-    expiry,
-  };
-}
-
-/**
- * Real party registration — writes to the same `registrations` array the admin panel reads.
- * registrationType must match what the admin panel itself uses (see src/firebase/parties.js):
- * "single-male-balance" | "single-female-balance" | "single-female-discount" | "couple".
- */
-async function registerForParty(partyId: string, data: {
-  fullName: string;
-  phoneNumber: string;
-  telegramUsername?: string;
-  // Only meaningful on the male half of a couple registration — the female
-  // half's own registerForParty call never sends a notification (see
-  // skipAutoSend below), so her Telegram handle has to ride along on his
-  // call to reach the single combined couple message.
-  womanTelegramUsername?: string;
-  registrationType: "single-male-balance" | "single-female-balance" | "single-female-discount" | "single-male-couple" | "single-female-couple" | "couple";
-  partnerName?: string;
-  partnerPhone?: string;
-  pickupAddress?: string;
-  coupleId?: string;
-}) {
-  const registrationType = data.registrationType;
-  const gender = registrationType === "couple" ? "couple" : registrationType.startsWith("single-female") ? "female" : "male";
-  const result = await registerToPartyNew(partyId, {
-    fullName: data.fullName,
-    phoneNumber: data.phoneNumber,
-    telegramUsername: data.telegramUsername || "",
-    gender,
-    registrationType,
-    partnerName: data.partnerName || null,
-    partnerPhone: data.partnerPhone || null,
-    pickupAddress: data.pickupAddress || "",
-    // Both halves of a couple share this id so the admin groups them as one couple.
-    coupleId: data.coupleId || null,
-  });
-
-  // Same client-side Telegram alert the old site's registration form sent —
-  // pure Firestore-config + direct Telegram API call, no server credential
-  // needed. Never blocks/fails the registration itself if it errors.
-  //
-  // A couple registers as two separate calls, one per half (see
-  // register-event.html) — but that's one registration *event*, not two, so
-  // only the male half's call sends the (now correctly full-couple-info)
-  // notification. Without this, both halves each auto-sent their own
-  // couple-formatted message — two duplicates of the same registration.
-  const skipAutoSend = registrationType === "single-female-couple";
-  try {
-    const party = await getPartyById(partyId);
-    if (party && !skipAutoSend) {
-      await sendRegistrationTelegram(
-        { ...data, registrationType, gender },
-        party,
-        null,
-        null,
-        "he"
-      );
-    }
-  } catch (err) {
-    // best-effort only
-  }
-
-  return result;
-}
-
-/**
- * Public "I want to be a subscriber" request — name + phone only, no
- * account or subscription created here. Shows up in the admin's "ניהול
- * מנויים" pending queue, and best-effort pings Telegram too.
- */
-async function requestSubscription(fullName: string, phoneNumber: string, note = "", plan = "") {
-  const result = await createSubscriptionRequest(fullName, phoneNumber, note);
-  try {
-    await sendSubscriptionRequestTelegram({ fullName, phoneNumber, note }, "he");
-  } catch (err) {
-    // best-effort only
-  }
-  return result;
-}
-
-/** Registers a Web Push subscription against the phone number so we can notify this device even when the site is closed. */
 async function registerPushSubscription(phoneNumber: string, subscription: any) {
   return savePushSubscription(phoneNumber, subscription);
-}
-
-/** Real advertiser party publishing — writes straight to the live parties collection. */
-/**
- * Upload a party image straight from the browser (phone gallery/camera or a
- * desktop file picker) to the same Cloudinary bucket the admin panel uses.
- * The preset is unsigned, so no server credential is involved.
- */
-async function uploadImage(file: File) {
-  const result: any = await uploadPartyImage(file, `adv_${Date.now()}`);
-  return typeof result === "string" ? result : result?.url || "";
-}
-
-async function createAdvertiserParty(advertiserId: string, data: {
-  title: string; date: string; time: string; dj?: string; imageURL?: string; description: string; category?: string; city?: string; whatsappNumber?: string; registrationLink?: string;
-}) {
-  return createParty({
-    city: data.city || "",
-    whatsappNumber: data.whatsappNumber || "",
-    // An external ticket link makes this an "external" party, which is what
-    // event.html keys off to send visitors straight to the seller.
-    registrationLink: data.registrationLink || "",
-    title: data.title,
-    name: data.title,
-    date: data.date,
-    time: data.time || "",
-    dj: data.dj || "",
-    imageURL: data.imageURL || "",
-    description: data.description,
-    category: data.category || "",
-    partyType: data.registrationLink ? "external" : "internal",
-    // Must be `createdBy` — this is the exact field the Telegram broadcast
-    // filter (api/telegram-webhook.js: partyAllowedFor) and the admin's
-    // per-advertiser party lookup (firebase/parties.js: query('createdBy'))
-    // both key off. A different field name here means the filter can never
-    // identify the real advertiser and silently falls back to its "admin-only"
-    // branch — which caused parties from any advertiser to leak into any
-    // restricted channel whose allowlist happened to include "__admin__".
-    createdBy: advertiserId,
-  });
-}
-
-/** All real parties an advertiser has published, newest first. */
-async function loadAdvertiserParties(advertiserId: string) {
-  const all = await getAllParties();
-  return (all || [])
-    .filter((p: any) => p.createdBy === advertiserId)
-    .sort((a: any, b: any) => partyDateMs(b) - partyDateMs(a))
-    .map(toEventShape);
-}
-
-/** Fetches one of an advertiser's own parties (for the edit form), refusing anything not theirs. */
-async function getAdvertiserParty(advertiserId: string, partyId: string) {
-  const party: any = await getPartyById(partyId);
-  if (!party || party.createdBy !== advertiserId) throw new Error("המסיבה לא נמצאה");
-  return toEventShape({ ...party, id: partyId });
-}
-
-/**
- * Lets an advertiser edit their own party. Re-checks `createdBy` against the
- * live doc (not just what the caller claims) so an advertiser can never
- * overwrite someone else's party by guessing/reusing an id.
- */
-async function updateAdvertiserParty(advertiserId: string, partyId: string, data: {
-  title: string; date: string; time: string; dj?: string; imageURL?: string; description: string; category?: string; city?: string; whatsappNumber?: string; registrationLink?: string;
-}) {
-  const existing: any = await getPartyById(partyId);
-  if (!existing || existing.createdBy !== advertiserId) throw new Error("המסיבה לא נמצאה");
-  await updateParty(partyId, {
-    title: data.title,
-    name: data.title,
-    date: data.date,
-    time: data.time || "",
-    dj: data.dj || "",
-    imageURL: data.imageURL || "",
-    description: data.description,
-    category: data.category || "",
-    city: data.city || "",
-    partyType: data.registrationLink ? "external" : "internal",
-    registrationLink: data.registrationLink || "",
-    whatsappNumber: data.whatsappNumber || "",
-  });
-  return true;
-}
-
-/** Lets an advertiser delete their own party — same ownership check as above. */
-async function deleteAdvertiserParty(advertiserId: string, partyId: string) {
-  const existing: any = await getPartyById(partyId);
-  if (!existing || existing.createdBy !== advertiserId) throw new Error("המסיבה לא נמצאה");
-  await deleteParty(partyId);
-  return true;
-}
-
-/**
- * Lets an advertiser publish one of their own parties to Telegram right now,
- * instead of waiting for the scheduled broadcast. Looks the raw party doc up
- * by id (event.html-shaped objects from loadAdvertiserParties don't carry the
- * raw `createdBy`/`imageURL` fields the Telegram formatter needs) so the same
- * advertiser-allowlist filter in sendManualPartyAnnouncement sees the real
- * `createdBy`, and can never reach a channel that advertiser isn't allowed into.
- *
- * Unlike sendManualPartyAnnouncement's own channel filtering, nothing here
- * used to check WHO was calling — any visitor could force-broadcast ANY
- * party (someone else's, or one not ready yet) straight from the browser
- * console. Same ownership check as updateAdvertiserParty/deleteAdvertiserParty
- * above.
- */
-async function publishPartyToTelegram(advertiserId: string, partyId: string) {
-  const party: any = await getPartyById(partyId);
-  if (!party || party.createdBy !== advertiserId) throw new Error("המסיבה לא נמצאה");
-  const result = await sendManualPartyAnnouncement(party);
-  await updateParty(partyId, { manualTelegramPublishedAt: new Date().toISOString() });
-  return result;
-}
-
-/** Real advertiser signup — creates a pending account awaiting admin approval. */
-async function registerAdvertiserAccount(data: { businessName: string; contactName: string; phoneNumber: string; password: string }) {
-  const advertiser = await registerAdvertiser(data);
-  return { id: advertiser.id, businessName: advertiser.businessName, name: advertiser.contactName, role: "advertiser" };
-}
-
-/** Real advertiser login — only succeeds once an admin has approved the account. */
-async function loginAdvertiser(phoneNumber: string, password: string) {
-  const result = await authenticateAdvertiser(phoneNumber, password);
-  if (!result.authenticated) throw new Error(result.error || "פרטי התחברות שגויים");
-  const a = result.advertiser as any;
-  return { id: a.id, businessName: a.businessName, name: a.contactName, role: "advertiser" };
-}
-
-/**
- * "Who is my balance match" lookup — party registrations have no login of
- * their own, so identity here is just the phone number the person
- * registered with (same trust model the rest of party registration already
- * uses). Never exposes a phone number except the matched woman's own,
- * explicit, opt-in share.
- */
-async function loadMyBalanceMatch(phoneNumber: string) {
-  return getMyBalanceMatch(phoneNumber);
-}
-
-async function shareMyBalancePhone(partyId: string, femalePhone: string, shared: boolean) {
-  await setBalanceMatchPhoneShared(partyId, femalePhone, shared);
-}
-
-/**
- * Real per-account favorites — requires a logged-in forum user AND an active
- * subscription. A forum account alone (self-registered nickname+phone+password)
- * isn't a subscriber; only adding is gated so an existing favorite can always
- * be removed even after a subscription lapses.
- */
-async function toggleFavorite(userId: string, partyId: string, isFavorite: boolean) {
-  if (!userId) throw new Error("יש להתחבר כדי לשמור מועדפים");
-  if (isFavorite) {
-    const forumUser = await getForumUserById(userId).catch(() => null) as any;
-    const phone = forumUser?.phone;
-    const profile = phone ? await getMyPersonalAreaProfile(phone).catch(() => null) : null;
-    if (!profile?.isPrivilegedSubscriber) {
-      throw new Error("סימון מועדפים זמין רק למנויים שנתיים");
-    }
-    await addFavorite(userId, partyId);
-    // Favoriting one party from a producer implicitly "follows" them —
-    // every other currently-active party from that same producer is
-    // favorited too, silently. No advertiser identity is ever shown for
-    // this; it's purely a side effect of favoriting.
-    const party: any = await getPartyById(partyId).catch(() => null);
-    if (party?.createdBy) {
-      const activeParties = await getActiveParties().catch(() => []);
-      const existingFavoriteIds = new Set(await getFavoritePartyIds(userId).catch(() => []));
-      const siblingParties = activeParties.filter(
-        (p: any) => p.id !== partyId && p.createdBy === party.createdBy && !existingFavoriteIds.has(p.id)
-      );
-      await Promise.all(siblingParties.map((p: any) => addFavorite(userId, p.id).catch(() => {})));
-    }
-  } else {
-    await removeFavorite(userId, partyId);
-  }
-}
-
-async function loadMyFavorites(userId: string) {
-  if (!userId) return [];
-  return getFavoritePartyIds(userId).catch(() => []);
-}
-
-/**
- * In-app "reminder bell" for the logged-in user: favorited parties happening
- * within the next few days. No push/SMS infra yet — this is the simple v1
- * (badge + list shown when the user is on the site), not a background alert.
- */
-async function loadFavoriteAlerts(userId: string, withinDays = 3) {
-  if (!userId) return [];
-  const favIds = await getFavoritePartyIds(userId).catch(() => []);
-  if (favIds.length === 0) return [];
-  const events = await loadEvents().catch(() => []);
-  const now = Date.now();
-  const horizon = now + withinDays * 24 * 60 * 60 * 1000;
-  return events.filter((e: any) => {
-    if (!favIds.includes(e.id)) return false;
-    const ms = new Date(e.dateISO + "T00:00:00").getTime();
-    return Number.isFinite(ms) && ms >= now - 24 * 60 * 60 * 1000 && ms <= horizon;
-  });
-}
-
-/**
- * /my-area's phone gate has no password — anyone who knows or guesses a
- * phone number can see that number's registrations, balance match (which
- * can include the other side's shared phone number!) and favorites. That's
- * fine for a one-time party registrant who never made an account, but a
- * real forum member (phone + password) must not be reachable that way —
- * they have to go through the real login. Checked before loadMyPersonalArea
- * ever runs for a typed-in phone.
- */
-async function checkPhoneHasForumAccount(phoneNumber: string) {
-  const user = await getForumUserByPhone(phoneNumber).catch(() => null) as any;
-  return !!user;
-}
-
-/**
- * Unified personal area, keyed by the phone number typed in (no login) —
- * one call combining registrations (with status), balance match, favorited
- * parties and profile/subscription info, so the page needs a single load.
- */
-async function loadMyPersonalArea(phoneNumber: string) {
-  const [registrations, balanceMatch, profile, favoriteIds] = await Promise.all([
-    getMyRegistrations(phoneNumber).catch(() => []),
-    getMyBalanceMatch(phoneNumber).catch(() => null),
-    getMyPersonalAreaProfile(phoneNumber).catch(() => null),
-    getFavoritePartyIds(phoneNumber).catch(() => []),
-  ]);
-
-  let favorites: any[] = [];
-  if (favoriteIds.length > 0) {
-    const events = await loadEvents().catch(() => []);
-    favorites = events.filter((e: any) => favoriteIds.includes(e.id));
-  }
-
-  return { registrations, balanceMatch, profile, favorites };
-}
-
-async function uploadMyProfilePhoto(phoneNumber: string, file: File) {
-  const url = await uploadImage(file);
-  if (url) await updateMyProfilePhoto(phoneNumber, url);
-  return url;
-}
-
-/**
- * Same unified personal area as loadMyPersonalArea, but for a logged-in
- * forum account (profile.html) — resolves the account's linked phone number
- * first (see getMyLinkedPhoneNumber) so people who already have a real
- * forum login don't need to type their phone in separately.
- */
-async function changeMyForumPassword(userId: string, currentPassword: string, newPassword: string) {
-  await changeMyPassword(userId, currentPassword, newPassword);
-}
-
-async function loadMyForumPersonalArea(forumUserId: string) {
-  const phone = await getMyLinkedPhoneNumber(forumUserId).catch(() => null);
-  if (!phone) return { phone: null, registrations: [], balanceMatch: null, profile: null, favorites: [] };
-  const data = await loadMyPersonalArea(phone);
-
-  // getMyLinkedPhoneNumber prefers the phone on the *linked site user*
-  // record over the phone the account actually logs in with — if that link
-  // points at the wrong (or a blank) site user, every party registration,
-  // favorite and balance match the person actually has, filed under their
-  // real login phone, silently doesn't show up here. Whenever the two
-  // differ, also load under the raw login phone and merge in anything the
-  // linked-phone lookup missed, rather than trusting one phone blindly.
-  const forumUser = await getForumUserById(forumUserId).catch(() => null) as any;
-  const loginPhone = forumUser?.phone || null;
-  if (loginPhone && loginPhone !== phone) {
-    const loginPhoneData = await loadMyPersonalArea(loginPhone).catch(() => null);
-    if (loginPhoneData) {
-      const existingRegIds = new Set(data.registrations.map((r: any) => r.partyId || r.id));
-      data.registrations = [
-        ...data.registrations,
-        ...loginPhoneData.registrations.filter((r: any) => !existingRegIds.has(r.partyId || r.id)),
-      ];
-      if (!data.balanceMatch && loginPhoneData.balanceMatch) data.balanceMatch = loginPhoneData.balanceMatch;
-      if (!data.profile && loginPhoneData.profile) data.profile = loginPhoneData.profile;
-      const existingFavIds = new Set(data.favorites.map((e: any) => e.id));
-      data.favorites = [
-        ...data.favorites,
-        ...loginPhoneData.favorites.filter((e: any) => !existingFavIds.has(e.id)),
-      ];
-    }
-  }
-  // Favorites can be saved under two different identities: phone number
-  // (the heart buttons on /my-area, which has no login) or forum account id
-  // (the heart buttons on events.html/index.html, gated to a real login via
-  // lpFavIdentity()). Merge both so a forum-account subscriber sees every
-  // party they've favorited, regardless of which page they used.
-  const forumFavoriteIds = await getFavoritePartyIds(forumUserId).catch(() => []);
-  const existingIds = new Set(data.favorites.map((e: any) => e.id));
-  const missingIds = forumFavoriteIds.filter((id: string) => !existingIds.has(id));
-  if (missingIds.length > 0) {
-    const events = await loadEvents().catch(() => []);
-    data.favorites = [...data.favorites, ...events.filter((e: any) => missingIds.includes(e.id))];
-  }
-  return { phone, ...data };
-}
-
-/**
- * Removing a favorite from /profile: it may have been saved under either
- * identity above, so clear both — deleting a document that doesn't exist is
- * a no-op, so this is safe regardless of which one it was actually under.
- */
-async function removeMyForumFavorite(forumUserId: string, phone: string | null, partyId: string) {
-  await Promise.all([
-    removeFavorite(forumUserId, partyId).catch(() => {}),
-    phone ? removeFavorite(phone, partyId).catch(() => {}) : Promise.resolve(),
-  ]);
 }
 
 async function loadNewsFeed() {
@@ -677,33 +226,6 @@ async function loadNewsFeed() {
   loadAbout,
   loadContact,
   supportChat,
-  registerAdvertiserAccount,
-  loginAdvertiser,
-  register,
-  login,
-  checkMyAccountStatus,
-  getMembershipStatus,
-  updateMyProfile,
-  uploadImage,
-  createAdvertiserParty,
-  loadAdvertiserParties,
-  getAdvertiserParty,
-  updateAdvertiserParty,
-  deleteAdvertiserParty,
-  publishPartyToTelegram,
-  registerForParty,
-  requestSubscription,
-  toggleFavorite,
-  loadMyFavorites,
-  loadFavoriteAlerts,
-  loadMyBalanceMatch,
-  shareMyBalancePhone,
-  loadMyPersonalArea,
-  checkPhoneHasForumAccount,
-  uploadMyProfilePhoto,
-  loadMyForumPersonalArea,
-  removeMyForumFavorite,
-  changeMyForumPassword,
   registerPushSubscription,
 };
 
@@ -718,12 +240,12 @@ async function loadNewsFeed() {
  */
 const SUPPORT_FAQ_KB: { keywords: string[]; answer: string }[] = [
   {
-    keywords: ["נרשם", "נרשמים", "נרשמת", "להצטרף", "מנוי חדש", "הצטרפות"],
-    answer: "ממלאים טופס הרשמה למנויים דרך העמוד 'הרשמה למנויים'. הצוות בודק את הבקשה, מאשר את המנוי ויוצר עבורכם חשבון כניסה באופן אישי.",
+    keywords: ["נרשם", "נרשמים", "נרשמת", "להירשם", "הרשמה", "להצטרף", "הצטרפות", "מנוי"],
+    answer: "ההרשמה למסיבות בוואטסאפ בלבד: לוחצים על 'הרשמה בוואטסאפ' ליד המסיבה ושולחים הודעה. הצוות חוזר אליכם עם כל הפרטים. באתר אין חשבונות ואין מנויים.",
   },
   {
-    keywords: ["צריך חשבון", "חייב חשבון", "בלי חשבון", "לפני שנרשמים"],
-    answer: "לא צריך חשבון כדי להירשם למסיבה — ההרשמה למסיבה נפרדת לגמרי מחשבון הכניסה לאזור האישי.",
+    keywords: ["צריך חשבון", "חייב חשבון", "בלי חשבון", "סיסמה", "התחברות", "כניסה לאתר"],
+    answer: "באתר אין חשבונות ואין התחברות. רואים את המסיבות באתר ונרשמים בוואטסאפ.",
   },
   {
     keywords: ["סינגלים", "סינגל", "סינגלית"],
@@ -734,44 +256,16 @@ const SUPPORT_FAQ_KB: { keywords: string[]; answer: string }[] = [
     answer: "התשלום מתואם ישירות מול הצוות. באתר עצמו אין סליקה או חיוב בכרטיס אשראי.",
   },
   {
-    keywords: ["סיסמה"],
-    answer: "פונים לצוות דרך עמוד 'יצירת קשר' — איפוס הסיסמה מתבצע ידנית על ידי מנהל.",
-  },
-  {
-    keywords: ["גישה לנשים", "נשים בחינם", "מנוי לנשים", "לנשים"],
-    answer: "הגישה לנשים היא ללא תשלום, בהתאם למדיניות המנויים. הרשמה וכניסה לאירוע כפופות לתנאי האירוע.",
-  },
-  {
     keywords: ["מה זה איזון", "מה זה האיזון", "איזון מגדרי"],
-    answer: "'איזון' הוא שיבוץ שנעשה ידנית על ידי הצוות כדי לשמור על יחס מאוזן בין גברים לנשים בכל מסיבה. אחרי ההרשמה נכנסים לאזור האישי כדי לראות את פרטי האיזון שלכם.",
-  },
-  {
-    keywords: ["נסגר", "עד איזו שעה", "עד מתי", "שעת סגירה", "21:00", "תשע בערב"],
-    answer: "ההרשמה למסיבות פתוחה עד שצוות האתר סוגר אותה. אם ההרשמה למסיבה סגורה, תראו על כך הודעה בדף ההרשמה.",
-  },
-  {
-    keywords: ["אזור אישי", "איפה רואים", "ההרשמות שלי"],
-    answer: "כל הפרטים שלכם — הרשמות, איזון ומועדפים — נמצאים ב'אזור האישי' באתר.",
+    answer: "'איזון' הוא שיבוץ שהצוות עושה כדי לשמור על יחס מאוזן בין גברים לנשים בכל מסיבה. נרשמים בוואטסאפ, והצוות מעדכן אתכם.",
   },
   {
     keywords: ["Liberal Suite", "סוויטה", "להשכיר מקום", "חדר פרטי", "פליירום"],
     answer: "Liberal Suite היא סוויטה פרטית להשכרה למפגשים ומסיבות, לזוג אחד ועד 10 זוגות — כוללת Playroom, מתחם אבזור וחדר רחצה מרהיב. כל הפרטים וההזמנה בעמוד 'Liberal Suite' באתר.",
   },
   {
-    keywords: ["מפיק", "לפרסם מסיבה", "מפרסם", "העלאת מסיבה", "לפרסם אירוע"],
-    answer: "מפיקים ומפרסמים פותחים חשבון מפיק דרך עמוד 'למפיקים', ולאחר אישור יכולים להעלות ולנהל את המסיבות שלהם ישירות באזור המפרסם.",
-  },
-  {
-    keywords: ["למחוק חשבון", "מוחקים חשבון", "מוחק חשבון", "מחיקת חשבון", "לבטל חשבון", "לבטל מנוי"],
-    answer: "בקשת מחיקת חשבון מתבצעת דרך עמוד 'מחיקת חשבון' — ממלאים את הפרטים המשויכים לחשבון, והצוות יוצר קשר לאימות לפני המחיקה בפועל.",
-  },
-  {
     keywords: ["לוח אירועים", "מתי המסיבה הבאה", "אילו מסיבות יש", "מה יש בקרוב"],
     answer: "את כל המסיבות הקרובות אפשר לראות בעמוד 'לוח האירועים' או ברשימת 'כל המסיבות' באתר.",
-  },
-  {
-    keywords: ["סוגי מנוי", "מנוי בדסמ", "מנוי בדסם", "מנוי סווינגרס", "מנוי משולב", "מחירי מנויים", "אילו מנויים", "אילו מנוי"],
-    answer: "יש שלושה סוגי מנוי: מנוי BDSM, מנוי מסיבות סווינגרס, ומנוי משולב שמעניק גישה לשני סוגי המסיבות. כל הפרטים בעמוד 'מחירי מנויים'.",
   },
   {
     keywords: ["קוד אתי", "כללי התנהגות", "בטיחות באירוע", "כללי הקהילה"],
@@ -870,7 +364,7 @@ function mountSupportChatWidget() {
 
   const getGuestName = () => localStorage.getItem("lp_support_chat_name") || "";
   const setGuestName = (name: string) => localStorage.setItem("lp_support_chat_name", name);
-  const currentDisplayName = () => (window as any).LP?.current?.()?.name || getGuestName() || "אורח/ת";
+  const currentDisplayName = () => getGuestName() || "אורח/ת";
 
   const renderMessages = (messages: any[]) => {
     msgsBox.innerHTML = messages
@@ -901,7 +395,7 @@ function mountSupportChatWidget() {
 
   const openPanel = () => {
     panel.style.display = "flex";
-    const known = (window as any).LP?.current?.()?.name || getGuestName();
+    const known = getGuestName();
     if (known) startChatBody();
     else gate.style.display = "block";
   };

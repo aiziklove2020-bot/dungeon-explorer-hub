@@ -1,14 +1,13 @@
 import { useState, useTransition, useEffect, useRef, lazy, Suspense } from 'react';
 import {
-  ChevronDown, ChevronUp, Heart, PartyPopper, Users, Palette, UserCog, CreditCard,
-  Info, Phone, Link2, Trash2,
-  ShieldCheck, Megaphone, Rss, Send, Database, FileClock, GitBranch, ShieldCheck as ShieldIcon, Lock,
+  ChevronDown, ChevronUp, PartyPopper, Palette, UserCog,
+  Info, Phone, Link2,
+  ShieldCheck, Rss, Send, Database, FileClock, GitBranch, ShieldCheck as ShieldIcon, Lock,
 } from 'lucide-react';
 
 const TAB_ICONS = {
-  matching: Heart, parties: PartyPopper, users: Users, siteDesign: Palette,
-  forumUsers: UserCog, subscriptions: CreditCard, about: Info, contact: Phone,
-  links: Link2, deleteRequests: Trash2, admins: ShieldCheck, advertisers: Megaphone,
+  parties: PartyPopper, siteDesign: Palette, about: Info, contact: Phone,
+  links: Link2, admins: ShieldCheck,
   rss: Rss, telegram: Send, agents: UserCog, db: Database, dbLogger: FileClock, gitHistory: GitBranch,
 };
 import { useNavigate } from '@tanstack/react-router';
@@ -25,21 +24,16 @@ import AdminLoader from '../components/admin/AdminLoader';
 // Each tab's code is fetched only when it's opened — the panel used to download
 // all sixteen sections up front just to show the first one.
 const PartiesSection = lazy(() => import('../components/admin/PartiesSection'));
-const MatchesSection = lazy(() => import('../components/admin/MatchesSection'));
 const RssSection = lazy(() => import('../components/admin/RssSection'));
 const AboutSection = lazy(() => import('../components/admin/AboutSection'));
 const ContactSection = lazy(() => import('../components/admin/ContactSection'));
 const LinksSection = lazy(() => import('../components/admin/LinksSection'));
 const AdminsSection = lazy(() => import('../components/admin/AdminsSection'));
-const AdvertisersSection = lazy(() => import('../components/admin/AdvertisersSection'));
 const TelegramSection = lazy(() => import('../components/admin/TelegramSection'));
 const AgentsSection = lazy(() => import('../components/admin/AgentsSection'));
 const DBLoggerSection = lazy(() => import('../components/admin/DBLoggerSection'));
 const DBSection = lazy(() => import('../components/admin/DBSection'));
 const GitHistorySection = lazy(() => import('../components/admin/GitHistorySection'));
-const ForumUsersSection = lazy(() => import('../components/admin/ForumUsersSection'));
-const DeleteRequestsSection = lazy(() => import('../components/admin/DeleteRequestsSection'));
-const SubscriptionsSection = lazy(() => import('../components/admin/SubscriptionsSection'));
 const SiteDesignSection = lazy(() => import('../components/admin/SiteDesignSection'));
 
 const Admin = () => {
@@ -63,7 +57,7 @@ const Admin = () => {
       setIsAuthenticated(true);
     }
   }, []);
-  const [activeSection, setActiveSection] = useState('subscriptions');
+  const [activeSection, setActiveSection] = useState('parties');
   // Advanced tools (DB backup, DB read-log, git history) are real working
   // features, just rarely-clicked/technical — collapsed by default to keep
   // the main tab row focused, not removed.
@@ -367,15 +361,10 @@ const Admin = () => {
           {activeSection === 'parties'   && <PartiesSection showSaved={showSaved} refreshKey={partiesRefreshKey} />}
           {activeSection === 'about'     && <AboutSection showSaved={showSaved} />}
           {activeSection === 'contact'   && <ContactSection showSaved={showSaved} />}
-          {activeSection === 'matching'  && <MatchesSection showSaved={showSaved} />}
           {activeSection === 'links'     && <LinksSection showSaved={showSaved} />}
           {activeSection === 'db'        && <DBSection />}
           {activeSection === 'dbLogger'  && <DBLoggerSection />}
-          {activeSection === 'forumUsers' && <ForumUsersSection showSaved={showSaved} />}
-          {activeSection === 'deleteRequests' && <DeleteRequestsSection showSaved={showSaved} />}
-          {activeSection === 'subscriptions' && <SubscriptionsSection showSaved={showSaved} />}
           {activeSection === 'admins'    && <AdminsSection showSaved={showSaved} />}
-          {activeSection === 'advertisers' && <AdvertisersSection showSaved={showSaved} />}
           {activeSection === 'rss'       && <RssSection showSaved={showSaved} />}
           {activeSection === 'telegram'  && <TelegramSection showSaved={showSaved} />}
           {activeSection === 'agents'    && <AgentsSection />}

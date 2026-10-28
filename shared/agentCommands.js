@@ -1,5 +1,5 @@
 // Plain-Hebrew commands the owner can type to an agent in the admin team chat
-// ("עומר, תפרסם רק בימי שני וחמישי", "ליאור, תעצור", "תמשיך"). Only a few
+// ("עומר, תפרסם רק בימי שני וחמישי", "עומר, תעצור", "תמשיך"). Only a few
 // things are controllable by the server itself; everything else is recorded as
 // a request for the team manager (Claude).
 import { agentById } from './agentsRoster.js';
@@ -9,7 +9,6 @@ export const DAY_LABELS = ['ראשון', 'שני', 'שלישי', 'רביעי', '
 // What each server-run agent accepts.
 export const CONTROLLABLE = {
   publisher: { days: true, pause: true, now: 'campaign' },
-  recruiter: { days: true, pause: true, now: 'promo' },
   tiktok: { days: true, pause: true, now: 'tiktok' },
   secretary: { pause: true },
   cleaner: { now: 'cleanup' },
@@ -19,7 +18,7 @@ export const CONTROLLABLE = {
 };
 
 // Agents that run by themselves and have nothing to start by hand.
-const AUTOMATIC = new Set(['support', 'matcher', 'notifier']);
+const AUTOMATIC = new Set(['support', 'notifier']);
 const CLAUDE_AGENTS = new Set(['creator', 'fixer']);
 
 const PAUSE_RE = /(עצור|תעצור|עצירה|תפסיק|הפסק|השהה|תשהה)/;
@@ -28,7 +27,6 @@ const RESUME_RE = /(המשך|תמשיך|תחזור|חזור|הפעל|תפעיל|
 // explicit "now" (or a bare "תנקה"), so "תנקה גם הרשמות ישנות" stays a request.
 const NOW_BY_AGENT = {
   publisher: /(עכשיו|מיד|תפרסם|תשלח|תריץ|תעבוד)/,
-  recruiter: /(עכשיו|מיד|תשלח|תריץ|תעבוד)/,
   tiktok: /(עכשיו|מיד|תכין|תשלח|תריץ|תעבוד)/,
   doctor: /(עכשיו|מיד|תבדוק|בדוק|תריץ|תעבוד)/,
   cleaner: /(עכשיו|מיד|^\s*(תנקה|נקה)\s*$)/,
@@ -69,10 +67,10 @@ export function applyAgentCommand(agentId, text, current = {}) {
     }
   }
   if (rules?.now && NOW_BY_AGENT[agentId]?.test(t)) {
-    const say = { campaign: 'מפרסם עכשיו קמפיין בערוץ, תראה את זה כאן בצ׳אט בעוד רגע.', standup: 'פותח עכשיו ישיבת צוות, כולם מדווחים כאן בצ׳אט בעוד רגע.', push: 'שולח עכשיו התראה לנייד על המסיבות הקרובות עם הרשמה באתר, אכתוב כאן כמה מכשירים קיבלו.', tiktok: 'מכין עכשיו פוסט לטיקטוק ושולח לך אותו בטלגרם.', promo: 'שולח עכשיו לקבוצה את ההודעה למפרסמים.', health: 'בודק את האתר עכשיו, אכתוב כאן מה מצאתי בעוד רגע.', cleanup: 'מנקה עכשיו, אכתוב כאן מה עשיתי.' };
+    const say = { campaign: 'מפרסם עכשיו קמפיין בערוץ, תראה את זה כאן בצ׳אט בעוד רגע.', standup: 'פותח עכשיו ישיבת צוות, כולם מדווחים כאן בצ׳אט בעוד רגע.', push: 'שולח עכשיו התראה לנייד על המסיבות הקרובות שלנו, אכתוב כאן כמה מכשירים קיבלו.', tiktok: 'מכין עכשיו פוסט לטיקטוק ושולח לך אותו בטלגרם.', promo: 'שולח עכשיו לקבוצה את ההודעה למפרסמים.', health: 'בודק את האתר עכשיו, אכתוב כאן מה מצאתי בעוד רגע.', cleanup: 'מנקה עכשיו, אכתוב כאן מה עשיתי.' };
     // "שלח התראה על המסיבות הפנימיות" → only internal (on-site) parties, not the newest party of any kind.
     if (agentId === 'notifier' && /פנימי/.test(t)) {
-      return { config: current, handled: true, runNow: 'push-internal', reply: 'שולח עכשיו התראה לנייד על המסיבות הקרובות עם הרשמה באתר, אכתוב כאן כמה מכשירים קיבלו.' };
+      return { config: current, handled: true, runNow: 'push-internal', reply: 'שולח עכשיו התראה לנייד על המסיבות הקרובות שלנו, אכתוב כאן כמה מכשירים קיבלו.' };
     }
     return { config: current, handled: true, runNow: rules.now, reply: say[rules.now] };
   }

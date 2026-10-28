@@ -11,8 +11,8 @@ import { isSilentDay, isSiteClosed } from '../shared/silentDay.js';
  * it configured, this responds 500 rather than silently no-op'ing so a
  * missing env var is obvious instead of "notifications just don't arrive".
  *
- * Admin-only: both callers (saveBalanceMatches, notifyPrivilegedSubscribersOfNewParty)
- * live in src/firebase/parties.js, used only from the admin panel. Without this
+ * Admin-only: its caller (src/firebase/pushSubscriptions.js) is used only from
+ * the admin panel. Without this
  * gate, anyone could POST arbitrary endpoint/keys and use this deploy's VAPID
  * identity as a free open push relay.
  */

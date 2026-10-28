@@ -17,9 +17,9 @@ describe('owner commands to agents', () => {
   });
 
   it('pauses and resumes', () => {
-    const paused = applyAgentCommand('recruiter', 'תעצור', {});
+    const paused = applyAgentCommand('tiktok', 'תעצור', {});
     expect(paused.config.paused).toBe(true);
-    const resumed = applyAgentCommand('recruiter', 'תמשיך', paused.config);
+    const resumed = applyAgentCommand('tiktok', 'תמשיך', paused.config);
     expect(resumed.config.paused).toBe(false);
     expect(resumed.handled).toBe(true);
   });
@@ -30,8 +30,8 @@ describe('owner commands to agents', () => {
   });
 
   it('"do it now" starts the right job for the agents that have one', () => {
-    expect(applyAgentCommand('recruiter', 'תעשה עכשיו', {}).runNow).toBe('promo');
-    expect(applyAgentCommand('recruiter', 'תעבוד עכשיו', {}).runNow).toBe('promo');
+    expect(applyAgentCommand('tiktok', 'תעשה עכשיו', {}).runNow).toBe('tiktok');
+    expect(applyAgentCommand('tiktok', 'תעבוד עכשיו', {}).runNow).toBe('tiktok');
     expect(applyAgentCommand('publisher', 'תפרסם עכשיו', {}).runNow).toBe('campaign');
     expect(applyAgentCommand('doctor', 'תבדוק שהכל תקין באתר', {}).runNow).toBe('health');
     expect(applyAgentCommand('cleaner', 'תנקה עכשיו', {}).runNow).toBe('cleanup');
