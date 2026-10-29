@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RotateCcw, UserPlus, Shield, ShieldOff, Trash2 } from 'lucide-react';
+import { RotateCcw, UserPlus, Shield, ShieldOff, Trash2, KeyRound } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminLoader from './AdminLoader';
 import PhoneLink from '../PhoneLink';
@@ -9,7 +9,8 @@ import {
   getAllUsers,
   setAdminActive, 
   makeUserAdmin, 
-  removeAdmin 
+  removeAdmin,
+  setAdminPassword as saveAdminPassword
 } from '../../firebase/users';
 
 const AdminsSection = ({ showSaved }) => {
@@ -46,6 +47,28 @@ const AdminsSection = ({ showSaved }) => {
       showSaved();
     } catch (error) {
       alert(error.message || t('admin.admins.errorToggle'));
+    }
+  };
+
+  const handleChangePassword = async (adminId, adminName) => {
+    const newPass = window.prompt(`סיסמה חדשה עבור ${adminName || 'המנהל'} (לפחות 8 תווים):`);
+    if (newPass === null) return;
+    if (newPass.length < 8) {
+      alert('הסיסמה חייבת להכיל לפחות 8 תווים');
+      return;
+    }
+    const confirmPass = window.prompt('הקלד שוב את הסיסמה לאישור:');
+    if (confirmPass === null) return;
+    if (confirmPass !== newPass) {
+      alert('הסיסמאות אינן תואמות');
+      return;
+    }
+    try {
+      await saveAdminPassword(adminId, newPass);
+      showSaved();
+      alert('הסיסמה עודכנה בהצלחה');
+    } catch (error) {
+      alert(error.message || 'שגיאה בעדכון הסיסמה');
     }
   };
 
@@ -271,6 +294,12 @@ const AdminsSection = ({ showSaved }) => {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleChangePassword(admin.id, admin.adminUsername || admin.name)}
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2"
+                  >
+                    <KeyRound size={14} /> שנה סיסמה
+                  </button>
                   {!admin.isDefaultAdmin && (
                     <>
                       <button
