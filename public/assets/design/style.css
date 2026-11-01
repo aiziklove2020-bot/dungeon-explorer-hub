@@ -368,8 +368,3 @@ input[type="date"]::-webkit-date-and-time-value{text-align:right;min-height:1.2e
 .membership-pricing .pricing-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:760px;margin-inline:auto}@media(max-width:800px){.membership-pricing .pricing-grid{grid-template-columns:1fr}}
 #lpPushGate .lp-gate-card{width:min(440px,100%);text-align:center;background:#1c1120f2;border:1px solid #ff5aa055;border-radius:20px;padding:28px 22px;box-shadow:0 20px 60px #000a}#lpPushGate h1{font-size:28px;margin:10px 0 8px;letter-spacing:-.5px}#lpPushGate p{color:#e9d7e2;font-size:16px;line-height:1.7;margin:0 0 18px}#lpPushGate .btn{min-height:52px;font-size:16px}#lpPushGate .lp-gate-note{margin-top:14px;color:#ffd0e2;font-size:14px}#lpPushGate #lpPushGateGo{margin-top:10px}
 #lpPushGate [hidden]{display:none!important}
-
-/* iPhone Dynamic Island / notch: with viewport-fit=cover (and the installed app's translucent status bar) the page runs
-   under the status bar, so the header grows by the cutout height and keeps the same dark colour behind it. */
-html{background:#100910}
-header{padding-top:calc(10px + env(safe-area-inset-top,0px))}
