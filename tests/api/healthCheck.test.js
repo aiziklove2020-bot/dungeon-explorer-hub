@@ -64,6 +64,19 @@ describe('daily health check', () => {
   });
 });
 
+describe('publisher paused on purpose', () => {
+  it('does not report a silent campaign channel while the publisher is paused, and reports it when he is active', async () => {
+    docs['settings/telegramCampaigns'] = { lastSentAt: Date.now() - 12 * 24 * 3600 * 1000 };
+    botOk = true;
+    const prev = process.env.SILENT_DAYS_OFF;
+    delete process.env.SILENT_DAYS_OFF; // the real configuration: PUBLISHER_PAUSED is on
+    try {
+      expect((await runHealthCheck({ alert: false })).problems.join(' ')).not.toContain('קמפיין');
+    } finally { process.env.SILENT_DAYS_OFF = prev; }
+    expect((await runHealthCheck({ alert: false })).problems.join(' ')).toContain('קמפיין'); // pause bypassed, as in the tests above
+  });
+});
+
 describe('health check stays light', () => {
   it('only asks whether the assets exist, without downloading them', async () => {
     assetMethods.length = 0;
