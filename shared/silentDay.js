@@ -18,10 +18,10 @@ export const NON_PUBLISHING_JOBS = new Set([
   'fix-channels', 'fix-chatids', 'migrate-support-chat-secret', 'fix-party-whatsapp'
 ]);
 
-// The site pages are closed (24.10.2026). The agents were switched back on by the owner on 27.10.2026,
-// so the global kill switch is off; only the channel publisher stays silent (PUBLISHER_PAUSED).
+// The agents were switched back on by the owner on 27.10.2026 (global kill switch off). The channel
+// publisher (עומר) was paused until 1.11.2026, when the owner asked to turn him on again (PUBLISHER_PAUSED off).
 export const SITE_CLOSED = false;
-export const PUBLISHER_PAUSED = true;
+export const PUBLISHER_PAUSED = false;
 export function isSiteClosed() {
   return SITE_CLOSED && process.env.SILENT_DAYS_OFF !== '1'; // tests of the publishing code switch it off
 }

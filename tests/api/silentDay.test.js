@@ -17,13 +17,13 @@ describe('silent day', () => {
   });
 });
 
-describe('agents back on, publisher paused', () => {
-  it('the global kill switch is off and only the channel publisher stays silent', async () => {
+describe('agents back on', () => {
+  it('the global kill switch is off and the channel publisher is active', async () => {
     const prev = process.env.SILENT_DAYS_OFF;
     delete process.env.SILENT_DAYS_OFF;
     const { isSiteClosed, PUBLISHER_PAUSED } = await import('../../shared/silentDay.js');
     expect(isSiteClosed()).toBe(false);
-    expect(PUBLISHER_PAUSED).toBe(true);
+    expect(PUBLISHER_PAUSED).toBe(false); // the owner turned the publisher back on (1.11.2026)
     process.env.SILENT_DAYS_OFF = prev;
   });
 });
