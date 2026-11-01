@@ -65,15 +65,16 @@ describe('daily health check', () => {
 });
 
 describe('publisher paused on purpose', () => {
-  it('does not report a silent campaign channel while the publisher is paused, and reports it when he is active', async () => {
+  it('reports a silent campaign channel exactly when the publisher is active (silence is expected only while he is paused)', async () => {
     docs['settings/telegramCampaigns'] = { lastSentAt: Date.now() - 12 * 24 * 3600 * 1000 };
     botOk = true;
+    const { PUBLISHER_PAUSED } = await import('../../shared/silentDay.js');
     const prev = process.env.SILENT_DAYS_OFF;
-    delete process.env.SILENT_DAYS_OFF; // the real configuration: PUBLISHER_PAUSED is on
+    delete process.env.SILENT_DAYS_OFF; // the real configuration
     try {
-      expect((await runHealthCheck({ alert: false })).problems.join(' ')).not.toContain('קמפיין');
+      const reported = (await runHealthCheck({ alert: false })).problems.join(' ').includes('קמפיין');
+      expect(reported).toBe(!PUBLISHER_PAUSED);
     } finally { process.env.SILENT_DAYS_OFF = prev; }
-    expect((await runHealthCheck({ alert: false })).problems.join(' ')).toContain('קמפיין'); // pause bypassed, as in the tests above
   });
 });
 
