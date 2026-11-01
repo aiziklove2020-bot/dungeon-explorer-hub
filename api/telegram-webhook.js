@@ -887,7 +887,9 @@ export async function runHealthCheck({ alert = true } = {}) {
     try {
       const snap = await db.collection('settings').doc('telegramCampaigns').get();
       const last = snap.exists ? snap.data()?.lastSentAt : null;
-      if (last && Date.now() - last > CAMPAIGN_MAX_SILENCE_MS) problems.push('לא פורסם קמפיין בערוץ יותר מ-9 ימים');
+      // While the publisher is paused on purpose (PUBLISHER_PAUSED) silence is expected, not a problem.
+      const publisherPaused = PUBLISHER_PAUSED && process.env.SILENT_DAYS_OFF !== '1';
+      if (!publisherPaused && last && Date.now() - last > CAMPAIGN_MAX_SILENCE_MS) problems.push('לא פורסם קמפיין בערוץ יותר מ-9 ימים');
     } catch (err) { /* already reported above */ }
   }
 
