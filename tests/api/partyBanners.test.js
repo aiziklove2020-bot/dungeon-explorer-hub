@@ -28,8 +28,11 @@ describe('banners between the parties', () => {
   it('renders the unchanged defaults with their original markup and a changed one with the new picture and link', () => {
     const [wa, insta] = DEFAULT_PARTY_BANNERS;
     expect(bannerHtml(insta)).toContain('instagram-banner-v2.webp');
-    expect(bannerHtml(wa)).toContain('chat.whatsapp.com/LHo4Spoy73b38mDI5XEcF7');
-    expect(bannerHtml({ ...wa, link: 'https://chat.whatsapp.com/NEW' })).toContain('href="https://chat.whatsapp.com/NEW"');
+    expect(bannerHtml(wa)).toContain('href="https://t.me/libralparty"');
+    expect(bannerHtml(wa)).toContain('קבוצת טלגרם');
+    // An old saved WhatsApp link never reaches the Telegram button.
+    expect(bannerHtml({ ...wa, link: 'https://chat.whatsapp.com/OLD' })).toContain('href="https://t.me/libralparty"');
+    expect(bannerHtml({ ...wa, link: 'https://t.me/NEW' })).toContain('href="https://t.me/NEW"');
     const changed = bannerHtml({ ...insta, image: 'https://res.cloudinary.com/new.jpg', link: 'https://t.me/libralparty' });
     expect(changed).toContain('src="https://res.cloudinary.com/new.jpg"');
     expect(changed).toContain('href="https://t.me/libralparty"');
