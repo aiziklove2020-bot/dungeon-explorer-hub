@@ -991,11 +991,32 @@ async function handleHealth(req, res) {
   }
 }
 
+// One-time cleanup (idempotent, best effort): the men/women WhatsApp group links and the WhatsApp group link of the
+// community links were removed from the site, so the stored values are deleted from the database.
+async function purgeRemovedLinks() {
+  try {
+    const admin = await initAdmin();
+    const db = admin.firestore();
+    const groupsRef = db.collection('settings').doc('whatsappGroups');
+    const groups = await groupsRef.get();
+    if (groups.exists) await groupsRef.delete();
+    const linksRef = db.collection('settings').doc('socialLinks');
+    const links = await linksRef.get();
+    if (links.exists && links.data()?.whatsapp !== undefined) {
+      const { FieldValue } = await import('firebase-admin/firestore');
+      await linksRef.update({ whatsapp: FieldValue.delete() });
+    }
+  } catch (err) {
+    console.error('purgeRemovedLinks:', err?.message || err);
+  }
+}
+
 async function handlePartyReminders(req, res) {
   if (!isCronAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
+    await purgeRemovedLinks();
     let secretaryPaused = false;
     try { secretaryPaused = Boolean((await getAgentConfig((await initAdmin()).firestore())).secretary?.paused); } catch { /* keep sending */ }
     // Parties go out Sunday, Tuesday, Thursday and Friday (the cron also runs Monday and Wednesday for the health check and the team meeting).
