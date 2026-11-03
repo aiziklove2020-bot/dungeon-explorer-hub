@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 process.env.SILENT_DAYS_OFF = '1'; // the mourning-day guard is tested in silentDay.test.js
 
 let stored = null;
@@ -102,3 +102,23 @@ describe('campaign content', () => {
     }
   });
 });
+
+describe('self-healing campaigns', () => {
+  beforeEach(() => { stored = null; sent.length = 0; telegramOk = true; vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-03T11:00:00Z')); }); // a Tuesday: not a campaign day
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('skips a normal non-campaign day', async () => {
+    stored = { lastSentAt: Date.now() - 2 * 24 * 3600 * 1000, nextIndex: 1, version: TELEGRAM_CAMPAIGNS_VERSION };
+    const r = await run({ force: undefined });
+    expect(r.body.skipped).toBe('not a campaign day');
+    expect(sent).toHaveLength(0);
+  });
+
+  it('posts a catch-up on a non-campaign day once the last campaign is 4+ days old', async () => {
+    stored = { lastSentAt: Date.now() - 5 * 24 * 3600 * 1000, nextIndex: 1, version: TELEGRAM_CAMPAIGNS_VERSION };
+    const r = await run({ force: undefined });
+    expect(r.body.ok).toBe(true);
+    expect(sent).toHaveLength(1);
+  });
+});
+

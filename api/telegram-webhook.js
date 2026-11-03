@@ -750,6 +750,10 @@ async function getAgentConfig(db) {
 const CAMPAIGN_DAYS = [1, 3];
 const PARTY_POST_DAYS = [0, 2, 4, 5]; // Sun, Tue, Thu, Fri — the days the parties go out (13:00 Israel time)
 const CAMPAIGN_MIN_GAP_MS = 20 * 60 * 60 * 1000;
+// Self-healing: if the scheduled day was missed (a failed run, a pause that ended), the next daily run posts anyway
+// once the last campaign is this old, so publishing never stays stuck until the next scheduled day.
+export const CAMPAIGN_CATCHUP_MS = 4 * 24 * 60 * 60 * 1000;
+export const PARTY_CATCHUP_MS = 4 * 24 * 60 * 60 * 1000;
 
 function israelWeekday(date = new Date()) {
   const name = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Jerusalem', weekday: 'short' }).format(date);
@@ -767,9 +771,13 @@ async function sendCampaignPost({ force = false } = {}) {
   const agentCfg = (await getAgentConfig(db)).publisher || {};
   if (!force && agentCfg.paused) return { ok: true, skipped: 'paused by the owner' };
   const campaignDays = Array.isArray(agentCfg.days) && agentCfg.days.length ? agentCfg.days : CAMPAIGN_DAYS;
-  if (!force && !campaignDays.includes(israelWeekday())) return { ok: true, skipped: 'not a campaign day' };
   const ref = db.collection('settings').doc('telegramCampaigns');
   const now = Date.now();
+  if (!force && !campaignDays.includes(israelWeekday())) {
+    const lastSent = (await ref.get()).data()?.lastSentAt;
+    const overdue = Boolean(lastSent) && now - lastSent > CAMPAIGN_CATCHUP_MS;
+    if (!overdue) return { ok: true, skipped: 'not a campaign day' };
+  }
   const claimed = await db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
     const data = snap.exists ? snap.data() || {} : {};
@@ -872,7 +880,7 @@ export async function sendTiktokPostIfDue({ force = false } = {}) {
 const HEALTH_SITE = 'https://www.libralparty.net';
 const HEALTH_PAGES = ['/', '/events', '/calendar', '/membership', '/register', '/login', '/about', '/contact', '/advertiser-register', '/my-area', '/profile'];
 const HEALTH_ASSETS = ['/assets/app.js', '/assets/site-data.js', '/assets/design/style.css', '/assets/design/hero-v3-800.webp'];
-const CAMPAIGN_MAX_SILENCE_MS = 9 * 24 * 60 * 60 * 1000;
+const CAMPAIGN_MAX_SILENCE_MS = 6 * 24 * 60 * 60 * 1000; // the longest planned gap is 5 days (Wed to Mon); the daily run posts a catch-up after 4
 
 async function healthFetch(path) {
   const ctrl = new AbortController();
@@ -936,7 +944,7 @@ export async function runHealthCheck({ alert = true } = {}) {
       const last = snap.exists ? snap.data()?.lastSentAt : null;
       // While the publisher is paused on purpose (PUBLISHER_PAUSED) silence is expected, not a problem.
       const publisherPaused = PUBLISHER_PAUSED && process.env.SILENT_DAYS_OFF !== '1';
-      if (!publisherPaused && last && Date.now() - last > CAMPAIGN_MAX_SILENCE_MS) problems.push('לא פורסם קמפיין בערוץ יותר מ-9 ימים');
+      if (!publisherPaused && last && Date.now() - last > CAMPAIGN_MAX_SILENCE_MS) problems.push('לא פורסם קמפיין בערוץ יותר מ-6 ימים');
     } catch (err) { /* already reported above */ }
   }
 
@@ -991,7 +999,14 @@ async function handlePartyReminders(req, res) {
     let secretaryPaused = false;
     try { secretaryPaused = Boolean((await getAgentConfig((await initAdmin()).firestore())).secretary?.paused); } catch { /* keep sending */ }
     // Parties go out Sunday, Tuesday, Thursday and Friday (the cron also runs Monday and Wednesday for the health check and the team meeting).
-    const partyDay = PARTY_POST_DAYS.includes(israelWeekday());
+    let partyDay = PARTY_POST_DAYS.includes(israelWeekday());
+    if (!partyDay && !secretaryPaused) {
+      // Catch-up: no party round for 4+ days (a missed run) -> send today instead of waiting for the next party day.
+      try {
+        const last = (await (await initAdmin()).firestore().collection('settings').doc('partyPublishState').get()).data()?.lastPublishedAt;
+        partyDay = Boolean(last) && Date.now() - last > PARTY_CATCHUP_MS;
+      } catch { /* keep the normal schedule */ }
+    }
     const reminders = secretaryPaused || !partyDay
       ? { partiesSent: 0, results: [], whatsappResult: null }
       : await sendAllPartyReminders();
