@@ -9,8 +9,7 @@ export const DAY_LABELS = ['ראשון', 'שני', 'שלישי', 'רביעי', '
 // What each server-run agent accepts.
 export const CONTROLLABLE = {
   publisher: { days: true, pause: true, now: 'campaign' },
-  tiktok: { days: true, pause: true, now: 'tiktok' },
-  secretary: { pause: true },
+  secretary: { pause: true, now: 'parties' },
   cleaner: { now: 'cleanup' },
   doctor: { now: 'health' },
   notifier: { now: 'push' },
@@ -21,14 +20,14 @@ export const CONTROLLABLE = {
 const AUTOMATIC = new Set(['support', 'notifier']);
 const CLAUDE_AGENTS = new Set(['creator', 'fixer']);
 
-const PAUSE_RE = /(עצור|תעצור|עצירה|תפסיק|הפסק|השהה|תשהה)/;
-const RESUME_RE = /(המשך|תמשיך|תחזור|חזור|הפעל|תפעיל|תתחיל|התחל)/;
+const PAUSE_RE = /(עצור|תעצור|עצירה|תפסיק|הפסק|השהה|תשהה|מספיק|תנוח|הפסקה|תשתוק|חופש)/;
+const RESUME_RE = /(המשך|תמשיך|תחזור|חזור|חזרה לעבודה|הפעל|תפעיל|תתחיל|התחל|קדימה|בוא נתחיל)/;
 // What counts as "do it now" for each agent. The cleaner only starts on an
 // explicit "now" (or a bare "תנקה"), so "תנקה גם הרשמות ישנות" stays a request.
 const NOW_BY_AGENT = {
   publisher: /(עכשיו|מיד|תפרסם|תשלח|תריץ|תעבוד)/,
-  tiktok: /(עכשיו|מיד|תכין|תשלח|תריץ|תעבוד)/,
-  doctor: /(עכשיו|מיד|תבדוק|בדוק|תריץ|תעבוד)/,
+  doctor: /(עכשיו|מיד|תבדוק|בדוק|תריץ|תעבוד|מה מצב|הכל תקין|הכול תקין)/,
+  secretary: /(עכשיו|מיד|תשלח|שלח|תפרסם|פרסם|תזכיר|תזכורת|תריץ)/,
   cleaner: /(עכשיו|מיד|^\s*(תנקה|נקה)\s*$)/,
   fixer: /(סיכום|סטטוס|ישיבה|תעדכן|עדכון|דיווח|תפתח)/,
   notifier: /(עכשיו|מיד|תשלח|שלח|תפעיל|תריץ|תעבוד|התראה|התראות)/,
@@ -55,6 +54,10 @@ export function applyAgentCommand(agentId, text, current = {}) {
   const wantsResume = RESUME_RE.test(t);
 
   if (rules) {
+    if (rules.days && !days.length && /(כל יום|בכל יום|כל הימים|כל ימות)/.test(t)) {
+      const everyDay = [0, 1, 2, 3, 4, 5];
+      return { config: { ...current, days: everyDay, paused: false }, handled: true, reply: 'בסדר. מעכשיו אני פועל בכל ימות השבוע (ראשון עד שישי).' };
+    }
     if (rules.days && days.length) {
       const config = { ...current, days, paused: false };
       return { config, handled: true, reply: `בסדר. מעכשיו אני פועל רק בימי ${days.map((d) => DAY_LABELS[d]).join(' ו')}.` };
@@ -67,7 +70,7 @@ export function applyAgentCommand(agentId, text, current = {}) {
     }
   }
   if (rules?.now && NOW_BY_AGENT[agentId]?.test(t)) {
-    const say = { campaign: 'מפרסם עכשיו קמפיין בערוץ, תראה את זה כאן בצ׳אט בעוד רגע.', standup: 'פותח עכשיו ישיבת צוות, כולם מדווחים כאן בצ׳אט בעוד רגע.', push: 'שולח עכשיו התראה לנייד על המסיבות הקרובות שלנו, אכתוב כאן כמה מכשירים קיבלו.', tiktok: 'מכין עכשיו פוסט לטיקטוק ושולח לך אותו בטלגרם.', promo: 'שולח עכשיו לקבוצה את ההודעה למפרסמים.', health: 'בודק את האתר עכשיו, אכתוב כאן מה מצאתי בעוד רגע.', cleanup: 'מנקה עכשיו, אכתוב כאן מה עשיתי.' };
+    const say = { parties: 'שולח עכשיו את המסיבות לכל הערוצים והקבוצות. אם כבר שלחתי ב-15 הדקות האחרונות אכתוב כאן שדילגתי.', campaign: 'מפרסם עכשיו קמפיין בערוץ, תראה את זה כאן בצ׳אט בעוד רגע.', standup: 'פותח עכשיו ישיבת צוות, כולם מדווחים כאן בצ׳אט בעוד רגע.', push: 'שולח עכשיו התראה לנייד על המסיבות הקרובות שלנו, אכתוב כאן כמה מכשירים קיבלו.', promo: 'שולח עכשיו לקבוצה את ההודעה למפרסמים.', health: 'בודק את האתר עכשיו, אכתוב כאן מה מצאתי בעוד רגע.', cleanup: 'מנקה עכשיו, אכתוב כאן מה עשיתי.' };
     // "שלח התראה על המסיבות הפנימיות" → only internal (on-site) parties, not the newest party of any kind.
     if (agentId === 'notifier' && /פנימי/.test(t)) {
       return { config: current, handled: true, runNow: 'push-internal', reply: 'שולח עכשיו התראה לנייד על המסיבות הקרובות שלנו, אכתוב כאן כמה מכשירים קיבלו.' };
