@@ -76,11 +76,6 @@ const COUPLE_TEMPLATE_PLACEHOLDER = `שם הגבר: {{registration.fullName}}
 
 const genId = () => Math.random().toString(36).slice(2, 12);
 
-// Synthetic id representing the site's own parties in a channel's allowlist
-// (the server's broadcast honours allowedAdvertiserIds): a restricted channel
-// gets the site's parties only when this id is ticked.
-const ADMIN_PSEUDO_ADVERTISER_ID = '__admin__';
-
 // Telegram preview: render only the small subset of HTML tags that Telegram's
 // `parse_mode=HTML` actually supports, and sanitize everything else with
 // DOMPurify so we share the same XSS layer used by the forum/blog renderer.
@@ -286,32 +281,12 @@ const TelegramSection = ({ showSaved }) => {
     setChannels((prev) => prev.map((c) => (c.id === id ? { ...c, broadcastEnabled: c.broadcastEnabled === false } : c)));
   };
 
-  // Restricts this channel — separate from the on/off switch above.
-  // Empty/absent allowedAdvertiserIds means "everything" (default); once
-  // restricted, the site's parties go there only when ticked.
-  const toggleChannelRestricted = (id) => {
-    setChannels((prev) => prev.map((c) => {
-      if (c.id !== id) return c;
-      const isRestricted = Array.isArray(c.allowedAdvertiserIds);
-      return { ...c, allowedAdvertiserIds: isRestricted ? undefined : [] };
-    }));
-  };
-
-  const toggleChannelAdvertiser = (channelId, advertiserId) => {
-    setChannels((prev) => prev.map((c) => {
-      if (c.id !== channelId) return c;
-      const current = c.allowedAdvertiserIds || [];
-      const next = current.includes(advertiserId) ? current.filter((a) => a !== advertiserId) : [...current, advertiserId];
-      return { ...c, allowedAdvertiserIds: next };
-    }));
-  };
-
   // A group/channel the bot was added to that is not in the list yet. It is added
-  // restricted, so no party is posted there until the site's parties are ticked.
+  // with publishing on: it gets every party of the site.
   const addSeenChat = (chat) => {
     setChannels((prev) => (prev.some((c) => String(c.chatId) === String(chat.id))
       ? prev
-      : [...prev, { id: genId(), name: chat.title || String(chat.id), chatId: String(chat.id), broadcastEnabled: true, allowedAdvertiserIds: [] }]));
+      : [...prev, { id: genId(), name: chat.title || String(chat.id), chatId: String(chat.id), broadcastEnabled: true }]));
   };
 
   // Posts the active parties to this one group only (the other groups get nothing),
@@ -328,7 +303,7 @@ const TelegramSection = ({ showSaved }) => {
       const results = Array.isArray(data.results) ? data.results : [];
       const failed = results.filter((r) => !r.ok);
       const lines = [`נשלחו ${results.length - failed.length} מתוך ${results.length} הודעות ל"${c.name}"`];
-      if (!results.length) lines.push('אין מסיבה שמורשית להתפרסם בקבוצה הזו (בדוק שסימנת מפרסם ושמרת).');
+      if (!results.length) lines.push('אין מסיבות פעילות לפרסם בקבוצה הזו כרגע.');
       failed.slice(0, 12).forEach((r) => lines.push(`• ${r.party || '?'}: ${r.description || 'שגיאה לא ידועה'}`));
       results.filter((r) => r.ok && r.imageFailed).forEach((r) => lines.push(`• ${r.party || '?'}: נשלח בלי תמונה — ${r.imageFailed}`));
       alert(lines.join('\n'));
@@ -659,32 +634,6 @@ const TelegramSection = ({ showSaved }) => {
                   </div>
                 )}
 
-                {editingChannel !== c.id && c.broadcastEnabled !== false && (
-                  <div className="pt-2 border-t border-[rgba(255,255,255,0.08)]">
-                    <label className="flex items-center gap-1.5 cursor-pointer text-xs mb-1.5">
-                      <input
-                        type="checkbox"
-                        checked={Array.isArray(c.allowedAdvertiserIds)}
-                        onChange={() => toggleChannelRestricted(c.id)}
-                      />
-                      <span className="text-[#c0aebb]">
-                        הגבלת פרסום בקבוצה הזו
-                      </span>
-                    </label>
-                    {Array.isArray(c.allowedAdvertiserIds) && (
-                      <div className="flex flex-wrap gap-2 mr-5">
-                        <label className="flex items-center gap-1 cursor-pointer text-xs bg-[#2a1a24]/80 border border-amber-800 rounded-lg px-2 py-1">
-                          <input
-                            type="checkbox"
-                            checked={c.allowedAdvertiserIds.includes(ADMIN_PSEUDO_ADVERTISER_ID)}
-                            onChange={() => toggleChannelAdvertiser(c.id, ADMIN_PSEUDO_ADVERTISER_ID)}
-                          />
-                          <span className="text-amber-400">לפרסם כאן את המסיבות של האתר</span>
-                        </label>
-                      </div>
-                    )}
-                  </div>
-                )}
               </li>
             ))}
           </ul>
