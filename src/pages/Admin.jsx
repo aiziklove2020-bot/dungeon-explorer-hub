@@ -20,6 +20,8 @@ import { adminTabs } from '../components/admin/adminTabs';
 import { adminAuthHeader } from '../utils/adminApi';
 import { restoreAdminSession, forgetAdminSession } from '../utils/adminSession';
 import AdminLoader from '../components/admin/AdminLoader';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 // Each tab's code is fetched only when it's opened — the panel used to download
 // all sixteen sections up front just to show the first one.
@@ -79,6 +81,12 @@ const Admin = () => {
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
   const [postingParties, setPostingParties] = useState(false);
+  // The button opens again 15 hours after the last publish (cron or manual); the server enforces it too.
+  const [nextPostAt, setNextPostAt] = useState(0);
+  const refreshNextPostAt = () => getDoc(doc(db, 'settings', 'partyPublishState'))
+    .then((snap) => setNextPostAt(snap.exists() && snap.data()?.lastPublishedAt ? snap.data().lastPublishedAt + 15 * 60 * 60 * 1000 : 0))
+    .catch(() => {});
+  useEffect(() => { refreshNextPostAt(); }, []);
   const [partiesRefreshKey, setPartiesRefreshKey] = useState(0);
   const savedTimeoutRef = useRef(null);
   const [, startTransition] = useTransition();
@@ -118,6 +126,7 @@ const Admin = () => {
 
   const handlePostParties = async () => {
     if (postingParties) return;
+    if (nextPostAt > Date.now()) { alert(`כבר פורסם. אפשר לפרסם ידנית שוב ב-${new Date(nextPostAt).toLocaleString('he-IL', { weekday: 'long', hour: '2-digit', minute: '2-digit' })}`); return; }
     if (!confirm('לפרסם עכשיו את כל המסיבות הפעילות באתר לטלגרם?')) return;
     setPostingParties(true);
     try {
@@ -125,6 +134,7 @@ const Admin = () => {
         headers: { ...adminAuthHeader() }
       });
       const data = await res.json();
+      if (res.status === 429) { if (data.nextAt) setNextPostAt(data.nextAt); alert(data.error || 'כבר פורסם'); return; }
       if (!res.ok || data.error) {
         alert(`הפרסום נכשל: ${data.error || res.statusText}`);
         return;
@@ -137,6 +147,7 @@ const Admin = () => {
         failed.slice(0, 12).forEach((r) => lines.push(`• ${r.party || '?'} (לקבוצה ${r.group || r.chatId}): ${r.description || 'שגיאה לא ידועה'}`));
       }
       alert(lines.join('\n'));
+      refreshNextPostAt();
       showSaved();
     } catch (err) {
       alert(`הפרסום נכשל: ${err.message}`);
@@ -258,7 +269,7 @@ const Admin = () => {
         <AdminHeader
           saved={saved}
           importing={importing} importMessage={importMessage} onImport={handleImportFromGit}
-          postingParties={postingParties} onPostParties={handlePostParties}
+          postingParties={postingParties} nextPostAt={nextPostAt} onPostParties={handlePostParties}
          
           onReset={() => {
             if (confirm(t('admin.resetConfirm') || 'האם אתה בטוח שברצונך לאפס את כל התוכן לברירות מחדל?')) {
