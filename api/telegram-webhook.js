@@ -297,6 +297,45 @@ async function handleBotInfo(req, res) {
   }
 }
 
+// ?job=bot-membership — where the bot really is right now. Asks Telegram (getChatMember) about every
+// destination in the "ערוצים" panel, plus the chats the bot has seen that are not listed. Nothing is
+// guessed from old activity: a chat the bot was removed from comes back as "left"/"kicked".
+const BOT_ACTIVE_STATUSES = ['member', 'administrator', 'creator'];
+async function handleBotMembership(req, res) {
+  if (!requireAdminApiSecret(req, res)) return;
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) return res.status(503).json({ error: 'Server not configured (missing TELEGRAM_BOT_TOKEN)' });
+  try {
+    const admin = await initAdmin();
+    const db = admin.firestore();
+    const me = (await (await fetch(`https://api.telegram.org/bot${botToken}/getMe`)).json()).result;
+    if (!me?.id) return res.status(502).json({ error: 'getMe failed' });
+    const tgSnap = await db.collection('settings').doc('telegram').get();
+    const channels = tgSnap.exists && Array.isArray(tgSnap.data()?.channels) ? tgSnap.data().channels : [];
+    const seenSnap = await db.collection('settings').doc('telegramSeenChats').get();
+    const seen = seenSnap.exists && Array.isArray(seenSnap.data()?.chats) ? seenSnap.data().chats : [];
+    const check = async (rawId) => {
+      const chatId = sanitizeChatId(rawId);
+      try {
+        const r = await (await fetch(`https://api.telegram.org/bot${botToken}/getChatMember?chat_id=${encodeURIComponent(chatId)}&user_id=${me.id}`)).json();
+        if (!r.ok) return { chatId, inChat: false, status: 'none', error: r.description || '' };
+        const m = r.result;
+        const inChat = BOT_ACTIVE_STATUSES.includes(m.status) || (m.status === 'restricted' && m.is_member !== false);
+        return { chatId, inChat, status: m.status, canPost: m.status === 'creator' || m.can_post_messages === true || (m.status === 'administrator' && m.can_post_messages !== false) || m.status === 'member' };
+      } catch (err) {
+        return { chatId, inChat: null, status: 'unknown', error: String(err?.message || err) };
+      }
+    };
+    const listed = await Promise.all(channels.map(async (c) => ({ id: c.id, name: c.name || '', ...(await check(c.chatId)) })));
+    const listedIds = new Set(channels.map((c) => String(sanitizeChatId(c.chatId))));
+    const others = seen.filter((c) => c.type !== 'private' && !listedIds.has(String(c.id)));
+    const unlisted = (await Promise.all(others.map(async (c) => ({ title: c.title || '', type: c.type || '', ...(await check(c.id)) })))).filter((x) => x.inChat);
+    return res.status(200).json({ ok: true, checkedAt: Date.now(), channels: listed, unlisted });
+  } catch (err) {
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
 // ?job=chat-status&chatId=<id> — checks the bot's actual membership status
 // (member/administrator/left/kicked) in a given chat, plus getChat details.
 // Added because sendMessage can report {ok:true} for a message the members
@@ -1296,6 +1335,9 @@ export default async function handler(req, res) {
     }
     if (job === 'campaign') {
       return handleCampaign(req, res);
+    }
+    if (job === 'bot-membership') {
+      return handleBotMembership(req, res);
     }
     if (job === 'test-group') {
       return handleTestGroup(req, res);
