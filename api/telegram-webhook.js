@@ -76,10 +76,31 @@ function sanitizeChatId(raw) {
 // Returns [{ chatId, name }] — every enabled channel/group in the "ערוצים" panel. The site has one
 // publisher (the owner), so every party goes to every enabled destination: the old per-advertiser
 // restriction (allowedAdvertiserIds) is gone and any leftover value in the settings is ignored.
+// Destinations the owner asked to add. Each one is added to settings/telegram.channels once (the id goes into
+// `ensuredChannels`), so deleting it later in the admin panel sticks. They then show up in the "ערוצים" panel.
+const ENSURED_CHANNELS = [
+  { id: 'liberal-line', name: 'הליין הליברלי', chatId: '-1003487913872' },
+];
+
+async function ensureChannels(ref, data) {
+  const done = Array.isArray(data?.ensuredChannels) ? data.ensuredChannels : [];
+  const todo = ENSURED_CHANNELS.filter((e) => !done.includes(e.id));
+  if (!todo.length) return data;
+  const channels = Array.isArray(data?.channels) ? [...data.channels] : [];
+  for (const e of todo) {
+    if (!channels.some((c) => String(c.chatId) === e.chatId)) channels.push({ id: e.id, name: e.name, chatId: e.chatId, broadcastEnabled: true });
+  }
+  const ensuredChannels = [...done, ...todo.map((e) => e.id)];
+  await ref.set({ channels, ensuredChannels }, { merge: true });
+  return { ...data, channels, ensuredChannels };
+}
+
 export async function getReminderDestinations(admin) {
   try {
-    const snap = await admin.firestore().collection('settings').doc('telegram').get();
-    const channels = snap.exists ? snap.data()?.channels : null;
+    const ref = admin.firestore().collection('settings').doc('telegram');
+    const snap = await ref.get();
+    const data = snap.exists ? await ensureChannels(ref, snap.data()).catch(() => snap.data()) : null;
+    const channels = data ? data.channels : null;
     const dests = (channels || [])
       // Group/channel owners can opt out of the automatic party broadcast
       // (checkbox in the ערוצים panel) without deleting the destination.
