@@ -81,10 +81,10 @@ const Admin = () => {
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
   const [postingParties, setPostingParties] = useState(false);
-  // The button opens again 15 hours after the last publish (cron or manual); the server enforces it too.
+  // The button opens again 15 minutes after the last publish (cron or manual); the server enforces it too.
   const [nextPostAt, setNextPostAt] = useState(0);
   const refreshNextPostAt = () => getDoc(doc(db, 'settings', 'partyPublishState'))
-    .then((snap) => setNextPostAt(snap.exists() && snap.data()?.lastPublishedAt ? snap.data().lastPublishedAt + 15 * 60 * 60 * 1000 : 0))
+    .then((snap) => setNextPostAt(snap.exists() && snap.data()?.lastPublishedAt ? snap.data().lastPublishedAt + 15 * 60 * 1000 : 0))
     .catch(() => {});
   useEffect(() => { refreshNextPostAt(); }, []);
   const [partiesRefreshKey, setPartiesRefreshKey] = useState(0);

@@ -630,7 +630,7 @@ export async function splitByBotPresence(botToken, destinations) {
 }
 
 // Parties are published to a chat once per round: nothing goes out again (cron or the admin button) until this long after the last round.
-export const PARTY_PUBLISH_GAP_MS = 15 * 60 * 60 * 1000;
+export const PARTY_PUBLISH_GAP_MS = 15 * 60 * 1000;
 
 async function sendAllPartyReminders(targetChatId) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -997,7 +997,7 @@ async function handlePartyReminders(req, res) {
       : await sendAllPartyReminders();
     const { partiesSent, results, whatsappResult } = reminders;
     if (secretaryPaused) await agentSay('secretary', 'אני בהפסקה לפי הבקשה שלך, לא שלחתי תזכורות היום.');
-    else if (partyDay && reminders.skipped) await agentSay('secretary', 'המסיבות כבר פורסמו ב-15 השעות האחרונות, לא שלחתי שוב.');
+    else if (partyDay && reminders.skipped) await agentSay('secretary', 'המסיבות כבר פורסמו ב-15 הדקות האחרונות, לא שלחתי שוב.');
     else if (partyDay) {
       await agentSay('secretary', partiesSent ? `שלחתי תזכורות על ${partiesSent} מסיבות לערוצים ולקבוצות ✅` : 'אין מסיבות פעילות היום, לא נשלחו תזכורות.');
       const failed = describeFailedChats(results);
@@ -1038,7 +1038,7 @@ async function handleManualPost(req, res) {
   const targetChatId = req.query?.chatId || new URL(req.url, 'http://x').searchParams.get('chatId') || undefined;
   try {
     const { partiesSent, results, whatsappResult, skipped, nextAt } = await sendAllPartyReminders(targetChatId);
-    if (skipped) return res.status(429).json({ error: 'המסיבות כבר פורסמו ב-15 השעות האחרונות', nextAt });
+    if (skipped) return res.status(429).json({ error: 'המסיבות כבר פורסמו ב-15 הדקות האחרונות', nextAt });
     return res.status(200).json({ ok: true, partiesSent, results, whatsappResult });
   } catch (err) {
     console.error('manual-post:', err);
