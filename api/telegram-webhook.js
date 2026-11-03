@@ -1372,11 +1372,17 @@ export async function handleAgentMessageFromSupportGroup(admin, msg) {
     tx.set(chatRef, { messages: [...prev, ...task.lines].slice(-150) });
     return task;
   });
-  await fetch(`https://api.telegram.org/bot${cfg.botToken}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: cfg.chatId, reply_to_message_id: msg.message_id, text: `${parsed.agent.name}: ${result.reply}` })
-  }).catch(() => {});
+  // Answer with the bot that received the message (the webhook's bot); fall back to the support-chat bot.
+  const tokens = [...new Set([process.env.TELEGRAM_BOT_TOKEN, cfg.botToken].filter(Boolean))];
+  for (const token of tokens) {
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: cfg.chatId, reply_to_message_id: msg.message_id, text: `${parsed.agent.name}: ${result.reply}` })
+    }).then((x) => x.json()).catch(() => ({}));
+    if (r.ok) break;
+    console.error('agent reply to support group failed:', r.description || 'no answer');
+  }
   for (const job of result.runNow) {
     if (!NOW_JOBS[job] || !process.env.TELEGRAM_PROMO_SECRET) continue;
     try {
