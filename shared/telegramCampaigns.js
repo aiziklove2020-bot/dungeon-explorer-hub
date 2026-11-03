@@ -54,7 +54,7 @@ export const TELEGRAM_CAMPAIGNS = [
   {
     "id": "c11",
     "image": "https://www.libralparty.net/assets/campaigns/c11.jpg",
-    "caption": "📲 מסיבות חדשות עולות באתר!\nמצטרפים לקבוצת הוואטסאפ ולא מפספסים אף מסיבה.\n\n👇 להצטרפות לקבוצה:\nhttps://chat.whatsapp.com/LHo4Spoy73b38mDI5XEcF7"
+    "caption": "📲 מסיבות חדשות עולות באתר!\nמצטרפים לקבוצת הטלגרם הגדולה ולא מפספסים אף מסיבה.\n\n👇 להצטרפות לקבוצה:\nhttps://t.me/libralparty"
   },
   {
     "id": "c12",
