@@ -3,10 +3,10 @@
 // panel ("באנרים באתר"), stored in settings/siteConfig.partyBanners. Until the
 // owner saves a list there, the site shows these defaults.
 //
-// kind "whatsapp" is the built-in WhatsApp group banner (only its link changes);
+// kind "whatsapp" (name kept for old saved lists) is the built-in Telegram group banner (only its link changes);
 // kind "image" is a picture with a link.
 export const DEFAULT_PARTY_BANNERS = [
-  { id: 'whatsapp', kind: 'whatsapp', link: 'https://chat.whatsapp.com/LHo4Spoy73b38mDI5XEcF7', alt: 'קבוצת פרסומי המסיבות בוואטסאפ', enabled: true },
+  { id: 'whatsapp', kind: 'whatsapp', link: 'https://t.me/libralparty', alt: 'קבוצת טלגרם גדולה', enabled: true },
   { id: 'instagram', kind: 'image', image: '/assets/design/instagram-banner-v2.jpg', link: 'https://www.instagram.com/liberl_party/', alt: 'הצטרפו אלינו באינסטגרם', enabled: true },
   { id: 'facebook', kind: 'image', image: '/assets/design/facebook-banner.jpg', link: 'https://www.facebook.com/share/g/1D7ng47o28/', alt: 'הצטרפו לקבוצת הפייסבוק שלנו', enabled: true },
   { id: 'app', kind: 'image', image: '/assets/design/app-banner.jpg', link: '/downloads/libral-party.apk', alt: 'האפליקציה של LIBRAL-PARTY לאנדרואיד', enabled: true },

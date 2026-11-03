@@ -83,7 +83,7 @@ const PartyBannersSection = ({ showSaved }) => {
           <div key={b.id} className="border border-[rgba(255,255,255,0.08)] rounded-xl p-4 space-y-3" style={{ opacity: b.enabled ? 1 : 0.55 }}>
             <div className="flex items-start gap-4 flex-wrap">
               {b.kind === 'whatsapp' ? (
-                <div className="h-16 w-40 rounded flex items-center justify-center text-xs font-bold text-white" style={{ background: '#128C4B' }}>באנר קבוצת הוואטסאפ</div>
+                <div className="h-16 w-40 rounded flex items-center justify-center text-xs font-bold text-white" style={{ background: '#229ED9' }}>באנר קבוצת הטלגרם</div>
               ) : (
                 <img src={b.image} alt={b.alt || 'באנר'} className="h-16 w-40 object-cover rounded bg-[#2a1a24]" />
               )}
