@@ -42,7 +42,6 @@ import { isSilentDay, israelDate, NON_PUBLISHING_JOBS, isSiteClosed, PUBLISHER_P
 import { requireTelegramWebhookSecret, requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 import { TELEGRAM_CAMPAIGNS, TELEGRAM_CAMPAIGNS_VERSION } from '../shared/telegramCampaigns.js';
-import { TIKTOK_PACK } from '../shared/tiktokPack.js';
 import { agentById } from '../shared/agentsRoster.js';
 
 // Sending every active party to every allowed destination can take longer
@@ -822,55 +821,6 @@ async function handleCampaign(req, res) {
 }
 
 
-// ── TikTok helper agent (נועם) ─────────────────────────────────────────────
-// TikTok's posting API needs an approved developer app, so this agent only
-// prepares the next post: it sends the owner (the support-chat Telegram chat)
-// the image and a ready caption, and the owner uploads it in the TikTok app.
-const TIKTOK_DAYS = [0, 4]; // Sunday, Thursday (Israel time)
-const TIKTOK_MIN_GAP_MS = 20 * 60 * 60 * 1000;
-
-export async function sendTiktokPostIfDue({ force = false } = {}) {
-  // The owner's Telegram chat is the support group, and TikTok posts must not
-  // appear there in any form. Nothing is sent until a separate destination is chosen.
-  return { ok: true, skipped: 'tiktok posts are not sent to the support group' };
-  // eslint-disable-next-line no-unreachable
-  if (!TIKTOK_PACK.length) return { ok: false, skipped: 'no tiktok pack' };
-  const admin = await initAdmin();
-  const db = admin.firestore();
-  const agentCfg = (await getAgentConfig(db)).tiktok || {};
-  if (!force && agentCfg.paused) return { ok: true, skipped: 'paused by the owner' };
-  const days = Array.isArray(agentCfg.days) && agentCfg.days.length ? agentCfg.days : TIKTOK_DAYS;
-  if (!force && !days.includes(israelWeekday())) return { ok: true, skipped: 'not a tiktok day' };
-  const cfgSnap = await db.collection('settings').doc('private').collection('supportChat').doc('config').get();
-  const cfg = cfgSnap.exists ? cfgSnap.data() : null;
-  if (!cfg?.botToken || !cfg?.chatId) return { ok: false, skipped: 'owner chat is not configured' };
-  const ref = db.collection('settings').doc('tiktokPosts');
-  const now = Date.now();
-  const claimed = await db.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    const data = snap.exists ? snap.data() || {} : {};
-    if (!force && data.lastSentAt && now - data.lastSentAt < TIKTOK_MIN_GAP_MS) return null;
-    const index = Number.isInteger(data.nextIndex) ? data.nextIndex % TIKTOK_PACK.length : 0;
-    tx.set(ref, { nextIndex: (index + 1) % TIKTOK_PACK.length, lastSentAt: now, lastId: TIKTOK_PACK[index].id }, { merge: true });
-    return { index, previous: { nextIndex: data.nextIndex ?? 0, lastSentAt: data.lastSentAt ?? null } };
-  });
-  if (!claimed) return { ok: true, skipped: 'already sent recently' };
-  const post = TIKTOK_PACK[claimed.index];
-  const caption = `🎵 פוסט הטיקטוק הבא (${post.id})\n\nמעלים את התמונה בטיקטוק ומדביקים את הכיתוב:\n\n${post.caption}`.slice(0, 1000);
-  const res = await fetch(`https://api.telegram.org/bot${cfg.botToken}/sendPhoto`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: cfg.chatId, photo: post.image, caption })
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!data.ok) {
-    await ref.set(claimed.previous, { merge: true }).catch(() => {});
-    return { ok: false, id: post.id, description: data.description || `HTTP ${res.status}` };
-  }
-  await agentSay('tiktok', `שלחתי לך בטלגרם את פוסט הטיקטוק הבא (${post.id}) ✅`);
-  return { ok: true, id: post.id };
-}
-
 // ── Daily health check ─────────────────────────────────────────────────────
 // Runs with the daily reminders cron: opens the key pages and assets of the
 // live site, checks Firestore and the Telegram bot, and that the campaign
@@ -1011,6 +961,24 @@ async function purgeRemovedLinks() {
   }
 }
 
+// GET ?job=parties-now&key=<TELEGRAM_PROMO_SECRET> — the secretary's "send the parties now" (owner command in the
+// team chat). Same sending logic and the same 15-minute gap as the cron and the admin button.
+async function handlePartiesNow(req, res) {
+  if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const r = await sendAllPartyReminders();
+    if (r.skipped) await agentSay('secretary', 'דילגתי: המסיבות כבר נשלחו ב-15 הדקות האחרונות.');
+    else {
+      await agentSay('secretary', r.partiesSent ? `שלחתי עכשיו ${r.partiesSent} מסיבות לערוצים ולקבוצות ✅` : 'אין מסיבות פעילות כרגע, לא שלחתי כלום.');
+      const failed = describeFailedChats(r.results);
+      if (failed) await agentSay('secretary', `לא הצלחתי לשלוח ל: ${failed}.`);
+    }
+    return res.status(200).json({ ok: true, partiesSent: r.partiesSent, skipped: Boolean(r.skipped) });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message || 'Internal error' });
+  }
+}
+
 async function handlePartyReminders(req, res) {
   if (!isCronAuthorized(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -1043,10 +1011,9 @@ async function handlePartyReminders(req, res) {
     }
     const announcements = await sendAnnouncementsOnce().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const campaign = await sendCampaignPost().catch((err) => ({ ok: false, error: String(err?.message || err) }));
-    const tiktok = await sendTiktokPostIfDue().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const health = await runHealthCheck().catch((err) => ({ ok: false, error: String(err?.message || err) }));
     const standup = await runDailyStandup({ health }).catch((err) => ({ ok: false, error: String(err?.message || err) }));
-    return res.status(200).json({ ok: true, partiesSent, results, whatsappResult, announcements, campaign, tiktok, health, standup });
+    return res.status(200).json({ ok: true, partiesSent, results, whatsappResult, announcements, campaign, health, standup });
   } catch (err) {
     console.error('party-reminders:', err);
     return res.status(err.message?.startsWith('Server not configured') ? 503 : 500).json({ error: err.message || 'Internal error' });
@@ -1254,7 +1221,6 @@ export async function runDailyStandup({ health } = {}) {
   const soon = upcoming.filter((p) => toMs(p.date) - now < 2 * dayMs);
   const pushDevices = (await db.collection('pushSubscriptions').get().catch(() => ({ size: 0 }))).size;
   const camp = (await db.collection('settings').doc('telegramCampaigns').get().catch(() => null))?.data?.() || {};
-  const tik = (await db.collection('settings').doc('tiktokPosts').get().catch(() => null))?.data?.() || {};
   const cleanup = (await db.collection('settings').doc('cleanupLast').get().catch(() => null))?.data?.() || {};
   const hoursAgo = (t) => (t ? Math.round((now - t) / 3600000) : null);
   const problems = Array.isArray(health?.problems) ? health.problems : [];
@@ -1267,7 +1233,6 @@ export async function runDailyStandup({ health } = {}) {
   await say('secretary', soon.length ? `בשני הימים הקרובים יש ${soon.length} מסיבות. אני שולח עליהן תזכורות לערוצים ולקבוצות.` : 'אין מסיבות בשני הימים הקרובים, אין תזכורות להיום.');
   if (soon.length) await say('secretary', `${soon[0].title || soon[0].name} היא הקרובה ביותר. כדאי לחזק אותה בקמפיין.`, 'publisher');
   await say('publisher', camp.lastSentAt ? `הקמפיין האחרון בערוץ יצא לפני ${hoursAgo(camp.lastSentAt)} שעות. הבא יוצא ביום הקמפיין הקרוב.` : 'עוד לא יצא קמפיין החודש, אני מחכה ליום הקמפיין.');
-  await say('tiktok', tik.lastSentAt ? `פוסט הטיקטוק האחרון נשלח אליך לפני ${hoursAgo(tik.lastSentAt)} שעות. הבא בראשון או בחמישי.` : 'עוד לא שלחתי לך פוסט לטיקטוק. הראשון יוצא ביום ראשון או חמישי.');
   await say('notifier', pushDevices ? `יש ${pushDevices} מכשירים שאישרו התראות. אני מוכן לשלוח על מסיבות חדשות.` : 'עוד אין מכשירים שאישרו התראות. כדאי לעודד אישור באתר.');
   await say('support', 'ענייתי לשאלות הנפוצות בצ׳אט התמיכה. שאלה שאין לי עליה תשובה ממתינה לך בצ׳אט.');
   const open = [problems.length ? `${problems.length} בעיות באתר` : ''].filter(Boolean);
@@ -1405,10 +1370,8 @@ export default async function handler(req, res) {
       const scope = req.query?.scope || new URL(req.url, 'http://x').searchParams.get('scope') || '';
       try { return res.status(200).json(await sendPushUpdateNow({ scope })); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
     }
-    if (job === 'tiktok') {
-      if (!isPromoAuthorized(req) && !isCronAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-      const force = (req.query?.force || new URL(req.url, 'http://x').searchParams.get('force')) === '1';
-      try { return res.status(200).json(await sendTiktokPostIfDue({ force })); } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
+    if (job === 'parties-now') {
+      return handlePartiesNow(req, res);
     }
     if (job === 'campaign') {
       return handleCampaign(req, res);

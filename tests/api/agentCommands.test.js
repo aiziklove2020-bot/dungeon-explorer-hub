@@ -17,9 +17,9 @@ describe('owner commands to agents', () => {
   });
 
   it('pauses and resumes', () => {
-    const paused = applyAgentCommand('tiktok', 'תעצור', {});
+    const paused = applyAgentCommand('publisher', 'תעצור', {});
     expect(paused.config.paused).toBe(true);
-    const resumed = applyAgentCommand('tiktok', 'תמשיך', paused.config);
+    const resumed = applyAgentCommand('publisher', 'תמשיך', paused.config);
     expect(resumed.config.paused).toBe(false);
     expect(resumed.handled).toBe(true);
   });
@@ -30,8 +30,8 @@ describe('owner commands to agents', () => {
   });
 
   it('"do it now" starts the right job for the agents that have one', () => {
-    expect(applyAgentCommand('tiktok', 'תעשה עכשיו', {}).runNow).toBe('tiktok');
-    expect(applyAgentCommand('tiktok', 'תעבוד עכשיו', {}).runNow).toBe('tiktok');
+    expect(applyAgentCommand('secretary', 'תשלח מסיבות עכשיו', {}).runNow).toBe('parties');
+    expect(applyAgentCommand('publisher', 'תפרסם עכשיו', {}).runNow).toBe('campaign');
     expect(applyAgentCommand('publisher', 'תפרסם עכשיו', {}).runNow).toBe('campaign');
     expect(applyAgentCommand('doctor', 'תבדוק שהכל תקין באתר', {}).runNow).toBe('health');
     expect(applyAgentCommand('cleaner', 'תנקה עכשיו', {}).runNow).toBe('cleanup');
@@ -58,5 +58,12 @@ describe('notifier: internal parties', () => {
   });
   it('a plain "שלח התראה" still runs the regular push', () => {
     expect(applyAgentCommand('notifier', 'שלח התראה', {}).runNow).toBe('push');
+  });
+
+  it('understands more ways to say it', () => {
+    expect(applyAgentCommand('publisher', 'מספיק, תנוח קצת', {}).config.paused).toBe(true);
+    expect(applyAgentCommand('publisher', 'קדימה, תחזור לעבוד', { paused: true }).config.paused).toBe(false);
+    expect(applyAgentCommand('publisher', 'תעבוד כל יום', {}).config.days).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(applyAgentCommand('doctor', 'מה מצב האתר?', {}).runNow).toBe('health');
   });
 });
