@@ -3,62 +3,62 @@ export const TELEGRAM_CAMPAIGNS_VERSION = "2026-11-01";
 export const TELEGRAM_CAMPAIGNS = [
   {
     "id": "c01",
-    "image": "https://www.libralparty.net/assets/campaigns/c01.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c01.jpg?v=20261103",
     "caption": "🆕 האתר של המועדון של אבי סווינגרס מחכה לכם!\nכל המסיבות הקרובות בדף אחד, וההרשמה בהודעה אחת בוואטסאפ.\n\n👇 כניסה לאתר:\nhttps://www.libralparty.net/"
   },
   {
     "id": "c02",
-    "image": "https://www.libralparty.net/assets/campaigns/c02.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c02.jpg?v=20261103",
     "caption": "🍸 ערב פרטי בסוויטה הליברלית!\nסלון אירוח מפנק עם בר יוקרתי, מערכות סאונד מתקדמות ואזור מרווח לריקודים.\n\n👇 לפרטים ולהזמנה:\nhttps://www.libralparty.net/liberal-suite"
   },
   {
     "id": "c03",
-    "image": "https://www.libralparty.net/assets/campaigns/c03.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c03.jpg?v=20261103",
     "caption": "🎶 מה קורה בסוף השבוע?\nכל המסיבות הקרובות של המועדון באתר, עם התאריכים.\n\n👇 בוחרים לילה:\nhttps://www.libralparty.net/events"
   },
   {
     "id": "c04",
-    "image": "https://www.libralparty.net/assets/campaigns/c04.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c04.jpg?v=20261103",
     "caption": "🛏 סוויטה ברמה אחרת!\nחלל מעוצב ברמת גימור גבוהה, עם מיטות ענק יוקרתיות.\n\n👇 לפרטים ולהזמנה:\nhttps://www.libralparty.net/liberal-suite"
   },
   {
     "id": "c05",
-    "image": "https://www.libralparty.net/assets/campaigns/c05.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c05.jpg?v=20261103",
     "caption": "💬 הודעה אחת וסגרתם מסיבה!\nלוחצים על \"הרשמה בוואטסאפ\" ליד המסיבה, ואבי חוזר אליכם עם כל הפרטים.\n\n👇 בוחרים מסיבה:\nhttps://www.libralparty.net/events"
   },
   {
     "id": "c06",
-    "image": "https://www.libralparty.net/assets/campaigns/c06.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c06.jpg?v=20261103",
     "caption": "🌙 אפטר בלילה? אפשר!\nשש שעות בסוויטה הליברלית, על בסיס מקום פנוי. לבדיקת זמינות פונים לאבי.\n\n👇 לפרטים:\nhttps://www.libralparty.net/liberal-suite"
   },
   {
     "id": "c07",
-    "image": "https://www.libralparty.net/assets/campaigns/c07.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c07.jpg?v=20261103",
     "caption": "📅 מפנים מקום ביומן!\nלוח המסיבות של המועדון מחכה לכם, תאריך אחרי תאריך.\n\n👇 ללוח האירועים:\nhttps://www.libralparty.net/calendar"
   },
   {
     "id": "c08",
-    "image": "https://www.libralparty.net/assets/campaigns/c08.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c08.jpg?v=20261103",
     "caption": "🥂 מזוג אחד ועד עשרה זוגות!\nסוויטת אירוח אקסקלוסיבית, בפרטיות מלאה.\n\n👇 לפרטים ולהזמנה:\nhttps://www.libralparty.net/liberal-suite"
   },
   {
     "id": "c09",
-    "image": "https://www.libralparty.net/assets/campaigns/c09.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c09.jpg?v=20261103",
     "caption": "✨ ערב בלתי נשכח מחכה במועדון של אבי סווינגרס!\nכל המסיבות הקרובות באתר.\n\n👇 למסיבות:\nhttps://www.libralparty.net/events"
   },
   {
     "id": "c10",
-    "image": "https://www.libralparty.net/assets/campaigns/c10.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c10.jpg?v=20261103",
     "caption": "💦 חדר רחצה מרהיב, ענק ושקוף, במרכז הסוויטה הליברלית!\n\n👇 לפרטים ולהזמנה:\nhttps://www.libralparty.net/liberal-suite"
   },
   {
     "id": "c11",
-    "image": "https://www.libralparty.net/assets/campaigns/c11.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c11.jpg?v=20261103",
     "caption": "📲 מסיבות חדשות עולות באתר!\nמצטרפים לקבוצת הטלגרם הגדולה ולא מפספסים אף מסיבה.\n\n👇 להצטרפות לקבוצה:\nhttps://t.me/libralparty"
   },
   {
     "id": "c12",
-    "image": "https://www.libralparty.net/assets/campaigns/c12.jpg",
+    "image": "https://www.libralparty.net/assets/campaigns/c12.jpg?v=20261103",
     "caption": "🔁 ליין קבוע בסוויטה?\nדברו עם אבי לתנאים מותאמים אישית.\n\n👇 לפרטים:\nhttps://www.libralparty.net/liberal-suite"
   }
 ];
