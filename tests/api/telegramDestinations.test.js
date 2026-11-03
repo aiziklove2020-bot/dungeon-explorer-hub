@@ -36,4 +36,10 @@ describe('party publishing destinations', () => {
     expect(afterDelete.map((d) => d.chatId)).not.toContain('-1003487913872');
     expect(writes).toHaveLength(1);
   });
+
+  it('a chat listed twice gets each post only once', async () => {
+    store.channels = [{ chatId: '-1001', name: 'א' }, { chatId: '1001', name: 'א (כפול)' }, { chatId: '@Avi_X', name: 'ב' }, { chatId: '@avi_x', name: 'ב (כפול)' }];
+    const dests = await getReminderDestinations({ firestore: () => db });
+    expect(dests.map((d) => d.chatId.toLowerCase()).filter((id) => id === '-1001' || id === '@avi_x')).toHaveLength(2);
+  });
 });

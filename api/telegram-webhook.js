@@ -108,7 +108,9 @@ export async function getReminderDestinations(admin) {
       .filter((c) => c.broadcastEnabled !== false)
       .filter((c) => String(c.chatId) !== REMOVED_REGISTRATIONS_GROUP_CHAT_ID) // the old "רישומים לחמישי שישי" group is gone
       .map((c) => ({ chatId: sanitizeChatId(c.chatId), name: c.name || '' }))
-      .filter((d) => /^-\d+$/.test(d.chatId) || /^@[\w-]+$/.test(d.chatId));
+      .filter((d) => /^-\d+$/.test(d.chatId) || /^@[\w-]+$/.test(d.chatId))
+      // The same chat listed twice (or an id that normalizes to another entry) must get each post only once.
+      .filter((d, i, arr) => arr.findIndex((x) => x.chatId.toLowerCase() === d.chatId.toLowerCase()) === i);
     if (dests.length > 0) return dests;
   } catch (err) {
     console.error('getReminderDestinations:', err);
