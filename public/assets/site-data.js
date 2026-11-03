@@ -13715,8 +13715,8 @@ var jg = [
 	{
 		id: "whatsapp",
 		kind: "whatsapp",
-		link: "https://chat.whatsapp.com/LHo4Spoy73b38mDI5XEcF7",
-		alt: "קבוצת פרסומי המסיבות בוואטסאפ",
+		link: "https://t.me/libralparty",
+		alt: "קבוצת טלגרם גדולה",
 		enabled: !0
 	},
 	{
@@ -18991,8 +18991,7 @@ async function JD() {
 		instagram: "אינסטגרם",
 		facebook: "פייסבוק",
 		telegramChannel: "ערוץ טלגרם",
-		telegramGroup: "קבוצת טלגרם",
-		whatsapp: "וואטסאפ"
+		telegramGroup: "קבוצת טלגרם"
 	}).forEach(([n, r]) => {
 		let i = e?.[n];
 		i && t.push({

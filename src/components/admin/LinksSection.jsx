@@ -51,7 +51,6 @@ const LinksSection = ({ showSaved }) => {
           { type: 'instagram', label: t('instagram'), url: links.instagram || '' },
           { type: 'channel', label: t('telegramChannel'), url: links.telegramChannel || '' },
           { type: 'discussion', label: t('telegramGroup'), url: links.telegramGroup || '' },
-          { type: 'whatsapp', label: t('talkingBdsm'), url: links.whatsapp || '' },
           { type: 'facebook', label: t('facebook'), url: links.facebook || '' }
         ];
         setSocialLinksData(linksArray);
@@ -61,7 +60,6 @@ const LinksSection = ({ showSaved }) => {
           { type: 'instagram', label: t('instagram'), url: '' },
           { type: 'channel', label: t('telegramChannel'), url: '' },
           { type: 'discussion', label: t('telegramGroup'), url: '' },
-          { type: 'whatsapp', label: t('talkingBdsm'), url: '' },
           { type: 'facebook', label: t('facebook'), url: '' }
         ]);
       }
@@ -71,7 +69,6 @@ const LinksSection = ({ showSaved }) => {
         { type: 'instagram', label: t('instagram'), url: '' },
         { type: 'channel', label: t('telegramChannel'), url: '' },
         { type: 'discussion', label: t('telegramGroup'), url: '' },
-        { type: 'whatsapp', label: t('talkingBdsm'), url: '' },
         { type: 'facebook', label: t('facebook'), url: '' }
       ]);
     }
@@ -199,7 +196,7 @@ const LinksSection = ({ showSaved }) => {
                   instagram: socialLinksData.find(l => l.type === 'instagram')?.url || '',
                   telegramChannel: socialLinksData.find(l => l.type === 'channel')?.url || '',
                   telegramGroup: socialLinksData.find(l => l.type === 'discussion')?.url || '',
-                  whatsapp: socialLinksData.find(l => l.type === 'whatsapp')?.url || '',
+                  whatsapp: '', // the WhatsApp group link was removed from the site
                   facebook: socialLinksData.find(l => l.type === 'facebook')?.url || ''
                 };
 
