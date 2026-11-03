@@ -629,6 +629,9 @@ export async function splitByBotPresence(botToken, destinations) {
   }
 }
 
+// Parties are published to a chat once per round: nothing goes out again (cron or the admin button) until this long after the last round.
+export const PARTY_PUBLISH_GAP_MS = 15 * 60 * 60 * 1000;
+
 async function sendAllPartyReminders(targetChatId) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
@@ -645,6 +648,13 @@ async function sendAllPartyReminders(targetChatId) {
   }
 
   try {
+    const stateRef = admin.firestore().collection('settings').doc('partyPublishState');
+    if (!targetChatId) {
+      const last = (await stateRef.get()).data()?.lastPublishedAt;
+      if (last && Date.now() - last < PARTY_PUBLISH_GAP_MS) {
+        return { partiesSent: 0, destinationCount: 0, results: [], whatsappResult: null, skipped: true, nextAt: last + PARTY_PUBLISH_GAP_MS };
+      }
+    }
     const settingsSnap = await admin.firestore().collection('settings').doc('partySettings').get();
     const retentionHours = settingsSnap.exists ? settingsSnap.data()?.retentionHours : DEFAULT_RETENTION_HOURS;
     let destinations = await getReminderDestinations(admin);
@@ -686,6 +696,7 @@ async function sendAllPartyReminders(targetChatId) {
       }
     }
 
+    if (!targetChatId && results.some((r) => r.ok)) await stateRef.set({ lastPublishedAt: Date.now() }).catch(() => {});
     const whatsappResult = targetChatId ? null : await publishActiveWhatsApp();
 
     return { partiesSent: activeParties.length, destinationCount: destinations.length, skippedChats: absent.map((d) => d.name || d.chatId), results, whatsappResult };
@@ -981,10 +992,12 @@ async function handlePartyReminders(req, res) {
     try { secretaryPaused = Boolean((await getAgentConfig((await initAdmin()).firestore())).secretary?.paused); } catch { /* keep sending */ }
     // Parties go out Sunday, Tuesday, Thursday and Friday (the cron also runs Monday and Wednesday for the health check and the team meeting).
     const partyDay = PARTY_POST_DAYS.includes(israelWeekday());
-    const { partiesSent, results, whatsappResult } = secretaryPaused || !partyDay
+    const reminders = secretaryPaused || !partyDay
       ? { partiesSent: 0, results: [], whatsappResult: null }
       : await sendAllPartyReminders();
+    const { partiesSent, results, whatsappResult } = reminders;
     if (secretaryPaused) await agentSay('secretary', 'אני בהפסקה לפי הבקשה שלך, לא שלחתי תזכורות היום.');
+    else if (partyDay && reminders.skipped) await agentSay('secretary', 'המסיבות כבר פורסמו ב-15 השעות האחרונות, לא שלחתי שוב.');
     else if (partyDay) {
       await agentSay('secretary', partiesSent ? `שלחתי תזכורות על ${partiesSent} מסיבות לערוצים ולקבוצות ✅` : 'אין מסיבות פעילות היום, לא נשלחו תזכורות.');
       const failed = describeFailedChats(results);
@@ -1024,7 +1037,8 @@ async function handleManualPost(req, res) {
   if (!requireAdminApiSecret(req, res)) return;
   const targetChatId = req.query?.chatId || new URL(req.url, 'http://x').searchParams.get('chatId') || undefined;
   try {
-    const { partiesSent, results, whatsappResult } = await sendAllPartyReminders(targetChatId);
+    const { partiesSent, results, whatsappResult, skipped, nextAt } = await sendAllPartyReminders(targetChatId);
+    if (skipped) return res.status(429).json({ error: 'המסיבות כבר פורסמו ב-15 השעות האחרונות', nextAt });
     return res.status(200).json({ ok: true, partiesSent, results, whatsappResult });
   } catch (err) {
     console.error('manual-post:', err);

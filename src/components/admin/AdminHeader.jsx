@@ -12,6 +12,7 @@ const AdminHeader = ({
   importMessage,
   onLogout,
   postingParties,
+  nextPostAt,
   onPostParties,
   onImport,
   onReset,
@@ -79,13 +80,13 @@ const AdminHeader = ({
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={onPostParties}
-                disabled={postingParties}
+                disabled={postingParties || nextPostAt > Date.now()}
                 title="שולח עכשיו את כל המסיבות הפעילות באתר לטלגרם, בלי לחכות ללו&quot;ז האוטומטי"
                 className="text-white disabled:opacity-50 text-sm font-bold flex items-center gap-2"
                 style={{ background: '#1c1120', border: '1px solid #f4bfd733', borderRadius: 15, padding: '10px 16px' }}
               >
                 {postingParties ? <Loader2 size={16} className="animate-spin shrink-0" /> : <Megaphone size={16} style={{ color: '#ad43ff' }} />}
-                {postingParties ? 'מפרסם...' : 'טלגרם'}
+                {postingParties ? 'מפרסם...' : nextPostAt > Date.now() ? `טלגרם (שוב ב-${new Date(nextPostAt).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })})` : 'טלגרם'}
               </button>
             </div>
           </div>
