@@ -4,6 +4,9 @@
 // a request for the team manager (Claude).
 import { agentById } from './agentsRoster.js';
 
+// The server job each "do it now" command starts (same for the admin chat and the Telegram support group).
+export const NOW_JOBS = { announce: 'job=announce', memorial: 'job=memorial', campaign: 'job=campaign&force=1', parties: 'job=parties-now', push: 'job=push-now&scope=internal', 'push-internal': 'job=push-now&scope=internal', standup: 'job=standup', health: 'job=health&noalert=1', cleanup: 'job=cleanup-parties' };
+
 export const DAY_LABELS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
 // What each server-run agent accepts.

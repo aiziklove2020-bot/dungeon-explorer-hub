@@ -42,7 +42,9 @@ import { isSilentDay, israelDate, NON_PUBLISHING_JOBS, isSiteClosed, PUBLISHER_P
 import { requireTelegramWebhookSecret, requireAdminApiSecret, safeEq } from '../lib/apiAuth.js';
 import { isPartyExpiredByDate } from '../shared/partyExpiry.js';
 import { TELEGRAM_CAMPAIGNS, TELEGRAM_CAMPAIGNS_VERSION } from '../shared/telegramCampaigns.js';
-import { agentById } from '../shared/agentsRoster.js';
+import { agentById, AGENTS } from '../shared/agentsRoster.js';
+import { runTask } from '../shared/a2a.js';
+import { NOW_JOBS } from '../shared/agentCommands.js';
 
 // Sending every active party to every allowed destination can take longer
 // than Vercel Hobby's default 10s function timeout, which caused the
@@ -1328,6 +1330,63 @@ export function describeFailedChats(results) {
   return [...seen].map(([name, why]) => `${name} (${why})`).join(', ');
 }
 
+// ── Writing to the agents from the Telegram support group ──────────────────
+// "@עומר תפרסם עכשיו" / "עומר, תעצור" written in the support group works like the admin tab "צוות הסוכנים".
+// Only the group's owner/administrators (or the user ids in settings/agentChatAccess.userIds, if set) are obeyed;
+// anyone else is ignored without a word.
+export function parseAgentMessage(text) {
+  // Explicit address only: "@עומר ..." or "עומר, ..." / "עומר: ..." (a plain sentence starting with a name is not a command).
+  const m = /^\s*(?:@([^\s,:;!?]+)[\s,:;!?]+|([^\s,:;!?]+)[,:]\s*)([\s\S]+)$/.exec(String(text || ''));
+  if (!m) return null;
+  const agent = AGENTS.find((a) => a.name === (m[1] || m[2]));
+  const body = m[3].trim().slice(0, 500);
+  return agent && body ? { agent, text: body } : null;
+}
+
+async function mayCommandAgents(db, token, chatId, userId) {
+  const access = (await db.collection('settings').doc('agentChatAccess').get().catch(() => null))?.data?.() || {};
+  if (Array.isArray(access.userIds) && access.userIds.length) return access.userIds.map(String).includes(String(userId));
+  const r = await (await fetch(`https://api.telegram.org/bot${token}/getChatMember?chat_id=${encodeURIComponent(chatId)}&user_id=${userId}`)).json().catch(() => ({}));
+  return r.ok && ['creator', 'administrator'].includes(r.result?.status);
+}
+
+// Returns true when the message was an agent command (answered or deliberately ignored).
+export async function handleAgentMessageFromSupportGroup(admin, msg) {
+  const parsed = parseAgentMessage(msg?.text);
+  if (!parsed || !msg.from || msg.from.is_bot) return false;
+  const db = admin.firestore();
+  const cfg = (await db.collection('settings').doc('private').collection('supportChat').doc('config').get().catch(() => null))?.data?.();
+  if (!cfg?.botToken || !cfg?.chatId || String(msg.chat?.id) !== String(cfg.chatId)) return false;
+  if (!(await mayCommandAgents(db, cfg.botToken, cfg.chatId, msg.from.id))) return true;
+
+  const cfgRef = db.collection('settings').doc('agentConfig');
+  const chatRef = db.collection('settings').doc('agentChat');
+  const result = await db.runTransaction(async (tx) => {
+    const [cfgSnap, chatSnap] = await Promise.all([tx.get(cfgRef), tx.get(chatRef)]);
+    const configs = cfgSnap.exists ? cfgSnap.data() || {} : {};
+    const prev = chatSnap.exists && Array.isArray(chatSnap.data()?.messages) ? chatSnap.data().messages : [];
+    const task = runTask(parsed.agent.id, parsed.text, configs);
+    if (Object.keys(task.configUpdates).length) tx.set(cfgRef, task.configUpdates, { merge: true });
+    tx.set(chatRef, { messages: [...prev, ...task.lines].slice(-150) });
+    return task;
+  });
+  await fetch(`https://api.telegram.org/bot${cfg.botToken}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: cfg.chatId, reply_to_message_id: msg.message_id, text: `${parsed.agent.name}: ${result.reply}` })
+  }).catch(() => {});
+  for (const job of result.runNow) {
+    if (!NOW_JOBS[job] || !process.env.TELEGRAM_PROMO_SECRET) continue;
+    try {
+      const url = `https://www.libralparty.net/api/telegram-webhook?${NOW_JOBS[job]}&key=${encodeURIComponent(process.env.TELEGRAM_PROMO_SECRET)}`;
+      await Promise.race([fetch(url), new Promise((r) => setTimeout(r, 6000))]);
+    } catch (err) {
+      console.error('agent run-now (telegram):', err?.message || err);
+    }
+  }
+  return true;
+}
+
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const job = req.query?.job || new URL(req.url, 'http://x').searchParams.get('job');
@@ -1454,6 +1513,10 @@ export default async function handler(req, res) {
     if (anyChat) await recordSeenChat(admin, anyChat, body?.my_chat_member?.new_chat_member?.status);
 
     if (!msg?.text) {
+      return res.status(200).json({ ok: true });
+    }
+
+    if (await handleAgentMessageFromSupportGroup(admin, msg).catch((err) => { console.error('agent message:', err?.message || err); return false; })) {
       return res.status(200).json({ ok: true });
     }
 
