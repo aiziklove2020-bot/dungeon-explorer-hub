@@ -670,7 +670,8 @@ async function getAgentConfig(db) {
 // a different one each time, in rotation. Piggybacks on the daily reminders
 // cron (Hobby plans cap the number of crons). A short lock window on
 // lastSentAt keeps a retried run from posting twice.
-const CAMPAIGN_DAYS = [0, 2, 4]; // Sunday, Tuesday, Thursday (Israel time)
+const CAMPAIGN_DAYS = [0, 2, 4];
+const PARTY_POST_DAYS = [0, 2, 4, 5]; // Sun, Tue, Thu, Fri — the days the parties go out (13:00 Israel time)
 const CAMPAIGN_MIN_GAP_MS = 20 * 60 * 60 * 1000;
 
 function israelWeekday(date = new Date()) {
@@ -912,11 +913,13 @@ async function handlePartyReminders(req, res) {
   try {
     let secretaryPaused = false;
     try { secretaryPaused = Boolean((await getAgentConfig((await initAdmin()).firestore())).secretary?.paused); } catch { /* keep sending */ }
-    const { partiesSent, results, whatsappResult } = secretaryPaused
+    // Parties go out Sunday, Tuesday, Thursday and Friday (the cron also runs Monday and Wednesday for the health check and the team meeting).
+    const partyDay = PARTY_POST_DAYS.includes(israelWeekday());
+    const { partiesSent, results, whatsappResult } = secretaryPaused || !partyDay
       ? { partiesSent: 0, results: [], whatsappResult: null }
       : await sendAllPartyReminders();
     if (secretaryPaused) await agentSay('secretary', 'אני בהפסקה לפי הבקשה שלך, לא שלחתי תזכורות היום.');
-    else {
+    else if (partyDay) {
       await agentSay('secretary', partiesSent ? `שלחתי תזכורות על ${partiesSent} מסיבות לערוצים ולקבוצות ✅` : 'אין מסיבות פעילות היום, לא נשלחו תזכורות.');
       const failed = describeFailedChats(results);
       if (failed) await agentSay('secretary', `לא הצלחתי לשלוח ל: ${failed}. צריך לתת לבוט הרשאות שם.`);
