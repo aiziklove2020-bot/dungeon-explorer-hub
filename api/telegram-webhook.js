@@ -666,11 +666,11 @@ async function getAgentConfig(db) {
 
 // ── Campaign posts ─────────────────────────────────────────────────────────
 // A designed image + caption (see scripts/campaigns/make_campaigns.py and
-// shared/telegramCampaigns.js) goes to the community channel on Sun/Tue/Thu,
+// shared/telegramCampaigns.js) goes to the community channel on Mon/Wed,
 // a different one each time, in rotation. Piggybacks on the daily reminders
 // cron (Hobby plans cap the number of crons). A short lock window on
 // lastSentAt keeps a retried run from posting twice.
-const CAMPAIGN_DAYS = [0, 2, 4];
+const CAMPAIGN_DAYS = [1, 3];
 const PARTY_POST_DAYS = [0, 2, 4, 5]; // Sun, Tue, Thu, Fri — the days the parties go out (13:00 Israel time)
 const CAMPAIGN_MIN_GAP_MS = 20 * 60 * 60 * 1000;
 
