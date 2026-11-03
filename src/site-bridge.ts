@@ -198,7 +198,6 @@ async function loadSocialLinks() {
     facebook: "פייסבוק",
     telegramChannel: "ערוץ טלגרם",
     telegramGroup: "קבוצת טלגרם",
-    whatsapp: "וואטסאפ",
   };
   Object.entries(map).forEach(([key, label]) => {
     const url = (links as any)?.[key];
