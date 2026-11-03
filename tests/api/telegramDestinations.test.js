@@ -22,8 +22,8 @@ const { getReminderDestinations } = await import('../../api/telegram-webhook.js'
 describe('party publishing destinations', () => {
   it('every enabled channel gets the site parties: the old advertiser restriction is gone, disabled ones are skipped', async () => {
     const dests = await getReminderDestinations({ firestore: () => db });
-    // הליין הליברלי is added once, on top of the enabled channels.
-    expect(dests.map((d) => d.chatId)).toEqual(['-1001', '-1002', '@avi_swingers2', '-1003487913872']);
+    // הליין הליברלי and 🎉מסיבות ליברליות בישראל🎉 are added once, on top of the enabled channels.
+    expect(dests.map((d) => d.chatId)).toEqual(['-1001', '-1002', '@avi_swingers2', '-1003487913872', '-1001371159295']);
     for (const d of dests) expect(d).not.toHaveProperty('allowedAdvertiserIds');
   });
 
