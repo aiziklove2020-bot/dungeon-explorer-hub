@@ -17,17 +17,15 @@ const db = {
 vi.mock('firebase-admin', () => ({ default: { firestore: Object.assign(() => db, { Timestamp: { now: () => 'NOW' } }), apps: [1] } }));
 
 const calls = [];
-let memberStatus = 'administrator';
 globalThis.fetch = vi.fn(async (url, init) => {
   const u = String(url);
   calls.push({ url: u, body: init?.body ? JSON.parse(init.body) : null });
-  if (u.includes('getChatMember')) return { json: async () => ({ ok: true, result: { status: memberStatus } }) };
   return { json: async () => ({ ok: true }), status: 200 };
 });
 
 const { default: handler, parseAgentMessage } = await import('../../api/telegram-webhook.js');
 
-const send = async (text, from = { id: 7 }) => {
+const send = async (text, from = { id: 5508757120 }) => {
   let status;
   const res = { setHeader: () => {}, status: (s) => ({ json: () => { status = s; }, end: () => { status = s; } }) };
   await handler({ method: 'POST', headers: {}, query: {}, url: '/api/telegram-webhook', body: { message: { message_id: 5, text, from, chat: { id: -100, type: 'supergroup' } } } }, res);
@@ -36,7 +34,7 @@ const send = async (text, from = { id: 7 }) => {
 
 describe('writing to the agents from the support group', () => {
   beforeEach(() => {
-    calls.length = 0; memberStatus = 'administrator';
+    calls.length = 0;
     for (const k of Object.keys(docs)) delete docs[k];
     docs['settings/private/supportChat/config'] = { botToken: 'T', chatId: '-100' };
   });
@@ -48,7 +46,7 @@ describe('writing to the agents from the support group', () => {
     expect(parseAgentMessage('@מישהו תעצור')).toBeNull();
   });
 
-  it('an administrator can pause the publisher, gets a reply, and the chat log is kept', async () => {
+  it('the owner can pause the publisher, gets a reply, and the chat log is kept', async () => {
     await send('@עומר תעצור');
     expect(docs['settings/agentConfig'].publisher.paused).toBe(true);
     const reply = calls.find((c) => c.url.includes('sendMessage'));
@@ -62,16 +60,15 @@ describe('writing to the agents from the support group', () => {
     expect(calls.some((c) => c.url.includes('job=campaign&force=1'))).toBe(true);
   });
 
-  it('a normal member is ignored without any reply or change', async () => {
-    memberStatus = 'member';
-    await send('@עומר תעצור');
+  it('anyone else (even a group admin) is ignored without any reply or change', async () => {
+    await send('@עומר תעצור', { id: 123 });
     expect(docs['settings/agentConfig']).toBeUndefined();
     expect(calls.some((c) => c.url.includes('sendMessage'))).toBe(false);
   });
 
   it('with an allow-list only those user ids are obeyed', async () => {
     docs['settings/agentChatAccess'] = { userIds: [99] };
-    await send('@עומר תעצור', { id: 7 });
+    await send('@עומר תעצור', { id: 5508757120 });
     expect(docs['settings/agentConfig']).toBeUndefined();
     await send('@עומר תעצור', { id: 99 });
     expect(docs['settings/agentConfig'].publisher.paused).toBe(true);

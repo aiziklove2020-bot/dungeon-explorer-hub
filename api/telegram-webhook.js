@@ -1332,8 +1332,10 @@ export function describeFailedChats(results) {
 
 // ── Writing to the agents from the Telegram support group ──────────────────
 // "@עומר תפרסם עכשיו" / "עומר, תעצור" written in the support group works like the admin tab "צוות הסוכנים".
-// Only the group's owner/administrators (or the user ids in settings/agentChatAccess.userIds, if set) are obeyed;
+// Only the owner's Telegram account (or the user ids in settings/agentChatAccess.userIds, if set) is obeyed;
 // anyone else is ignored without a word.
+const OWNER_TELEGRAM_ID = '5508757120'; // the owner's Telegram user id (not a secret)
+
 export function parseAgentMessage(text) {
   // Explicit address only: "@עומר ..." or "עומר, ..." / "עומר: ..." (a plain sentence starting with a name is not a command).
   const m = /^\s*(?:@([^\s,:;!?]+)[\s,:;!?]+|([^\s,:;!?]+)[,:]\s*)([\s\S]+)$/.exec(String(text || ''));
@@ -1343,11 +1345,11 @@ export function parseAgentMessage(text) {
   return agent && body ? { agent, text: body } : null;
 }
 
-async function mayCommandAgents(db, token, chatId, userId) {
+async function mayCommandAgents(db, userId) {
   const access = (await db.collection('settings').doc('agentChatAccess').get().catch(() => null))?.data?.() || {};
-  if (Array.isArray(access.userIds) && access.userIds.length) return access.userIds.map(String).includes(String(userId));
-  const r = await (await fetch(`https://api.telegram.org/bot${token}/getChatMember?chat_id=${encodeURIComponent(chatId)}&user_id=${userId}`)).json().catch(() => ({}));
-  return r.ok && ['creator', 'administrator'].includes(r.result?.status);
+  // Only the owner by default; settings/agentChatAccess.userIds, when set, replaces that list.
+  const allowed = Array.isArray(access.userIds) && access.userIds.length ? access.userIds.map(String) : [OWNER_TELEGRAM_ID];
+  return allowed.includes(String(userId));
 }
 
 // Returns true when the message was an agent command (answered or deliberately ignored).
@@ -1357,7 +1359,7 @@ export async function handleAgentMessageFromSupportGroup(admin, msg) {
   const db = admin.firestore();
   const cfg = (await db.collection('settings').doc('private').collection('supportChat').doc('config').get().catch(() => null))?.data?.();
   if (!cfg?.botToken || !cfg?.chatId || String(msg.chat?.id) !== String(cfg.chatId)) return false;
-  if (!(await mayCommandAgents(db, cfg.botToken, cfg.chatId, msg.from.id))) return true;
+  if (!(await mayCommandAgents(db, msg.from.id))) return true;
 
   const cfgRef = db.collection('settings').doc('agentConfig');
   const chatRef = db.collection('settings').doc('agentChat');
