@@ -7,6 +7,7 @@ const channels = [
   { chatId: '-1002', name: 'מוגבל ישן', allowedAdvertiserIds: ['x'] },
   { chatId: '@avi_swingers2', name: 'ריק', allowedAdvertiserIds: [] },
   { chatId: '-1003', name: 'כבוי', broadcastEnabled: false },
+  { chatId: '-5141782209', name: 'רישומים לחמישי שישי' }, // removed for good, even if still enabled in the settings
 ];
 const db = { collection: () => ({ doc: () => ({ get: async () => ({ exists: true, data: () => ({ channels }) }) }) }) };
 vi.mock('firebase-admin', () => ({ default: { firestore: Object.assign(() => db, { Timestamp: { now: () => 'NOW' } }), apps: [1] } }));

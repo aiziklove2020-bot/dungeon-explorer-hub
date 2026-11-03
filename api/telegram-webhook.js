@@ -58,6 +58,7 @@ export const config = { maxDuration: 60 };
 const REMINDER_CHANNEL_CHAT_ID = '-1002446012533'; // @libralparty channel
 const REMINDER_GROUP_CHAT_ID = '-1001610769071'; // "מסיבות בישראל" group
 const DEFAULT_RETENTION_HOURS = 48;
+const REMOVED_REGISTRATIONS_GROUP_CHAT_ID = '-5141782209'; // "רישומים לחמישי שישי", removed at the owner's request
 
 // Some admin-entered chat IDs are missing the leading "-" (or "-100" for
 // supergroups) or carry a stray "_<topic>" suffix copied from a topic link.
@@ -83,6 +84,7 @@ export async function getReminderDestinations(admin) {
       // Group/channel owners can opt out of the automatic party broadcast
       // (checkbox in the ערוצים panel) without deleting the destination.
       .filter((c) => c.broadcastEnabled !== false)
+      .filter((c) => String(c.chatId) !== REMOVED_REGISTRATIONS_GROUP_CHAT_ID) // the old "רישומים לחמישי שישי" group is gone
       .map((c) => ({ chatId: sanitizeChatId(c.chatId), name: c.name || '' }))
       .filter((d) => /^-\d+$/.test(d.chatId) || /^@[\w-]+$/.test(d.chatId));
     if (dests.length > 0) return dests;
@@ -342,14 +344,10 @@ async function handleFixChannels(req, res) {
     const snap = await ref.get();
     const channels = snap.exists ? (snap.data()?.channels || []) : [];
 
-    // "רישומים לחמישי שישי" is a dedicated registrations list, not a
-    // party-promo group — exclude it from the automatic broadcast entirely.
-    // Advertiser restrictions no longer exist (the owner is the only publisher): strip any leftover.
+    // The old "רישומים לחמישי שישי" group is removed for good. Advertiser restrictions no longer
+    // exist (the owner is the only publisher): strip any leftover.
     const updated = channels.map(({ allowedAdvertiserIds, ...c }) => c);
-    const withRegistrationsFix = updated.map((c) =>
-      (c.name === 'רישומים לחמישי שישי' ? { ...c, broadcastEnabled: false } : c)
-    );
-
+    const withRegistrationsFix = updated.filter((c) => String(c.chatId) !== REMOVED_REGISTRATIONS_GROUP_CHAT_ID && c.name !== 'רישומים לחמישי שישי');
     await ref.update({ channels: withRegistrationsFix });
     return res.status(200).json({ ok: true, channels: withRegistrationsFix });
   } catch (err) {

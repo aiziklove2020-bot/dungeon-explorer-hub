@@ -76,6 +76,12 @@ const COUPLE_TEMPLATE_PLACEHOLDER = `שם הגבר: {{registration.fullName}}
 
 const genId = () => Math.random().toString(36).slice(2, 12);
 
+// The old "רישומים לחמישי שישי" group (site registrations list) no longer exists: the site has no
+// on-site registration. It is removed from the list (and from the saved settings) automatically.
+const FRIDAY_REGISTRATIONS_CHAT_ID = '-5141782209';
+const isFridayRegistrationsGroup = (c) =>
+  c?.id === 'v955l478yc' || String(c?.chatId) === FRIDAY_REGISTRATIONS_CHAT_ID || c?.name === 'רישומים לחמישי שישי';
+
 // Telegram preview: render only the small subset of HTML tags that Telegram's
 // `parse_mode=HTML` actually supports, and sanitize everything else with
 // DOMPurify so we share the same XSS layer used by the forum/blog renderer.
@@ -135,7 +141,7 @@ const TelegramSection = ({ showSaved }) => {
     return () => clearInterval(timer);
   }, []);
 
-  const missingChats = seenChats.filter((c) => c.type !== 'private' && !channels.some((ch) => String(ch.chatId) === String(c.id)));
+  const missingChats = seenChats.filter((c) => c.type !== 'private' && String(c.id) !== FRIDAY_REGISTRATIONS_CHAT_ID && !channels.some((ch) => String(ch.chatId) === String(c.id)));
 
   const load = async () => {
     setLoading(true);
@@ -185,7 +191,14 @@ const TelegramSection = ({ showSaved }) => {
       } else {
         setLegacy(null);
         setBots(tg.bots || []);
-        setChannels(tg.channels || []);
+        const removedChannelIds = (tg.channels || []).filter(isFridayRegistrationsGroup).map((c) => c.id);
+        const cleanChannels = (tg.channels || []).filter((c) => !isFridayRegistrationsGroup(c));
+        setChannels(cleanChannels);
+        if (removedChannelIds.length) {
+          // Save the removal right away, so it does not come back and is no longer sent to.
+          const cleanMessages = (tg.messages || []).map((m) => ({ ...m, channelIds: (m.channelIds || []).filter((id) => !removedChannelIds.includes(id)) }));
+          updateTelegramSettings({ channels: cleanChannels, messages: cleanMessages }).catch(() => {});
+        }
         const defaultMs = BUILT_IN_MESSAGE_KEYS.map((key) => ({
           id: genId(),
           key,
