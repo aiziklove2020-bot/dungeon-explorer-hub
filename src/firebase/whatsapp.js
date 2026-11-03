@@ -62,11 +62,8 @@ export const sendNewExternalPartyWhatsApp = async (party, partyUrl, language = '
  * Send every currently-active party to WhatsApp in one go. Mirrors the
  * "פרסם מסיבות לטלגרם" admin button (sendAllPartyReminders in
  * api/telegram-webhook.js) — delegates to the bot's own /broadcast-parties
- * endpoint, which reads Firestore directly and applies each group's
- * allowedAdvertiserIds filter (e.g. a partner venue's group only gets their
- * own parties + the Dungeon's, never competitors'). Do NOT reimplement this
- * client-side via sendNewPartyWhatsApp per party — that path has no filter
- * and would leak every party into every group.
+ * endpoint, which reads Firestore directly. Do NOT reimplement this
+ * client-side via sendNewPartyWhatsApp per party.
  */
 export const sendAllPartiesWhatsApp = async () => {
   const res = await fetch(`${WHATSAPP_BOT_URL}/broadcast-parties`, {

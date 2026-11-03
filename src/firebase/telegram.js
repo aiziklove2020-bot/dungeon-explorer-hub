@@ -843,28 +843,10 @@ export const sendNewPartyTelegram = async (party, language = 'he') => {
  * partyUrl: the registration/info URL for the external party (registrationLink field).
  * If party has imageURL (public HTTPS), sends the image via sendPhoto with caption; otherwise text only.
  */
-/** Matches the admin's "אני מאשר את המסיבות שלי" checkbox in TelegramSection.jsx —
- *  not a real advertiser doc, just an explicit opt-in for admin-added (no advertiser) parties. */
-const ADMIN_PSEUDO_ADVERTISER_ID = '__admin__';
-
 /**
- * Same allow/deny rule the automatic broadcast (api/telegram-webhook.js:
- * partyAllowedFor) uses, kept in sync here so a manual publish can never
- * reach a channel the party wouldn't otherwise be allowed into.
- */
-function isPartyAllowedForChannel(party, allowedAdvertiserIds) {
-  if (!allowedAdvertiserIds) return true;
-  if (party.createdBy) return allowedAdvertiserIds.includes(party.createdBy);
-  return allowedAdvertiserIds.includes(ADMIN_PSEUDO_ADVERTISER_ID);
-}
-
-/**
- * Lets an advertiser publish their own party to Telegram immediately, instead
- * of waiting for the scheduled broadcast (Sun/Wed/Fri). Sends only to
- * channels the party is actually allowed into — reuses the exact same
- * channels/allowedAdvertiserIds config and rule as the automatic broadcast,
- * so a manual publish can never leak into another advertiser's restricted
- * channel. Skips destinations that opted out (broadcastEnabled === false).
+ * Lets the admin publish a party to Telegram immediately, instead
+ * of waiting for the scheduled broadcast. Sends to every enabled channel
+ * (skips destinations that opted out, broadcastEnabled === false).
  */
 export const sendManualPartyAnnouncement = async (party, language = 'he') => {
   const config = await getTelegramSettings();
@@ -875,11 +857,10 @@ export const sendManualPartyAnnouncement = async (party, language = 'he') => {
   if (!botToken) throw new Error('לא הוגדר בוט טלגרם במערכת');
 
   const destinations = (config.channels || [])
-    .filter((c) => c.broadcastEnabled !== false)
-    .filter((c) => isPartyAllowedForChannel(party, Array.isArray(c.allowedAdvertiserIds) ? c.allowedAdvertiserIds : null));
+    .filter((c) => c.broadcastEnabled !== false);
 
   if (destinations.length === 0) {
-    throw new Error('אין ערוץ שהמסיבה הזו מורשית להתפרסם בו');
+    throw new Error('אין ערוץ מופעל לפרסום (בדוק בלשונית "טלגרם")');
   }
 
   const isExternal = party?.partyType === 'external';

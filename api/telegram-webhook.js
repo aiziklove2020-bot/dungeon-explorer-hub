@@ -72,44 +72,24 @@ function sanitizeChatId(raw) {
   return s;
 }
 
-// Returns [{ chatId, allowedAdvertiserIds }] — allowedAdvertiserIds is null
-// when the destination accepts every advertiser's parties (the default),
-// or an array restricting it to specific approved advertisers only (set via
-// the "רק מפרסמים נבחרים מותרים לפרסם כאן" picker in the ערוצים panel).
-async function getReminderDestinations(admin) {
+// Returns [{ chatId, name }] — every enabled channel/group in the "ערוצים" panel. The site has one
+// publisher (the owner), so every party goes to every enabled destination: the old per-advertiser
+// restriction (allowedAdvertiserIds) is gone and any leftover value in the settings is ignored.
+export async function getReminderDestinations(admin) {
   try {
     const snap = await admin.firestore().collection('settings').doc('telegram').get();
     const channels = snap.exists ? snap.data()?.channels : null;
     const dests = (channels || [])
       // Group/channel owners can opt out of the automatic party broadcast
-      // (checkbox in the ערוצים panel) without deleting the destination —
-      // some only want their own party posted there, not everyone else's.
+      // (checkbox in the ערוצים panel) without deleting the destination.
       .filter((c) => c.broadcastEnabled !== false)
-      .map((c) => ({ chatId: sanitizeChatId(c.chatId), name: c.name || '', allowedAdvertiserIds: Array.isArray(c.allowedAdvertiserIds) ? c.allowedAdvertiserIds : null }))
+      .map((c) => ({ chatId: sanitizeChatId(c.chatId), name: c.name || '' }))
       .filter((d) => /^-\d+$/.test(d.chatId) || /^@[\w-]+$/.test(d.chatId));
     if (dests.length > 0) return dests;
   } catch (err) {
     console.error('getReminderDestinations:', err);
   }
-  return [{ chatId: REMINDER_CHANNEL_CHAT_ID, allowedAdvertiserIds: null }, { chatId: REMINDER_GROUP_CHAT_ID, allowedAdvertiserIds: null }];
-}
-
-// Matches the frontend's ADMIN_PSEUDO_ADVERTISER_ID (TelegramSection.jsx) —
-// not a real advertiser doc, just an explicit opt-in checkbox so the admin
-// can allow their own directly-added parties into a restricted channel.
-const ADMIN_PSEUDO_ADVERTISER_ID = '__admin__';
-
-// Deliberately strict: a party with no advertiser attached (e.g. added
-// directly by the site admin with no owner tagged) does NOT get a free
-// pass into restricted groups — only an explicitly-approved advertiser (or
-// the admin themself, if checked in the picker) does. This is intentional
-// so a mistake can never leak a party into a competitor's group; an
-// untagged party still reaches every unrestricted (allowedAdvertiserIds
-// === null) destination as normal.
-function partyAllowedFor(party, allowedAdvertiserIds) {
-  if (!allowedAdvertiserIds) return true;
-  if (party.createdBy) return allowedAdvertiserIds.includes(party.createdBy);
-  return allowedAdvertiserIds.includes(ADMIN_PSEUDO_ADVERTISER_ID);
+  return [{ chatId: REMINDER_CHANNEL_CHAT_ID }, { chatId: REMINDER_GROUP_CHAT_ID }];
 }
 
 async function initAdmin() {
@@ -362,46 +342,16 @@ async function handleFixChannels(req, res) {
     const snap = await ref.get();
     const channels = snap.exists ? (snap.data()?.channels || []) : [];
 
-    const BOUTIQUE_ID = 'lOmonxa5U8cgAr5K7Wjp';
-    const NO_LIMIT_ID = 'YaVU9sZVPI10mgLpIsXz';
-    const AVI_ID = 'SteUWXIgzPLVZVZ6Lu3a';
-
-    let found = false;
-    const updated = channels.map((c) => {
-      if (c.id === 'krjj67olds' || c.name === 'מוניק') {
-        found = true;
-        return { ...c, chatId: '-1003413559919', allowedAdvertiserIds: [BOUTIQUE_ID, NO_LIMIT_ID] };
-      }
-      return c;
-    });
-    if (!found) {
-      updated.push({ id: 'krjj67olds', name: 'מוניק', chatId: '-1003413559919', allowedAdvertiserIds: [BOUTIQUE_ID, NO_LIMIT_ID] });
-    }
-
-    const aviExists = updated.some((c) => c.chatId === '@avi_swingers2');
-    if (!aviExists) {
-      updated.push({ id: 'avi2vs2', name: '2vs2 (אבי סווינגרס)', chatId: '@avi_swingers2', allowedAdvertiserIds: [AVI_ID] });
-    }
-
     // "רישומים לחמישי שישי" is a dedicated registrations list, not a
     // party-promo group — exclude it from the automatic broadcast entirely.
+    // Advertiser restrictions no longer exist (the owner is the only publisher): strip any leftover.
+    const updated = channels.map(({ allowedAdvertiserIds, ...c }) => c);
     const withRegistrationsFix = updated.map((c) =>
       (c.name === 'רישומים לחמישי שישי' ? { ...c, broadcastEnabled: false } : c)
     );
 
-    // These are the admin's own "open to everyone" groups — remove the
-    // restriction entirely (rather than listing every current advertiser)
-    // so a newly-approved advertiser is automatically allowed too, with no
-    // manual re-checking required per group.
-    const OPEN_CHANNEL_NAMES = ['מנוים מדברים בדסמ', 'מסיבות ליברליות ערוץ', 'מדברים בדסמ ערוץ', 'מסיבות בישראל', 'מדברים בדסמ קבוצה'];
-    const withOpenChannelsFix = withRegistrationsFix.map((c) => {
-      if (!OPEN_CHANNEL_NAMES.includes(c.name)) return c;
-      const { allowedAdvertiserIds, ...rest } = c;
-      return rest;
-    });
-
-    await ref.update({ channels: withOpenChannelsFix });
-    return res.status(200).json({ ok: true, channels: withOpenChannelsFix });
+    await ref.update({ channels: withRegistrationsFix });
+    return res.status(200).json({ ok: true, channels: withRegistrationsFix });
   } catch (err) {
     console.error('fix-channels:', err);
     return res.status(500).json({ error: err.message || 'Internal error' });
@@ -575,10 +525,8 @@ async function releaseBroadcastLock(ref) {
 // WhatsApp side of the same scheduled run: pokes the whatsapp-bot's own
 // /broadcast-parties endpoint, now that the bot runs on a public host
 // (Render) instead of localhost. Silently does nothing until both env vars
-// are set — before that, WhatsApp stays the admin's manual button. The bot
-// has its own internal broadcastActiveParties() with the same
-// allowedAdvertiserIds filtering as here, so this call intentionally does
-// no per-party logic itself.
+// are set — before that, WhatsApp stays the admin's manual button. This call
+// intentionally does no per-party logic itself.
 async function publishActiveWhatsApp() {
   const url = process.env.WHATSAPP_BOT_PUBLIC_URL;
   const apiKey = process.env.WHATSAPP_BOT_API_KEY;
@@ -632,7 +580,6 @@ async function sendAllPartyReminders(targetChatId) {
     const results = [];
     for (const party of activeParties) {
       for (const dest of destinations) {
-        if (!partyAllowedFor(party, dest.allowedAdvertiserIds)) continue;
         const data = await sendReminderToChat(botToken, dest.chatId, party);
         results.push({ party: party.title || party.name, chatId: dest.chatId, group: dest.name || '', ok: data.ok, description: data.description, imageFailed: data.imageFailed || undefined });
         // Each send targets a different chat, so Telegram's ~1/sec-per-chat
