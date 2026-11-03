@@ -8,17 +8,14 @@ import {
   getTelegramSettings, 
   updateTelegramSettings, 
   getAboutStory, 
-  updateAboutStory, 
-  getWhatsappGroups, 
-  updateWhatsappGroups 
+  updateAboutStory
 } from '../../firebase/settings';
 import { getBotInfo } from '../../firebase/telegram';
 
 const LinksSection = ({ showSaved }) => {
   const { t } = useLanguage();
-  const { content, updateSocialLinks: updateSocialLinksContext, updateWhatsappGroups: updateWhatsappGroupsContext, updateRegistration, exportAllData, importAllData } = useContent();
+  const { content, updateSocialLinks: updateSocialLinksContext, updateRegistration, exportAllData, importAllData } = useContent();
   const [socialLinksData, setSocialLinksData] = useState(Array.isArray(content.socialLinks) ? content.socialLinks : []);
-  const [whatsappGroupsData, setWhatsappGroupsData] = useState(content.whatsappGroups || { men: '', women: '' });
   const [telegramSettings, setTelegramSettings] = useState({
     botToken: '',
     chatId: '',
@@ -35,7 +32,6 @@ const LinksSection = ({ showSaved }) => {
   useEffect(() => {
     loadSocialLinks();
     loadTelegramSettings();
-    loadWhatsappGroups();
     loadAboutStory();
   }, []);
 
@@ -84,14 +80,6 @@ const LinksSection = ({ showSaved }) => {
       } else {
         setBotInfo(null);
       }
-    } catch (error) {
-    }
-  };
-
-  const loadWhatsappGroups = async () => {
-    try {
-      const groups = await getWhatsappGroups();
-      setWhatsappGroupsData(groups);
     } catch (error) {
     }
   };
@@ -201,10 +189,8 @@ const LinksSection = ({ showSaved }) => {
                 };
 
                 await updateSocialLinks(socialLinksObj);
-                await updateWhatsappGroups(whatsappGroupsData);
 
                 updateSocialLinksContext(socialLinksData);
-                updateWhatsappGroupsContext(whatsappGroupsData);
                 
                 showSaved();
               } catch (error) {
@@ -219,32 +205,6 @@ const LinksSection = ({ showSaved }) => {
       </div>
 
       <div className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-xl font-bold">{t('whatsappGroups')}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1 text-right">
-              <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('menGroupLink')}</label>
-              <input
-                type="url"
-                value={whatsappGroupsData.men || ''}
-                onChange={e => setWhatsappGroupsData({...whatsappGroupsData, men: e.target.value})}
-                className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
-                placeholder="https://chat.whatsapp.com/..."
-              />
-            </div>
-            <div className="space-y-1 text-right">
-              <label className="text-xs uppercase font-bold text-[#94A3B8]">{t('womenGroupLink')}</label>
-              <input
-                type="url"
-                value={whatsappGroupsData.women || ''}
-                onChange={e => setWhatsappGroupsData({...whatsappGroupsData, women: e.target.value})}
-                className="w-full bg-[#2a1a24] border border-[rgba(255,255,255,0.08)] p-3 rounded-xl focus:border-[#ff438b] outline-none text-white text-right"
-                placeholder="https://chat.whatsapp.com/..."
-              />
-            </div>
-          </div>
-        </div>
-
         <div className="space-y-4">
           <h3 className="text-xl font-bold">{t('socialMediaLinks')}</h3>
           {Array.isArray(socialLinksData) && socialLinksData.map((link, index) => (
