@@ -80,6 +80,7 @@ function sanitizeChatId(raw) {
 // `ensuredChannels`), so deleting it later in the admin panel sticks. They then show up in the "ערוצים" panel.
 const ENSURED_CHANNELS = [
   { id: 'liberal-line', name: 'הליין הליברלי', chatId: '-1003487913872' },
+  { id: 'liberal-parties-channel', name: '🎉מסיבות ליברליות בישראל🎉', chatId: '-1001371159295' },
 ];
 
 async function ensureChannels(ref, data) {
