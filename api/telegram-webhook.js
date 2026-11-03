@@ -605,6 +605,30 @@ async function publishActiveWhatsApp() {
   }
 }
 
+// Splits destinations into the chats the bot is really in and the ones it is not (left, removed, never added).
+// Only a definite answer from Telegram skips a chat: if the check itself fails, the chat is kept and tried.
+export async function splitByBotPresence(botToken, destinations) {
+  try {
+    const me = (await (await fetch(`https://api.telegram.org/bot${botToken}/getMe`)).json()).result;
+    if (!me?.id) return { present: destinations, absent: [] };
+    const checks = await Promise.all(destinations.map(async (d) => {
+      try {
+        const r = await (await fetch(`https://api.telegram.org/bot${botToken}/getChatMember?chat_id=${encodeURIComponent(d.chatId)}&user_id=${me.id}`)).json();
+        if (r.ok) {
+          const m = r.result;
+          return !(m.status === 'left' || m.status === 'kicked' || (m.status === 'restricted' && m.is_member === false));
+        }
+        return !/chat not found|kicked|not a member|user not found|bot was blocked/i.test(r.description || '');
+      } catch {
+        return true;
+      }
+    }));
+    return { present: destinations.filter((_, i) => checks[i]), absent: destinations.filter((_, i) => !checks[i]) };
+  } catch {
+    return { present: destinations, absent: [] };
+  }
+}
+
 async function sendAllPartyReminders(targetChatId) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
@@ -638,7 +662,10 @@ async function sendAllPartyReminders(targetChatId) {
         return toMs(a.date) - toMs(b.date);
       });
 
-    const results = [];
+    // Skip chats the bot is not in (it was removed or never added) instead of failing on them for every party.
+    const { present, absent } = await splitByBotPresence(botToken, destinations);
+    destinations = present;
+    const results = absent.map((d) => ({ party: '', chatId: d.chatId, group: d.name || '', ok: false, skipped: true, description: 'chat not found: הבוט לא נמצא בקבוצה' }));
     for (const party of activeParties) {
       for (const dest of destinations) {
         const data = await sendReminderToChat(botToken, dest.chatId, party);
@@ -661,7 +688,7 @@ async function sendAllPartyReminders(targetChatId) {
 
     const whatsappResult = targetChatId ? null : await publishActiveWhatsApp();
 
-    return { partiesSent: activeParties.length, destinationCount: destinations.length, results, whatsappResult };
+    return { partiesSent: activeParties.length, destinationCount: destinations.length, skippedChats: absent.map((d) => d.name || d.chatId), results, whatsappResult };
   } finally {
     await releaseBroadcastLock(lockRef);
   }
@@ -1214,7 +1241,7 @@ async function sendMemorialOnce() {
     return true;
   });
   if (!claimed) return { ok: true, skipped: 'memorial already sent today' };
-  const destinations = await getReminderDestinations(admin);
+  const destinations = (await splitByBotPresence(botToken, await getReminderDestinations(admin))).present;
   const results = [];
   for (const dest of destinations) {
     const r = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
@@ -1250,7 +1277,7 @@ export async function sendAnnouncementsOnce() {
       return true;
     });
     if (!claimed) { out.push({ id: a.id, skipped: 'already sent' }); continue; }
-    const destinations = await getReminderDestinations(admin);
+    const destinations = (await splitByBotPresence(botToken, await getReminderDestinations(admin))).present;
     const results = [];
     for (const dest of destinations) {
       const r = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {

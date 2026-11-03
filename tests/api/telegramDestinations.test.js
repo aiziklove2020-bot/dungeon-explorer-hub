@@ -43,3 +43,27 @@ describe('party publishing destinations', () => {
     expect(dests.map((d) => d.chatId.toLowerCase()).filter((id) => id === '-1001' || id === '@avi_x')).toHaveLength(2);
   });
 });
+
+describe('skipping chats the bot is not in', () => {
+  it('drops only chats Telegram says the bot left or was never in; keeps chats when the check fails', async () => {
+    const { splitByBotPresence } = await import('../../api/telegram-webhook.js');
+    const real = globalThis.fetch;
+    globalThis.fetch = async (url) => {
+      const u = String(url);
+      const json = (o) => ({ json: async () => o });
+      if (u.includes('/getMe')) return json({ ok: true, result: { id: 7 } });
+      if (u.includes('chat_id=-1')) return json({ ok: true, result: { status: 'administrator' } });
+      if (u.includes('chat_id=-2')) return json({ ok: true, result: { status: 'left' } });
+      if (u.includes('chat_id=-3')) return json({ ok: false, description: 'Bad Request: chat not found' });
+      if (u.includes('chat_id=-4')) throw new Error('network down');
+      return json({ ok: false, description: 'Too Many Requests' });
+    };
+    try {
+      const { present, absent } = await splitByBotPresence('T', ['-1', '-2', '-3', '-4', '-5'].map((chatId) => ({ chatId })));
+      expect(present.map((d) => d.chatId)).toEqual(['-1', '-4', '-5']);
+      expect(absent.map((d) => d.chatId)).toEqual(['-2', '-3']);
+    } finally {
+      globalThis.fetch = real;
+    }
+  });
+});
