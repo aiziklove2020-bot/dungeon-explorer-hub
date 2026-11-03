@@ -134,6 +134,24 @@ const TelegramSection = ({ showSaved }) => {
 
   const refreshSeenChats = () => getTelegramSeenChats().then(setSeenChats).catch(() => {});
 
+  // Where the bot really is right now: the server asks Telegram about every destination.
+  const [membership, setMembership] = useState(null); // { checkedAt, byId: {channelId: {...}}, unlisted: [...] } | { error }
+  const [checkingMembership, setCheckingMembership] = useState(false);
+  const checkMembership = async () => {
+    setCheckingMembership(true);
+    try {
+      const res = await fetch('/api/telegram-webhook?job=bot-membership', { headers: { ...adminAuthHeader() } });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+      setMembership({ checkedAt: data.checkedAt, byId: Object.fromEntries((data.channels || []).map((c) => [c.id, c])), unlisted: data.unlisted || [] });
+    } catch (err) {
+      setMembership({ error: String(err?.message || err) });
+    } finally {
+      setCheckingMembership(false);
+    }
+  };
+  useEffect(() => { checkMembership(); }, []);
+
   // Keeps checking, so a group the bot was just added to shows up without a reload.
   useEffect(() => {
     refreshSeenChats();
@@ -141,7 +159,8 @@ const TelegramSection = ({ showSaved }) => {
     return () => clearInterval(timer);
   }, []);
 
-  const missingChats = seenChats.filter((c) => c.type !== 'private' && String(c.id) !== FRIDAY_REGISTRATIONS_CHAT_ID && !channels.some((ch) => String(ch.chatId) === String(c.id)));
+  // Only chats Telegram confirms the bot is in right now (old activity is not proof).
+  const missingChats = seenChats.filter((c) => c.type !== 'private' && String(c.id) !== FRIDAY_REGISTRATIONS_CHAT_ID && !channels.some((ch) => String(ch.chatId) === String(c.id)) && membership?.unlisted?.some((u) => String(u.chatId) === String(c.id)));
 
   const load = async () => {
     setLoading(true);
@@ -575,6 +594,25 @@ const TelegramSection = ({ showSaved }) => {
             </button>
           </div>
           {(() => {
+            const rows = channels.map((c) => membership?.byId?.[c.id]);
+            const inCount = rows.filter((r) => r?.inChat).length;
+            return (
+              <div className="p-3 rounded-xl bg-[#1c1b1f] border border-[rgba(255,255,255,0.08)] space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-bold">איפה הבוט נמצא עכשיו</p>
+                  <button type="button" onClick={checkMembership} disabled={checkingMembership} className="text-xs underline">{checkingMembership ? 'בודק...' : 'בדוק מול טלגרם'}</button>
+                </div>
+                {membership?.error ? (
+                  <p className="text-xs text-red-400">לא הצלחתי לבדוק מול טלגרם: {membership.error}</p>
+                ) : membership?.byId ? (
+                  <p className="text-xs text-[#c0aebb]">הבוט נמצא ב-{inCount} מתוך {channels.length} ערוצים וקבוצות. נבדק מול טלגרם {new Date(membership.checkedAt).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}.</p>
+                ) : (
+                  <p className="text-xs text-[#94A3B8]">בודק מול טלגרם...</p>
+                )}
+              </div>
+            );
+          })()}
+          {(() => {
             const missing = missingChats;
             if (!missing.length) return null;
             return (
@@ -615,6 +653,13 @@ const TelegramSection = ({ showSaved }) => {
                   <>
                     <div className="flex-1 min-w-0">
                       <div className="font-bold leading-snug break-words">{c.name}</div>
+                      {(() => {
+                        const m = membership?.byId?.[c.id];
+                        if (!m) return <div className="text-xs text-[#94A3B8] mt-0.5">{membership?.error ? 'לא נבדק' : 'בודק...'}</div>;
+                        if (m.inChat === null) return <div className="text-xs text-[#94A3B8] mt-0.5">לא ידוע (הבדיקה נכשלה)</div>;
+                        if (!m.inChat) return <div className="text-xs text-red-400 mt-0.5">❌ הבוט לא נמצא כאן{m.status === 'kicked' ? ' (הוסר)' : m.status === 'left' ? ' (יצא)' : ''}</div>;
+                        return <div className={`text-xs mt-0.5 ${m.canPost ? 'text-emerald-400' : 'text-amber-400'}`}>{m.canPost ? '✅ הבוט נמצא כאן' : '⚠️ הבוט נמצא אבל בלי הרשאת שליחה'}</div>;
+                      })()}
                       <div className="text-[#94A3B8] text-xs font-mono mt-0.5" dir="ltr" style={{ textAlign: 'right' }}>{c.chatId}</div>
                     </div>
                   </>
