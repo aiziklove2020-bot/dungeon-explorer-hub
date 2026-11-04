@@ -147,6 +147,32 @@ function lpPushIdentity() {
   return anon;
 }
 
+// Reconcile an already-authorized device without requesting permission or sending a push.
+let lpPushReconcilePending = null;
+async function lpReconcileGrantedPush() {
+  if (lpPushReconcilePending) return lpPushReconcilePending;
+  if (lpIsIosNotInstalled() || typeof Notification === "undefined" ||
+      Notification.permission !== "granted" || !("serviceWorker" in navigator) ||
+      !("PushManager" in window)) return "unsupported";
+  lpPushReconcilePending = (async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      const sub = await reg.pushManager.getSubscription();
+      if (!sub) return "missing";
+      // The data bridge loads separately. Do not silently lose a registration race.
+      for (let n = 0; n < 20 && !window.LPData?.registerPushSubscription; n++) {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+      if (!window.LPData?.registerPushSubscription) return "error";
+      await window.LPData.registerPushSubscription(lpPushIdentity(), sub.toJSON());
+      return "ok";
+    } catch { return "error"; }
+    finally { lpPushReconcilePending = null; }
+  })();
+  return lpPushReconcilePending;
+}
+window.lpReconcileGrantedPush = lpReconcileGrantedPush;
+
 // Easier typing in every form on the site (also forms added later by scripts):
 // the right mobile keyboard per field (digits for phones), no auto-capitalising or
 // autocorrect for Telegram handles, links and passwords, a "next / done" key on the
@@ -333,13 +359,43 @@ else lpWirePushGate();
 // Notification.permission, not our own storage) the "!== 'default'" check
 // below is what stops it from ever showing again — no separate "dismissed"
 // flag needed, and none is set here.
+function lpShowPushRepair() {
+  if (document.getElementById("lpPushRepair")) return;
+  const el = document.createElement("div");
+  el.id = "lpPushRepair";
+  el.setAttribute("role", "status");
+  el.style.cssText = "position:fixed;z-index:22;bottom:80px;inset-inline:12px;background:#1c1120;color:white;padding:16px;border:1px solid #ff5798;border-radius:12px";
+  const text = document.createElement("p");
+  text.textContent = "ההרשאה להתראות קיימת, אבל רישום המכשיר לא הושלם. אפשר לנסות לחבר אותו שוב.";
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn gold";
+  btn.textContent = "חיבור מחדש להתראות";
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    const result = await lpEnablePushNotifications(lpPushIdentity());
+    if (result === "ok") { toast("התראות הופעלו בהצלחה"); el.remove(); }
+    else { text.textContent = "רישום ההתראות לא הושלם. אפשר לנסות שוב."; btn.disabled = false; }
+  });
+  el.append(text, btn);
+  document.body.appendChild(el);
+}
+
 function lpWirePushBanner() {
   if (document.getElementById("lpPushGate")) return; // the entry page already asks
   // One banner at a time: the cookie notice comes first, this one follows once it is answered.
   if (!lpCookieDecided()) { document.addEventListener("lp-cookie-decided", lpWirePushBanner, { once: true }); return; }
   if (lpIsIosNotInstalled()) return; // can't work here at all; nothing to offer
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
-  if (typeof Notification === "undefined" || Notification.permission !== "default") return;
+  if (typeof Notification === "undefined" || Notification.permission === "denied") return;
+  if (Notification.permission === "granted") {
+    lpReconcileGrantedPush().then((result) => {
+      if (result === "ok") return;
+      // A user gesture is required if the subscription itself must be created.
+      lpShowPushRepair();
+    });
+    return;
+  }
 
   const el = document.createElement("div");
   el.id = "lpPushBanner";
@@ -385,3 +441,63 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+
+// Background delivery still uses sw.js. This only repairs registration on a visit.
+window.addEventListener("pageshow", () => {
+  lpReconcileGrantedPush().then((result) => {
+    if (result === "missing" || result === "error") lpShowPushRepair();
+  });
+});
+
+// Same-origin device diagnostic. Only booleans/status words are shown, never push credentials.
+function lpWirePushStatus() {
+  if (location.hash !== "#push-status" || document.getElementById("lpPushStatus")) return;
+  const panel = document.createElement("section");
+  panel.id = "lpPushStatus";
+  panel.dir = "rtl";
+  panel.style.cssText = "position:fixed;inset:12px;z-index:2147483500;overflow:auto;padding:24px;border-radius:16px;background:#1c1120;color:#fff;font:16px sans-serif;border:1px solid #ff5798";
+  const title = document.createElement("h2"); title.textContent = "בדיקת התראות במכשיר הזה";
+  const summary = document.createElement("p"); summary.textContent = "הבדיקה לא שולחת התראה ולא מציגה מזהים או מפתחות של המכשיר.";
+  const status = document.createElement("pre"); status.style.cssText = "white-space:pre-wrap;line-height:1.8;font:inherit";
+  const check = document.createElement("button"); check.type = "button"; check.className = "btn gold"; check.textContent = "בדוק מצב";
+  const repair = document.createElement("button"); repair.type = "button"; repair.className = "btn gold"; repair.textContent = "חיבור מחדש להתראות";
+  const close = document.createElement("button"); close.type = "button"; close.className = "btn"; close.textContent = "סגירה";
+  close.addEventListener("click", () => { panel.remove(); history.replaceState(null, "", location.pathname + location.search); });
+  const inspect = async () => {
+    check.disabled = true;
+    const permission = typeof Notification === "undefined" ? "לא נתמך" : Notification.permission;
+    const installed = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    const lines = [`פתיחה ממסך הבית: ${installed ? "כן" : "לא"}`, `הרשאת התראות: ${permission}`];
+    if (lpIsIosNotInstalled()) lines.push("באייפון יש לפתוח את האתר מהאייקון במסך הבית כדי לקבל פוש.");
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) lines.push("פוש אינו נתמך במצב הפתיחה הזה.");
+    else {
+      try {
+        const reg = await navigator.serviceWorker.getRegistration("/");
+        lines.push(`רישום service worker: ${reg ? "קיים" : "חסר"}`);
+        const sub = reg ? await reg.pushManager.getSubscription() : null;
+        lines.push(`מינוי פוש במכשיר: ${sub ? "קיים" : "חסר"}`);
+        if (sub && permission === "granted") {
+          const result = await lpReconcileGrantedPush();
+          lines.push(`שמירת הרישום באתר: ${result === "ok" ? "הצליחה" : "לא הושלמה"}`);
+        }
+      } catch { lines.push("בדיקת הרישום נכשלה. אפשר לנסות שוב."); }
+    }
+    lines.push("קבלה בפועל של התראה עדיין דורשת בדיקה במכשיר הזה.");
+    status.textContent = lines.join("\n");
+    check.disabled = false;
+  };
+  check.addEventListener("click", inspect);
+  repair.addEventListener("click", async () => {
+    repair.disabled = true;
+    const result = await lpEnablePushNotifications(lpPushIdentity());
+    await inspect();
+    if (result !== "ok") status.textContent += "\nהחיבור לא הושלם. יש לבדוק את מצב הפתיחה וההרשאה.";
+    repair.disabled = false;
+  });
+  panel.append(title, summary, status, check, repair, close);
+  document.body.appendChild(panel);
+  inspect();
+}
+window.addEventListener("hashchange", lpWirePushStatus);
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", lpWirePushStatus);
+else lpWirePushStatus();
