@@ -16,6 +16,8 @@ const items = ACCOUNTS.map((a, i) => {
   const wv = document.createElement('webview');
   wv.setAttribute('partition', a.partition); // separate login/cookies per account
   wv.setAttribute('allowpopups', '');
+  wv.setAttribute('webpreferences', 'contextIsolation=no');
+  wv.setAttribute('preload', new URL('webview-preload.js', location.href).href);
   wv.src = a.url;
   // Unread count comes from the page title, e.g. "(3) WhatsApp".
   wv.addEventListener('page-title-updated', (e) => {
