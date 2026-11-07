@@ -1,0 +1,21 @@
+{
+  "name": "mac-messenger",
+  "version": "1.0.0",
+  "description": "One Mac app for two WhatsApp accounts and Facebook Messenger",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.local.macmessenger",
+    "productName": "Mac Messenger",
+    "mac": { "category": "public.app-category.social-networking", "target": ["dmg"] },
+    "files": ["main.js", "index.html", "renderer.js", "style.css"]
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}
