@@ -109,6 +109,9 @@ const MessagePreviewBox = ({ text }) => (
 const TelegramSection = ({ showSaved }) => {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
+  const [publishConfirm, setPublishConfirm] = useState(null);
+  const [publishingChannel, setPublishingChannel] = useState(null);
+  const [publishResult, setPublishResult] = useState(null);
   const [saving, setSaving] = useState(false);
   const [bots, setBots] = useState([]);
   const [channels, setChannels] = useState([]);
@@ -324,12 +327,15 @@ const TelegramSection = ({ showSaved }) => {
   // Posts the active parties to this one group only (the other groups get nothing),
   // and shows exactly what Telegram answered for each party.
   const publishToChannel = async (c) => {
-    if (!confirm(`לפרסם עכשיו את המסיבות המורשות לקבוצה "${c.name}" בלבד?`)) return;
+    if (publishingChannel) return;
+    setPublishConfirm(null);
+    setPublishingChannel(c.chatId);
+    setPublishResult({ name: c.name, text: "מפרסם... לא ללחוץ שוב עד לקבלת תוצאה." });
     try {
       const res = await fetch(`/api/telegram-webhook?job=manual-post&chatId=${encodeURIComponent(c.chatId)}`, { headers: { ...adminAuthHeader() } });
       const data = await res.json();
       if (!res.ok || data.error) {
-        alert(`הפרסום נכשל: ${data.error || res.statusText}`);
+        setPublishResult({ name: c.name, text: `הפרסום נכשל: ${data.error || res.statusText}` });
         return;
       }
       const results = Array.isArray(data.results) ? data.results : [];
@@ -338,9 +344,11 @@ const TelegramSection = ({ showSaved }) => {
       if (!results.length) lines.push('אין מסיבות פעילות לפרסם בקבוצה הזו כרגע.');
       failed.slice(0, 12).forEach((r) => lines.push(`• ${r.party || '?'}: ${r.description || 'שגיאה לא ידועה'}`));
       results.filter((r) => r.ok && r.imageFailed).forEach((r) => lines.push(`• ${r.party || '?'}: נשלח בלי תמונה — ${r.imageFailed}`));
-      alert(lines.join('\n'));
+      setPublishResult({ name: c.name, text: lines.join('\n') });
     } catch (err) {
-      alert(`הפרסום נכשל: ${err.message}`);
+      setPublishResult({ name: c.name, text: `לא התקבלה תוצאה: ${err.message}. אין לשלוח שוב לפני בדיקה אם פורסם.` });
+    } finally {
+      setPublishingChannel(null);
     }
   };
 
@@ -564,6 +572,22 @@ const TelegramSection = ({ showSaved }) => {
       {activePanel === 'channels' && (
         <div className="space-y-4">
           <h3 className="text-lg font-bold">{t('admin.telegram.channels')}</h3>
+          {publishConfirm && (
+            <div role="alertdialog" aria-label="אישור פרסום מסיבות" className="p-4 rounded-xl border border-[#ff438b] bg-[#2a1a24] space-y-3">
+              <p>לפרסם עכשיו את המסיבות לקבוצה "{publishConfirm.name}" בלבד? לא יישלח לוואטסאפ.</p>
+              <div className="flex gap-3">
+                <button type="button" className="px-4 py-2 rounded-lg bg-[#ff438b] text-white" onClick={() => publishToChannel(publishConfirm)} disabled={Boolean(publishingChannel)}>אישור פרסום</button>
+                <button type="button" className="px-4 py-2 rounded-lg border border-white/20" onClick={() => setPublishConfirm(null)}>ביטול</button>
+              </div>
+            </div>
+          )}
+          {publishResult && (
+            <div role="status" className="p-4 rounded-xl border border-white/20 bg-[#2a1a24] whitespace-pre-wrap">
+              <strong>{publishResult.name}</strong>
+              <p>{publishResult.text}</p>
+            </div>
+          )}
+
           <p className="text-[#94A3B8] text-xs">
             {t('admin.telegram.saveHint')}
           </p>
@@ -678,7 +702,7 @@ const TelegramSection = ({ showSaved }) => {
                       />
                       פרסום אוטומטי
                     </label>
-                    <button type="button" onClick={() => publishToChannel(c)} className="h-9 px-3 rounded-lg bg-[#ff438b] hover:bg-[#ff5596] text-white text-xs font-bold">
+                    <button type="button" onClick={() => setPublishConfirm(c)} disabled={Boolean(publishingChannel)} className="h-9 px-3 rounded-lg bg-[#ff438b] hover:bg-[#ff5596] text-white text-xs font-bold">
                       פרסם כאן עכשיו
                     </button>
                     <div className="flex items-center gap-2 mr-auto">
