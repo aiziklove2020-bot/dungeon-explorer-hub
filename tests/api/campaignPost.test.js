@@ -104,7 +104,7 @@ describe('campaign content', () => {
 });
 
 describe('self-healing campaigns', () => {
-  beforeEach(() => { stored = null; sent.length = 0; telegramOk = true; vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-07T11:00:00Z')); }); // a Saturday: not a campaign day
+  beforeEach(() => { stored = null; sent.length = 0; telegramOk = true; vi.useFakeTimers(); vi.setSystemTime(new Date('2026-11-07T11:00:00Z')); }); // a Saturday: not a campaign day (campaigns: Sun, Tue, Thu)
   afterEach(() => { vi.useRealTimers(); });
 
   it('skips a normal non-campaign day', async () => {
