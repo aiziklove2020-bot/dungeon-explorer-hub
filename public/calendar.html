@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     for (let i = 0; i < startOffset; i++) html += '<div class="day"></div>';
     for (let d = 1; d <= daysInMonth; d++) {
       const dayEvents = eventsByDay.get(d) || [];
-      const links = dayEvents.map(e => `<a href="/event?id=${encodeURIComponent(e.id)}">${escapeHtml(e.title)}</a>`).join("");
+      const links = dayEvents.map(e => `<a href="/party/${encodeURIComponent(e.id)}">${escapeHtml(e.title)}</a>`).join("");
       html += `<div class="day">${d}${links}</div>`;
     }
     grid.innerHTML = html;
