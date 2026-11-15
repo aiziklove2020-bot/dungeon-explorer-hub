@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>
       <div class="card-body">
         ${e.category ? `<span class="tag">${escapeHtml(e.category)}</span>` : ""}
-        <h3><a href="/event?id=${encodeURIComponent(e.id)}">${escapeHtml(e.title)}</a></h3>
+        <h3><a href="/party/${encodeURIComponent(e.id)}">${escapeHtml(e.title)}</a></h3>
         <div class="meta">${escapeHtml(e.day||"")}${e.day && e.date ? ", " : ""}${escapeHtml(e.date||"")}</div>
         <div class="card-bottom"><a class="btn gold event-register-card" href="${escapeHtml(lpRegisterLink(e).href)}" target="_blank" rel="noopener noreferrer">${lpRegisterLink(e).label}</a></div>
       </div>

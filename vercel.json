@@ -41,6 +41,14 @@
   ],
   "rewrites": [
     {
+      "source": "/party/:id",
+      "destination": "/api/seo?type=party&id=:id"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/seo?type=sitemap"
+    },
+    {
       "source": "/about",
       "destination": "/about.html"
     },
